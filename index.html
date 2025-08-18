@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bitsy Mini Engine</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app">
+        <header>
+            <h1>Bitsy Mini Engine</h1>
+            <input type="text" id="game-title" placeholder="Nome do jogo">
+        </header>
+
+        <main>
+            <div class="tabs">
+                <button class="tab-button active" data-tab="game" aria-selected="true">Jogo</button>
+                <button class="tab-button" data-tab="editor" aria-selected="false">Editor</button>
+            </div>
+
+            <div class="tab-content active" id="tab-game">
+                <div class="game-container">
+                    <canvas id="game-canvas" width="128" height="128"></canvas>
+                    <div class="game-controls">
+                        <button id="btn-reset">Reiniciar</button>
+                        <span>Setas para mover • Z para interagir</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-editor">
+                <div class="editor-layout">
+                    <div class="editor-left">
+                        <div class="editor-section">
+                            <h3>Mapa</h3>
+                            <canvas id="editor-canvas" width="256" height="256"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="editor-right">
+                        <div class="editor-section">
+                            <h3>Tile Selecionado</h3>
+                            <canvas id="selected-tile-preview" width="64" height="64"></canvas>
+                        </div>
+
+                        <div class="editor-section">
+                            <details open>
+                                <summary>Tiles</summary>
+                                <div class="tiles-panel">
+                                    <div class="tile-actions">
+                                        <button id="btn-add-tile">+ Adicionar Tile</button>
+                                        <button id="btn-add-tree">+ Adicionar Árvore</button>
+                                    </div>
+                                    <div id="tile-list" class="tile-list"></div>
+                                </div>
+                            </details>
+                        </div>
+
+                        <div class="editor-section">
+                            <details open>
+                                <summary>Editor de Tile</summary>
+                                <div class="tile-editor">
+                                    <div class="tile-editor-top">
+                                        <canvas id="tile-canvas" width="128" height="128"></canvas>
+                                    </div>
+                                    <div class="tile-editor-controls">
+                                        <div class="control-group">
+                                            <label for="tile-color">Cor:</label>
+                                            <input type="color" id="tile-color" value="#ff0000">
+                                        </div>
+                                        <div class="control-group">
+                                            <label for="tile-name">Nome:</label>
+                                            <input type="text" id="tile-name" placeholder="Nome do tile">
+                                        </div>
+                                        <div class="control-group">
+                                            <label class="checkbox">
+                                                <input type="checkbox" id="tile-collision">
+                                                Colide
+                                            </label>
+                                        </div>
+                                        <div class="control-group">
+                                            <button id="btn-clear-tile">Limpar</button>
+                                            <button id="btn-duplicate-tile">Duplicar</button>
+                                            <button id="btn-remove-tile">Remover</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </details>
+                        </div>
+
+                        <div class="editor-section">
+                            <details open>
+                                <summary>NPCs</summary>
+                                <div class="npcs-panel">
+                                    <div class="npcs-actions">
+                                        <button id="btn-add-npc">+ Adicionar NPC</button>
+                                        <button id="btn-place-npc" disabled>Colocar NPC no mapa</button>
+                                    </div>
+                                    <div id="npcs-list" class="npcs-list"></div>
+                                    <div class="npc-editor">
+                                        <label for="npc-text">Diálogo:</label>
+                                        <textarea id="npc-text" placeholder="Digite o diálogo do NPC..."></textarea>
+                                        <button id="npc-delete">Deletar NPC</button>
+                                    </div>
+                                </div>
+                            </details>
+                        </div>
+
+                        <div class="editor-section">
+                            <details open>
+                                <summary>Projeto</summary>
+                                <div class="project-actions">
+                                    <button id="btn-new">Novo</button>
+                                    <button id="btn-load">Carregar</button>
+                                    <button id="btn-save">Salvar</button>
+                                    <button id="btn-export-html">Exportar HTML</button>
+                                </div>
+                                <div class="history-actions">
+                                    <button id="btn-undo">Desfazer</button>
+                                    <button id="btn-redo">Refazer</button>
+                                </div>
+                                <div class="json-editor">
+                                    <label for="json-area">JSON:</label>
+                                    <textarea id="json-area" placeholder="Cole o JSON aqui..."></textarea>
+                                    <button id="btn-apply-json">Aplicar JSON</button>
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <input type="file" id="file-input" accept=".json" style="display: none;">
+
+    <!-- Carregar módulos na ordem correta -->
+    <script src="js/core/GameState.js"></script>
+    <script src="js/core/TileManager.js"></script>
+    <script src="js/core/NPCManager.js"></script>
+    <script src="js/core/InputManager.js"></script>
+    <script src="js/core/Renderer.js"></script>
+    <script src="js/core/GameEngine.js"></script>
+    <script src="js/editor/EditorManager.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
+
+
