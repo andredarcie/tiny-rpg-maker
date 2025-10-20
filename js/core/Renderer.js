@@ -5,9 +5,11 @@ class Renderer {
     constructor(canvas, gameState, tileManager, npcManager) {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
+        this.ctx.imageSmoothingEnabled = false;
         this.gameState = gameState;
         this.tileManager = tileManager;
         this.npcManager = npcManager;
+        this.playerSprite = this.buildPlayerSprite();
     }
 
     draw() {
@@ -106,15 +108,19 @@ class Renderer {
     drawPlayer() {
         const player = this.gameState.getPlayer();
         const tileSize = this.getTilePixelSize();
+        const step = tileSize / 8;
+        const px = player.x * tileSize;
+        const py = player.y * tileSize;
         
-        this.ctx.strokeStyle = this.getColor(2);
-        this.ctx.lineWidth = Math.max(1, Math.floor(tileSize / 6));
-        this.ctx.strokeRect(
-            player.x * tileSize + 2, 
-            player.y * tileSize + 2, 
-            tileSize - 4, 
-            tileSize - 4
-        );
+        for (let y = 0; y < this.playerSprite.length; y++) {
+            const row = this.playerSprite[y];
+            for (let x = 0; x < row.length; x++) {
+                const col = row[x];
+                if (!col) continue;
+                this.ctx.fillStyle = col;
+                this.ctx.fillRect(px + x * step, py + y * step, step, step);
+            }
+        }
     }
 
     drawDialog() {
@@ -215,6 +221,31 @@ class Renderer {
                 ctx.fillRect(px + x * step, py + y * step, step, step);
             }
         }
+    }
+
+    buildPlayerSprite() {
+        const palette = {
+            '.': null,
+            'O': '#1e2136', // outline
+            'A': '#d4dae8', // armor
+            'H': '#f4c9a2', // skin
+            'C': '#3f4ea5', // cloth
+            'G': '#f2b705', // gold accent
+            'S': '#dfe4ec'  // sword
+        };
+
+        const rows = [
+            "..AAAS..",
+            ".AHHHSA.",
+            "OAHGHSA.",
+            "OACGCSA.",
+            "OACCCSA.",
+            ".ACCCAO.",
+            ".A..A.O.",
+            "O....O.."
+        ];
+
+        return rows.map(row => row.split('').map(ch => palette[ch] ?? null));
     }
 }
 

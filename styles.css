@@ -133,6 +133,44 @@ main {
     display: block;
 }
 
+body.editor-mode main {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    gap: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+body.editor-mode .tabs {
+    border-left: 0;
+    border-right: 0;
+    border-radius: 0;
+}
+
+body.editor-mode #tab-editor.tab-content {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background: rgba(10, 13, 22, 0.9);
+    padding: 0;
+}
+
+body.editor-mode #tab-editor.tab-content.active {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
+body.editor-mode #tab-editor .editor-layout {
+    flex: 1;
+    min-height: 0;
+    padding: clamp(16px, 4vw, 32px);
+    overflow: auto;
+}
+
 .game-container {
     display: grid;
     gap: 16px;

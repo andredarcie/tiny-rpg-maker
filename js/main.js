@@ -53,6 +53,9 @@
     function setupTabs() {
         const tabs = document.querySelectorAll('.tab-button');
         const tabContents = document.querySelectorAll('.tab-content');
+        const applyLayoutMode = (tabName) => {
+            document.body.classList.toggle('editor-mode', tabName === 'editor');
+        };
         
         tabs.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -75,8 +78,22 @@
                 if (targetContent) {
                     targetContent.classList.add('active');
                 }
+
+                applyLayoutMode(btn.dataset.tab);
+                
+                if (btn.dataset.tab === 'editor') {
+                    document.dispatchEvent(new CustomEvent('editor-tab-activated'));
+                }
             });
         });
+
+        const initialTab = document.querySelector('.tab-button.active');
+        if (initialTab) {
+            applyLayoutMode(initialTab.dataset.tab);
+            if (initialTab.dataset.tab === 'editor') {
+                document.dispatchEvent(new CustomEvent('editor-tab-activated', { detail: { initial: true }}));
+            }
+        }
     }
 
     document.addEventListener('DOMContentLoaded', () => {

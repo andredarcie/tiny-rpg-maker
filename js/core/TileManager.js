@@ -85,8 +85,23 @@ class TileManager {
 
     ensureDefaultTiles() {
         if (this.gameState.game.tileset.tiles.length === 0) {
-            const defaultTile = this.createBlankTile('Padrão');
-            this.addTile(defaultTile);
+            const ground = this.createBlankTile('Chao');
+            const grassColor = '#2f9e44';
+
+            for (let y = 0; y < 8; y++) {
+                for (let x = 0; x < 8; x++) {
+                    ground.pixels[y][x] = grassColor;
+                }
+            }
+
+            const groundId = this.addTile(ground);
+            const map = this.gameState.game.tileset.map;
+
+            for (let y = 0; y < map.length; y++) {
+                for (let x = 0; x < map[y].length; x++) {
+                    map[y][x] = groundId;
+                }
+            }
         }
     }
 }
@@ -97,3 +112,4 @@ if (typeof module !== 'undefined' && module.exports) {
 } else {
     window.TileManager = TileManager;
 }
+

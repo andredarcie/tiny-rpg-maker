@@ -9,6 +9,8 @@ class EditorManager {
         this.placingNpc = false;
         this.activeTileId = null;
         this.history = { stack: [], index: -1 };
+        this.handleCanvasResize = this.handleCanvasResize.bind(this);
+        this.handleEditorTabActivated = this.handleEditorTabActivated.bind(this);
         
         this.setupDOMReferences();
         this.setupEventListeners();
@@ -19,11 +21,13 @@ class EditorManager {
         // Canvas e contexto
         this.editorCanvas = document.getElementById('editor-canvas');
         this.ectx = this.editorCanvas.getContext('2d');
+        this.ectx.imageSmoothingEnabled = false;
         this.selectedTilePreview = document.getElementById('selected-tile-preview');
         
         // Controles do editor de tile
         this.tileCanvas = document.getElementById('tile-canvas');
         this.tileCtx = this.tileCanvas.getContext('2d');
+        this.tileCtx.imageSmoothingEnabled = false;
         this.tileColor = document.getElementById('tile-color');
         this.tileName = document.getElementById('tile-name');
         this.tileCollision = document.getElementById('tile-collision');
@@ -95,6 +99,8 @@ class EditorManager {
         
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => this.handleKeyboardShortcuts(e));
+        window.addEventListener('resize', this.handleCanvasResize);
+        document.addEventListener('editor-tab-activated', this.handleEditorTabActivated);
     }
 
     setupCanvasEventListeners() {
@@ -120,20 +126,64 @@ class EditorManager {
 
     setupTileEditorEventListeners() {
         let tilePainting = false;
-        const gridStep = Math.floor(this.tileCanvas.width / 8);
         
         this.tileCanvas.addEventListener('mousedown', (e) => {
             tilePainting = true;
-            this.onTilePaint(e, gridStep);
+            this.onTilePaint(e);
         });
         
         this.tileCanvas.addEventListener('mousemove', (e) => {
-            if (tilePainting) this.onTilePaint(e, gridStep);
+            if (tilePainting) this.onTilePaint(e);
         });
         
         document.addEventListener('mouseup', () => {
             tilePainting = false;
         });
+    }
+
+    resizeCanvasToDisplaySize(canvas, ctx, { square = false } = {}) {
+        if (!canvas) return false;
+        const rect = canvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        const measuredWidth = rect.width;
+        const measuredHeight = rect.height || rect.width;
+        if (!measuredWidth || !measuredHeight) return false;
+        
+        let targetWidth = Math.max(1, Math.round(measuredWidth * dpr));
+        let targetHeight = square ? targetWidth : Math.max(1, Math.round(measuredHeight * dpr));
+        
+        if (square) {
+            const multiple = 8;
+            const alignedSize = Math.max(multiple, Math.ceil(targetWidth / multiple) * multiple);
+            targetWidth = alignedSize;
+            targetHeight = alignedSize;
+        }
+        
+        if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+            canvas.width = targetWidth;
+            canvas.height = targetHeight;
+            if (ctx) {
+                ctx.imageSmoothingEnabled = false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    handleCanvasResize(force = false) {
+        const editorChanged = this.resizeCanvasToDisplaySize(this.editorCanvas, this.ectx, { square: true });
+        const tileChanged = this.resizeCanvasToDisplaySize(this.tileCanvas, this.tileCtx, { square: true });
+        
+        if (editorChanged || force) {
+            this.renderEditor();
+        }
+        if (tileChanged || force) {
+            this.redrawTileEditor();
+        }
+    }
+
+    handleEditorTabActivated() {
+        requestAnimationFrame(() => this.handleCanvasResize(true));
     }
 
     handleKeyboardShortcuts(e) {
@@ -153,7 +203,7 @@ class EditorManager {
 
     initialize() {
         this.pushHistory();
-        this.tileManager.ensureDefaultTiles();
+        this.gameEngine.tileManager.ensureDefaultTiles();
         
         const tiles = this.gameEngine.getTiles();
         if (tiles.length > 0) {
@@ -165,7 +215,7 @@ class EditorManager {
         this.syncUI();
         this.renderTileList();
         this.renderNpcsList();
-        this.renderEditor();
+        this.handleCanvasResize(true);
     }
 
     // Métodos de pintura
@@ -186,18 +236,26 @@ class EditorManager {
 
     getTileFromEvent(e) {
         const rect = this.editorCanvas.getBoundingClientRect();
-        const sx = e.clientX - rect.left;
-        const sy = e.clientY - rect.top;
-        const tileSize = Math.floor(this.editorCanvas.width / 8);
-        const x = Math.floor(sx / tileSize);
-        const y = Math.floor(sy / tileSize);
+        if (!rect.width || !rect.height) return { x: -1, y: -1 };
+        
+        const relX = (e.clientX - rect.left) / rect.width;
+        const relY = (e.clientY - rect.top) / rect.height;
+        if (relX < 0 || relX > 1 || relY < 0 || relY > 1) return { x: -1, y: -1 };
+        const x = Math.min(7, Math.floor(relX * 8));
+        const y = Math.min(7, Math.floor(relY * 8));
         return { x, y };
     }
 
-    onTilePaint(e, gridStep) {
+    onTilePaint(e) {
         const rect = this.tileCanvas.getBoundingClientRect();
-        const x = Math.floor((e.clientX - rect.left) / gridStep);
-        const y = Math.floor((e.clientY - rect.top) / gridStep);
+        if (!rect.width || !rect.height) return;
+        
+        const relX = (e.clientX - rect.left) / rect.width;
+        const relY = (e.clientY - rect.top) / rect.height;
+        if (relX < 0 || relX > 1 || relY < 0 || relY > 1) return;
+        
+        const x = Math.min(7, Math.floor(relX * 8));
+        const y = Math.min(7, Math.floor(relY * 8));
         
         const tiles = this.gameEngine.getTiles();
         const tile = tiles.find(t => t.id === this.activeTileId);
