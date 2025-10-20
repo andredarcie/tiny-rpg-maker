@@ -78,4 +78,19 @@
             });
         });
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const gameCanvas = document.getElementById('game-canvas');
+        const gameContainer = document.getElementById('game-container');
+
+        // Ajustar tamanho do canvas para centralizar e ser responsivo
+        const resizeCanvas = () => {
+            const size = Math.min(window.innerWidth, window.innerHeight) * 0.9;
+            gameCanvas.style.width = `${size}px`;
+            gameCanvas.style.height = `${size}px`;
+        };
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+    });
 })();
