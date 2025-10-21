@@ -54,7 +54,10 @@
         const tabs = document.querySelectorAll('.tab-button');
         const tabContents = document.querySelectorAll('.tab-content');
         const applyLayoutMode = (tabName) => {
-            document.body.classList.toggle('editor-mode', tabName === 'editor');
+            const isEditor = tabName === 'editor';
+            const isGame = tabName === 'game';
+            document.body.classList.toggle('editor-mode', isEditor);
+            document.body.classList.toggle('game-mode', isGame);
         };
         
         tabs.forEach(btn => {
@@ -81,6 +84,10 @@
 
                 applyLayoutMode(btn.dataset.tab);
                 
+                if (btn.dataset.tab === 'game') {
+                    document.dispatchEvent(new CustomEvent('game-tab-activated'));
+                }
+                
                 if (btn.dataset.tab === 'editor') {
                     document.dispatchEvent(new CustomEvent('editor-tab-activated'));
                 }
@@ -90,6 +97,9 @@
         const initialTab = document.querySelector('.tab-button.active');
         if (initialTab) {
             applyLayoutMode(initialTab.dataset.tab);
+            if (initialTab.dataset.tab === 'game') {
+                document.dispatchEvent(new CustomEvent('game-tab-activated', { detail: { initial: true } }));
+            }
             if (initialTab.dataset.tab === 'editor') {
                 document.dispatchEvent(new CustomEvent('editor-tab-activated', { detail: { initial: true }}));
             }
@@ -100,14 +110,26 @@
         const gameCanvas = document.getElementById('game-canvas');
         const gameContainer = document.getElementById('game-container');
 
+        if (!gameCanvas || !gameContainer) {
+            return;
+        }
+
         // Ajustar tamanho do canvas para centralizar e ser responsivo
         const resizeCanvas = () => {
-            const size = Math.min(window.innerWidth, window.innerHeight) * 0.9;
+            const rect = gameContainer.getBoundingClientRect();
+            const availableWidth = rect.width || window.innerWidth;
+            const availableHeight = rect.height || window.innerHeight;
+            const baseSize = Math.min(availableWidth, availableHeight);
+            const size = Math.max(128, baseSize * 0.9);
             gameCanvas.style.width = `${size}px`;
             gameCanvas.style.height = `${size}px`;
         };
 
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+        const scheduleResize = () => window.requestAnimationFrame(resizeCanvas);
+
+        window.addEventListener('resize', scheduleResize);
+        document.addEventListener('game-tab-activated', scheduleResize);
+
+        scheduleResize();
     });
 })();
