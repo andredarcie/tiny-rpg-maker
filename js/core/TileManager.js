@@ -53,9 +53,34 @@ class TileManager {
         return this.gameState.game.tileset.tiles.find(t => t.id === tileId);
     }
 
-    setMapTile(x, y, tileId) {
+    setMapTile(x, y, tileId, layer = null) {
         if (y < 0 || y >= 8 || x < 0 || x >= 8) return;
-        this.gameState.game.tileset.map[y][x] = tileId;
+        const map = this.gameState.game.tileset.map;
+        if (!map) return;
+
+        if (tileId === null) {
+            if (layer === 'overlay') {
+                map.overlay[y][x] = null;
+            } else if (layer === 'ground') {
+                map.ground[y][x] = null;
+            } else {
+                map.overlay[y][x] = null;
+                map.ground[y][x] = null;
+            }
+            return;
+        }
+
+        const tile = this.getTile(tileId);
+        const targetLayer = layer || (tile?.collision ? 'overlay' : 'ground');
+
+        if (targetLayer === 'overlay') {
+            map.overlay[y][x] = tileId;
+        } else {
+            map.ground[y][x] = tileId;
+            if (!layer) {
+                map.overlay[y][x] = null;
+            }
+        }
     }
 
     getTileMap() {
@@ -66,6 +91,7 @@ class TileManager {
         const tree = this.createBlankTile('Árvore');
         const green = '#2fbf71';
         const brown = '#8b5a2b';
+        tree.collision = true;
         
         // Desenha um triângulo verde simples
         for (let y = 0; y < 6; y++) {
@@ -97,13 +123,15 @@ class TileManager {
             const groundId = this.addTile(ground);
             const map = this.gameState.game.tileset.map;
 
-            for (let y = 0; y < map.length; y++) {
-                for (let x = 0; x < map[y].length; x++) {
-                    map[y][x] = groundId;
+            for (let y = 0; y < map.ground.length; y++) {
+                for (let x = 0; x < map.ground[y].length; x++) {
+                    map.ground[y][x] = groundId;
+                    map.overlay[y][x] = null;
                 }
             }
         }
     }
+
 }
 
 // Export for use in other modules
@@ -112,4 +140,5 @@ if (typeof module !== 'undefined' && module.exports) {
 } else {
     window.TileManager = TileManager;
 }
+
 

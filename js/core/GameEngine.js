@@ -35,12 +35,15 @@ class GameEngine {
         const nx = this.clamp(player.x + dx, 0, 7);
         const ny = this.clamp(player.y + dy, 0, 7);
         
-        if (room.walls[ny][nx]) return; // colisão por parede
+        if (room.walls[ny][nx]) return; // colisao por parede
         
-        const tileId = this.tileManager.getTileMap()[ny]?.[nx];
-        if (tileId) {
-            const tile = this.tileManager.getTile(tileId);
-            if (tile?.collision) return; // colisão por tile
+        const tileMap = this.tileManager.getTileMap();
+        const overlayId = tileMap?.overlay?.[ny]?.[nx] ?? null;
+        const groundId = tileMap?.ground?.[ny]?.[nx] ?? null;
+        const candidateId = overlayId ?? groundId;
+        if (candidateId) {
+            const tile = this.tileManager.getTile(candidateId);
+            if (tile?.collision) return; // colisao por tile
         }
         
         this.gameState.setPlayerPosition(nx, ny);
@@ -174,3 +177,4 @@ if (typeof module !== 'undefined' && module.exports) {
 } else {
     window.GameEngine = GameEngine;
 }
+

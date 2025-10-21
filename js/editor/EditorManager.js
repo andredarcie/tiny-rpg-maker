@@ -276,6 +276,8 @@ class EditorManager {
         const sprites = this.gameEngine.getSprites();
         const size = 8;
         const tileSize = Math.floor(this.editorCanvas.width / size);
+        const groundMap = tileMap?.ground || [];
+        const overlayMap = tileMap?.overlay || [];
 
         this.ectx.fillStyle = '#0a0c12';
         this.ectx.fillRect(0, 0, this.editorCanvas.width, this.editorCanvas.height);
@@ -283,9 +285,21 @@ class EditorManager {
         // Desenhar tiles
         for (let y = 0; y < size; y++) {
             for (let x = 0; x < size; x++) {
-                const tileId = tileMap[y][x];
-                if (tileId) {
-                    this.drawTilePreviewAt(tileId, x * tileSize, y * tileSize, tileSize);
+                const groundId = groundMap[y]?.[x];
+                if (groundId) {
+                    this.drawTilePreviewAt(groundId, x * tileSize, y * tileSize, tileSize);
+                }
+
+                const overlayId = overlayMap[y]?.[x];
+                if (overlayId) {
+                    this.ectx.save();
+                    this.ectx.globalAlpha = 0.95;
+                    this.drawTilePreviewAt(overlayId, x * tileSize, y * tileSize, tileSize);
+                    this.ectx.restore();
+                    
+                    this.ectx.strokeStyle = 'rgba(100, 181, 246, 0.45)';
+                    this.ectx.lineWidth = 1;
+                    this.ectx.strokeRect(x * tileSize + 0.5, y * tileSize + 0.5, tileSize - 1, tileSize - 1);
                 }
             }
         }
@@ -732,8 +746,11 @@ class EditorManager {
             start: { x: 1, y: 1, roomIndex: 0 },
             sprites: [], items: [], exits: [],
             tileset: {
-                tiles: [this.gameEngine.createBlankTile('Padrão')],
-                map: Array.from({ length: 8 }, () => Array(8).fill(null))
+                tiles: [this.gameEngine.createBlankTile('Padrao')],
+                map: {
+                    ground: Array.from({ length: 8 }, () => Array(8).fill(null)),
+                    overlay: Array.from({ length: 8 }, () => Array(8).fill(null))
+                }
             }
         };
         
@@ -979,16 +996,24 @@ class EditorManager {
                 const room = currentRoom();
                 const tileSize = getTilePixelSize();
 
+                const groundMap = game.tileset.map.ground || [];
+                const overlayMap = game.tileset.map.overlay || [];
+
                 // tiles personalizados
                 for (let y = 0; y < 8; y++) {
                     for (let x = 0; x < 8; x++) {
-                        const tileId = game.tileset.map[y]?.[x];
-                        if (tileId) {
-                            drawCustomTile(tileId, x * tileSize, y * tileSize, tileSize);
+                        const groundId = groundMap[y]?.[x];
+                        if (groundId) {
+                            drawCustomTile(groundId, x * tileSize, y * tileSize, tileSize);
                         } else {
                             const colIdx = room.tiles[y][x];
                             ctx.fillStyle = color(colIdx);
                             ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+                        }
+
+                        const overlayId = overlayMap[y]?.[x];
+                        if (overlayId) {
+                            drawCustomTile(overlayId, x * tileSize, y * tileSize, tileSize);
                         }
                     }
                 }
@@ -1073,12 +1098,16 @@ class EditorManager {
                 const room = currentRoom();
                 const nx = clamp(state.player.x + dx, 0, 7);
                 const ny = clamp(state.player.y + dy, 0, 7);
-                if (room.walls[ny][nx]) return; // colisão por parede
-                const tileId = game.tileset.map[ny]?.[nx];
-                if (tileId) {
-                    const tile = game.tileset.tiles.find(t => t.id === tileId);
-                    if (tile?.collision) return; // colisão por tile
+                if (room.walls[ny][nx]) return; // colisao por parede
+
+                const overlayId = game.tileset.map.overlay[ny]?.[nx] ?? null;
+                const groundId = game.tileset.map.ground[ny]?.[nx] ?? null;
+                const candidateId = overlayId ?? groundId;
+                if (candidateId) {
+                    const tile = game.tileset.tiles.find(t => t.id === candidateId);
+                    if (tile?.collision) return; // colisao por tile
                 }
+
                 state.player.x = nx;
                 state.player.y = ny;
                 checkInteractions();
@@ -1186,3 +1215,4 @@ if (typeof module !== 'undefined' && module.exports) {
 } else {
     window.EditorManager = EditorManager;
 }
+

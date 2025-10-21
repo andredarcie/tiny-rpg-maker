@@ -14,7 +14,7 @@ class GameState {
             exits: [],
             tileset: {
                 tiles: [],
-                map: Array.from({ length: 8 }, () => Array(8).fill(null))
+                map: this.createEmptyTileMap(8)
             }
         };
 
@@ -30,6 +30,13 @@ class GameState {
             bg: 0,
             tiles: Array.from({ length: size }, () => Array(size).fill(0)),
             walls: Array.from({ length: size }, () => Array(size).fill(false))
+        };
+    }
+
+    createEmptyTileMap(size) {
+        return {
+            ground: Array.from({ length: size }, () => Array(size).fill(null)),
+            overlay: Array.from({ length: size }, () => Array(size).fill(null))
         };
     }
 
@@ -93,6 +100,11 @@ class GameState {
     importGameData(data) {
         if (!data || !Array.isArray(data.rooms)) return;
 
+        const tileset = {
+            tiles: Array.isArray(data.tileset?.tiles) ? data.tileset.tiles : this.game.tileset.tiles,
+            map: this.normalizeTileMap(data.tileset?.map)
+        };
+
         Object.assign(this.game, {
             title: data.title || "Meu Jogo Bitsy",
             palette: Array.isArray(data.palette) && data.palette.length >= 3 ? data.palette.slice(0, 3) : ['#0e0f13', '#2e3140', '#f4f4f8'],
@@ -107,10 +119,29 @@ class GameState {
             sprites: Array.isArray(data.sprites) ? data.sprites : [],
             items: Array.isArray(data.items) ? data.items : [],
             exits: Array.isArray(data.exits) ? data.exits : [],
-            tileset: data.tileset || this.game.tileset,
+            tileset,
         });
 
         this.resetGame();
+    }
+
+    normalizeTileMap(map) {
+        const empty = this.createEmptyTileMap(8);
+        if (!map) return empty;
+        
+        if (Array.isArray(map)) {
+            empty.ground = map.map(row => Array.from({ length: 8 }, (_, idx) => row?.[idx] ?? null));
+            return empty;
+        }
+        
+        const ground = Array.from({ length: 8 }, (_, y) =>
+            Array.from({ length: 8 }, (_, x) => map.ground?.[y]?.[x] ?? null)
+        );
+        const overlay = Array.from({ length: 8 }, (_, y) =>
+            Array.from({ length: 8 }, (_, x) => map.overlay?.[y]?.[x] ?? null)
+        );
+        
+        return { ground, overlay };
     }
 }
 

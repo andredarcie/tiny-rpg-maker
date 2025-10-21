@@ -41,17 +41,23 @@ class Renderer {
         const room = this.gameState.getCurrentRoom();
         const tileSize = this.getTilePixelSize();
         const tileMap = this.tileManager.getTileMap();
+        const groundMap = tileMap?.ground || [];
+        const overlayMap = tileMap?.overlay || [];
 
-        // Desenhar tiles personalizados
         for (let y = 0; y < 8; y++) {
             for (let x = 0; x < 8; x++) {
-                const tileId = tileMap[y]?.[x];
-                if (tileId) {
-                    this.drawCustomTile(tileId, x * tileSize, y * tileSize, tileSize);
+                const groundId = groundMap[y]?.[x];
+                if (groundId) {
+                    this.drawCustomTile(groundId, x * tileSize, y * tileSize, tileSize);
                 } else {
                     const colIdx = room.tiles[y][x];
                     this.ctx.fillStyle = this.getColor(colIdx);
                     this.ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+                }
+
+                const overlayId = overlayMap[y]?.[x];
+                if (overlayId) {
+                    this.drawCustomTile(overlayId, x * tileSize, y * tileSize, tileSize);
                 }
             }
         }
@@ -211,14 +217,15 @@ class Renderer {
     drawTilePreviewAt(tileId, px, py, size, ctx) {
         const tile = this.tileManager.getTile(tileId);
         if (!tile) return;
+        const targetCtx = ctx || this.ctx;
         
         const step = Math.floor(size / 8);
         for (let y = 0; y < 8; y++) {
             for (let x = 0; x < 8; x++) {
                 const col = tile.pixels[y][x];
                 if (!col || col === 'transparent') continue;
-                ctx.fillStyle = col;
-                ctx.fillRect(px + x * step, py + y * step, step, step);
+                targetCtx.fillStyle = col;
+                targetCtx.fillRect(px + x * step, py + y * step, step, step);
             }
         }
     }
