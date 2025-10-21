@@ -1,174 +1,173 @@
-# Bitsy Mini Engine
+# Tiny RPG Maker Engine
 
-Uma engine de jogos modular inspirada no Bitsy, organizada com boas práticas e separação de responsabilidades.
+Tiny RPG Maker is a modular 8x8 tile adventure engine with a clear split between the runtime and the editor UI.
 
-## 🏗️ Estrutura do Projeto
+## Project Structure
 
 ```
-bitsy/
-├── index.html              # Arquivo principal HTML
-├── styles.css              # Estilos CSS
-├── js/
-│   ├── main.js             # Arquivo principal de inicialização
-│   ├── core/               # Módulos principais da engine
-│   │   ├── GameState.js    # Gerenciamento de estado do jogo
-│   │   ├── TileManager.js  # Gerenciamento de tiles
-│   │   ├── NPCManager.js   # Gerenciamento de NPCs
-│   │   ├── InputManager.js # Gerenciamento de entrada
-│   │   ├── Renderer.js     # Sistema de renderização
-│   │   └── GameEngine.js   # Motor principal do jogo
-│   └── editor/             # Módulos do editor
-│       └── EditorManager.js # Gerenciamento do editor
-└── README.md               # Esta documentação
+tiny-rpg-maker/
+|-- index.html            # Application shell and tab layout
+|-- styles.css            # Global styling for the game and editor
+|-- js/
+|   |-- main.js           # App bootstrap and tab coordination
+|   |-- core/
+|   |   |-- GameEngine.js
+|   |   |-- GameState.js
+|   |   |-- InputManager.js
+|   |   |-- NPCManager.js
+|   |   |-- Renderer.js
+|   |   `-- TileManager.js
+|   `-- editor/
+|       `-- EditorManager.js
+|-- engine.js             # Standalone build used by the editor HTML export
+`-- README.md
 ```
 
-## 🎮 Funcionalidades
+## Features
 
-### Motor do Jogo
-- **Sistema de tiles 8x8**: Tiles personalizáveis com pixel art
-- **Sistema de NPCs**: Personagens com diálogos interativos
-- **Sistema de colisão**: Tiles e paredes com detecção de colisão
-- **Sistema de diálogos**: Interface de conversa com NPCs
-- **Sistema de salas**: Múltiplas salas (atualmente suporte a 1 sala)
+### Game Runtime
+- 8x8 tile grid with customizable pixel art tiles
+- NPC support with interactive dialog boxes
+- Wall and tile collision, room exits, and collectible items
+- Room switching and palette management
 
 ### Editor
-- **Editor de tiles**: Criar e editar tiles pixel por pixel
-- **Editor de mapa**: Pintar tiles no mapa 8x8
-- **Gerenciador de NPCs**: Adicionar, posicionar e editar NPCs
-- **Sistema de histórico**: Undo/Redo com Ctrl+Z/Ctrl+Y
-- **Exportação**: Salvar como JSON ou HTML standalone
+- Pixel-perfect tile editor
+- Map painting with ground and overlay layers
+- NPC manager with placement and dialog editing
+- Undo and redo history, JSON import or export, and HTML export helper
 
-## 🚀 Como Usar
+## Getting Started
 
-### 1. Iniciar o Servidor
+### 1. Run a Local Server
+
 ```bash
 python -m http.server 8000
 ```
 
-### 2. Abrir no Navegador
-Acesse `http://localhost:8000`
+### 2. Open the App
 
-### 3. Criar um Jogo
-1. **Abra a aba "Editor"**
-2. **Crie tiles**: Use o editor de tiles para desenhar pixel art 8x8
-3. **Pinte o mapa**: Selecione um tile e clique no mapa para pintar
-4. **Adicione NPCs**: Crie NPCs e posicione-os no mapa
-5. **Teste o jogo**: Mude para a aba "Jogo" e use as setas para mover
+Visit `http://localhost:8000` in your browser.
 
-## 📁 Módulos
+### 3. Build Your Game
+
+1. Select the **Editor** tab.
+2. Draw tiles in the tile editor.
+3. Paint the overworld map with your tiles.
+4. Add NPCs, items, and exits.
+5. Switch to the **Game** tab to play-test using the arrow keys.
+
+## Module Overview
 
 ### GameState.js
-Gerencia todo o estado do jogo:
-- Dados do jogo (título, paleta, salas)
-- Estado do jogador (posição, sala atual)
-- Estado do diálogo
+Stores the entire game definition:
+- Game metadata (title, palette, rooms)
+- Player position and dialog state
+- Tileset map, sprites, exits, and items
 
 ### TileManager.js
-Gerencia tiles e operações relacionadas:
-- Criação de tiles em branco
-- Adição/remoção/atualização de tiles
-- Gerenciamento do mapa de tiles
-- Criação de tiles padrão (árvore)
+Manages tiles and tile maps:
+- Creates blank tiles
+- Adds, removes, and updates tiles
+- Updates ground and overlay layers
+- Seeds default ground tiles when the world is empty
 
 ### NPCManager.js
-Gerencia NPCs e operações relacionadas:
-- Criação de NPCs
-- Posicionamento no mapa
-- Gerenciamento de diálogos
+Handles NPC creation and dialog updates:
+- Generates IDs
+- Adds and updates NPCs
+- Filters NPCs per room
+- Stores dialog text
 
 ### InputManager.js
-Gerencia entrada do usuário:
-- Controles do jogador (setas)
-- Interação com diálogos (Z)
-- Eventos do editor
+Processes keyboard and editor pointer input:
+- Player movement and interaction keys
+- Dialog dismissal shortcuts
+- Canvas painting helpers for the editor
 
 ### Renderer.js
-Gerencia toda a renderização:
-- Renderização do jogo
-- Renderização do editor
-- Renderização de tiles
-- Renderização de diálogos
+Draws every frame:
+- Ground, overlay tiles, and walls
+- Items, NPCs, and the player sprite
+- Dialog box rendering
+- Tile previews for the editor UI
 
 ### GameEngine.js
-Motor principal que coordena todos os módulos:
-- Inicialização dos módulos
-- Lógica de movimento
-- Detecção de interações
-- Interface com o editor
+Coordinates the runtime:
+- Boots all core modules
+- Owns movement, collision, and interaction checks
+- Synchronizes the document title with the game
 
 ### EditorManager.js
-Gerencia todas as operações do editor:
-- Interface do editor
-- Gerenciamento de histórico
-- Operações de arquivo
-- Renderização do editor
+Controls the editor UI:
+- DOM binding and resize handling
+- History stack management
+- Import, export, and HTML generation
+- Canvas interactions for map and tile editing
 
-## 🔧 API Pública
+## Public API
 
-O motor expõe uma API através de `window.BitsyMini`:
+The engine exposes a runtime API on `window.TinyRPGMaker`:
 
 ```javascript
-// Dados do jogo
-BitsyMini.exportGameData()     // Exportar dados do jogo
-BitsyMini.importGameData(data) // Importar dados do jogo
-BitsyMini.getState()           // Obter estado atual
-BitsyMini.draw()               // Redesenhar o jogo
-BitsyMini.resetGame()          // Reiniciar o jogo
+// Game data
+TinyRPGMaker.exportGameData();      // Export current game as JSON
+TinyRPGMaker.importGameData(data);  // Load a game definition
+TinyRPGMaker.getState();            // Read-only access to internal state
+TinyRPGMaker.draw();                // Force a render pass
+TinyRPGMaker.resetGame();           // Reset player position and dialog
 
 // Tiles
-BitsyMini.addTile(tile)        // Adicionar tile
-BitsyMini.updateTile(id, data) // Atualizar tile
-BitsyMini.createBlankTile(name) // Criar tile em branco
-BitsyMini.setMapTile(x, y, id) // Definir tile no mapa
-BitsyMini.getTiles()           // Obter lista de tiles
-BitsyMini.getTileMap()         // Obter mapa de tiles
+TinyRPGMaker.addTile(tile);
+TinyRPGMaker.updateTile(id, data);
+TinyRPGMaker.createBlankTile(name);
+TinyRPGMaker.setMapTile(x, y, id);
+TinyRPGMaker.getTiles();
+TinyRPGMaker.getTileMap();
 
 // NPCs
-BitsyMini.addSprite(npc)       // Adicionar NPC
-BitsyMini.getSprites()         // Obter lista de NPCs
+TinyRPGMaker.addSprite(npc);
+TinyRPGMaker.getSprites();
 ```
 
-## 🎨 Personalização
+## Customization
 
-### Cores
-As cores padrão podem ser alteradas no `GameState.js`:
+### Colors
+Update the palette in `GameState.js`:
+
 ```javascript
 palette: ['#0e0f13', '#2e3140', '#f4f4f8']
 ```
 
-### Tamanho do Mapa
-O tamanho do mapa é fixo em 8x8 tiles, mas pode ser alterado modificando as constantes nos módulos.
+### Map Size
+The grid defaults to 8x8. Adjust the constants in the core modules if you need larger rooms.
 
-## 📝 Boas Práticas Implementadas
+## Implementation Notes
 
-1. **Separação de Responsabilidades**: Cada módulo tem uma função específica
-2. **Encapsulamento**: Dados privados protegidos, API pública clara
-3. **Modularidade**: Módulos independentes e reutilizáveis
-4. **Nomenclatura Clara**: Funções e variáveis com nomes descritivos
-5. **Documentação**: Comentários explicativos em cada módulo
-6. **Compatibilidade**: API mantida para código existente
+1. Single responsibility: each module focuses on one concern.
+2. Encapsulation: shared state lives in `GameState`, while managers expose intent-based methods.
+3. Modularity: the editor talks to the engine exclusively through public APIs.
+4. Naming: functions and variables favor descriptive identifiers.
+5. Documentation: comments describe non-obvious behavior where helpful.
+6. Compatibility: the runtime API remains stable for editor integrations.
 
-## 🔄 Migração
+## Troubleshooting
 
-O código foi reorganizado mantendo compatibilidade com a API anterior. Se você tinha código usando `window.BitsyMini`, ele continuará funcionando.
+### Editor does not respond
+- Ensure every JavaScript file listed in `index.html` is being served.
+- Check the browser console for runtime errors.
+- Confirm the development server is running.
 
-## 🐛 Solução de Problemas
+### Tiles are invisible
+- Verify that at least one tile exists in the tileset.
+- Use "Add Tile" to create a starter tile.
+- Make sure the tile is selected before painting the map.
 
-### Editor não funciona
-- Verifique se todos os arquivos JavaScript estão sendo carregados
-- Abra o console do navegador para ver erros
-- Certifique-se de que o servidor está rodando
+### NPCs do not interact
+- Confirm the NPC is placed in the correct room.
+- Add dialog text in the NPC panel.
+- Stand on the NPC and press `Z` or `Enter` to trigger dialog.
 
-### Tiles não aparecem
-- Verifique se há pelo menos um tile criado
-- Use o botão "Adicionar Tile" para criar um tile padrão
-- Verifique se o tile está selecionado antes de pintar
+## License
 
-### NPCs não funcionam
-- Verifique se o NPC foi adicionado corretamente
-- Certifique-se de que o NPC está posicionado no mapa
-- Verifique se o diálogo foi definido
-
-## 📄 Licença
-
-Este projeto é uma implementação educacional inspirada no Bitsy original.
+This project is released for educational purposes. Use it freely in your own experiments and prototypes.

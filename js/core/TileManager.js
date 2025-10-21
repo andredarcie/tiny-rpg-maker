@@ -1,5 +1,5 @@
 /**
- * TileManager - Gerencia tiles e operações relacionadas
+ * TileManager handles tile creation, updates, and placement.
  */
 class TileManager {
     constructor(gameState) {
@@ -10,13 +10,13 @@ class TileManager {
         return (window.crypto?.randomUUID?.() || ('id-' + Math.random().toString(36).slice(2, 9)));
     }
 
-    createBlankTile(name = "Novo Tile") {
+    createBlankTile(name = "New Tile") {
         const pixels = Array.from({ length: 8 }, () => Array(8).fill('transparent'));
-        return { 
-            id: this.generateId(), 
-            name, 
-            pixels, 
-            collision: false 
+        return {
+            id: this.generateId(),
+            name,
+            pixels,
+            collision: false
         };
     }
 
@@ -25,19 +25,19 @@ class TileManager {
         if (!tile.pixels) tile.pixels = Array.from({ length: 8 }, () => Array(8).fill('transparent'));
         if (typeof tile.collision !== 'boolean') tile.collision = false;
         if (!tile.name) tile.name = 'Tile';
-        
+
         this.gameState.game.tileset.tiles.push(tile);
         return tile.id;
     }
 
     updateTile(tileId, data) {
-        const tile = this.gameState.game.tileset.tiles.find(t => t.id === tileId);
+        const tile = this.gameState.game.tileset.tiles.find((t) => t.id === tileId);
         if (!tile) return;
         Object.assign(tile, data);
     }
 
     removeTile(tileId) {
-        const index = this.gameState.game.tileset.tiles.findIndex(t => t.id === tileId);
+        const index = this.gameState.game.tileset.tiles.findIndex((t) => t.id === tileId);
         if (index >= 0) {
             this.gameState.game.tileset.tiles.splice(index, 1);
             return true;
@@ -50,7 +50,7 @@ class TileManager {
     }
 
     getTile(tileId) {
-        return this.gameState.game.tileset.tiles.find(t => t.id === tileId);
+        return this.gameState.game.tileset.tiles.find((t) => t.id === tileId);
     }
 
     setMapTile(x, y, tileId, layer = null) {
@@ -88,30 +88,30 @@ class TileManager {
     }
 
     createDefaultTree() {
-        const tree = this.createBlankTile('Árvore');
+        const tree = this.createBlankTile('Tree');
         const green = '#2fbf71';
         const brown = '#8b5a2b';
         tree.collision = true;
-        
-        // Desenha um triângulo verde simples
+
+        // Draw a simple green triangle canopy
         for (let y = 0; y < 6; y++) {
-            for (let x = 3 - Math.floor(y/2); x <= 4 + Math.floor(y/2); x++) {
+            for (let x = 3 - Math.floor(y / 2); x <= 4 + Math.floor(y / 2); x++) {
                 tree.pixels[y][x] = green;
             }
         }
-        
-        // Tronco marrom
-        tree.pixels[6][3] = brown; 
+
+        // Brown trunk
+        tree.pixels[6][3] = brown;
         tree.pixels[6][4] = brown;
-        tree.pixels[7][3] = brown; 
+        tree.pixels[7][3] = brown;
         tree.pixels[7][4] = brown;
-        
+
         return tree;
     }
 
     ensureDefaultTiles() {
         if (this.gameState.game.tileset.tiles.length === 0) {
-            const ground = this.createBlankTile('Chao');
+            const ground = this.createBlankTile('Ground');
             const grassColor = '#2f9e44';
 
             for (let y = 0; y < 8; y++) {
@@ -131,7 +131,6 @@ class TileManager {
             }
         }
     }
-
 }
 
 // Export for use in other modules
@@ -140,5 +139,3 @@ if (typeof module !== 'undefined' && module.exports) {
 } else {
     window.TileManager = TileManager;
 }
-
-

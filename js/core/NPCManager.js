@@ -1,5 +1,5 @@
 /**
- * NPCManager - Gerencia NPCs e operações relacionadas
+ * NPCManager creates and mutates NPC definitions.
  */
 class NPCManager {
     constructor(gameState) {
@@ -10,7 +10,7 @@ class NPCManager {
         return (window.crypto?.randomUUID?.() || ('id-' + Math.random().toString(36).slice(2, 9)));
     }
 
-    createNPC(name = null, x = 1, y = 1, roomIndex = 0, text = 'Olá!') {
+    createNPC(name = null, x = 1, y = 1, roomIndex = 0, text = 'Hello!') {
         return {
             id: this.generateId(),
             name: name || `NPC ${this.gameState.game.sprites.length + 1}`,
@@ -27,20 +27,20 @@ class NPCManager {
         if (typeof npc.x !== 'number') npc.x = 1;
         if (typeof npc.y !== 'number') npc.y = 1;
         if (typeof npc.roomIndex !== 'number') npc.roomIndex = 0;
-        if (!npc.text) npc.text = 'Olá!';
-        
+        if (!npc.text) npc.text = 'Hello!';
+
         this.gameState.game.sprites.push(npc);
         return npc.id;
     }
 
     updateNPC(npcId, data) {
-        const npc = this.gameState.game.sprites.find(s => s.id === npcId);
+        const npc = this.gameState.game.sprites.find((s) => s.id === npcId);
         if (!npc) return;
         Object.assign(npc, data);
     }
 
     removeNPC(npcId) {
-        const index = this.gameState.game.sprites.findIndex(s => s.id === npcId);
+        const index = this.gameState.game.sprites.findIndex((s) => s.id === npcId);
         if (index >= 0) {
             this.gameState.game.sprites.splice(index, 1);
             return true;
@@ -53,17 +53,17 @@ class NPCManager {
     }
 
     getNPC(npcId) {
-        return this.gameState.game.sprites.find(s => s.id === npcId);
+        return this.gameState.game.sprites.find((s) => s.id === npcId);
     }
 
     getNPCsInRoom(roomIndex) {
-        return this.gameState.game.sprites.filter(s => s.roomIndex === roomIndex);
+        return this.gameState.game.sprites.filter((s) => s.roomIndex === roomIndex);
     }
 
     setNPCPosition(npcId, x, y, roomIndex = null) {
         const npc = this.getNPC(npcId);
         if (!npc) return;
-        
+
         npc.x = x;
         npc.y = y;
         if (roomIndex !== null) {

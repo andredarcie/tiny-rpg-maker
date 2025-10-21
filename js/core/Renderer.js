@@ -1,5 +1,5 @@
 /**
- * Renderer - Gerencia toda a renderização do jogo
+ * Renderer handles drawing the game scene and editor surfaces.
  */
 class Renderer {
     constructor(canvas, gameState, tileManager, npcManager) {
@@ -66,7 +66,7 @@ class Renderer {
     drawWalls() {
         const room = this.gameState.getCurrentRoom();
         const tileSize = this.getTilePixelSize();
-        
+
         this.ctx.fillStyle = this.getColor(1);
         for (let y = 0; y < 8; y++) {
             for (let x = 0; x < 8; x++) {
@@ -81,14 +81,14 @@ class Renderer {
         const game = this.gameState.getGame();
         const player = this.gameState.getPlayer();
         const tileSize = this.getTilePixelSize();
-        
+
         this.ctx.fillStyle = this.getColor(2);
         for (const item of game.items) {
             if (item.roomIndex !== player.roomIndex || item.collected) continue;
             this.ctx.fillRect(
-                item.x * tileSize + tileSize * 0.25, 
-                item.y * tileSize + tileSize * 0.25, 
-                tileSize * 0.5, 
+                item.x * tileSize + tileSize * 0.25,
+                item.y * tileSize + tileSize * 0.25,
+                tileSize * 0.5,
                 tileSize * 0.5
             );
         }
@@ -98,14 +98,14 @@ class Renderer {
         const game = this.gameState.getGame();
         const player = this.gameState.getPlayer();
         const tileSize = this.getTilePixelSize();
-        
+
         this.ctx.fillStyle = this.getColor(2);
         for (const npc of game.sprites) {
             if (npc.roomIndex !== player.roomIndex) continue;
             this.ctx.fillRect(
-                npc.x * tileSize + 2, 
-                npc.y * tileSize + 2, 
-                tileSize - 4, 
+                npc.x * tileSize + 2,
+                npc.y * tileSize + 2,
+                tileSize - 4,
                 tileSize - 4
             );
         }
@@ -117,7 +117,7 @@ class Renderer {
         const step = tileSize / 8;
         const px = player.x * tileSize;
         const py = player.y * tileSize;
-        
+
         for (let y = 0; y < this.playerSprite.length; y++) {
             const row = this.playerSprite[y];
             for (let x = 0; x < row.length; x++) {
@@ -131,8 +131,7 @@ class Renderer {
 
     drawDialog() {
         const dialog = this.gameState.getDialog();
-        if (!dialog.active) return;
-        
+        if (!dialog.active || !dialog.text) return;
         this.drawDialogBox(dialog.text);
     }
 
@@ -142,13 +141,13 @@ class Renderer {
         const h = 40;
         const x = pad;
         const y = this.canvas.height - h - pad;
-        
+
         this.ctx.fillStyle = "rgba(0,0,0,0.7)";
         this.ctx.fillRect(x, y, w, h);
-        
+
         this.ctx.strokeStyle = this.getColor(2);
         this.ctx.strokeRect(x, y, w, h);
-        
+
         this.ctx.fillStyle = this.getColor(2);
         this.ctx.font = "10px monospace";
         this.wrapText(text, x + 8, y + 14, w - 16, 12);
@@ -157,7 +156,7 @@ class Renderer {
     drawCustomTile(tileId, px, py, size) {
         const tile = this.tileManager.getTile(tileId);
         if (!tile) return;
-        
+
         const step = Math.floor(size / 8);
         for (let y = 0; y < 8; y++) {
             for (let x = 0; x < 8; x++) {
@@ -172,11 +171,11 @@ class Renderer {
     wrapText(text, x, y, maxWidth, lineHeight) {
         const words = text.split(/\s+/);
         let line = "";
-        
+
         for (let i = 0; i < words.length; i++) {
             const testLine = line + words[i] + " ";
             const metrics = this.ctx.measureText(testLine);
-            
+
             if (metrics.width > maxWidth && i > 0) {
                 this.ctx.fillText(line, x, y);
                 line = words[i] + " ";
@@ -185,7 +184,7 @@ class Renderer {
                 line = testLine;
             }
         }
-        
+
         this.ctx.fillText(line, x, y);
     }
 
@@ -198,11 +197,11 @@ class Renderer {
         return game.palette[idx] || "#f4f4f8";
     }
 
-    // Métodos para o editor
+    // Editor helpers
     drawTileOnCanvas(canvas, tile) {
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
+
         const step = Math.floor(canvas.width / 8);
         for (let y = 0; y < 8; y++) {
             for (let x = 0; x < 8; x++) {
@@ -218,7 +217,7 @@ class Renderer {
         const tile = this.tileManager.getTile(tileId);
         if (!tile) return;
         const targetCtx = ctx || this.ctx;
-        
+
         const step = Math.floor(size / 8);
         for (let y = 0; y < 8; y++) {
             for (let x = 0; x < 8; x++) {
@@ -252,7 +251,7 @@ class Renderer {
             "O....O.."
         ];
 
-        return rows.map(row => row.split('').map(ch => palette[ch] ?? null));
+        return rows.map((row) => row.split('').map((ch) => palette[ch] ?? null));
     }
 }
 

@@ -1,5 +1,5 @@
 /**
- * EditorManager - Gerencia todas as opera√ß√µes do editor
+ * EditorManager - Gerencia todas as opera+∫+¡es do editor
  */
 class EditorManager {
     constructor(gameEngine) {
@@ -42,7 +42,7 @@ class EditorManager {
         this.jsonArea = document.getElementById('json-area');
         this.fileInput = document.getElementById('file-input');
         
-        // Bot√µes
+        // Bot+¡es
         this.btnAddTile = document.getElementById('btn-add-tile');
         this.btnAddTree = document.getElementById('btn-add-tree');
         this.btnAddNpc = document.getElementById('btn-add-npc');
@@ -80,7 +80,7 @@ class EditorManager {
         this.btnExportHTML?.addEventListener('click', () => this.exportHTML());
         this.btnApplyJson?.addEventListener('click', () => this.applyJSON());
         
-        // Event listeners para hist√≥rico
+        // Event listeners para hist+¶rico
         this.btnUndo?.addEventListener('click', () => this.undo());
         this.btnRedo?.addEventListener('click', () => this.redo());
         
@@ -218,7 +218,7 @@ class EditorManager {
         this.handleCanvasResize(true);
     }
 
-    // M√©todos de pintura
+    // M+Ætodos de pintura
     paintAt(e) {
         if (this.placingNpc) {
             this.placeNpcAt(e);
@@ -270,7 +270,7 @@ class EditorManager {
         this.updateJSONArea();
     }
 
-    // M√©todos de renderiza√ß√£o
+    // M+Ætodos de renderiza+∫+˙o
     renderEditor() {
         const tileMap = this.gameEngine.getTileMap();
         const sprites = this.gameEngine.getSprites();
@@ -424,7 +424,7 @@ class EditorManager {
             
             const preview = document.createElement('div');
             preview.className = 'npc-preview';
-            preview.textContent = 'üë§';
+            preview.textContent = '≠ÉÊÒ';
             
             const meta = document.createElement('div');
             meta.className = 'meta';
@@ -439,7 +439,7 @@ class EditorManager {
             
             const dialog = document.createElement('div');
             dialog.className = 'npc-dialog';
-            dialog.textContent = npc.text || 'Sem di√°logo';
+            dialog.textContent = npc.text || 'Sem di+Ìlogo';
             
             meta.appendChild(name);
             meta.appendChild(position);
@@ -458,7 +458,7 @@ class EditorManager {
         this.reflectSelectedNpcToEditor();
     }
 
-    // M√©todos de NPC
+    // M+Ætodos de NPC
     addNewNPC() {
         const npc = {
             id: this.generateId(),
@@ -466,7 +466,7 @@ class EditorManager {
             x: 1,
             y: 1,
             roomIndex: 0,
-            text: 'Ol√°!'
+            text: 'Ol+Ì!'
         };
         
         this.gameEngine.addSprite(npc);
@@ -488,7 +488,7 @@ class EditorManager {
     startPlacingNpc() {
         if (!this.selectedNpcId) return;
         this.placingNpc = true;
-        this.btnPlaceNpc.textContent = 'Cancelar coloca√ß√£o';
+        this.btnPlaceNpc.textContent = 'Cancelar coloca+∫+˙o';
         this.btnPlaceNpc.classList.add('placing');
         this.editorCanvas.style.cursor = 'crosshair';
     }
@@ -569,7 +569,7 @@ class EditorManager {
         this.updateJSONArea();
     }
 
-    // M√©todos de tile
+    // M+Ætodos de tile
     addNewTile() {
         const tile = this.gameEngine.createBlankTile('Tile');
         this.gameEngine.addTile(tile);
@@ -607,7 +607,7 @@ class EditorManager {
         
         const copy = {
             id: this.generateId(),
-            name: (tile.name || 'Tile') + ' (c√≥pia)',
+            name: (tile.name || 'Tile') + ' (c+¶pia)',
             pixels: tile.pixels.map(r => r.slice()),
             collision: tile.collision
         };
@@ -706,7 +706,7 @@ class EditorManager {
         this.gameEngine.draw();
     }
 
-    // M√©todos de hist√≥rico
+    // M+Ætodos de hist+¶rico
     pushHistory() {
         const data = this.gameEngine.exportGameData();
         this.history.stack = this.history.stack.slice(0, this.history.index + 1);
@@ -736,7 +736,7 @@ class EditorManager {
         this.gameEngine.draw();
     }
 
-    // M√©todos de arquivo
+    // M+Ætodos de arquivo
     createNewGame() {
         const data = {
             title: 'Novo Jogo',
@@ -808,7 +808,7 @@ class EditorManager {
                 
                 this.gameEngine.draw();
             } catch (e) {
-                alert('JSON inv√°lido');
+                alert('JSON inv+Ìlido');
             }
         };
         reader.readAsText(file);
@@ -834,7 +834,7 @@ class EditorManager {
             
             this.gameEngine.draw();
         } catch (e) {
-            alert('JSON inv√°lido');
+            alert('JSON inv+Ìlido');
         }
     }
 
@@ -939,7 +939,7 @@ class EditorManager {
         </div>
         <div class="game-controls">
             <button id="btn-reset">Reiniciar</button>
-            <span>Setas para mover ‚Ä¢ Z para interagir</span>
+            <span>Setas para mover ‘«Û Z para interagir</span>
         </div>
     </div>
 
@@ -1047,7 +1047,7 @@ class EditorManager {
                 ctx.lineWidth = Math.max(1, Math.floor(tileSize / 6));
                 ctx.strokeRect(state.player.x * tileSize + 2, state.player.y * tileSize + 2, tileSize - 4, tileSize - 4);
 
-                // di√°logo se ativo
+                // di+Ìlogo se ativo
                 if (state.dialog.active) {
                     drawDialog(state.dialog.text);
                 }
@@ -1119,18 +1119,18 @@ class EditorManager {
                 for (const item of game.items) {
                     if (item.roomIndex === state.player.roomIndex && !item.collected && item.x === state.player.x && item.y === state.player.y) {
                         item.collected = true;
-                        showDialog(item.text || "Voc√™ pegou um item.");
+                        showDialog(item.text || "Voc+¨ pegou um item.");
                         break;
                     }
                 }
                 // sprites
                 for (const s of game.sprites) {
                     if (s.roomIndex === state.player.roomIndex && s.x === state.player.x && s.y === state.player.y) {
-                        showDialog(s.text || "Ol√°!");
+                        showDialog(s.text || "Ol+Ì!");
                         break;
                     }
                 }
-                // sa√≠das
+                // sa+°das
                 for (const ex of game.exits) {
                     if (ex.roomIndex === state.player.roomIndex && ex.x === state.player.x && ex.y === state.player.y) {
                         if (game.rooms[ex.targetRoomIndex]) {
@@ -1186,7 +1186,7 @@ class EditorManager {
 </html>`;
     }
 
-    // M√©todos utilit√°rios
+    // M+Ætodos utilit+Ìrios
     generateId() {
         return (window.crypto?.randomUUID?.() || ('id-' + Math.random().toString(36).slice(2, 9)));
     }

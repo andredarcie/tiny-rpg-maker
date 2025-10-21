@@ -1,5 +1,5 @@
 /**
- * InputManager - Gerencia entrada do usuário
+ * InputManager wires keyboard and editor pointer interactions.
  */
 class InputManager {
     constructor(gameEngine) {
@@ -13,8 +13,8 @@ class InputManager {
 
     handleKeyDown(ev) {
         const dialog = this.gameEngine.gameState.getDialog();
-        
-        // Se há diálogo ativo, apenas Z/Enter/Espaço para fechar
+
+        // When a dialog is open, only allow confirmation keys to close it
         if (dialog.active) {
             switch (ev.key.toLowerCase()) {
                 case "z":
@@ -28,7 +28,7 @@ class InputManager {
             return;
         }
 
-        // Movimento do jogador
+        // Player movement
         switch (ev.key) {
             case "ArrowLeft":
                 ev.preventDefault();
@@ -49,40 +49,40 @@ class InputManager {
         }
     }
 
-    // Para o editor
+    // Map editor canvas interactions
     setupEditorInputs(editorCanvas, paintCallback) {
         let painting = false;
-        
+
         editorCanvas.addEventListener('mousedown', (e) => {
             painting = true;
             paintCallback(e);
         });
-        
+
         editorCanvas.addEventListener('mousemove', (e) => {
             if (painting) paintCallback(e);
         });
-        
+
         document.addEventListener('mouseup', () => {
             if (painting) {
                 painting = false;
-                // Callback para finalizar a pintura (ex: pushHistory)
+                // Hook to finalize painting (for example, push to history)
             }
         });
     }
 
-    // Para o tile editor
+    // Tile editor canvas interactions
     setupTileEditorInputs(tileCanvas, paintCallback) {
         let tilePainting = false;
-        
+
         tileCanvas.addEventListener('mousedown', (e) => {
             tilePainting = true;
             paintCallback(e);
         });
-        
+
         tileCanvas.addEventListener('mousemove', (e) => {
             if (tilePainting) paintCallback(e);
         });
-        
+
         document.addEventListener('mouseup', () => {
             tilePainting = false;
         });

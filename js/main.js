@@ -1,53 +1,52 @@
 /**
- * Main - Arquivo principal que inicializa o jogo e o editor
+ * Main entry point that boots the game and the editor.
  */
 (function() {
     "use strict";
 
-    // Aguardar o DOM estar pronto
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', () => {
         initializeApplication();
     });
 
     function initializeApplication() {
-        // Configurar tabs
+        // Configure tab behavior
         setupTabs();
-        
-        // Inicializar motor do jogo
+
+        // Initialize the core game engine
         const gameCanvas = document.getElementById('game-canvas');
         const gameEngine = new GameEngine(gameCanvas);
-        
-        // Expor para compatibilidade com código existente
-        window.BitsyMini = {
+
+        // Expose the public runtime API
+        window.TinyRPGMaker = {
             exportGameData: () => gameEngine.exportGameData(),
             importGameData: (data) => gameEngine.importGameData(data),
             getState: () => gameEngine.getState(),
             draw: () => gameEngine.draw(),
             resetGame: () => gameEngine.resetGame(),
-            
-            // API de tiles
+
+            // Tile API
             addTile: (tile) => gameEngine.addTile(tile),
             updateTile: (tileId, data) => gameEngine.updateTile(tileId, data),
             createBlankTile: (name) => gameEngine.createBlankTile(name),
             setMapTile: (x, y, tileId) => gameEngine.setMapTile(x, y, tileId),
             getTiles: () => gameEngine.getTiles(),
             getTileMap: () => gameEngine.getTileMap(),
-            
-            // API de sprites/NPCs
+
+            // NPC API
             addSprite: (npc) => gameEngine.addSprite(npc),
             getSprites: () => gameEngine.getSprites()
         };
-        
-        // Inicializar editor
+
+        // Initialize the editor controller
         const editorManager = new EditorManager(gameEngine);
-        
-        // Configurar botão de reset
+
+        // Wire the reset button
         const resetButton = document.getElementById('btn-reset');
         if (resetButton) {
             resetButton.addEventListener('click', () => gameEngine.resetGame());
         }
-        
-        console.log('Bitsy Mini Engine inicializado com sucesso!');
+
+        console.log('Tiny RPG Maker engine initialized successfully.');
     }
 
     function setupTabs() {
@@ -59,23 +58,22 @@
             document.body.classList.toggle('editor-mode', isEditor);
             document.body.classList.toggle('game-mode', isGame);
         };
-        
-        tabs.forEach(btn => {
+
+        tabs.forEach((btn) => {
             btn.addEventListener('click', () => {
-                // Remover classe ativa de todas as tabs
-                tabs.forEach(b => {
-                    b.classList.remove('active');
-                    b.setAttribute('aria-selected', 'false');
+                // Clear the active state from every tab button
+                tabs.forEach((other) => {
+                    other.classList.remove('active');
+                    other.setAttribute('aria-selected', 'false');
                 });
-                
-                // Remover classe ativa de todos os conteúdos
-                tabContents.forEach(c => c.classList.remove('active'));
-                
-                // Adicionar classe ativa na tab clicada
+
+                // Hide every tab content panel
+                tabContents.forEach((content) => content.classList.remove('active'));
+
+                // Activate the selected tab and panel
                 btn.classList.add('active');
                 btn.setAttribute('aria-selected', 'true');
-                
-                // Mostrar conteúdo correspondente
+
                 const targetId = 'tab-' + btn.dataset.tab;
                 const targetContent = document.getElementById(targetId);
                 if (targetContent) {
@@ -83,11 +81,11 @@
                 }
 
                 applyLayoutMode(btn.dataset.tab);
-                
+
                 if (btn.dataset.tab === 'game') {
                     document.dispatchEvent(new CustomEvent('game-tab-activated'));
                 }
-                
+
                 if (btn.dataset.tab === 'editor') {
                     document.dispatchEvent(new CustomEvent('editor-tab-activated'));
                 }
@@ -101,7 +99,7 @@
                 document.dispatchEvent(new CustomEvent('game-tab-activated', { detail: { initial: true } }));
             }
             if (initialTab.dataset.tab === 'editor') {
-                document.dispatchEvent(new CustomEvent('editor-tab-activated', { detail: { initial: true }}));
+                document.dispatchEvent(new CustomEvent('editor-tab-activated', { detail: { initial: true } }));
             }
         }
     }
@@ -114,7 +112,7 @@
             return;
         }
 
-        // Ajustar tamanho do canvas para centralizar e ser responsivo
+        // Keep the canvas centered and responsive
         const resizeCanvas = () => {
             const rect = gameContainer.getBoundingClientRect();
             const availableWidth = rect.width || window.innerWidth;

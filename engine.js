@@ -1,14 +1,14 @@
-// Bitsy Mini Engine (simplificada)
-// Alto nível: mapa em grade, colisão de paredes, jogador, NPCs, itens, saídas e diálogos básicos.
+// Tiny RPG Maker standalone engine (simplified)
+// High level: grid map, wall collisions, player, NPCs, items, exits, and basic dialogs.
 
 (function () {
     "use strict";
 
-    // ---------- Estado do jogo ----------
-    const defaultPalette = ["#0e0f13", "#2e3140", "#f4f4f8"]; // fundo, meio, frente
+    // ---------- Game state ----------
+    const defaultPalette = ["#0e0f13", "#2e3140", "#f4f4f8"]; // background, mid, foreground
 
     const game = {
-        title: "Meu Jogo Bitsy",
+        title: "My Tiny RPG Game",
         palette: [...defaultPalette],
         roomSize: 8,
         rooms: [createEmptyRoom(8)],
@@ -18,7 +18,7 @@
         exits: [],   // { id, x, y, roomIndex, targetX, targetY, targetRoomIndex }
         tileset: {
             tiles: [], // { id, name, pixels: string[8][8] | 'transparent', collision: boolean }
-            map: Array.from({ length: 8 }, () => Array(8).fill(null)), // id do tile em cada célula do cenário
+            map: Array.from({ length: 8 }, () => Array(8).fill(null)), // tile id stored in each map cell
         },
     };
 
@@ -31,10 +31,10 @@
         };
     }
 
-    // ---------- Renderização ----------
+    // ---------- Rendering ----------
     const canvas = document.getElementById("game-canvas");
     const ctx = canvas.getContext("2d");
-    const scale = 4; // 128 canvas → 32 tiles (se 16x16 então cada tile = 8px com scale 4)
+    const scale = 4; // 128 canvas -> 32 tiles (16x16 means each tile is 8px with scale 4)
 
     function getTilePixelSize() {
         const sz = currentRoom().size;
@@ -57,7 +57,7 @@
         const room = currentRoom();
         const tileSize = getTilePixelSize();
 
-        // tiles personalizados (ou cor de fundo se vazio)
+        // custom tiles (or background color if empty)
         for (let y = 0; y < room.size; y++) {
             for (let x = 0; x < room.size; x++) {
                 const tileId = game.tileset.map[y]?.[x];
@@ -71,7 +71,7 @@
             }
         }
 
-        // paredes
+        // walls
         ctx.fillStyle = color(1);
         for (let y = 0; y < room.size; y++) {
             for (let x = 0; x < room.size; x++) {
@@ -81,26 +81,26 @@
             }
         }
 
-        // itens
+        // items
         ctx.fillStyle = color(2);
         for (const item of game.items) {
             if (item.roomIndex !== state.player.roomIndex || item.collected) continue;
             ctx.fillRect(item.x * tileSize + tileSize * 0.25, item.y * tileSize + tileSize * 0.25, tileSize * 0.5, tileSize * 0.5);
         }
 
-        // sprites (NPCs)
+        // NPC sprites
         ctx.fillStyle = color(2);
         for (const s of game.sprites) {
             if (s.roomIndex !== state.player.roomIndex) continue;
             ctx.fillRect(s.x * tileSize + 2, s.y * tileSize + 2, tileSize - 4, tileSize - 4);
         }
 
-        // jogador
+        // player
         ctx.strokeStyle = color(2);
         ctx.lineWidth = Math.max(1, Math.floor(tileSize / 6));
         ctx.strokeRect(state.player.x * tileSize + 2, state.player.y * tileSize + 2, tileSize - 4, tileSize - 4);
 
-        // diálogo se ativo
+        // dialog overlay
         if (state.dialog.active) {
             drawDialog(state.dialog.text);
         }
@@ -126,10 +126,13 @@
         const h = 40;
         const x = pad;
         const y = canvas.height - h - pad;
+
         ctx.fillStyle = "rgba(0,0,0,0.7)";
         ctx.fillRect(x, y, w, h);
+
         ctx.strokeStyle = color(2);
         ctx.strokeRect(x, y, w, h);
+
         ctx.fillStyle = color(2);
         ctx.font = "10px monospace";
         wrapText(text, x + 8, y + 14, w - 16, 12);
@@ -138,9 +141,11 @@
     function wrapText(text, x, y, maxWidth, lineHeight) {
         const words = text.split(/\s+/);
         let line = "";
+
         for (let i = 0; i < words.length; i++) {
             const testLine = line + words[i] + " ";
             const metrics = ctx.measureText(testLine);
+
             if (metrics.width > maxWidth && i > 0) {
                 ctx.fillText(line, x, y);
                 line = words[i] + " ";
@@ -149,57 +154,61 @@
                 line = testLine;
             }
         }
+
         ctx.fillText(line, x, y);
     }
 
-    // ---------- Controle ----------
+    // ---------- Control ----------
     const state = {
         player: { x: game.start.x, y: game.start.y, roomIndex: game.start.roomIndex },
-        dialog: { active: false, text: "" },
+        dialog: { active: false, text: "" }
     };
 
     function tryMove(dx, dy) {
         if (state.dialog.active) { state.dialog.active = false; draw(); return; }
         const room = currentRoom();
-        const nx = clamp(state.player.x + dx, 0, room.size - 1);
-        const ny = clamp(state.player.y + dy, 0, room.size - 1);
-        if (room.walls[ny][nx]) return; // colisão por parede
+        const limit = room.size - 1;
+        const nx = clamp(state.player.x + dx, 0, limit);
+        const ny = clamp(state.player.y + dy, 0, limit);
+        if (room.walls[ny][nx]) return; // wall collision
+
         const tileId = game.tileset.map[ny]?.[nx];
         if (tileId) {
             const tile = game.tileset.tiles.find(t => t.id === tileId);
-            if (tile?.collision) return; // colisão por tile
+            if (tile?.collision) return; // tile collision
         }
+
         state.player.x = nx;
         state.player.y = ny;
         checkInteractions();
         draw();
     }
 
-    function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
-
     function checkInteractions() {
-        // itens
+        // items
         for (const item of game.items) {
             if (item.roomIndex === state.player.roomIndex && !item.collected && item.x === state.player.x && item.y === state.player.y) {
                 item.collected = true;
-                showDialog(item.text || "Você pegou um item.");
+                showDialog(item.text || "You picked up an item.");
                 break;
             }
         }
         // sprites
         for (const s of game.sprites) {
             if (s.roomIndex === state.player.roomIndex && s.x === state.player.x && s.y === state.player.y) {
-                showDialog(s.text || "Olá!");
+                showDialog(s.text || "Hello!");
                 break;
             }
         }
-        // saídas
+        // exits
         for (const ex of game.exits) {
             if (ex.roomIndex === state.player.roomIndex && ex.x === state.player.x && ex.y === state.player.y) {
-                if (game.rooms[ex.targetRoomIndex]) {
+                const targetRoom = game.rooms[ex.targetRoomIndex];
+                if (targetRoom) {
+                    const limit = targetRoom.size - 1;
                     state.player.roomIndex = ex.targetRoomIndex;
-                    state.player.x = clamp(ex.targetX, 0, game.rooms[ex.targetRoomIndex].size - 1);
-                    state.player.y = clamp(ex.targetY, 0, game.rooms[ex.targetRoomIndex].size - 1);
+                    state.player.x = clamp(ex.targetX, 0, limit);
+                    state.player.y = clamp(ex.targetY, 0, limit);
                 }
                 break;
             }
@@ -209,6 +218,19 @@
     function showDialog(text) {
         state.dialog.active = true;
         state.dialog.text = text;
+    }
+
+    function resetGame() {
+        state.player.x = game.start.x;
+        state.player.y = game.start.y;
+        state.player.roomIndex = game.start.roomIndex;
+        for (const i of game.items) i.collected = false;
+        state.dialog.active = false;
+        draw();
+    }
+
+    function clamp(v, min, max) {
+        return Math.max(min, Math.min(max, v));
     }
 
     // ---------- Input ----------
@@ -231,25 +253,16 @@
         resetGame();
     });
 
-    function resetGame() {
-        state.player.x = game.start.x;
-        state.player.y = game.start.y;
-        state.player.roomIndex = game.start.roomIndex;
-        for (const i of game.items) i.collected = false;
-        state.dialog.active = false;
-        draw();
-    }
-
-    // ---------- API pública mínima ----------
+    // ---------- Minimal public API ----------
     function exportGameData() {
         return JSON.parse(JSON.stringify(game));
     }
 
     function importGameData(data) {
-        // validação simples
+        // basic validation
         if (!data || !Array.isArray(data.rooms)) return;
         Object.assign(game, {
-            title: data.title || "Meu Jogo Bitsy",
+            title: data.title || "My Tiny RPG Game",
             palette: Array.isArray(data.palette) && data.palette.length >= 3 ? data.palette.slice(0, 3) : [...defaultPalette],
             roomSize: 8,
             rooms: data.rooms.map((r) => ({
@@ -269,12 +282,12 @@
     }
 
     function syncDocumentTitle() {
-        document.title = (game.title || "Bitsy Mini");
+        document.title = (game.title || "Tiny RPG Maker");
     }
 
-    // ---------- integração com editor ----------
-    // ---------- helpers tileset ----------
-    function createBlankTile(name = "Novo Tile") {
+    // ---------- Editor integration ----------
+    // ---------- Tileset helpers ----------
+    function createBlankTile(name = "New Tile") {
         const pixels = Array.from({ length: 8 }, () => Array(8).fill('transparent'));
         return { id: generateId(), name, pixels, collision: false };
     }
@@ -304,11 +317,11 @@
     function getTiles() { return game.tileset.tiles; }
     function getTileMap() { return game.tileset.map; }
 
-    // cria um tile de árvore simples padrão
+    // create a simple default tree tile
     function ensureDefaultTree() {
         if (game.tileset.tiles.length > 0) return;
-        const tree = createBlankTile('Árvore');
-        // desenha um triângulo verde simples
+        const tree = createBlankTile('Tree');
+        // draw a simple green triangle
         const green = '#2fbf71';
         const brown = '#8b5a2b';
         for (let y = 0; y < 6; y++) {
@@ -323,7 +336,7 @@
 
     ensureDefaultTree();
 
-    window.BitsyMini = {
+    window.TinyRPGMaker = {
         exportGameData,
         importGameData,
         getState: () => ({ game, state }),
@@ -342,5 +355,3 @@
     syncDocumentTitle();
     draw();
 })();
-
-
