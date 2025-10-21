@@ -180,7 +180,7 @@ body.game-mode .app {
 }
 
 body.game-mode header {
-    flex-shrink: 0;
+    display: none;
 }
 
 body.game-mode main {
@@ -196,10 +196,37 @@ body.game-mode main {
 }
 
 body.game-mode .tabs {
+    align-self: flex-end;
     flex-shrink: 0;
-    border-left: 0;
-    border-right: 0;
-    border-radius: 0;
+    margin: 8px 16px 0;
+    padding: 6px 8px;
+    gap: 6px;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    scrollbar-width: none;
+}
+
+body.game-mode .tabs::-webkit-scrollbar {
+    display: none;
+}
+
+body.game-mode .tab-button {
+    flex: 0 0 auto;
+    min-width: 0;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(18, 22, 35, 0.6);
+    color: rgba(230, 231, 235, 0.85);
+}
+
+body.game-mode .tab-button:hover,
+body.game-mode .tab-button.active {
+    background: rgba(100, 181, 246, 0.22);
+    border-color: rgba(100, 181, 246, 0.45);
+    color: #fff;
 }
 
 body.game-mode #tab-game.tab-content {
@@ -221,19 +248,32 @@ body.game-mode #game-container {
     width: 100%;
     height: 100%;
     min-height: 0;
-    padding: clamp(16px, 4vw, 48px);
+    padding: clamp(12px, 3vw, 32px);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
 }
 
 body.game-mode #tab-game .game-controls {
-    color: var(--muted);
+    position: absolute;
+    top: clamp(12px, 3vw, 24px);
+    right: clamp(12px, 3vw, 24px);
+    padding: 6px 8px;
+    background: rgba(10, 13, 22, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+
+body.game-mode #tab-game .game-controls button {
+    font-size: 0.75rem;
+    padding: 6px 10px;
 }
 
 .game-container {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 16px;
