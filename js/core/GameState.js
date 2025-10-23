@@ -5,7 +5,7 @@ class GameState {
     constructor() {
         this.game = {
             title: "My Tiny RPG Game",
-            palette: ['#0e0f13', '#2e3140', '#f4f4f8'],
+            palette: ['#000000', '#1D2B53', '#FFF1E8'],
             roomSize: 8,
             rooms: [this.createEmptyRoom(8)],
             start: { x: 1, y: 1, roomIndex: 0 },
@@ -107,7 +107,7 @@ class GameState {
 
         Object.assign(this.game, {
             title: data.title || "My Tiny RPG Game",
-            palette: Array.isArray(data.palette) && data.palette.length >= 3 ? data.palette.slice(0, 3) : ['#0e0f13', '#2e3140', '#f4f4f8'],
+            palette: Array.isArray(data.palette) && data.palette.length >= 3 ? data.palette.slice(0, 3) : ['#000000', '#1D2B53', '#FFF1E8'],
             roomSize: 8,
             rooms: data.rooms.map((room) => ({
                 size: 8,
