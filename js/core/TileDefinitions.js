@@ -1,400 +1,215 @@
 /**
  * TileDefinitions centralizes default tile colors and preset pixel matrices.
  */
-const PICO8_COLORS = Object.freeze({
-    Black: '#000000',
-    DarkBlue: '#1D2B53',
-    DarkPurple: '#7E2553',
-    DarkGreen: '#008751',
-    Brown: '#AB5236',
-    DarkGray: '#5F574F',
-    LightGray: '#C2C3C7',
-    White: '#FFF1E8',
-    Red: '#FF004D',
-    Orange: '#FFA300',
-    Yellow: '#FFFF27',
-    Green: '#00E756',
-    Blue: '#29ADFF',
-    Indigo: '#83769C',
-    Pink: '#FF77A8',
-    Peach: '#FFCCAA'
-});
+const PICO8_COLORS = Object.freeze([
+    "#000000",
+    "#1D2B53",
+    "#7E2553",
+    "#008751",
+    "#AB5236",
+    "#5F574F",
+    "#C2C3C7",
+    "#FFF1E8",
+    "#FF004D",
+    "#FFA300",
+    "#FFFF27",
+    "#00E756",
+    "#29ADFF",
+    "#83769C",
+    "#FF77A8",
+    "#FFCCAA"
+]);
 
 function createTile(id, name, pixels, collision = false, category = 'Diversos') {
     return { id, name, pixels, collision, category };
 }
 
+function toPixels(layout) {
+    return layout.map((row) =>
+        row.map((value) => (value === null ? 'transparent' : PICO8_COLORS[value] ?? 'transparent'))
+    );
+}
+
+function tile(id, name, layout, collision = false, category = 'Diversos') {
+    return createTile(id, name, toPixels(layout), collision, category);
+}
+
 const TILE_PRESETS = [
-    createTile('grass', 'Grama da Planicie', [
-        [PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green],
-        [PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green],
-        [PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green],
-        [PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green],
-        [PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green],
-        [PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green],
-        [PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green],
-        [PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green]
+    tile('grass', 'Grama Vibrante', [
+        [ 3,  3,  3,  3,  3,  3,  3,  3],
+        [ 3,  3,  3,  3,  3,  3,  3,  3],
+        [ 3,  3,  3,  3,  3,  3,  3,  3],
+        [ 3,  3,  3,  3,  3,  3,  3,  3],
+        [ 3,  3,  3,  3,  3,  3,  3,  3],
+        [ 3,  3,  3,  3,  3,  3,  3,  3],
+        [ 3,  3,  3,  3,  3,  3,  3,  3],
+        [ 3,  3,  3,  3,  3,  3,  3,  3]
     ], false, 'Terreno'),
-    createTile('tall_grass', 'Grama Alta', [
-        [PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen],
-        [PICO8_COLORS.DarkGreen, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.DarkGreen],
-        [PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen],
-        [PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.Green, PICO8_COLORS.Green],
-        [PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen],
-        [PICO8_COLORS.DarkGreen, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.DarkGreen],
-        [PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen],
-        [PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green]
+
+    tile('tall_grass', 'Grama Alta', [
+        [ 3,  3,  3,  3,  3,  3,  3,  3],
+        [ 3,  3,  3, 11,  3,  3,  3,  3],
+        [ 3,  3,  3, 11,  3,  3,  3,  3],
+        [ 3,  3,  3, 11,  3,  3,  3,  3],
+        [ 3,  3,  3,  3,  3,  11,  3,  3],
+        [ 3,  11,  3,  3,  3, 11,  3,  3],
+        [ 3,  11,  3,  3,  3,  3,  3,  3],
+        [ 3,  3,  3,  3,  3,  3,  3,  3]
     ], false, 'Terreno'),
-    createTile('stone_path', 'Caminho de Pedra', [
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray]
+
+    tile('dirt_path', 'Trilha de Terra', [
+        [ 4,  4,  4,  4,  4,  4,  4,  4],
+        [ 4,  4,  9,  4,  4,  4,  9,  4],
+        [ 4,  4,  4,  4,  4,  4,  4,  4],
+        [ 4,  4,  4,  4,  4,  9,  4,  4],
+        [ 4,  4,  4,  4,  4,  4,  4,  4],
+        [ 4,  4,  9,  4,  4,  4,  9,  4],
+        [ 4,  4,  4,  4,  4,  4,  4,  4],
+        [ 4,  4,  4,  4,  4,  4,  9,  4]
     ], false, 'Terreno'),
-    createTile('water', 'Agua do Rio', [
-        [PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue],
-        [PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue],
-        [PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue],
-        [PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue],
-        [PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue],
-        [PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue],
-        [PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue],
-        [PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue]
+
+    tile('stone_floor', 'Chao de Pedra', [
+        [  3,  3,  3,  3,  3,  3,  3,  3 ],
+        [  3,  3,  3,  3,  3,  3,  3,  3 ],
+        [  3,  3,  3,  3,  3,  3,  3,  3 ],
+        [  3,  3,  1,  1,  1,  1,  1,  3 ],
+        [  3,  1,  1,  6,  6,  6,  1,  3 ],
+        [  3,  1,  6,  6,  6,  6,  1,  3 ],
+        [  3,  3,  3,  3,  3,  3,  3,  3 ],
+        [  3,  3,  3,  3,  3,  3,  3,  3 ]
+    ], false, 'Terreno'),
+
+    tile('sand', 'Areia Macia', [
+        [15, 15, 15, 15, 15, 15, 15, 15],
+        [15, 15, 10, 15, 15, 10, 15, 15],
+        [15, 15, 15, 15, 15, 15, 15, 15],
+        [15, 10, 15, 15, 15, 15, 10, 15],
+        [15, 15, 15, 15, 15, 15, 15, 15],
+        [15, 15, 10, 15, 15, 10, 15, 15],
+        [15, 15, 15, 15, 15, 15, 15, 15],
+        [15, 10, 15, 15, 15, 15, 10, 15]
+    ], false, 'Terreno'),
+
+    tile('water', 'Agua Brilhante', [
+        [ 1,  1,  1,  1,  1,  1,  1,  1],
+        [ 1,  1, 12,  7,  7, 12,  1,  1],
+        [ 1, 12,  7,  7, 12, 12,  1,  1],
+        [12, 12,  1,  1,  1,  1, 12, 12],
+        [ 1, 12,  7,  7, 12, 12,  1,  1],
+        [ 1,  1, 12,  7,  7, 12,  1,  1],
+        [ 1,  1,  1,  1,  1,  1,  1,  1],
+        [12, 12,  1,  1,  1,  1, 12, 12]
     ], true, 'Agua'),
-    createTile('mountain_rock', 'Rocha da Montanha', [
-        [PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown],
-        [PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown],
-        [PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown],
-        [PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Peach, PICO8_COLORS.Peach]
+
+    tile('lava', 'Lava Borbulhante', [
+        [ 8,  8,  8,  8,  8,  8,  8,  8],
+        [ 8,  8,  9, 10,  9,  8,  8,  8],
+        [ 8,  9, 10,  9,  9, 10,  9,  8],
+        [ 8,  8,  9, 10,  9,  8,  8,  8],
+        [ 8,  8,  8,  8,  8,  8,  8,  8],
+        [ 8,  9, 10,  9,  9, 10,  9,  8],
+        [ 8,  8,  9, 10,  9,  8,  8,  8],
+        [ 8,  8,  8,  8,  8,  8,  8,  8]
+    ], true, 'Perigo'),
+
+    tile('rock', 'Pedra Grande', [
+        [null, null, null, null, null, null, null, null],
+        [null, null,  5,  6,  6,  5, null, null],
+        [null,  5,  6,  6,  6,  6,  5, null],
+        [null,  5,  6,  6,  6,  6,  5, null],
+        [null,  5,  6,  6,  6,  6,  5, null],
+        [null,  5,  6,  6,  6,  6,  5, null],
+        [null, null,  5,  6,  6,  5, null, null],
+        [null, null, null, null, null, null, null, null]
     ], true, 'Natureza'),
-    createTile('forest_tree', 'Arvore da Floresta', [
-        [PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen],
-        [PICO8_COLORS.DarkGreen, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.DarkGreen],
-        [PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green],
-        [PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green],
-        [PICO8_COLORS.DarkGreen, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.DarkGreen],
-        [PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.Green, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen],
-        [PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen],
-        [PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen]
+
+    tile('tree', 'Arvore Verde', [
+        [ 3,  1,  1,  1,  1,  1,  1,  3],
+        [ 1,  1, 11, 11, 11, 11,  1,  1],
+        [ 1, 11,  3, 11, 11, 11, 11,  1],
+        [ 1, 11, 11, 11, 11,  3, 11,  1],
+        [ 1,  1, 11, 11, 11, 11,  1,  1],
+        [ 3,  1,  1,  4,  4,  1,  1,  3],
+        [ 3,  3,  3,  4,  4,  3,  3,  3],
+        [ 3,  3,  4,  4,  4,  4,  3,  3]
     ], true, 'Natureza'),
-    createTile('dead_tree', 'Arvore Morta', [
-        ['transparent', 'transparent', PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Brown, PICO8_COLORS.Peach, 'transparent', 'transparent'],
-        ['transparent', 'transparent', PICO8_COLORS.Peach, PICO8_COLORS.Brown, PICO8_COLORS.Peach, PICO8_COLORS.Brown, 'transparent', 'transparent'],
-        ['transparent', PICO8_COLORS.Peach, PICO8_COLORS.Brown, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Brown, PICO8_COLORS.Peach, 'transparent'],
-        ['transparent', PICO8_COLORS.Brown, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, 'transparent'],
-        ['transparent', 'transparent', PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, 'transparent', 'transparent'],
-        ['transparent', 'transparent', PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, 'transparent', 'transparent'],
-        ['transparent', 'transparent', PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, 'transparent', 'transparent'],
-        ['transparent', 'transparent', PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, 'transparent', 'transparent']
+
+    tile('bush', 'Arbusto Denso', [
+        [null,  1,  1,  1,  1,  1, null, null],
+        [ 1, 11, 11, 11, 11, 11,  1, null],
+        [ 1, 11, 11, 11, 11, 11,  1, null],
+        [ 1, 11, 11, 11, 11, 11,  1, null],
+        [null,  1, 11, 11, 11,  1, null, null],
+        [null, null,  1,  1,  1, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null]
     ], true, 'Natureza'),
-    createTile('castle_wall', 'Muro do Castelo', [
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.LightGray, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.LightGray, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.LightGray, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.LightGray, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.LightGray, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.LightGray, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.LightGray, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.LightGray, PICO8_COLORS.White]
+
+    tile('stone_wall', 'Parede de Pedra', [
+        [ 6,  6,  6,  6,  6,  6,  6,  6],
+        [ 5,  6,  6,  6,  6,  6,  6,  5],
+        [ 6,  6,  6,  6,  6,  6,  6,  6],
+        [ 6,  6,  5,  6,  6,  5,  6,  6],
+        [ 6,  6,  6,  6,  6,  6,  6,  6],
+        [ 5,  6,  6,  6,  6,  6,  6,  5],
+        [ 6,  6,  6,  6,  6,  6,  6,  6],
+        [ 6,  6,  5,  6,  6,  5,  6,  6]
     ], true, 'Construcoes'),
-    createTile('wood_floor', 'Piso de Madeira', [
-        [PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown],
-        [PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown],
-        [PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown],
-        [PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown],
-        [PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown],
-        [PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown],
-        [PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown],
-        [PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown]
-    ], false, 'Interior'),
-    createTile('brick_roof', 'Telhado de Tijolos', [
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red]
+
+    tile('wood_wall', 'Parede de Madeira', [
+        [ 4,  4,  4,  4,  4,  4,  4,  4],
+        [ 4,  9,  9,  9,  9,  9,  4,  9],
+        [ 4,  4,  4,  4,  4,  4,  4,  4],
+        [ 4,  9,  9,  9,  9,  9,  4,  9],
+        [ 4,  4,  4,  4,  4,  4,  4,  4],
+        [ 4,  9,  9,  9,  9,  9,  4,  9],
+        [ 4,  4,  4,  4,  4,  4,  4,  4],
+        [ 4,  9,  9,  9,  9,  9,  4,  9]
     ], true, 'Construcoes'),
-    createTile('magic_rune', 'Runa Arcana', [
-        [PICO8_COLORS.DarkBlue, PICO8_COLORS.DarkBlue, PICO8_COLORS.DarkBlue, PICO8_COLORS.DarkBlue, PICO8_COLORS.DarkBlue, PICO8_COLORS.DarkBlue, PICO8_COLORS.DarkBlue, PICO8_COLORS.DarkBlue],
-        [PICO8_COLORS.DarkBlue, PICO8_COLORS.DarkBlue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.DarkBlue, PICO8_COLORS.DarkBlue],
-        [PICO8_COLORS.DarkBlue, PICO8_COLORS.Blue, PICO8_COLORS.Indigo, PICO8_COLORS.Indigo, PICO8_COLORS.Indigo, PICO8_COLORS.Indigo, PICO8_COLORS.Blue, PICO8_COLORS.DarkBlue],
-        [PICO8_COLORS.DarkBlue, PICO8_COLORS.Blue, PICO8_COLORS.Indigo, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Indigo, PICO8_COLORS.Blue, PICO8_COLORS.DarkBlue],
-        [PICO8_COLORS.DarkBlue, PICO8_COLORS.Blue, PICO8_COLORS.Indigo, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Indigo, PICO8_COLORS.Blue, PICO8_COLORS.DarkBlue],
-        [PICO8_COLORS.DarkBlue, PICO8_COLORS.Blue, PICO8_COLORS.Indigo, PICO8_COLORS.Indigo, PICO8_COLORS.Indigo, PICO8_COLORS.Indigo, PICO8_COLORS.Blue, PICO8_COLORS.DarkBlue],
-        [PICO8_COLORS.DarkBlue, PICO8_COLORS.DarkBlue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.DarkBlue, PICO8_COLORS.DarkBlue],
-        [PICO8_COLORS.DarkBlue, PICO8_COLORS.DarkBlue, PICO8_COLORS.DarkBlue, PICO8_COLORS.DarkBlue, PICO8_COLORS.DarkBlue, PICO8_COLORS.DarkBlue, PICO8_COLORS.DarkBlue, PICO8_COLORS.DarkBlue]
-    ], false, 'Decoracao'),
-    createTile('sand_dune', 'Areia do Deserto', [
-        [PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Yellow, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Yellow, PICO8_COLORS.Peach, PICO8_COLORS.Yellow, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Yellow, PICO8_COLORS.Peach, PICO8_COLORS.Yellow, PICO8_COLORS.Peach, PICO8_COLORS.Yellow, PICO8_COLORS.Peach, PICO8_COLORS.Yellow, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Yellow, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Yellow, PICO8_COLORS.Peach, PICO8_COLORS.Yellow, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Yellow, PICO8_COLORS.Peach, PICO8_COLORS.Yellow, PICO8_COLORS.Peach, PICO8_COLORS.Yellow, PICO8_COLORS.Peach, PICO8_COLORS.Yellow, PICO8_COLORS.Peach]
-    ], false, 'Terreno'),
-    createTile('snow_field', 'Campo Nevado', [
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White]
-    ], false, 'Terreno'),
-    createTile('lava_pool', 'Poca de Lava', [
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Orange, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Orange, PICO8_COLORS.Red, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Orange, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Orange, PICO8_COLORS.Red, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Orange, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Orange, PICO8_COLORS.Red, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Orange, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Orange, PICO8_COLORS.Red, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Red]
-    ], true, 'Agua'),
-    createTile('swamp_mire', 'Lama de Pantano', [
-        [PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray],
-        [PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGray],
-        [PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray],
-        [PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGray],
-        [PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray],
-        [PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGray],
-        [PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray],
-        [PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGreen, PICO8_COLORS.DarkGray]
-    ], true, 'Natureza'),
-    createTile('stone_bridge', 'Ponte de Pedra', [
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray]
+
+    tile('roof', 'Telhado Classico', [
+        [ 2,  2,  2,  2,  2,  2,  2,  2],
+        [ 2,  2, 14, 14, 14, 14,  2,  2],
+        [ 2, 14, 14, 14, 14, 14, 14,  2],
+        [ 2, 14, 14, 14, 14, 14, 14,  2],
+        [ 2, 14, 14, 14, 14, 14, 14,  2],
+        [ 2, 14, 14, 14, 14, 14, 14,  2],
+        [ 2,  2, 14, 14, 14, 14,  2,  2],
+        [ 2,  2,  2,  2,  2,  2,  2,  2]
+    ], true, 'Construcoes'),
+
+    tile('door', 'Porta de Madeira', [
+        [ 4,  4,  4,  4,  4,  4,  4,  4],
+        [ 4,  9,  9,  9,  9,  9,  9,  4],
+        [ 4,  9,  9,  9,  9,  9,  9,  4],
+        [ 4,  9,  9,  9, 10,  9,  9,  4],
+        [ 4,  9,  9,  9,  9,  9,  9,  4],
+        [ 4,  9,  9,  9,  9,  9,  9,  4],
+        [ 4,  9,  9,  9,  9,  9,  9,  4],
+        [ 4,  4,  4,  4,  4,  4,  4,  4]
     ], false, 'Construcoes'),
-    createTile('cobblestone', 'Calcamento', [
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray]
-    ], false, 'Terreno'),
-    createTile('royal_carpet', 'Tapete Real', [
-        [PICO8_COLORS.DarkPurple, PICO8_COLORS.DarkPurple, PICO8_COLORS.DarkPurple, PICO8_COLORS.DarkPurple, PICO8_COLORS.DarkPurple, PICO8_COLORS.DarkPurple, PICO8_COLORS.DarkPurple, PICO8_COLORS.DarkPurple],
-        [PICO8_COLORS.DarkPurple, PICO8_COLORS.DarkPurple, PICO8_COLORS.Pink, PICO8_COLORS.Pink, PICO8_COLORS.Pink, PICO8_COLORS.Pink, PICO8_COLORS.DarkPurple, PICO8_COLORS.DarkPurple],
-        [PICO8_COLORS.DarkPurple, PICO8_COLORS.Pink, PICO8_COLORS.Pink, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Pink, PICO8_COLORS.Pink, PICO8_COLORS.DarkPurple],
-        [PICO8_COLORS.DarkPurple, PICO8_COLORS.Pink, PICO8_COLORS.Yellow, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.Yellow, PICO8_COLORS.Pink, PICO8_COLORS.DarkPurple],
-        [PICO8_COLORS.DarkPurple, PICO8_COLORS.Pink, PICO8_COLORS.Yellow, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.Yellow, PICO8_COLORS.Pink, PICO8_COLORS.DarkPurple],
-        [PICO8_COLORS.DarkPurple, PICO8_COLORS.Pink, PICO8_COLORS.Pink, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Pink, PICO8_COLORS.Pink, PICO8_COLORS.DarkPurple],
-        [PICO8_COLORS.DarkPurple, PICO8_COLORS.DarkPurple, PICO8_COLORS.Pink, PICO8_COLORS.Pink, PICO8_COLORS.Pink, PICO8_COLORS.Pink, PICO8_COLORS.DarkPurple, PICO8_COLORS.DarkPurple],
-        [PICO8_COLORS.DarkPurple, PICO8_COLORS.DarkPurple, PICO8_COLORS.DarkPurple, PICO8_COLORS.DarkPurple, PICO8_COLORS.DarkPurple, PICO8_COLORS.DarkPurple, PICO8_COLORS.DarkPurple, PICO8_COLORS.DarkPurple]
-    ], false, 'Interior'),
-    createTile('cave_floor', 'Chao de Caverna', [
-        [PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray],
-        [PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray],
-        [PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray],
-        [PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray],
-        [PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray],
-        [PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray],
-        [PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray],
-        [PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray]
-    ], false, 'Terreno'),
-    createTile('castle_gate', 'Portao do Castelo', [
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.LightGray]
+
+    tile('window', 'Janela Azul', [
+        [ 7,  7,  7,  7,  7,  7,  7,  7],
+        [ 7,  1,  1,  1,  1,  1,  1,  7],
+        [ 7,  1, 12,  1, 12,  1,  1,  7],
+        [ 7,  1, 12,  1, 12,  1,  1,  7],
+        [ 7,  1, 12,  1, 12,  1,  1,  7],
+        [ 7,  1, 12,  1, 12,  1,  1,  7],
+        [ 7,  1,  1,  1,  1,  1,  1,  7],
+        [ 7,  7,  7,  7,  7,  7,  7,  7]
     ], true, 'Construcoes'),
-    createTile('torch_brazier', 'Braseiro', [
-        ['transparent', 'transparent', 'transparent', 'transparent', 'transparent', 'transparent', 'transparent', 'transparent'],
-        ['transparent', 'transparent', 'transparent', PICO8_COLORS.Orange, PICO8_COLORS.Orange, 'transparent', 'transparent', 'transparent'],
-        ['transparent', 'transparent', PICO8_COLORS.Orange, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Orange, 'transparent', 'transparent'],
-        ['transparent', PICO8_COLORS.Orange, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Orange, 'transparent'],
-        ['transparent', PICO8_COLORS.Orange, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Orange, 'transparent'],
-        ['transparent', 'transparent', PICO8_COLORS.Orange, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Orange, 'transparent', 'transparent'],
-        ['transparent', 'transparent', 'transparent', PICO8_COLORS.Orange, PICO8_COLORS.Orange, 'transparent', 'transparent', 'transparent'],
-        ['transparent', 'transparent', 'transparent', PICO8_COLORS.Black, PICO8_COLORS.Black, 'transparent', 'transparent', 'transparent']
-    ], true, 'Decoracao'),
-    createTile('cottage_roof', 'Telhado de Casa', [
-        [PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange],
-        [PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Brown, PICO8_COLORS.Brown],
-        [PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange],
-        [PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Brown, PICO8_COLORS.Brown],
-        [PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange],
-        [PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Brown, PICO8_COLORS.Brown],
-        [PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange],
-        [PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange]
-    ], true, 'Construcoes'),
-    createTile('cottage_wall', 'Parede de Casa', [
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.Peach, PICO8_COLORS.Peach],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.Peach, PICO8_COLORS.Peach],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.Peach, PICO8_COLORS.Peach],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White]
-    ], true, 'Construcoes'),
-    createTile('cottage_door', 'Porta de Casa', [
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.White, PICO8_COLORS.White]
-    ], true, 'Construcoes'),
-    createTile('cottage_window', 'Janela de Casa', [
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.Brown, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Brown, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.Brown, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Brown, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White]
-    ], true, 'Construcoes'),
-    createTile('stone_house_roof', 'Telhado de Pedra', [
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.DarkGray, PICO8_COLORS.DarkGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray]
-    ], true, 'Construcoes'),
-    createTile('stone_house_wall', 'Parede de Pedra', [
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray],
-        [PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray, PICO8_COLORS.LightGray]
-    ], true, 'Construcoes'),
-    createTile('market_stall_top', 'Tenda do Mercado', [
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White],
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red],
-        [PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White, PICO8_COLORS.White]
-    ], true, 'Construcoes'),
-    createTile('market_counter', 'Balcao do Mercado', [
-        [PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown],
-        [PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown],
-        [PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown],
-        [PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown],
-        [PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown],
-        [PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown],
-        [PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown],
-        [PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown]
-    ], true, 'Construcoes'),
-    createTile('barn_roof', 'Telhado do Celeiro', [
-        [PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange],
-        [PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange],
-        [PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange],
-        [PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange],
-        [PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange],
-        [PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange],
-        [PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange],
-        [PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Orange]
-    ], true, 'Construcoes'),
-    createTile('barn_wall', 'Parede do Celeiro', [
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Red]
-    ], true, 'Construcoes'),
-    createTile('barn_door', 'Porta do Celeiro', [
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Red, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Red, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Red, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Red, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red],
-        [PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red, PICO8_COLORS.Red]
-    ], true, 'Construcoes'),
-    createTile('bakery_roof', 'Telhado da Padaria', [
-        [PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Orange, PICO8_COLORS.Orange, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach]
-    ], true, 'Construcoes'),
-    createTile('bakery_wall', 'Parede da Padaria', [
-        [PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach]
-    ], true, 'Construcoes'),
-    createTile('bakery_window', 'Janela da Padaria', [
-        [PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Peach, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Brown, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Brown, PICO8_COLORS.Peach, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Brown, PICO8_COLORS.Yellow, PICO8_COLORS.Yellow, PICO8_COLORS.Brown, PICO8_COLORS.Peach, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Brown, PICO8_COLORS.Peach, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach],
-        [PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach, PICO8_COLORS.Peach]
-    ], true, 'Construcoes'),
-    createTile('fountain_top', 'Topo da Fonte', [
-        ['transparent', 'transparent', 'transparent', 'transparent', 'transparent', 'transparent', 'transparent', 'transparent'],
-        ['transparent', 'transparent', PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, 'transparent', 'transparent'],
-        ['transparent', PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, 'transparent'],
-        ['transparent', PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, 'transparent'],
-        ['transparent', PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, 'transparent'],
-        ['transparent', PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, 'transparent'],
-        ['transparent', 'transparent', PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, 'transparent', 'transparent'],
-        ['transparent', 'transparent', 'transparent', 'transparent', 'transparent', 'transparent', 'transparent', 'transparent']
-    ], true, 'Decoracao'),
-    createTile('fountain_base', 'Base da Fonte', [
-        [PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue],
-        [PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue],
-        [PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue],
-        [PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue],
-        [PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue],
-        [PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue],
-        [PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue],
-        [PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue, PICO8_COLORS.Blue]
-    ], true, 'Decoracao')
+
+    tile('torch', 'Tocha de Parede', [
+        [null, null, null, 10, null, null, null, null],
+        [null, null, 10,  9, 10, null, null, null],
+        [null, 10,  8,  8, 10, null, null, null],
+        [null, null, 10,  9, 10, null, null, null],
+        [null, null, null, 10, null, null, null, null],
+        [null, null, null,  4, null, null, null, null],
+        [null, null,  5,  5,  5, null, null, null],
+        [null, null,  5,  5,  5, null, null, null]
+    ], false, 'Decoracao')
 ];
 
 if (typeof module !== 'undefined' && module.exports) {
