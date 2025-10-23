@@ -113,36 +113,36 @@ const TILE_PRESETS = [
     ], true, 'Perigo'),
 
     tile(7, 'Pedra Grande', [
-        [null, null, null, null, null, null, null, null],
-        [null, null,  5,  6,  6,  5, null, null],
-        [null,  5,  6,  6,  6,  6,  5, null],
-        [null,  5,  6,  6,  6,  6,  5, null],
-        [null,  5,  6,  6,  6,  6,  5, null],
-        [null,  5,  6,  6,  6,  6,  5, null],
-        [null, null,  5,  6,  6,  5, null, null],
-        [null, null, null, null, null, null, null, null]
+        [ null, null, null, null, null, null, null, null ],
+        [ null, null, null, null,  5, null, null, null ],
+        [ null, null, null,  5,  6,  5, null, null ],
+        [ null, null,  5,  6,  6,  6,  5, null ],
+        [ null,  5,  6,  6,  6,  6,  5, null ],
+        [ null,  5,  6,  6,  6,  6,  6,  5 ],
+        [ null,  5,  6,  6,  6,  6,  6,  5 ],
+        [ null, null, null, null, null, null, null, null ]
     ], true, 'Natureza'),
 
     tile(8, 'Arvore Verde', [
-        [ 3,  1,  1,  1,  1,  1,  1,  3],
-        [ 1,  1, 11, 11, 11, 11,  1,  1],
-        [ 1, 11,  3, 11, 11, 11, 11,  1],
-        [ 1, 11, 11, 11, 11,  3, 11,  1],
-        [ 1,  1, 11, 11, 11, 11,  1,  1],
-        [ 3,  1,  1,  4,  4,  1,  1,  3],
-        [ 3,  3,  3,  4,  4,  3,  3,  3],
-        [ 3,  3,  4,  4,  4,  4,  3,  3]
+        [ null,  1,  1,  1,  1,  1,  1, null ],
+        [  1,  1, 11, 11, 11, 11,  1,  1 ],
+        [  1, 11,  3, 11, 11, 11, 11,  1 ],
+        [  1, 11, 11, 11, 11,  3, 11,  1 ],
+        [  1, 11, 11, 11, 11, 11, 11,  1 ],
+        [  1, 11, 11,  4,  4, 11, 11,  1 ],
+        [ null, null, null,  4,  4, null, null, null ],
+        [ null, null,  4,  4,  4,  4, null, null ]
     ], true, 'Natureza'),
 
     tile(9, 'Arbusto Denso', [
-        [null,  1,  1,  1,  1,  1, null, null],
-        [ 1, 11, 11, 11, 11, 11,  1, null],
-        [ 1, 11, 11, 11, 11, 11,  1, null],
-        [ 1, 11, 11, 11, 11, 11,  1, null],
-        [null,  1, 11, 11, 11,  1, null, null],
-        [null, null,  1,  1,  1, null, null, null],
-        [null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null]
+        [ null, null, null, null, null, null, null, null ],
+        [ null, null, null, null, null, null, null, null ],
+        [ null, null, null, null, null, null, null, null ],
+        [ null, null, null,  1,  1,  1, null, null ],
+        [ null, null,  1, 11, 11, 11,  1, null ],
+        [ null,  1, 11, 11,  3, 11, 11,  1 ],
+        [ null,  1, 11,  3, 11, 11, 11,  1 ],
+        [ null, null, null, null, null, null, null, null ]
     ], true, 'Natureza'),
 
     tile(10, 'Parede de Pedra', [
@@ -157,14 +157,14 @@ const TILE_PRESETS = [
     ], true, 'Construcoes'),
 
     tile(11, 'Parede de Madeira', [
-        [ 4,  4,  4,  4,  4,  4,  4,  4],
-        [ 4,  9,  9,  9,  9,  9,  4,  9],
-        [ 4,  4,  4,  4,  4,  4,  4,  4],
-        [ 4,  9,  9,  9,  9,  9,  4,  9],
-        [ 4,  4,  4,  4,  4,  4,  4,  4],
-        [ 4,  9,  9,  9,  9,  9,  4,  9],
-        [ 4,  4,  4,  4,  4,  4,  4,  4],
-        [ 4,  9,  9,  9,  9,  9,  4,  9]
+        [  9,  9,  9,  9,  9,  9,  9,  9 ],
+        [  9,  9,  9,  9,  9,  9,  9,  9 ],
+        [  9,  9,  9,  9,  9,  9,  9,  9 ],
+        [  9,  9,  9,  9,  9,  9,  9,  9 ],
+        [  9,  9,  9,  9,  9,  9,  9,  9 ],
+        [  4,  4,  4,  4,  4,  4,  4,  4 ],
+        [  9,  9,  9,  9,  9,  9,  9,  9 ],
+        [  4,  4,  4,  4,  4,  4,  4,  4 ]
     ], true, 'Construcoes'),
 
     tile(12, 'Telhado Classico', [
@@ -190,14 +190,14 @@ const TILE_PRESETS = [
     ], false, 'Construcoes'),
 
     tile(14, 'Janela Azul', [
-        [ 7,  7,  7,  7,  7,  7,  7,  7],
-        [ 7,  1,  1,  1,  1,  1,  1,  7],
-        [ 7,  1, 12,  1, 12,  1,  1,  7],
-        [ 7,  1, 12,  1, 12,  1,  1,  7],
-        [ 7,  1, 12,  1, 12,  1,  1,  7],
-        [ 7,  1, 12,  1, 12,  1,  1,  7],
-        [ 7,  1,  1,  1,  1,  1,  1,  7],
-        [ 7,  7,  7,  7,  7,  7,  7,  7]
+        [  9,  9,  9,  9,  9,  9,  9,  9 ],
+        [  9,  9,  5,  5,  5,  5,  9,  9 ],
+        [  9,  9,  5,  2,  2,  5,  9,  9 ],
+        [  9,  9,  5,  2,  2,  5,  9,  9 ],
+        [  9,  9,  5,  5,  5,  5,  9,  9 ],
+        [  4,  4,  4,  4,  4,  4,  4,  4 ],
+        [  9,  9,  9,  9,  9,  9,  9,  9 ],
+        [  4,  4,  4,  4,  4,  4,  4,  4 ]
     ], true, 'Construcoes'),
 
     tile(15, 'Tocha de Parede', [
