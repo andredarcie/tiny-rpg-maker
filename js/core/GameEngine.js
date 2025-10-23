@@ -110,6 +110,7 @@ class GameEngine {
 
     importGameData(data) {
         this.gameState.importGameData(data);
+        this.tileManager.ensureDefaultTiles();
         this.syncDocumentTitle();
         this.renderer.draw();
     }
@@ -146,16 +147,12 @@ class GameEngine {
         return this.tileManager.getTileMap();
     }
 
+    getTilePresetNames() {
+        return this.tileManager.getPresetTileNames();
+    }
+
     getSprites() {
         return this.npcManager.getNPCs();
-    }
-
-    createBlankTile(name) {
-        return this.tileManager.createBlankTile(name);
-    }
-
-    addTile(tile) {
-        return this.tileManager.addTile(tile);
     }
 
     updateTile(tileId, data) {

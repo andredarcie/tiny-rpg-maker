@@ -4,11 +4,14 @@
 class InputManager {
     constructor(gameEngine) {
         this.gameEngine = gameEngine;
+        this.touchStart = null;
         this.setupEventListeners();
     }
 
     setupEventListeners() {
         document.addEventListener("keydown", (ev) => this.handleKeyDown(ev));
+        document.addEventListener("touchstart", (ev) => this.handleTouchStart(ev), { passive: true });
+        document.addEventListener("touchend", (ev) => this.handleTouchEnd(ev));
     }
 
     handleKeyDown(ev) {
@@ -46,6 +49,58 @@ class InputManager {
                 ev.preventDefault();
                 this.gameEngine.tryMove(0, 1);
                 break;
+        }
+    }
+
+    handleTouchStart(ev) {
+        const touch = ev.changedTouches?.[0];
+        if (!touch) return;
+        this.touchStart = {
+            x: touch.clientX,
+            y: touch.clientY,
+            time: Date.now()
+        };
+    }
+
+    handleTouchEnd(ev) {
+        const start = this.touchStart;
+        if (!start) return;
+
+        const touch = ev.changedTouches?.[0];
+        if (!touch) {
+            this.touchStart = null;
+            return;
+        }
+
+        const dx = touch.clientX - start.x;
+        const dy = touch.clientY - start.y;
+        const absX = Math.abs(dx);
+        const absY = Math.abs(dy);
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const duration = Date.now() - start.time;
+
+        this.touchStart = null;
+
+        const MIN_DISTANCE = 24;
+        const MAX_DURATION = 600;
+        if (distance < MIN_DISTANCE || duration > MAX_DURATION) {
+            return;
+        }
+
+        ev.preventDefault();
+
+        if (absX > absY) {
+            if (dx > 0) {
+                this.gameEngine.tryMove(1, 0);
+            } else {
+                this.gameEngine.tryMove(-1, 0);
+            }
+        } else {
+            if (dy > 0) {
+                this.gameEngine.tryMove(0, 1);
+            } else {
+                this.gameEngine.tryMove(0, -1);
+            }
         }
     }
 

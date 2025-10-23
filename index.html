@@ -47,53 +47,18 @@
                         </div>
                     </div>
 
-                    <div class="editor-right">
-                        <div class="editor-section">
-                            <h3>Tile Selecionado</h3>
-                            <canvas id="selected-tile-preview" width="64" height="64"></canvas>
-                        </div>
+                <div class="editor-right">
+                    <div class="editor-section">
+                        <h3>Tile Selecionado</h3>
+                        <canvas id="selected-tile-preview" width="64" height="64"></canvas>
+                    </div>
 
                         <div class="editor-section">
                             <details open>
                                 <summary>Tiles</summary>
                                 <div class="tiles-panel">
-                                    <div class="tile-actions">
-                                        <button id="btn-add-tile">+ Adicionar Tile</button>
-                                        <button id="btn-add-tree">+ Adicionar Árvore</button>
-                                    </div>
+                                    <p id="tile-preset-summary" class="tile-preset-summary"></p>
                                     <div id="tile-list" class="tile-list"></div>
-                                </div>
-                            </details>
-                        </div>
-
-                        <div class="editor-section">
-                            <details open>
-                                <summary>Editor de Tile</summary>
-                                <div class="tile-editor">
-                                    <div class="tile-editor-top">
-                                        <canvas id="tile-canvas" width="128" height="128"></canvas>
-                                    </div>
-                                    <div class="tile-editor-controls">
-                                        <div class="control-group">
-                                            <label for="tile-color">Cor:</label>
-                                            <input type="color" id="tile-color" value="#ff0000">
-                                        </div>
-                                        <div class="control-group">
-                                            <label for="tile-name">Nome:</label>
-                                            <input type="text" id="tile-name" placeholder="Nome do tile">
-                                        </div>
-                                        <div class="control-group">
-                                            <label class="checkbox">
-                                                <input type="checkbox" id="tile-collision">
-                                                Colide
-                                            </label>
-                                        </div>
-                                        <div class="control-group">
-                                            <button id="btn-clear-tile">Limpar</button>
-                                            <button id="btn-duplicate-tile">Duplicar</button>
-                                            <button id="btn-remove-tile">Remover</button>
-                                        </div>
-                                    </div>
                                 </div>
                             </details>
                         </div>
@@ -155,6 +120,7 @@
     <script src="js/main.js"></script>
 </body>
 </html>
+
 
 
 

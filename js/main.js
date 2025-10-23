@@ -25,12 +25,11 @@
             resetGame: () => gameEngine.resetGame(),
 
             // Tile API
-            addTile: (tile) => gameEngine.addTile(tile),
             updateTile: (tileId, data) => gameEngine.updateTile(tileId, data),
-            createBlankTile: (name) => gameEngine.createBlankTile(name),
             setMapTile: (x, y, tileId) => gameEngine.setMapTile(x, y, tileId),
             getTiles: () => gameEngine.getTiles(),
             getTileMap: () => gameEngine.getTileMap(),
+            getTilePresetNames: () => gameEngine.getTilePresetNames(),
 
             // NPC API
             addSprite: (npc) => gameEngine.addSprite(npc),

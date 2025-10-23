@@ -388,28 +388,27 @@ body.game-mode #tab-game .game-controls button {
     justify-items: center;
 }
 
-.tile-editor-controls {
+.tile-editor-info {
     display: grid;
     gap: 12px;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
-.tile-editor-controls .checkbox {
-    grid-column: 1 / -1;
+.tile-name-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+}
+
+.tile-name-line .label {
+    color: var(--muted);
+}
+
+.tile-editor-info .checkbox {
     display: flex;
     align-items: center;
     gap: 6px;
-}
-
-.tile-editor-controls .control-group:last-child {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    grid-column: 1 / -1;
-}
-
-.tile-editor-controls .control-group:last-child button {
-    flex: 1 1 120px;
+    font-size: 0.85rem;
 }
 
 .control-group {
@@ -472,13 +471,14 @@ textarea {
     resize: vertical;
 }
 
-.tiles-panel,
-.npcs-panel {
-    display: grid;
-    gap: 12px;
+
+.tile-preset-summary {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--muted);
 }
 
-.tile-actions,
+
 .npcs-actions,
 .project-actions,
 .history-actions {
@@ -487,14 +487,12 @@ textarea {
     gap: 8px;
 }
 
-.tile-actions button,
 .npcs-actions button,
 .project-actions button,
 .history-actions button {
     flex: 1 1 160px;
 }
 
-.tile-actions button,
 .npcs-actions button {
     font-size: 0.85rem;
 }
@@ -506,6 +504,33 @@ textarea {
     max-height: min(40vh, 260px);
     overflow-y: auto;
     padding-right: 4px;
+}
+
+.tile-group {
+    display: grid;
+    gap: 6px;
+}
+
+.tile-group + .tile-group {
+    margin-top: 12px;
+}
+
+.tile-group-title {
+    margin: 4px 0 0;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.tile-group:first-child .tile-group-title {
+    margin-top: 0;
+}
+
+.tile-group-grid {
+    display: grid;
+    gap: 6px;
 }
 
 .tile-list::-webkit-scrollbar,
@@ -532,12 +557,12 @@ textarea {
     transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
-.tile-card:hover,
-.npc-card:hover {
-    border-color: var(--accent);
-    transform: translateY(-1px);
-}
 
+.tile-card.selected {
+    border-color: var(--accent);
+    background: rgba(100, 181, 246, 0.08);
+    box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.15);
+}
 .tile-card canvas {
     border: 1px solid var(--border);
     border-radius: 4px;
@@ -550,15 +575,12 @@ textarea {
     display: grid;
     gap: 4px;
 }
-
-.tile-card input[type="text"] {
+.tile-name {
     font-size: 0.85rem;
-    padding: 4px 6px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 4px;
+    font-weight: 600;
     color: var(--text);
 }
+
 
 .tile-card .row {
     display: flex;
@@ -722,7 +744,6 @@ textarea {
         margin-bottom: 4px;
     }
 
-    .tile-actions button,
     .npcs-actions button,
     .project-actions button,
     .history-actions button {
@@ -737,3 +758,9 @@ textarea {
         flex-direction: column;
     }
 }
+
+
+
+
+
+
