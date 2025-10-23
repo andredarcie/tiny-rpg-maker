@@ -230,28 +230,32 @@ class Renderer {
     }
 
     buildPlayerSprite() {
-        const palette = {
-            '.': null,
-            'O': '#1e2136', // outline
-            'A': '#d4dae8', // armor
-            'H': '#f4c9a2', // skin
-            'C': '#3f4ea5', // cloth
-            'G': '#f2b705', // gold accent
-            'S': '#dfe4ec'  // sword
-        };
+        const picoPalette = (typeof window !== 'undefined' && window.PICO8_COLORS)
+            ? window.PICO8_COLORS
+            : [
+                "#000000", "#1D2B53", "#7E2553", "#008751",
+                "#AB5236", "#5F574F", "#C2C3C7", "#FFF1E8",
+                "#FF004D", "#FFA300", "#FFFF27", "#00E756",
+                "#29ADFF", "#83769C", "#FF77A8", "#FFCCAA"
+            ];
 
-        const rows = [
-            "..AAAS..",
-            ".AHHHSA.",
-            "OAHGHSA.",
-            "OACGCSA.",
-            "OACCCSA.",
-            ".ACCCAO.",
-            ".A..A.O.",
-            "O....O.."
+        const pixels = [
+            [ null, null, 15, 15, 15, 15, null, null ],
+            [  6, null, 15, 12, 15, 12, null, null ],
+            [ null,  1, 15, 15, 15, 15, null, null ],
+            [  1,  9,  4, 15, 15,  9,  9, null ],
+            [ null, 15,  9,  4,  4,  9, 15, null ],
+            [ null, null,  9,  9,  9,  4, null, null ],
+            [ null, null,  1,  1,  1,  1, null, null ],
+            [ null, null,  1, null, null,  1, null, null ]
         ];
 
-        return rows.map((row) => row.split('').map((ch) => palette[ch] ?? null));
+        return pixels.map((row) =>
+            row.map((value) => {
+                if (value === null || value === undefined) return null;
+                return picoPalette[value] ?? null;
+            })
+        );
     }
 }
 
