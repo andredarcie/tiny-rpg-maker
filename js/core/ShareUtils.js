@@ -9,16 +9,6 @@
     const PIXEL_ALPHABET = "0123456789abcdefg"; // 0-15 cores + 'g' para transparente
     const TILE_NULL_CODE = "g";
     const GRID_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_"; // 0-63
-    const CATEGORY_CODES = [
-        "Terreno",
-        "Natureza",
-        "Agua",
-        "Construcoes",
-        "Interior",
-        "Decoracao",
-        "Diversos"
-    ];
-
     const encoder = new TextEncoder();
     const decoder = new TextDecoder();
 
@@ -209,88 +199,97 @@
         return rows;
     }
 
-    function encodeCategory(category) {
-        const idx = CATEGORY_CODES.indexOf(category);
-        return idx >= 0 ? idx : category || "Diversos";
-    }
-
-    function decodeCategory(value) {
-        if (typeof value === "number") {
-            return CATEGORY_CODES[value] || "Diversos";
-        }
-        return value || "Diversos";
-    }
-
     function packGameData(game) {
-        const size = game.roomSize || game.rooms?.[0]?.size || 8;
-        const tiles = (game.tileset?.tiles || []).map((tile) => ({
-            i: Number(tile.id),
-            n: tile.name || '',
-            c: encodeCategory(tile.category),
-            l: tile.collision ? 1 : 0,
-            p: encodePixels(tile.pixels || [])
-        }));
+        const size = 8;
+        const groundStr = encodeTileLayer(game.tileset?.map?.ground, size);
+        const overlayLayer = game.tileset?.map?.overlay;
+        let overlayStr = "";
+        if (overlayLayer) {
+            outer: for (let y = 0; y < size; y++) {
+                const row = overlayLayer[y] || [];
+                for (let x = 0; x < size; x++) {
+                    if (row[x] !== null && row[x] !== undefined) {
+                        overlayStr = encodeTileLayer(overlayLayer, size);
+                        break outer;
+                    }
+                }
+            }
+        }
 
-        return {
+        const sprites = game.sprites || [];
+        const positions = [];
+        const dialogs = [];
+        sprites.forEach((npc) => {
+            const room = npc.roomIndex ?? 0;
+            const x = npc.x ?? 0;
+            const y = npc.y ?? 0;
+            positions.push((room << 6) | (y << 3) | x); // 9 bits
+            const textBytes = encoder.encode(npc.text || "");
+            dialogs.push(toBase64Url(textBytes));
+        });
+
+        const payload = {
             v: 1,
-            t: game.title || '',
-            pa: (game.palette || []).join(','),
-            st: [
-                game.start?.x ?? 1,
-                game.start?.y ?? 1,
-                game.start?.roomIndex ?? 0
-            ],
-            sz: size,
-            r: (game.rooms || []).map((room) => ({
-                b: room.bg ?? 0,
-                t: encodeNumberGrid(room.tiles, size),
-                w: encodeBooleanGrid(room.walls, size)
-            })),
-            sp: game.sprites || [],
-            it: game.items || [],
-            ex: game.exits || [],
-            tl: tiles,
-            g: encodeTileLayer(game.tileset?.map?.ground, size),
-            o: encodeTileLayer(game.tileset?.map?.overlay, size)
+            g: groundStr
         };
+        if (overlayStr) payload.o = overlayStr;
+        if (positions.length) {
+            payload.s = encodePacked(positions, 9);
+            payload.d = dialogs;
+        }
+        return payload;
     }
 
     function unpackGameData(payload) {
-        const size = payload.sz || payload.size || 8;
-        const palette = typeof payload.pa === 'string'
-            ? (payload.pa ? payload.pa.split(',') : [])
-            : (payload.palette || []);
-        const startArr = payload.st || [];
-        const start = {
-            x: Number(startArr[0] ?? 1),
-            y: Number(startArr[1] ?? 1),
-            roomIndex: Number(startArr[2] ?? 0)
-        };
-        return {
-            title: payload.t || payload.title || '',
-            palette,
-            roomSize: size,
-            rooms: (payload.r || payload.rooms || []).map((room) => ({
+        const size = 8;
+        const ground = decodeTileLayer(payload.g, size);
+        const overlay = decodeTileLayer(payload.o, size);
+
+        const dialogs = payload.d || [];
+        const sprites = [];
+        if (payload.s && dialogs.length) {
+            const positions = decodePacked(payload.s, dialogs.length, 9);
+            positions.forEach((pos, index) => {
+                const room = pos >> 6;
+                const y = (pos >> 3) & 7;
+                const x = pos & 7;
+                const bytes = fromBase64Url(dialogs[index]);
+                const text = decoder.decode(bytes);
+                sprites.push({
+                    id: `npc-${index}`,
+                    roomIndex: room,
+                    x,
+                    y,
+                    text
+                });
+            });
+        }
+
+        const roomCount = Math.max(1, ...sprites.map((npc) => npc.roomIndex + 1));
+        const rooms = [];
+        for (let i = 0; i < roomCount; i++) {
+            rooms.push({
                 size,
-                bg: room.b ?? 0,
-                tiles: decodeNumberGrid(room.t, size),
-                walls: decodeBooleanGrid(room.w, size)
-            })),
-            start,
-            sprites: payload.sp || payload.sprites || [],
-            items: payload.it || payload.items || [],
-            exits: payload.ex || payload.exits || [],
+                bg: 0,
+                tiles: Array.from({ length: size }, () => Array(size).fill(0)),
+                walls: Array.from({ length: size }, () => Array(size).fill(false))
+            });
+        }
+
+        return {
+            title: '',
+            palette: ['#000000', '#1D2B53', '#FFF1E8'],
+            roomSize: size,
+            rooms,
+            start: { x: 1, y: 1, roomIndex: 0 },
+            sprites,
+            items: [],
+            exits: [],
             tileset: {
-                tiles: (payload.tl || payload.tiles || []).map((tile) => ({
-                    id: tile.i,
-                    name: tile.n || '',
-                    category: decodeCategory(tile.c),
-                    collision: !!tile.l,
-                    pixels: decodePixels(tile.p || '')
-                })),
+                tiles: [],
                 map: {
-                    ground: decodeTileLayer(payload.g || payload.ground, size),
-                    overlay: decodeTileLayer(payload.o || payload.overlay, size)
+                    ground,
+                    overlay
                 }
             }
         };
@@ -340,4 +339,5 @@
         module.exports = global.TinyRPGShare;
     }
 })(typeof window !== 'undefined' ? window : globalThis);
+
 
