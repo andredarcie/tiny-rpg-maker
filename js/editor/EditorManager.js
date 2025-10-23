@@ -37,10 +37,7 @@ class EditorManager {
         this.btnAddNpc = document.getElementById('btn-add-npc');
         this.btnPlaceNpc = document.getElementById('btn-place-npc');
         this.btnNpcDelete = document.getElementById('npc-delete');
-        this.btnNew = document.getElementById('btn-new');
-        this.btnLoad = document.getElementById('btn-load');
-        this.btnSave = document.getElementById('btn-save');
-        this.btnExportHTML = document.getElementById('btn-export-html');
+        this.btnGenerateUrl = document.getElementById('btn-generate-url');
         this.btnApplyJson = document.getElementById('btn-apply-json');
         this.btnUndo = document.getElementById('btn-undo');
         this.btnRedo = document.getElementById('btn-redo');
@@ -51,10 +48,7 @@ class EditorManager {
         this.btnPlaceNpc?.addEventListener('click', () => this.toggleNpcPlacement());
         this.btnNpcDelete?.addEventListener('click', () => this.removeSelectedNpc());
 
-        this.btnNew?.addEventListener('click', () => this.createNewGame());
-        this.btnLoad?.addEventListener('click', () => this.fileInput?.click());
-        this.btnSave?.addEventListener('click', () => this.saveGame());
-        this.btnExportHTML?.addEventListener('click', () => { void this.exportHTML(); });
+        this.btnGenerateUrl?.addEventListener('click', () => this.generateShareableUrl());
 
         this.btnApplyJson?.addEventListener('click', () => this.applyJSON());
         this.btnUndo?.addEventListener('click', () => this.undo());
@@ -137,7 +131,7 @@ class EditorManager {
             return;
         }
 
-        if (!this.selectedTileId) return;
+        if (this.selectedTileId === null || this.selectedTileId === undefined) return;
         this.gameEngine.setMapTile(coord.x, coord.y, this.selectedTileId);
         this.renderEditor();
         this.gameEngine.draw();
@@ -173,7 +167,7 @@ class EditorManager {
         for (let y = 0; y < 8; y++) {
             for (let x = 0; x < 8; x++) {
                 const groundId = ground[y]?.[x];
-                if (groundId) {
+                if (groundId !== null && groundId !== undefined) {
                     this.gameEngine.renderer.drawTilePreviewAt(groundId, x * tileSize, y * tileSize, tileSize, this.ectx);
                 } else if (room) {
                     const colorIndex = room.tiles?.[y]?.[x] ?? 0;
@@ -182,7 +176,7 @@ class EditorManager {
                 }
 
                 const overlayId = overlay[y]?.[x];
-                if (overlayId) {
+                if (overlayId !== null && overlayId !== undefined) {
                     this.ectx.save();
                     this.ectx.globalAlpha = 0.92;
                     this.gameEngine.renderer.drawTilePreviewAt(overlayId, x * tileSize, y * tileSize, tileSize, this.ectx);
@@ -492,6 +486,32 @@ class EditorManager {
         this.pushHistory();
     }
 
+    async generateShareableUrl() {
+        try {
+            const share = window.TinyRPGShare;
+            if (!share?.buildShareUrl) {
+                throw new Error('TinyRPGShare indisponivel');
+            }
+            const gameData = this.gameEngine.exportGameData();
+            const url = share.buildShareUrl(gameData);
+            try {
+                window.history?.replaceState?.(null, '', url);
+            } catch {
+                // ignore history update issues
+            }
+
+            if (navigator.clipboard?.writeText) {
+                await navigator.clipboard.writeText(url);
+                alert('URL do jogo copiada para a area de transferencia!');
+            } else {
+                prompt('Copie a URL do seu jogo:', url);
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Nao foi possivel gerar a URL do jogo.');
+        }
+    }
+
     saveGame() {
         const blob = new Blob([JSON.stringify(this.gameEngine.exportGameData(), null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -611,7 +631,7 @@ class EditorManager {
 
     buildStandaloneHTML(gameData) {
         const safeData = JSON.stringify(gameData, null, 2).replace(/<\/script>/gi, '<\\/script>');
-        const engine = "(function(){const DATA=window.__TINY_RPG_GAME_DATA__;if(!DATA)return;const canvas=document.getElementById('game-canvas');const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;const state={player:{...DATA.start},dialog:{active:false,text:''}};function clamp(v,a,b){return Math.max(a,Math.min(b,v));}function currentRoom(){return DATA.rooms[state.player.roomIndex];}function drawTile(id,px,py,size){const tile=DATA.tileset.tiles.find(t=>t.id===id);if(!tile)return;const step=Math.floor(size/8);for(let y=0;y<8;y++){for(let x=0;x<8;x++){const col=tile.pixels[y][x];if(!col||col==='transparent')continue;ctx.fillStyle=col;ctx.fillRect(px+x*step,py+y*step,step,step);}}}function draw(){const room=currentRoom();const size=Math.floor(canvas.width/8);ctx.fillStyle=DATA.palette[room.bg]||'#0e0f13';ctx.fillRect(0,0,canvas.width,canvas.height);for(let y=0;y<8;y++){for(let x=0;x<8;x++){const ground=DATA.tileset.map.ground[y]?.[x];const overlay=DATA.tileset.map.overlay[y]?.[x];if(ground){drawTile(ground,x*size,y*size,size);}else{const idx=room.tiles[y][x];ctx.fillStyle=DATA.palette[idx]||'#1a1d2b';ctx.fillRect(x*size,y*size,size,size);}if(overlay){drawTile(overlay,x*size,y*size,size);}}}ctx.fillStyle=DATA.palette[2];for(const npc of DATA.sprites){if(npc.roomIndex!==state.player.roomIndex)continue;ctx.fillRect(npc.x*size+2,npc.y*size+2,size-4,size-4);}ctx.strokeStyle=DATA.palette[2];ctx.lineWidth=Math.max(1,Math.floor(size/6));ctx.strokeRect(state.player.x*size+2,state.player.y*size+2,size-4,size-4);}function tryMove(dx,dy){const room=currentRoom();const nx=clamp(state.player.x+dx,0,7);const ny=clamp(state.player.y+dy,0,7);if(room.walls[ny][nx])return;const overlay=DATA.tileset.map.overlay[ny]?.[nx]??null;const ground=DATA.tileset.map.ground[ny]?.[nx]??null;const id=overlay??ground;if(id){const tile=DATA.tileset.tiles.find(t=>t.id===id);if(tile?.collision)return;}state.player.x=nx;state.player.y=ny;draw();}document.addEventListener('keydown',ev=>{switch(ev.key){case'ArrowLeft':tryMove(-1,0);break;case'ArrowRight':tryMove(1,0);break;case'ArrowUp':tryMove(0,-1);break;case'ArrowDown':tryMove(0,1);break;case' ':case'Enter':case'z':case'Z':if(state.dialog.active){state.dialog.active=false;draw();}}});document.getElementById('btn-reset').addEventListener('click',()=>{state.player={...DATA.start};state.dialog.active=false;draw();});draw();})();";
+        const engine = "(function(){const DATA=window.__TINY_RPG_GAME_DATA__;if(!DATA)return;const canvas=document.getElementById('game-canvas');const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;const state={player:{...DATA.start},dialog:{active:false,text:''}};function clamp(v,a,b){return Math.max(a,Math.min(b,v));}function currentRoom(){return DATA.rooms[state.player.roomIndex];}function drawTile(id,px,py,size){const tile=DATA.tileset.tiles.find(t=>t.id===id);if(!tile)return;const step=Math.floor(size/8);for(let y=0;y<8;y++){for(let x=0;x<8;x++){const col=tile.pixels[y][x];if(!col||col==='transparent')continue;ctx.fillStyle=col;ctx.fillRect(px+x*step,py+y*step,step,step);}}}function draw(){const room=currentRoom();const size=Math.floor(canvas.width/8);ctx.fillStyle=DATA.palette[room.bg]||'#0e0f13';ctx.fillRect(0,0,canvas.width,canvas.height);for(let y=0;y<8;y++){for(let x=0;x<8;x++){const ground=DATA.tileset.map.ground[y]?.[x];const overlay=DATA.tileset.map.overlay[y]?.[x];if(ground!==null&&ground!==undefined){drawTile(ground,x*size,y*size,size);}else{const idx=room.tiles[y][x];ctx.fillStyle=DATA.palette[idx]||'#1a1d2b';ctx.fillRect(x*size,y*size,size,size);}if(overlay!==null&&overlay!==undefined){drawTile(overlay,x*size,y*size,size);}}}ctx.fillStyle=DATA.palette[2];for(const npc of DATA.sprites){if(npc.roomIndex!==state.player.roomIndex)continue;ctx.fillRect(npc.x*size+2,npc.y*size+2,size-4,size-4);}ctx.strokeStyle=DATA.palette[2];ctx.lineWidth=Math.max(1,Math.floor(size/6));ctx.strokeRect(state.player.x*size+2,state.player.y*size+2,size-4,size-4);}function tryMove(dx,dy){const room=currentRoom();const nx=clamp(state.player.x+dx,0,7);const ny=clamp(state.player.y+dy,0,7);if(room.walls[ny][nx])return;const overlay=DATA.tileset.map.overlay[ny]?.[nx]??null;const ground=DATA.tileset.map.ground[ny]?.[nx]??null;const id=overlay??ground;if(id!==null&&id!==undefined){const tile=DATA.tileset.tiles.find(t=>t.id===id);if(tile?.collision)return;}state.player.x=nx;state.player.y=ny;draw();}document.addEventListener('keydown',ev=>{switch(ev.key){case'ArrowLeft':tryMove(-1,0);break;case'ArrowRight':tryMove(1,0);break;case'ArrowUp':tryMove(0,-1);break;case'ArrowDown':tryMove(0,1);break;case' ':case'Enter':case'z':case'Z':if(state.dialog.active){state.dialog.active=false;draw();}}});document.getElementById('btn-reset').addEventListener('click',()=>{state.player={...DATA.start};state.dialog.active=false;draw();});draw();})();";
         return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -649,4 +669,5 @@ if (typeof module !== 'undefined' && module.exports) {
 } else {
     window.EditorManager = EditorManager;
 }
+
 

@@ -30,12 +30,12 @@ function toPixels(layout) {
     );
 }
 
-function tile(id, name, layout, collision = false, category = 'Diversos') {
-    return createTile(id, name, toPixels(layout), collision, category);
+function tile(index, name, layout, collision = false, category = 'Diversos') {
+    return createTile(index, name, toPixels(layout), collision, category);
 }
 
 const TILE_PRESETS = [
-    tile('grass', 'Grama Vibrante', [
+    tile(0, 'Grama Vibrante', [
         [ 3,  3,  3,  3,  3,  3,  3,  3],
         [ 3,  3,  3,  3,  3,  3,  3,  3],
         [ 3,  3,  3,  3,  3,  3,  3,  3],
@@ -46,7 +46,7 @@ const TILE_PRESETS = [
         [ 3,  3,  3,  3,  3,  3,  3,  3]
     ], false, 'Terreno'),
 
-    tile('tall_grass', 'Grama Alta', [
+    tile(1, 'Grama Alta', [
         [ 3,  3,  3,  3,  3,  3,  3,  3],
         [ 3,  3,  3, 11,  3,  3,  3,  3],
         [ 3,  3,  3, 11,  3,  3,  3,  3],
@@ -57,7 +57,7 @@ const TILE_PRESETS = [
         [ 3,  3,  3,  3,  3,  3,  3,  3]
     ], false, 'Terreno'),
 
-    tile('dirt_path', 'Trilha de Terra', [
+    tile(2, 'Trilha de Terra', [
         [ 4,  4,  4,  4,  4,  4,  4,  4],
         [ 4,  4,  9,  4,  4,  4,  9,  4],
         [ 4,  4,  4,  4,  4,  4,  4,  4],
@@ -68,7 +68,7 @@ const TILE_PRESETS = [
         [ 4,  4,  4,  4,  4,  4,  9,  4]
     ], false, 'Terreno'),
 
-    tile('stone_floor', 'Chao de Pedra', [
+    tile(3, 'Chao de Pedra', [
         [  3,  3,  3,  3,  3,  3,  3,  3 ],
         [  3,  3,  3,  3,  3,  3,  3,  3 ],
         [  3,  3,  3,  3,  3,  3,  3,  3 ],
@@ -79,7 +79,7 @@ const TILE_PRESETS = [
         [  3,  3,  3,  3,  3,  3,  3,  3 ]
     ], false, 'Terreno'),
 
-    tile('sand', 'Areia Macia', [
+    tile(4, 'Areia Macia', [
         [15, 15, 15, 15, 15, 15, 15, 15],
         [15, 15, 10, 15, 15, 10, 15, 15],
         [15, 15, 15, 15, 15, 15, 15, 15],
@@ -90,7 +90,7 @@ const TILE_PRESETS = [
         [15, 10, 15, 15, 15, 15, 10, 15]
     ], false, 'Terreno'),
 
-    tile('water', 'Agua Brilhante', [
+    tile(5, 'Agua Brilhante', [
         [ 1,  1,  1,  1,  1,  1,  1,  1],
         [ 1,  1, 12,  7,  7, 12,  1,  1],
         [ 1, 12,  7,  7, 12, 12,  1,  1],
@@ -101,7 +101,7 @@ const TILE_PRESETS = [
         [12, 12,  1,  1,  1,  1, 12, 12]
     ], true, 'Agua'),
 
-    tile('lava', 'Lava Borbulhante', [
+    tile(6, 'Lava Borbulhante', [
         [ 8,  8,  8,  8,  8,  8,  8,  8],
         [ 8,  8,  9, 10,  9,  8,  8,  8],
         [ 8,  9, 10,  9,  9, 10,  9,  8],
@@ -112,7 +112,7 @@ const TILE_PRESETS = [
         [ 8,  8,  8,  8,  8,  8,  8,  8]
     ], true, 'Perigo'),
 
-    tile('rock', 'Pedra Grande', [
+    tile(7, 'Pedra Grande', [
         [null, null, null, null, null, null, null, null],
         [null, null,  5,  6,  6,  5, null, null],
         [null,  5,  6,  6,  6,  6,  5, null],
@@ -123,7 +123,7 @@ const TILE_PRESETS = [
         [null, null, null, null, null, null, null, null]
     ], true, 'Natureza'),
 
-    tile('tree', 'Arvore Verde', [
+    tile(8, 'Arvore Verde', [
         [ 3,  1,  1,  1,  1,  1,  1,  3],
         [ 1,  1, 11, 11, 11, 11,  1,  1],
         [ 1, 11,  3, 11, 11, 11, 11,  1],
@@ -134,7 +134,7 @@ const TILE_PRESETS = [
         [ 3,  3,  4,  4,  4,  4,  3,  3]
     ], true, 'Natureza'),
 
-    tile('bush', 'Arbusto Denso', [
+    tile(9, 'Arbusto Denso', [
         [null,  1,  1,  1,  1,  1, null, null],
         [ 1, 11, 11, 11, 11, 11,  1, null],
         [ 1, 11, 11, 11, 11, 11,  1, null],
@@ -145,7 +145,7 @@ const TILE_PRESETS = [
         [null, null, null, null, null, null, null, null]
     ], true, 'Natureza'),
 
-    tile('stone_wall', 'Parede de Pedra', [
+    tile(10, 'Parede de Pedra', [
         [ 6,  6,  6,  6,  6,  6,  6,  6],
         [ 5,  6,  6,  6,  6,  6,  6,  5],
         [ 6,  6,  6,  6,  6,  6,  6,  6],
@@ -156,7 +156,7 @@ const TILE_PRESETS = [
         [ 6,  6,  5,  6,  6,  5,  6,  6]
     ], true, 'Construcoes'),
 
-    tile('wood_wall', 'Parede de Madeira', [
+    tile(11, 'Parede de Madeira', [
         [ 4,  4,  4,  4,  4,  4,  4,  4],
         [ 4,  9,  9,  9,  9,  9,  4,  9],
         [ 4,  4,  4,  4,  4,  4,  4,  4],
@@ -167,7 +167,7 @@ const TILE_PRESETS = [
         [ 4,  9,  9,  9,  9,  9,  4,  9]
     ], true, 'Construcoes'),
 
-    tile('roof', 'Telhado Classico', [
+    tile(12, 'Telhado Classico', [
         [ 2,  2,  2,  2,  2,  2,  2,  2],
         [ 2,  2, 14, 14, 14, 14,  2,  2],
         [ 2, 14, 14, 14, 14, 14, 14,  2],
@@ -178,7 +178,7 @@ const TILE_PRESETS = [
         [ 2,  2,  2,  2,  2,  2,  2,  2]
     ], true, 'Construcoes'),
 
-    tile('door', 'Porta de Madeira', [
+    tile(13, 'Porta de Madeira', [
         [ 4,  4,  4,  4,  4,  4,  4,  4],
         [ 4,  9,  9,  9,  9,  9,  9,  4],
         [ 4,  9,  9,  9,  9,  9,  9,  4],
@@ -189,7 +189,7 @@ const TILE_PRESETS = [
         [ 4,  4,  4,  4,  4,  4,  4,  4]
     ], false, 'Construcoes'),
 
-    tile('window', 'Janela Azul', [
+    tile(14, 'Janela Azul', [
         [ 7,  7,  7,  7,  7,  7,  7,  7],
         [ 7,  1,  1,  1,  1,  1,  1,  7],
         [ 7,  1, 12,  1, 12,  1,  1,  7],
@@ -200,7 +200,7 @@ const TILE_PRESETS = [
         [ 7,  7,  7,  7,  7,  7,  7,  7]
     ], true, 'Construcoes'),
 
-    tile('torch', 'Tocha de Parede', [
+    tile(15, 'Tocha de Parede', [
         [null, null, null, 10, null, null, null, null],
         [null, null, 10,  9, 10, null, null, null],
         [null, 10,  8,  8, 10, null, null, null],

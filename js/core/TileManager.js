@@ -55,8 +55,13 @@ class TileManager {
             ? tile.category.trim()
             : 'Diversos';
 
+        const existingId = (typeof tile.id === 'string' && /^\d+$/.test(tile.id))
+            ? Number(tile.id)
+            : tile.id;
+        const stableId = existingId !== undefined && existingId !== null ? existingId : this.generateTileId();
+
         return {
-            id: tile.id || this.generateTileId(),
+            id: stableId,
             name,
             collision,
             pixels,
@@ -68,7 +73,14 @@ class TileManager {
         if (!Array.isArray(TILE_PRESETS_SOURCE)) {
             return [];
         }
-        return TILE_PRESETS_SOURCE.map((tile) => this.cloneTile(tile));
+        return TILE_PRESETS_SOURCE
+            .map((tile) => this.cloneTile(tile))
+            .sort((a, b) => {
+                if (typeof a.id === 'number' && typeof b.id === 'number') {
+                    return a.id - b.id;
+                }
+                return String(a.id).localeCompare(String(b.id));
+            });
     }
 
     cloneTile(tile) {

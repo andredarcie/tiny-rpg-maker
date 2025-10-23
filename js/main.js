@@ -15,6 +15,7 @@
         // Initialize the core game engine
         const gameCanvas = document.getElementById('game-canvas');
         const gameEngine = new GameEngine(gameCanvas);
+        loadSharedGameIfAvailable(gameEngine);
 
         // Expose the public runtime API
         window.TinyRPGMaker = {
@@ -100,6 +101,15 @@
             if (initialTab.dataset.tab === 'editor') {
                 document.dispatchEvent(new CustomEvent('editor-tab-activated', { detail: { initial: true } }));
             }
+        }
+    }
+
+    function loadSharedGameIfAvailable(gameEngine) {
+        const share = window.TinyRPGShare;
+        if (!share?.extractGameDataFromLocation) return;
+        const data = share.extractGameDataFromLocation(window.location);
+        if (data) {
+            gameEngine.importGameData(data);
         }
     }
 

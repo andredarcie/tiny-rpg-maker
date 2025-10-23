@@ -41,7 +41,7 @@ class GameEngine {
         const overlayId = tileMap?.overlay?.[ny]?.[nx] ?? null;
         const groundId = tileMap?.ground?.[ny]?.[nx] ?? null;
         const candidateId = overlayId ?? groundId;
-        if (candidateId) {
+        if (candidateId !== null && candidateId !== undefined) {
             const tile = this.tileManager.getTile(candidateId);
             if (tile?.collision) return; // blocked by a collidable tile
         }

@@ -61,7 +61,7 @@
         for (let y = 0; y < room.size; y++) {
             for (let x = 0; x < room.size; x++) {
                 const tileId = game.tileset.map[y]?.[x];
-                if (tileId) {
+                if (tileId !== null && tileId !== undefined) {
                     drawCustomTile(tileId, x * tileSize, y * tileSize, tileSize);
                 } else {
                     const colIdx = room.tiles[y][x];
@@ -173,7 +173,7 @@
         if (room.walls[ny][nx]) return; // wall collision
 
         const tileId = game.tileset.map[ny]?.[nx];
-        if (tileId) {
+        if (tileId !== null && tileId !== undefined) {
             const tile = game.tileset.tiles.find(t => t.id === tileId);
             if (tile?.collision) return; // tile collision
         }

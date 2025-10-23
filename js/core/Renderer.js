@@ -47,7 +47,7 @@ class Renderer {
         for (let y = 0; y < 8; y++) {
             for (let x = 0; x < 8; x++) {
                 const groundId = groundMap[y]?.[x];
-                if (groundId) {
+                if (groundId !== null && groundId !== undefined) {
                     this.drawCustomTile(groundId, x * tileSize, y * tileSize, tileSize);
                 } else {
                     const colIdx = room.tiles[y][x];
@@ -56,7 +56,7 @@ class Renderer {
                 }
 
                 const overlayId = overlayMap[y]?.[x];
-                if (overlayId) {
+                if (overlayId !== null && overlayId !== undefined) {
                     this.drawCustomTile(overlayId, x * tileSize, y * tileSize, tileSize);
                 }
             }
