@@ -12,14 +12,14 @@
             previewLabel: 'Mago',
             defaultText: 'Eu guardo segredos antigos.',
             sprite: [
-                [null, null, null, 13, 13, null, null, null],
-                [null, null, 13, 13, 13, 13, null, null],
-                [null, 1, 13, 7, 7, 13, 1, null],
-                [null, 1, 7, 7, 7, 7, 1, null],
-                [null, 1, 6, 7, 7, 6, 1, null],
-                [null, 1, 6, 6, 6, 6, 1, null],
-                [null, 13, 13, 1, 1, 13, 13, null],
-                [null, null, 1, null, null, 1, null, null]
+                [ null, null,  6,  6,  6,  6, null, null ],
+                [  6, null, 15, 12, 15, 12, null, null ],
+                [  6, null, 15, 15, 15, 15, null, null ],
+                [ 15,  5,  5,  6,  6,  6,  5, null ],
+                [  6, null,  5,  6,  6,  6, 15, null ],
+                [  6, null,  5,  5,  6,  6, null, null ],
+                [  6, null,  5,  5,  5,  5, null, null ],
+                [  6, null,  5,  5,  5,  5, null, null ]
             ]
         },
         {
@@ -29,14 +29,14 @@
             previewLabel: 'Homem',
             defaultText: 'Bom dia! Posso ajudar?',
             sprite: [
-                [null, null, null, 15, 15, null, null, null],
-                [null, null, 6, 15, 15, 6, null, null],
-                [null, 6, 15, 15, 15, 15, 6, null],
-                [null, 6, 15, 8, 8, 15, 6, null],
-                [null, 6, 6, 8, 8, 6, 6, null],
-                [null, 11, 11, 6, 6, 11, 11, null],
-                [null, 6, 11, 6, 6, 11, 6, null],
-                [null, 6, null, 6, 6, null, 6, null]
+                [ null, null, 15, 15, 15, 15, null, null ],
+                [ null, null, 15, 12, 15, 12, null, null ],
+                [ null, null, 15, 15, 15, 15, null, null ],
+                [ null,  4,  4, 15, 15,  4,  4, null ],
+                [ null, 15,  4,  4,  4,  4, 15, null ],
+                [ null, null,  4,  4,  4,  4, null, null ],
+                [ null, null,  9,  9,  9,  9, null, null ],
+                [ null, null,  9, null, null,  9, null, null ]
             ]
         },
         {
@@ -46,14 +46,14 @@
             previewLabel: 'Mulher',
             defaultText: 'Que dia lindo para explorar.',
             sprite: [
-                [null, null, null, 15, 15, null, null, null],
-                [null, null, 8, 15, 15, 8, null, null],
-                [null, 8, 15, 15, 15, 15, 8, null],
-                [null, 8, 15, 6, 6, 15, 8, null],
-                [null, 8, 8, 6, 6, 8, 8, null],
-                [null, 2, 2, 8, 8, 2, 2, null],
-                [null, 8, 2, 8, 8, 2, 8, null],
-                [null, 8, null, 8, 8, null, 8, null]
+                [ null, null,  4,  4,  4,  4, null, null ],
+                [ null, null,  4, 12, 15, 12, null, null ],
+                [ null, null,  4, 15, 15, 15, null, null ],
+                [ null, 14,  4, 15, 15, 14, 14, null ],
+                [ null, 15,  4, 14, 14, 14, 15, null ],
+                [ null, null, 14, 14, 14, 14, null, null ],
+                [ null, null, 14, 14, 14, 14, null, null ],
+                [ null, null, 14, 14, 14, 14, null, null ]
             ]
         },
         {
@@ -63,14 +63,14 @@
             previewLabel: 'Crianca',
             defaultText: 'Vamos brincar de aventura!',
             sprite: [
-                [null, null, null, 10, 10, null, null, null],
-                [null, null, 10, 15, 15, 10, null, null],
-                [null, 10, 15, 15, 15, 15, 10, null],
-                [null, 10, 15, 6, 6, 15, 10, null],
-                [null, 10, 10, 6, 6, 10, 10, null],
-                [null, null, 10, 10, 10, 10, null, null],
-                [null, null, 10, 15, 15, 10, null, null],
-                [null, null, 4, null, null, 4, null, null]
+                [ null, null, null, null, null, null, null, null ],
+                [ null, null, null, null, null, null, null, null ],
+                [ null, null, null, null, null, null, null, null ],
+                [ null, null, 15, 15, 15, 15, null, null ],
+                [ null, null, 15, 12, 15, 12, null, null ],
+                [ null, null, 15, 15, 15, 15, null, null ],
+                [ null,  9,  9,  9,  9,  9,  9, null ],
+                [ null, null,  9, null, null,  9, null, null ]
             ]
         },
         {
