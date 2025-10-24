@@ -7,6 +7,8 @@ class EditorManager {
         this.selectedTileId = null;
         this.selectedNpcId = null;
         this.placingNpc = false;
+        this.placingEnemy = false;
+        this.selectedEnemyType = 'skull';
         this.mapPainting = false;
         this.history = { stack: [], index: -1 };
 
@@ -38,6 +40,8 @@ class EditorManager {
         this.btnPlaceNpc = document.getElementById('btn-place-npc');
         this.btnNpcDelete = document.getElementById('npc-delete');
         this.btnGenerateUrl = document.getElementById('btn-generate-url');
+        this.btnPlaceEnemy = document.getElementById('btn-place-enemy');
+        this.enemiesList = document.getElementById('enemies-list');
         this.btnApplyJson = document.getElementById('btn-apply-json');
         this.btnUndo = document.getElementById('btn-undo');
         this.btnRedo = document.getElementById('btn-redo');
@@ -47,6 +51,7 @@ class EditorManager {
         this.btnAddNpc?.addEventListener('click', () => this.addNPC());
         this.btnPlaceNpc?.addEventListener('click', () => this.toggleNpcPlacement());
         this.btnNpcDelete?.addEventListener('click', () => this.removeSelectedNpc());
+        this.btnPlaceEnemy?.addEventListener('click', () => this.toggleEnemyPlacement());
 
         this.btnGenerateUrl?.addEventListener('click', () => this.generateShareableUrl());
 
@@ -79,6 +84,7 @@ class EditorManager {
         this.syncUI();
         this.renderTileList();
         this.renderNpcs();
+        this.renderEnemies();
         this.renderEditor();
         this.updateSelectedTilePreview();
         this.handleCanvasResize(true);
@@ -128,6 +134,22 @@ class EditorManager {
             this.gameEngine.draw();
             this.updateJSON();
             this.pushHistory();
+            return;
+        }
+
+        if (this.placingEnemy) {
+            const roomIndex = 0;
+            const existing = (this.gameEngine.getEnemyDefinitions?.() ?? []).find((enemy) =>
+                enemy.roomIndex === roomIndex && enemy.x === coord.x && enemy.y === coord.y
+            );
+            if (!existing) {
+                this.gameEngine.addEnemy({ x: coord.x, y: coord.y, roomIndex, type: 'skull' });
+                this.renderEnemies();
+                this.renderEditor();
+                this.gameEngine.draw();
+                this.updateJSON();
+                this.pushHistory();
+            }
             return;
         }
 
@@ -199,6 +221,14 @@ class EditorManager {
                 this.ectx.lineWidth = 2;
                 this.ectx.strokeRect(px + 1, py + 1, tileSize - 2, tileSize - 2);
             }
+        });
+
+        const enemies = this.gameEngine.getEnemyDefinitions?.() ?? [];
+        enemies.forEach((enemy) => {
+            if (enemy.roomIndex !== roomIndex) return;
+            const ex = enemy.x * tileSize;
+            const ey = enemy.y * tileSize;
+            this.gameEngine.renderer.drawEnemySprite(this.ectx, ex, ey, tileSize / 8);
         });
 
         this.ectx.strokeStyle = '#2a2f3f';
@@ -356,6 +386,47 @@ class EditorManager {
         this.updateNpcSelection();
     }
 
+    renderEnemies() {
+        if (!this.enemiesList) return;
+        const enemies = this.gameEngine.getEnemyDefinitions?.() ?? [];
+        this.enemiesList.innerHTML = '';
+
+        if (!enemies.length) {
+            const hint = document.createElement('p');
+            hint.className = 'enemy-hint';
+            hint.textContent = 'Nenhum inimigo colocado.';
+            this.enemiesList.appendChild(hint);
+            return;
+        }
+
+        enemies.forEach((enemy) => {
+            const card = document.createElement('div');
+            card.className = 'enemy-card';
+
+            const info = document.createElement('span');
+            info.textContent = `Caveira (${enemy.x}, ${enemy.y})`;
+
+            const removeBtn = document.createElement('button');
+            removeBtn.textContent = 'Remover';
+            removeBtn.addEventListener('click', () => this.removeEnemy(enemy.id));
+
+            card.append(info, removeBtn);
+            this.enemiesList.appendChild(card);
+        });
+    }
+
+    removeEnemy(enemyId) {
+        if (this.placingEnemy) {
+            this.toggleEnemyPlacement(true);
+        }
+        this.gameEngine.removeEnemy(enemyId);
+        this.renderEnemies();
+        this.renderEditor();
+        this.gameEngine.draw();
+        this.updateJSON();
+        this.pushHistory();
+    }
+
     addNPC() {
         const index = this.gameEngine.getSprites().length;
         const npc = {
@@ -375,6 +446,9 @@ class EditorManager {
     }
 
     toggleNpcPlacement(skipRender = false) {
+        if (this.placingEnemy) {
+            this.toggleEnemyPlacement(true);
+        }
         if (this.placingNpc) {
             this.placingNpc = false;
             if (this.btnPlaceNpc) {
@@ -391,6 +465,33 @@ class EditorManager {
             if (this.editorCanvas) this.editorCanvas.style.cursor = 'crosshair';
         }
         if (!skipRender) this.renderEditor();
+    }
+
+    toggleEnemyPlacement(forceOff = false) {
+        const nextState = forceOff ? false : !this.placingEnemy;
+        this.placingEnemy = nextState;
+        if (this.placingEnemy) {
+            this.placingNpc = false;
+            if (this.btnPlaceNpc) {
+                this.btnPlaceNpc.textContent = 'Colocar NPC no mapa';
+                this.btnPlaceNpc.classList.remove('placing');
+            }
+            if (this.btnPlaceEnemy) {
+                this.btnPlaceEnemy.textContent = 'Cancelar colocacao';
+                this.btnPlaceEnemy.classList.add('placing');
+            }
+            if (this.editorCanvas) {
+                this.editorCanvas.style.cursor = 'crosshair';
+            }
+        } else {
+            if (this.btnPlaceEnemy) {
+                this.btnPlaceEnemy.textContent = 'Colocar caveira';
+                this.btnPlaceEnemy.classList.remove('placing');
+            }
+            if (!this.placingNpc && this.editorCanvas) {
+                this.editorCanvas.style.cursor = 'default';
+            }
+        }
     }
 
     removeSelectedNpc() {
@@ -460,6 +561,8 @@ class EditorManager {
             this.redo();
         } else if (key === 'escape' && this.placingNpc) {
             this.toggleNpcPlacement();
+        } else if (key === 'escape' && this.placingEnemy) {
+            this.toggleEnemyPlacement(true);
         }
     }
 
@@ -567,6 +670,7 @@ class EditorManager {
         this.syncUI();
         this.renderTileList();
         this.renderNpcs();
+        this.renderEnemies();
         this.renderEditor();
         this.updateSelectedTilePreview();
         this.gameEngine.draw();
@@ -610,58 +714,6 @@ class EditorManager {
         this.updateJSON();
     }
 
-    async exportHTML() {
-        try {
-            const html = this.buildStandaloneHTML(this.gameEngine.exportGameData());
-            const blob = new Blob([html], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            const name = (this.gameEngine.getGame().title || 'meu-jogo').trim().replace(/\s+/g, '-').toLowerCase();
-            link.href = url;
-            link.download = `${name || 'meu-jogo'}.html`;
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            URL.revokeObjectURL(url);
-        } catch (err) {
-            console.error(err);
-            alert('Nao foi possivel exportar o HTML.');
-        }
-    }
-
-    buildStandaloneHTML(gameData) {
-        const safeData = JSON.stringify(gameData, null, 2).replace(/<\/script>/gi, '<\\/script>');
-        const engine = "(function(){const DATA=window.__TINY_RPG_GAME_DATA__;if(!DATA)return;const canvas=document.getElementById('game-canvas');const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;const state={player:{...DATA.start},dialog:{active:false,text:''}};function clamp(v,a,b){return Math.max(a,Math.min(b,v));}function currentRoom(){return DATA.rooms[state.player.roomIndex];}function drawTile(id,px,py,size){const tile=DATA.tileset.tiles.find(t=>t.id===id);if(!tile)return;const step=Math.floor(size/8);for(let y=0;y<8;y++){for(let x=0;x<8;x++){const col=tile.pixels[y][x];if(!col||col==='transparent')continue;ctx.fillStyle=col;ctx.fillRect(px+x*step,py+y*step,step,step);}}}function draw(){const room=currentRoom();const size=Math.floor(canvas.width/8);ctx.fillStyle=DATA.palette[room.bg]||'#0e0f13';ctx.fillRect(0,0,canvas.width,canvas.height);for(let y=0;y<8;y++){for(let x=0;x<8;x++){const ground=DATA.tileset.map.ground[y]?.[x];const overlay=DATA.tileset.map.overlay[y]?.[x];if(ground!==null&&ground!==undefined){drawTile(ground,x*size,y*size,size);}else{const idx=room.tiles[y][x];ctx.fillStyle=DATA.palette[idx]||'#1a1d2b';ctx.fillRect(x*size,y*size,size,size);}if(overlay!==null&&overlay!==undefined){drawTile(overlay,x*size,y*size,size);}}}ctx.fillStyle=DATA.palette[2];for(const npc of DATA.sprites){if(npc.roomIndex!==state.player.roomIndex)continue;ctx.fillRect(npc.x*size+2,npc.y*size+2,size-4,size-4);}ctx.strokeStyle=DATA.palette[2];ctx.lineWidth=Math.max(1,Math.floor(size/6));ctx.strokeRect(state.player.x*size+2,state.player.y*size+2,size-4,size-4);}function tryMove(dx,dy){const room=currentRoom();const nx=clamp(state.player.x+dx,0,7);const ny=clamp(state.player.y+dy,0,7);if(room.walls[ny][nx])return;const overlay=DATA.tileset.map.overlay[ny]?.[nx]??null;const ground=DATA.tileset.map.ground[ny]?.[nx]??null;const id=overlay??ground;if(id!==null&&id!==undefined){const tile=DATA.tileset.tiles.find(t=>t.id===id);if(tile?.collision)return;}state.player.x=nx;state.player.y=ny;draw();}document.addEventListener('keydown',ev=>{switch(ev.key){case'ArrowLeft':tryMove(-1,0);break;case'ArrowRight':tryMove(1,0);break;case'ArrowUp':tryMove(0,-1);break;case'ArrowDown':tryMove(0,1);break;case' ':case'Enter':case'z':case'Z':if(state.dialog.active){state.dialog.active=false;draw();}}});document.getElementById('btn-reset').addEventListener('click',()=>{state.player={...DATA.start};state.dialog.active=false;draw();});draw();})();";
-        return `<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${(gameData.title || 'Meu Jogo').replace(/</g, '&lt;')}</title>
-<style>
-body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(1200px 600px at 50% -200px,#182036 0%,#0e0f13 60%);color:#e6e7eb;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Arial;}
-.container{background:#0a0c12;border:1px solid #232734;border-radius:12px;padding:20px;box-shadow:0 12px 40px rgba(0,0,0,0.4);text-align:center;}
-h1{margin:0 0 16px;font-size:18px;}
-canvas{width:256px;height:256px;image-rendering:pixelated;image-rendering:crisp-edges;border-radius:10px;background:#04070f;}
-.controls{margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;font-size:14px;color:#9aa0aa;}
-button{padding:8px 16px;border-radius:8px;border:1px solid #232734;background:#0f1422;color:#e6e7eb;cursor:pointer;}
-button:hover{border-color:#2d3242;}
-</style>
-</head>
-<body>
-<div class="container">
-<h1>${(gameData.title || 'Meu Jogo').replace(/</g, '&lt;')}</h1>
-<canvas id="game-canvas" width="128" height="128"></canvas>
-<div class="controls">
-<button id="btn-reset">Reiniciar</button>
-<span>Setas movem - Z/Enter interagem</span>
-</div>
-</div>
-<script>window.__TINY_RPG_GAME_DATA__=${safeData};</script>
-<script>${engine}</script>
-</body>
-</html>`;
-    }
 }
 
 if (typeof module !== 'undefined' && module.exports) {
@@ -669,5 +721,8 @@ if (typeof module !== 'undefined' && module.exports) {
 } else {
     window.EditorManager = EditorManager;
 }
+
+
+
 
 

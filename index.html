@@ -7,12 +7,28 @@
     <link rel="stylesheet" href="styles.css">
     <style>
         #game-container {
+            position: relative;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             background-color: #000;
             overflow: hidden;
+        }
+
+        .game-hud {
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            pointer-events: none;
+            z-index: 2;
         }
     </style>
 </head>
@@ -31,6 +47,7 @@
 
             <div class="tab-content active" id="tab-game">
                 <div class="game-container" id="game-container">
+                    <div id="game-hud" class="game-hud">Vidas: 3</div>
                     <canvas id="game-canvas" width="128" height="128"></canvas>
                     <div class="game-controls">
                         <button id="btn-reset">Reiniciar</button>
@@ -77,15 +94,25 @@
                                         <textarea id="npc-text" placeholder="Digite o diálogo do NPC..."></textarea>
                                         <button id="npc-delete">Deletar NPC</button>
                                     </div>
-                                </div>
-                            </details>
-                        </div>
+                            </div>
+                        </details>
+                    </div>
 
-                        <div class="editor-section">
-                            <details open>
-                                <summary>Projeto</summary>
-                                <div class="project-actions">
-                                    <button id="btn-generate-url">Gerar URL do jogo</button>
+                    <div class="editor-section">
+                        <details open>
+                            <summary>Inimigos</summary>
+                            <div class="enemies-panel">
+                                <button id="btn-place-enemy">Colocar caveira</button>
+                                <div id="enemies-list" class="enemies-list"></div>
+                            </div>
+                        </details>
+                    </div>
+
+                    <div class="editor-section">
+                        <details open>
+                            <summary>Projeto</summary>
+                            <div class="project-actions">
+                                <button id="btn-generate-url">Gerar URL do jogo</button>
                                 </div>
                                 <div class="history-actions">
                                     <button id="btn-undo">Desfazer</button>

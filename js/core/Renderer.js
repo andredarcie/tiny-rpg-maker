@@ -10,6 +10,11 @@ class Renderer {
         this.tileManager = tileManager;
         this.npcManager = npcManager;
         this.playerSprite = this.buildPlayerSprite();
+        this.npcSprite = this.buildNpcSprite();
+        this.enemySprite = this.buildEnemySprite();
+        this.hudElement = typeof document !== 'undefined'
+            ? document.getElementById('game-hud')
+            : null;
     }
 
     draw() {
@@ -19,8 +24,10 @@ class Renderer {
         this.drawWalls();
         this.drawItems();
         this.drawNPCs();
+        this.drawEnemies();
         this.drawPlayer();
         this.drawDialog();
+        this.drawHUD();
     }
 
     clearCanvas() {
@@ -99,16 +106,30 @@ class Renderer {
         const player = this.gameState.getPlayer();
         const tileSize = this.getTilePixelSize();
 
-        this.ctx.fillStyle = this.getColor(2);
+        const step = tileSize / 8;
         for (const npc of game.sprites) {
             if (npc.roomIndex !== player.roomIndex) continue;
-            this.ctx.fillRect(
-                npc.x * tileSize + 2,
-                npc.y * tileSize + 2,
-                tileSize - 4,
-                tileSize - 4
-            );
+            const px = npc.x * tileSize;
+            const py = npc.y * tileSize;
+            this.drawSprite(this.ctx, this.npcSprite, px, py, step);
         }
+    }
+
+    drawEnemies() {
+        const enemies = this.gameState.getEnemies?.() ?? [];
+        if (!enemies.length) return;
+        const player = this.gameState.getPlayer();
+        const tileSize = this.getTilePixelSize();
+        const step = tileSize / 8;
+
+        enemies.forEach((enemy) => {
+            if (enemy.roomIndex !== player.roomIndex) return;
+            this.drawEnemySprite(this.ctx, enemy.x * tileSize, enemy.y * tileSize, step);
+        });
+    }
+
+    drawEnemySprite(ctx, px, py, step) {
+        this.drawSprite(ctx, this.enemySprite, px, py, step);
     }
 
     drawPlayer() {
@@ -118,21 +139,28 @@ class Renderer {
         const px = player.x * tileSize;
         const py = player.y * tileSize;
 
-        for (let y = 0; y < this.playerSprite.length; y++) {
-            const row = this.playerSprite[y];
-            for (let x = 0; x < row.length; x++) {
-                const col = row[x];
-                if (!col) continue;
-                this.ctx.fillStyle = col;
-                this.ctx.fillRect(px + x * step, py + y * step, step, step);
-            }
-        }
+        this.drawSprite(this.ctx, this.playerSprite, px, py, step);
     }
 
     drawDialog() {
         const dialog = this.gameState.getDialog();
         if (!dialog.active || !dialog.text) return;
         this.drawDialogBox(dialog.text);
+    }
+
+    drawHUD() {
+        if (!this.gameState.getLives) {
+            if (this.hudElement) {
+                this.hudElement.style.visibility = 'hidden';
+            }
+            return;
+        }
+
+        const hud = this.hudElement;
+        if (!hud) return;
+        const lives = this.gameState.getLives();
+        hud.textContent = `Vidas: ${lives}`;
+        hud.style.visibility = 'visible';
     }
 
     drawDialogBox(text) {
@@ -145,10 +173,11 @@ class Renderer {
         this.ctx.fillStyle = "rgba(0,0,0,0.7)";
         this.ctx.fillRect(x, y, w, h);
 
-        this.ctx.strokeStyle = this.getColor(2);
+        const accent = this.getColor(7) || "#FFF1E8";
+        this.ctx.strokeStyle = accent;
         this.ctx.strokeRect(x, y, w, h);
 
-        this.ctx.fillStyle = this.getColor(2);
+        this.ctx.fillStyle = accent;
         this.ctx.font = "10px monospace";
         this.wrapText(text, x + 8, y + 14, w - 16, 12);
     }
@@ -164,6 +193,19 @@ class Renderer {
                 if (!col || col === 'transparent') continue;
                 this.ctx.fillStyle = col;
                 this.ctx.fillRect(px + x * step, py + y * step, step, step);
+            }
+        }
+    }
+
+    drawSprite(ctx, sprite, px, py, step) {
+        if (!sprite) return;
+        for (let y = 0; y < sprite.length; y++) {
+            const row = sprite[y];
+            for (let x = 0; x < row.length; x++) {
+                const col = row[x];
+                if (!col) continue;
+                ctx.fillStyle = col;
+                ctx.fillRect(px + x * step, py + y * step, step, step);
             }
         }
     }
@@ -257,6 +299,64 @@ class Renderer {
             })
         );
     }
+
+    buildNpcSprite() {
+        const picoPalette = (typeof window !== 'undefined' && window.PICO8_COLORS)
+            ? window.PICO8_COLORS
+            : [
+                "#000000", "#1D2B53", "#7E2553", "#008751",
+                "#AB5236", "#5F574F", "#C2C3C7", "#FFF1E8",
+                "#FF004D", "#FFA300", "#FFFF27", "#00E756",
+                "#29ADFF", "#83769C", "#FF77A8", "#FFCCAA"
+            ];
+
+        const pixels = [
+            [ null, null, null,  5,  5,  5, null, null ],
+            [ null, null,  5,  5,  5,  5,  5, null ],
+            [ null, null,  7,  1,  7,  1,  7, null ],
+            [  5, null,  7,  7,  7,  7,  7, null ],
+            [  5, null,  5,  5,  5,  5,  5, null ],
+            [  5,  7,  6,  5,  5,  5,  6, null ],
+            [  5, null,  6,  6,  5,  6,  6, null ],
+            [  5, null,  6,  6,  6,  6,  6, null ]
+        ];
+
+        return pixels.map((row) =>
+            row.map((value) => {
+                if (value === null || value === undefined) return null;
+                return picoPalette[value] ?? null;
+            })
+        );
+    }
+
+    buildEnemySprite() {
+        const picoPalette = (typeof window !== 'undefined' && window.PICO8_COLORS)
+            ? window.PICO8_COLORS
+            : [
+                "#000000", "#1D2B53", "#7E2553", "#008751",
+                "#AB5236", "#5F574F", "#C2C3C7", "#FFF1E8",
+                "#FF004D", "#FFA300", "#FFFF27", "#00E756",
+                "#29ADFF", "#83769C", "#FF77A8", "#FFCCAA"
+            ];
+
+        const pixels = [
+            [ null, null,  6, null, null, null,  6, null ],
+            [ null, null,  6,  6,  6,  6,  6, null ],
+            [ null, null,  6,  6,  8,  6,  8, null ],
+            [ null, null,  6,  6,  6,  6,  6, null ],
+            [ null, null,  1,  1,  6,  1,  1, null ],
+            [ null, null,  6,  1,  1,  1,  6, null ],
+            [ null, null, null,  1,  1,  1, null, null ],
+            [ null, null, null,  6, null,  6, null, null ]
+        ];
+
+        return pixels.map((row) =>
+            row.map((value) => {
+                if (value === null || value === undefined) return null;
+                return picoPalette[value] ?? null;
+            })
+        );
+    }
 }
 
 // Export for use in other modules
@@ -265,3 +365,7 @@ if (typeof module !== 'undefined' && module.exports) {
 } else {
     window.Renderer = Renderer;
 }
+
+
+
+

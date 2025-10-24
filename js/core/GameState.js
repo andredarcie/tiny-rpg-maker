@@ -10,6 +10,7 @@ class GameState {
             rooms: [this.createEmptyRoom(8)],
             start: { x: 1, y: 1, roomIndex: 0 },
             sprites: [],
+            enemies: [],
             items: [],
             exits: [],
             tileset: {
@@ -19,9 +20,11 @@ class GameState {
         };
 
         this.state = {
-            player: { x: 1, y: 1, roomIndex: 0 },
-            dialog: { active: false, text: "" }
+            player: { x: 1, y: 1, roomIndex: 0, lives: 3 },
+            dialog: { active: false, text: "" },
+            enemies: []
         };
+        this.state.enemies = this.cloneEnemies(this.game.enemies);
     }
 
     createEmptyRoom(size) {
@@ -77,7 +80,10 @@ class GameState {
         this.state.player.x = this.game.start.x;
         this.state.player.y = this.game.start.y;
         this.state.player.roomIndex = this.game.start.roomIndex;
+        this.state.player.lives = 3;
         this.state.dialog.active = false;
+        this.state.dialog.text = "";
+        this.state.enemies = this.cloneEnemies(this.game.enemies);
 
         // Reset collected items
         this.game.items.forEach((item) => item.collected = false);
@@ -91,6 +97,7 @@ class GameState {
             rooms: this.game.rooms,
             start: this.game.start,
             sprites: this.game.sprites,
+            enemies: this.game.enemies,
             items: this.game.items,
             exits: this.game.exits,
             tileset: this.game.tileset
@@ -117,6 +124,7 @@ class GameState {
             })),
             start: data.start || { x: 1, y: 1, roomIndex: 0 },
             sprites: Array.isArray(data.sprites) ? data.sprites : [],
+            enemies: Array.isArray(data.enemies) ? data.enemies : [],
             items: Array.isArray(data.items) ? data.items : [],
             exits: Array.isArray(data.exits) ? data.exits : [],
             tileset,
@@ -142,6 +150,62 @@ class GameState {
         );
 
         return { ground, overlay };
+    }
+
+    cloneEnemies(enemies) {
+        return (enemies || []).map((enemy) => ({
+            id: enemy.id,
+            type: enemy.type || 'skull',
+            roomIndex: enemy.roomIndex ?? 0,
+            x: enemy.x ?? 0,
+            y: enemy.y ?? 0,
+            lives: enemy.lives ?? 1
+        }));
+    }
+
+    getEnemies() {
+        return this.state.enemies;
+    }
+
+    getEnemyDefinitions() {
+        return this.game.enemies;
+    }
+
+    addEnemy(enemy) {
+        const entry = {
+            id: enemy.id,
+            type: enemy.type || 'skull',
+            roomIndex: enemy.roomIndex ?? 0,
+            x: enemy.x ?? 0,
+            y: enemy.y ?? 0
+        };
+        this.game.enemies.push(entry);
+        this.state.enemies.push({ ...entry });
+    }
+
+    removeEnemy(enemyId) {
+        this.game.enemies = this.game.enemies.filter((enemy) => enemy.id !== enemyId);
+        this.state.enemies = this.state.enemies.filter((enemy) => enemy.id !== enemyId);
+    }
+
+    setEnemyPosition(enemyId, x, y, roomIndex = null) {
+        const enemy = this.state.enemies.find((e) => e.id === enemyId);
+        if (enemy) {
+            enemy.x = x;
+            enemy.y = y;
+            if (roomIndex !== null && roomIndex !== undefined) {
+                enemy.roomIndex = roomIndex;
+            }
+        }
+    }
+
+    damagePlayer(amount = 1) {
+        this.state.player.lives = Math.max(0, this.state.player.lives - amount);
+        return this.state.player.lives;
+    }
+
+    getLives() {
+        return this.state.player.lives;
     }
 }
 
