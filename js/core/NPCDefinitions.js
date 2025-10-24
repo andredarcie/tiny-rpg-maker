@@ -80,14 +80,14 @@
             previewLabel: 'Placa',
             defaultText: 'Atenção aos perigos à frente.',
             sprite: [
-                [null, null, 6, 6, 6, 6, null, null],
-                [null, 6, 14, 14, 14, 14, 6, null],
-                [null, 6, 14, 14, 14, 14, 6, null],
-                [null, 6, 14, 14, 14, 14, 6, null],
-                [null, 6, 14, 14, 14, 14, 6, null],
-                [null, 6, 14, 14, 14, 14, 6, null],
-                [null, null, 6, 6, 6, 6, null, null],
-                [null, null, 6, null, null, 6, null, null]
+                [ null, null, null, null, null, null, null, null ],
+                [ null,  4,  4,  4,  4,  4,  4, null ],
+                [ null,  4,  5,  5,  5,  5,  4, null ],
+                [ null,  4,  4,  4,  4,  4,  4, null ],
+                [ null,  4,  5,  5,  5,  4,  4, null ],
+                [ null,  4,  4,  4,  4,  4,  4, null ],
+                [ null,  4, null, null, null, null,  4, null ],
+                [ null,  4, null, null, null, null,  4, null ]
             ]
         }
     ];
