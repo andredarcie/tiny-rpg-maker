@@ -1,3 +1,9 @@
+const npcDefinitionsSource = (typeof module !== 'undefined' && module.exports)
+    ? require('./NPCDefinitions')
+    : ((typeof window !== 'undefined' ? window.NPCDefinitions : null) || {});
+
+const NPC_DEFINITIONS = npcDefinitionsSource.NPC_DEFINITIONS || [];
+
 /**
  * Renderer handles drawing the game scene and editor surfaces.
  */
@@ -10,7 +16,7 @@ class Renderer {
         this.tileManager = tileManager;
         this.npcManager = npcManager;
         this.playerSprite = this.buildPlayerSprite();
-        this.npcSprite = this.buildNpcSprite();
+        this.npcSprites = this.buildNpcSprites();
         this.enemySprite = this.buildEnemySprite();
         this.hudElement = typeof document !== 'undefined'
             ? document.getElementById('game-hud')
@@ -108,10 +114,12 @@ class Renderer {
 
         const step = tileSize / 8;
         for (const npc of game.sprites) {
+            if (!npc.placed) continue;
             if (npc.roomIndex !== player.roomIndex) continue;
             const px = npc.x * tileSize;
             const py = npc.y * tileSize;
-            this.drawSprite(this.ctx, this.npcSprite, px, py, step);
+            const sprite = this.npcSprites[npc.type] || this.npcSprites.default;
+            this.drawSprite(this.ctx, sprite, px, py, step);
         }
     }
 
@@ -271,8 +279,8 @@ class Renderer {
         }
     }
 
-    buildPlayerSprite() {
-        const picoPalette = (typeof window !== 'undefined' && window.PICO8_COLORS)
+    getPicoPalette() {
+        return (typeof window !== 'undefined' && window.PICO8_COLORS)
             ? window.PICO8_COLORS
             : [
                 "#000000", "#1D2B53", "#7E2553", "#008751",
@@ -280,6 +288,10 @@ class Renderer {
                 "#FF004D", "#FFA300", "#FFFF27", "#00E756",
                 "#29ADFF", "#83769C", "#FF77A8", "#FFCCAA"
             ];
+    }
+
+    buildPlayerSprite() {
+        const picoPalette = this.getPicoPalette();
 
         const pixels = [
             [ null, null, 15, 15, 15, 15, null, null ],
@@ -300,16 +312,28 @@ class Renderer {
         );
     }
 
-    buildNpcSprite() {
-        const picoPalette = (typeof window !== 'undefined' && window.PICO8_COLORS)
-            ? window.PICO8_COLORS
-            : [
-                "#000000", "#1D2B53", "#7E2553", "#008751",
-                "#AB5236", "#5F574F", "#C2C3C7", "#FFF1E8",
-                "#FF004D", "#FFA300", "#FFFF27", "#00E756",
-                "#29ADFF", "#83769C", "#FF77A8", "#FFCCAA"
-            ];
+    buildNpcSprites() {
+        const picoPalette = this.getPicoPalette();
+        const mapPixels = (pixels) => {
+            if (!Array.isArray(pixels)) return this.buildNpcSprite(picoPalette);
+            return pixels.map((row) =>
+                row.map((value) => {
+                    if (value === null || value === undefined) return null;
+                    return picoPalette[value] ?? null;
+                })
+            );
+        };
 
+        const sprites = {};
+        for (const def of NPC_DEFINITIONS) {
+            sprites[def.type] = mapPixels(def.sprite);
+        }
+        sprites.default = this.buildNpcSprite(picoPalette);
+        return sprites;
+    }
+
+    buildNpcSprite(palette = null) {
+        const picoPalette = palette || this.getPicoPalette();
         const pixels = [
             [ null, null, null,  5,  5,  5, null, null ],
             [ null, null,  5,  5,  5,  5,  5, null ],
@@ -330,14 +354,7 @@ class Renderer {
     }
 
     buildEnemySprite() {
-        const picoPalette = (typeof window !== 'undefined' && window.PICO8_COLORS)
-            ? window.PICO8_COLORS
-            : [
-                "#000000", "#1D2B53", "#7E2553", "#008751",
-                "#AB5236", "#5F574F", "#C2C3C7", "#FFF1E8",
-                "#FF004D", "#FFA300", "#FFFF27", "#00E756",
-                "#29ADFF", "#83769C", "#FF77A8", "#FFCCAA"
-            ];
+        const picoPalette = this.getPicoPalette();
 
         const pixels = [
             [ null, null,  6, null, null, null,  6, null ],

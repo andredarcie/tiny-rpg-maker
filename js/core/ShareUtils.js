@@ -4,6 +4,12 @@
 (function (global) {
     'use strict';
 
+    const definitionsSource = (typeof module !== 'undefined' && module.exports)
+        ? require('./NPCDefinitions')
+        : (global.NPCDefinitions || {});
+
+    const NPC_DEFINITIONS = definitionsSource.NPC_DEFINITIONS || [];
+
     const VERSION = 1;
     const MATRIX_SIZE = 8;
     const NULL_CHAR = 'z';
@@ -59,18 +65,48 @@
         };
     }
 
+    function resolveNpcType(npc) {
+        if (typeof npc?.type === 'string') {
+            return npc.type;
+        }
+        if (typeof npc?.id === 'string') {
+            const matchById = NPC_DEFINITIONS.find((def) => def.id === npc.id);
+            if (matchById) return matchById.type;
+        }
+        if (typeof npc?.name === 'string') {
+            const matchByName = NPC_DEFINITIONS.find((def) => def.name === npc.name);
+            if (matchByName) return matchByName.type;
+        }
+        return null;
+    }
+
     function normalizeSprites(list) {
         if (!Array.isArray(list)) return [];
-        return list
-            .map((npc, index) => ({
-                x: clamp(Number(npc?.x), 0, MATRIX_SIZE - 1, 0),
-                y: clamp(Number(npc?.y), 0, MATRIX_SIZE - 1, 0),
+        const seen = new Set();
+        const normalized = [];
+        for (const npc of list) {
+            const type = resolveNpcType(npc);
+            if (!type) continue;
+            if (seen.has(type)) continue;
+            const def = NPC_DEFINITIONS.find((entry) => entry.type === type);
+            if (!def) continue;
+            const placed = npc?.placed !== false;
+            if (!placed) continue;
+            const x = clamp(Number(npc?.x), 0, MATRIX_SIZE - 1, 0);
+            const y = clamp(Number(npc?.y), 0, MATRIX_SIZE - 1, 0);
+            if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+            normalized.push({
+                type,
+                id: def.id,
+                name: def.name,
+                x,
+                y,
                 roomIndex: clamp(Number(npc?.roomIndex), 0, 3, 0),
-                text: typeof npc?.text === 'string' ? npc.text : '',
-                id: npc?.id || `npc-${index + 1}`,
-                name: npc?.name || `NPC ${index + 1}`
-            }))
-            .filter((npc) => Number.isFinite(npc.x) && Number.isFinite(npc.y));
+                text: typeof npc?.text === 'string' ? npc.text : (def.defaultText || '')
+            });
+            seen.add(type);
+        }
+        return normalized;
     }
 
     function normalizeEnemies(list) {
@@ -173,10 +209,26 @@
         return toBase64Url(bytes);
     }
 
+    function encodeNpcTypeIndexes(sprites) {
+        if (!sprites.length) return '';
+        const bytes = new Uint8Array(sprites.length);
+        for (let i = 0; i < sprites.length; i++) {
+            const sprite = sprites[i];
+            const index = NPC_DEFINITIONS.findIndex((def) => def.type === sprite.type);
+            bytes[i] = index >= 0 ? index : 255;
+        }
+        return toBase64Url(bytes);
+    }
+
     function decodePositions(text) {
         if (!text) return [];
         const bytes = fromBase64Url(text);
         return Array.from(bytes, (byte) => byteToPosition(byte));
+    }
+
+    function decodeNpcTypeIndexes(text) {
+        if (!text) return [];
+        return Array.from(fromBase64Url(text), (byte) => byte);
     }
 
     function encodeText(value) {
@@ -293,8 +345,12 @@
         }
 
         if (sprites.length) {
-            parts.push('p' + encodePositions(sprites));
-            parts.push('t' + encodeTextArray(sprites.map((npc) => npc.text || '')));
+            const positions = encodePositions(sprites);
+            const typeIndexes = encodeNpcTypeIndexes(sprites);
+            const texts = encodeTextArray(sprites.map((npc) => npc.text || ''));
+            if (positions) parts.push('p' + positions);
+            if (typeIndexes) parts.push('i' + typeIndexes);
+            if (texts) parts.push('t' + texts);
         }
 
         if (enemies.length) {
@@ -329,17 +385,42 @@
         const startPosition = decodePositions(payload.s || '')?.[0] ?? normalizeStart({});
         const npcPositions = decodePositions(payload.p || '');
         const npcTexts = decodeTextArray(payload.t || '');
+        const npcTypeIndexes = decodeNpcTypeIndexes(payload.i || '');
         const enemyPositions = decodePositions(payload.e || '');
         const title = decodeText(payload.n, DEFAULT_TITLE) || DEFAULT_TITLE;
 
-        const sprites = npcPositions.map((pos, index) => ({
-            id: `npc-${index + 1}`,
-            name: `NPC ${index + 1}`,
-            x: pos.x,
-            y: pos.y,
-            roomIndex: pos.roomIndex,
-            text: npcTexts[index] ?? ''
-        }));
+        const canUseDefinitions = NPC_DEFINITIONS.length > 0 && (npcTypeIndexes.length > 0 || npcPositions.length <= NPC_DEFINITIONS.length);
+        const sprites = [];
+        if (canUseDefinitions) {
+            for (let index = 0; index < npcPositions.length; index++) {
+                const typeIndex = npcTypeIndexes[index] ?? index;
+                const def = NPC_DEFINITIONS[typeIndex];
+                if (!def) continue;
+                const pos = npcPositions[index];
+                sprites.push({
+                    id: def.id,
+                    type: def.type,
+                    name: def.name,
+                    x: pos.x,
+                    y: pos.y,
+                    roomIndex: pos.roomIndex,
+                    text: npcTexts[index] ?? (def.defaultText || ''),
+                    placed: true
+                });
+            }
+        } else {
+            for (let index = 0; index < npcPositions.length; index++) {
+                const pos = npcPositions[index];
+                sprites.push({
+                    id: `npc-${index + 1}`,
+                    name: `NPC ${index + 1}`,
+                    x: pos.x,
+                    y: pos.y,
+                    roomIndex: pos.roomIndex,
+                    text: npcTexts[index] ?? ''
+                });
+            }
+        }
 
         const enemies = enemyPositions.map((pos, index) => ({
             id: `enemy-${index + 1}`,

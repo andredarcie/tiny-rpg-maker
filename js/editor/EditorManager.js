@@ -6,6 +6,7 @@ class EditorManager {
         this.gameEngine = gameEngine;
         this.selectedTileId = null;
         this.selectedNpcId = null;
+        this.selectedNpcType = null;
         this.placingNpc = false;
         this.placingEnemy = false;
         this.selectedEnemyType = 'skull';
@@ -82,6 +83,7 @@ class EditorManager {
         }
 
         this.syncUI();
+        this.gameEngine.npcManager?.ensureDefaultNPCs?.();
         this.renderTileList();
         this.renderNpcs();
         this.renderEnemies();
@@ -125,9 +127,7 @@ class EditorManager {
         if (this.placingNpc && this.selectedNpcId) {
             const npc = this.gameEngine.getSprites().find((s) => s.id === this.selectedNpcId);
             if (!npc) return;
-            npc.x = coord.x;
-            npc.y = coord.y;
-            npc.roomIndex = 0;
+            this.gameEngine.npcManager?.setNPCPosition?.(npc.id, coord.x, coord.y, 0);
             this.toggleNpcPlacement(true);
             this.renderNpcs();
             this.renderEditor();
@@ -345,43 +345,62 @@ class EditorManager {
 
     renderNpcs() {
         if (!this.npcsList) return;
+        this.gameEngine.npcManager?.ensureDefaultNPCs?.();
+        const definitions = this.gameEngine.npcManager?.getDefinitions?.() ?? [];
         const npcs = this.gameEngine.getSprites();
         this.npcsList.innerHTML = '';
-        npcs.forEach((npc) => {
+        definitions.forEach((def) => {
+            const npc = npcs.find((entry) => entry.type === def.type) || null;
             const card = document.createElement('div');
             card.className = 'npc-card';
-            card.dataset.id = npc.id;
-            if (npc.id === this.selectedNpcId) card.classList.add('selected');
+            card.dataset.type = def.type;
+            card.dataset.id = npc?.id || '';
+            if (def.type === this.selectedNpcType) card.classList.add('selected');
 
             const preview = document.createElement('div');
             preview.className = 'npc-preview';
-            preview.textContent = '??';
+            preview.textContent = def.previewLabel || def.name;
 
             const meta = document.createElement('div');
             meta.className = 'meta';
 
             const name = document.createElement('div');
             name.className = 'npc-name';
-            name.textContent = npc.name || 'NPC';
+            name.textContent = def.name;
 
             const pos = document.createElement('div');
             pos.className = 'npc-position';
-            pos.textContent = `Sala ${npc.roomIndex + 1} - (${npc.x}, ${npc.y})`;
+            if (npc?.placed) {
+                pos.textContent = `Sala ${npc.roomIndex + 1} - (${npc.x}, ${npc.y})`;
+                card.classList.add('npc-card-placed');
+            } else {
+                pos.textContent = 'Disponivel';
+                card.classList.add('npc-card-available');
+            }
 
             const dialog = document.createElement('div');
             dialog.className = 'npc-dialog';
-            dialog.textContent = npc.text || 'Sem dialogo';
+            dialog.textContent = npc?.text || 'Sem dialogo';
 
             meta.append(name, pos, dialog);
             card.append(preview, meta);
 
             card.addEventListener('click', () => {
-                this.selectedNpcId = npc.id;
+                this.selectedNpcType = def.type;
+                this.selectedNpcId = npc?.id || null;
                 this.updateNpcSelection();
             });
 
             this.npcsList.appendChild(card);
         });
+
+        if (this.btnAddNpc) {
+            const remaining = definitions.some((def) => {
+                const npc = npcs.find((entry) => entry.type === def.type);
+                return !npc?.placed;
+            });
+            this.btnAddNpc.disabled = !remaining;
+        }
 
         this.updateNpcSelection();
     }
@@ -428,16 +447,29 @@ class EditorManager {
     }
 
     addNPC() {
-        const index = this.gameEngine.getSprites().length;
-        const npc = {
-            name: `NPC ${index + 1}`,
-            x: 1,
-            y: 1,
-            roomIndex: 0,
-            text: 'Ola!'
-        };
-        const id = this.gameEngine.addSprite(npc);
-        this.selectedNpcId = id;
+        this.gameEngine.npcManager?.ensureDefaultNPCs?.();
+        const sprites = this.gameEngine.getSprites();
+        const definitions = this.gameEngine.npcManager?.getDefinitions?.() ?? [];
+        const available = definitions.map((def) => ({
+            def,
+            npc: sprites.find((entry) => entry.type === def.type) || null
+        })).find((entry) => !entry.npc?.placed);
+
+        if (!available) {
+            alert('Todos os NPCs ja estao no mapa.');
+            return;
+        }
+
+        if (!available.npc) {
+            this.gameEngine.addSprite({ type: available.def.type, placed: false });
+        }
+
+        const npc = this.gameEngine.npcManager?.getNPCByType?.(available.def.type)
+            || this.gameEngine.getSprites().find((entry) => entry.type === available.def.type)
+            || null;
+
+        this.selectedNpcType = available.def.type;
+        this.selectedNpcId = npc?.id || null;
         this.renderNpcs();
         this.renderEditor();
         this.gameEngine.draw();
@@ -446,16 +478,19 @@ class EditorManager {
     }
 
     toggleNpcPlacement(skipRender = false) {
+        const npc = this.gameEngine.getSprites().find((s) => s.id === this.selectedNpcId);
+        if (!npc) return;
         if (this.placingEnemy) {
             this.toggleEnemyPlacement(true);
         }
         if (this.placingNpc) {
             this.placingNpc = false;
             if (this.btnPlaceNpc) {
-                this.btnPlaceNpc.textContent = 'Colocar NPC no mapa';
+                const label = npc.placed ? 'Mover NPC no mapa' : 'Colocar NPC no mapa';
+                this.btnPlaceNpc.textContent = label;
                 this.btnPlaceNpc.classList.remove('placing');
             }
-            if (this.editorCanvas) this.editorCanvas.style.cursor = 'default';
+            if (!this.placingEnemy && this.editorCanvas) this.editorCanvas.style.cursor = 'default';
         } else if (this.selectedNpcId) {
             this.placingNpc = true;
             if (this.btnPlaceNpc) {
@@ -496,16 +531,14 @@ class EditorManager {
 
     removeSelectedNpc() {
         if (!this.selectedNpcId) return;
-        const sprites = this.gameEngine.getSprites();
-        const index = sprites.findIndex((npc) => npc.id === this.selectedNpcId);
-        if (index === -1) return;
-        sprites.splice(index, 1);
-        this.selectedNpcId = null;
+        const removed = this.gameEngine.npcManager?.removeNPC?.(this.selectedNpcId);
+        if (!removed) return;
         this.placingNpc = false;
         if (this.btnPlaceNpc) {
             this.btnPlaceNpc.textContent = 'Colocar NPC no mapa';
             this.btnPlaceNpc.classList.remove('placing');
-            this.btnPlaceNpc.disabled = true;
+            const npc = this.gameEngine.getSprites().find((entry) => entry.id === this.selectedNpcId);
+            this.btnPlaceNpc.disabled = !npc;
         }
         this.renderNpcs();
         this.renderEditor();
@@ -517,20 +550,43 @@ class EditorManager {
     updateNpcSelection() {
         if (this.npcsList) {
             this.npcsList.querySelectorAll('.npc-card').forEach((card) => {
-                card.classList.toggle('selected', card.dataset.id === this.selectedNpcId);
+                card.classList.toggle('selected', card.dataset.type === this.selectedNpcType);
             });
         }
-        const npc = this.gameEngine.getSprites().find((s) => s.id === this.selectedNpcId);
-        if (this.npcText) this.npcText.value = npc?.text || '';
-        if (this.btnPlaceNpc) this.btnPlaceNpc.disabled = !npc;
-        if (!npc) this.placingNpc = false;
+        const npc = this.gameEngine.getSprites().find((s) => s.type === this.selectedNpcType) || null;
+        this.selectedNpcId = npc?.id || null;
+        if (this.npcText) {
+            this.npcText.disabled = !npc;
+            this.npcText.value = npc?.text || '';
+        }
+        if (this.btnPlaceNpc) {
+            if (!npc) {
+                this.btnPlaceNpc.disabled = true;
+                this.btnPlaceNpc.textContent = 'Colocar NPC no mapa';
+                this.btnPlaceNpc.classList.remove('placing');
+            } else {
+                this.btnPlaceNpc.disabled = false;
+                if (!this.placingNpc) {
+                    this.btnPlaceNpc.textContent = npc.placed ? 'Mover NPC no mapa' : 'Colocar NPC no mapa';
+                    this.btnPlaceNpc.classList.remove('placing');
+                }
+            }
+        }
+        if (this.btnNpcDelete) {
+            this.btnNpcDelete.disabled = !npc || !npc.placed;
+        }
+        if (!npc) {
+            this.placingNpc = false;
+            if (this.editorCanvas) this.editorCanvas.style.cursor = 'default';
+        }
     }
 
     updateNpcText() {
-        if (!this.selectedNpcId || !this.npcText) return;
-        const npc = this.gameEngine.getSprites().find((s) => s.id === this.selectedNpcId);
+        if (!this.selectedNpcType || !this.npcText) return;
+        const npc = this.gameEngine.getSprites().find((s) => s.type === this.selectedNpcType);
         if (!npc) return;
         npc.text = this.npcText.value;
+        this.gameEngine.npcManager?.updateNPCDialog?.(npc.id, npc.text);
         this.renderNpcs();
         this.updateJSON();
         this.pushHistory();
@@ -721,8 +777,3 @@ if (typeof module !== 'undefined' && module.exports) {
 } else {
     window.EditorManager = EditorManager;
 }
-
-
-
-
-

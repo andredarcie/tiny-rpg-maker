@@ -9,6 +9,7 @@ class GameEngine {
         this.gameState = new GameState();
         this.tileManager = new TileManager(this.gameState);
         this.npcManager = new NPCManager(this.gameState);
+        this.npcManager.ensureDefaultNPCs?.();
         this.renderer = new Renderer(canvas, this.gameState, this.tileManager, this.npcManager);
         this.inputManager = new InputManager(this);
         this.enemyMoveTimer = null;
@@ -72,6 +73,7 @@ class GameEngine {
 
         // NPCs
         for (const npc of game.sprites) {
+            if (!npc.placed) continue;
             if (npc.roomIndex === player.roomIndex &&
                 npc.x === player.x &&
                 npc.y === player.y) {
@@ -114,6 +116,7 @@ class GameEngine {
 
     importGameData(data) {
         this.gameState.importGameData(data);
+        this.npcManager.ensureDefaultNPCs?.();
         this.tileManager.ensureDefaultTiles();
         this.syncDocumentTitle();
         this.startEnemyLoop();
@@ -157,6 +160,7 @@ class GameEngine {
     }
 
     getSprites() {
+        this.npcManager.ensureDefaultNPCs?.();
         return this.npcManager.getNPCs();
     }
 
