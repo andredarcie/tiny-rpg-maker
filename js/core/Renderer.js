@@ -158,8 +158,11 @@ class Renderer {
 
     drawDialog() {
         const dialog = this.gameState.getDialog();
+        
         if (!dialog.active || !dialog.text) return;
-        this.drawDialogBox(dialog.text);
+        dialog.page+=1;
+        
+        this.drawDialogBox(dialog);
     }
 
     drawHUD() {
@@ -204,7 +207,7 @@ class Renderer {
         }
     }
 
-    drawDialogBox(text) {
+    drawDialogBox(dialog) {
         const pad = 6;
         const w = this.canvas.width - pad * 2;
         const h = 40;
@@ -220,7 +223,50 @@ class Renderer {
 
         this.ctx.fillStyle = accent;
         this.ctx.font = "10px monospace";
-        this.wrapText(text, x + 8, y + 14, w - 16, 12);
+
+        const lineHeight = 12;
+        const maxWidth = w - 16;
+
+        const pages = this.calculateDialogPages(dialog, this.ctx, maxWidth, lineHeight, h - 8);
+        // Página atual
+        const pageIndex = dialog.page - 1;
+        const lines = pages[pageIndex] || [];
+
+        // Desenha cada linha
+        let ty = y + 14;
+        for (const line of lines) {
+            this.ctx.fillText(line, x + 8, ty);
+            ty += lineHeight;
+        }
+    }
+
+    calculateDialogPages(dialog, ctx, maxWidth, lineHeight, boxHeight) {
+        const words = dialog.text.split(/\s+/);
+        let line = "";
+        let lines = [];
+
+        // Quebra o texto em linhas
+        for (let i = 0; i < words.length; i++) {
+            const testLine = line + words[i] + " ";
+            const metrics = ctx.measureText(testLine);
+            if (metrics.width > maxWidth && i > 0) {
+                lines.push(line.trim());
+                line = words[i] + " ";
+            } else {
+                line = testLine;
+            }
+        }
+        lines.push(line.trim());
+        // Calcula quantas linhas cabem por página
+        const linesPerPage = Math.floor(boxHeight / lineHeight);
+        const pages = [];
+
+        for (let i = 0; i < lines.length; i += linesPerPage) {
+            pages.push(lines.slice(i, i + linesPerPage));
+        }
+
+        dialog.maxPages = pages.length;
+        return pages;
     }
 
     drawCustomTile(tileId, px, py, size) {
@@ -249,26 +295,6 @@ class Renderer {
                 ctx.fillRect(px + x * step, py + y * step, step, step);
             }
         }
-    }
-
-    wrapText(text, x, y, maxWidth, lineHeight) {
-        const words = text.split(/\s+/);
-        let line = "";
-
-        for (let i = 0; i < words.length; i++) {
-            const testLine = line + words[i] + " ";
-            const metrics = this.ctx.measureText(testLine);
-
-            if (metrics.width > maxWidth && i > 0) {
-                this.ctx.fillText(line, x, y);
-                line = words[i] + " ";
-                y += lineHeight;
-            } else {
-                line = testLine;
-            }
-        }
-
-        this.ctx.fillText(line, x, y);
     }
 
     getTilePixelSize() {
