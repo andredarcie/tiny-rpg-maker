@@ -48,7 +48,6 @@
             <div class="tab-content active" id="tab-game">
                 <div class="game-container" id="game-container">
                     <div id="game-hud" class="game-hud">Vidas: 3</div>
-                    <div id="game-minimap" class="game-minimap" aria-hidden="true"></div>
                     <canvas id="game-canvas" width="128" height="128"></canvas>
                     <div class="game-controls">
                         <button id="btn-reset">Reiniciar</button>
@@ -69,15 +68,6 @@
                     <div class="editor-section">
                         <h3>Tile Selecionado</h3>
                         <canvas id="selected-tile-preview" width="64" height="64"></canvas>
-                    </div>
-
-                    <div class="editor-section">
-                        <details open>
-                            <summary>Mundo</summary>
-                            <div class="world-panel">
-                                <div id="world-grid" class="world-grid"></div>
-                            </div>
-                        </details>
                     </div>
 
                         <div class="editor-section">

@@ -32,24 +32,70 @@ class GameEngine {
             return;
         }
 
-        const room = this.gameState.getCurrentRoom();
         const player = this.gameState.getPlayer();
+        const roomIndex = player.roomIndex;
+        const currentCoords = this.gameState.getRoomCoords(roomIndex);
+        const limit = this.gameState.game.roomSize - 1;
 
-        const nx = this.clamp(player.x + dx, 0, 7);
-        const ny = this.clamp(player.y + dy, 0, 7);
+        let targetRoomIndex = roomIndex;
+        let targetX = player.x + dx;
+        let targetY = player.y + dy;
 
-        if (room.walls[ny][nx]) return; // blocked by a wall
+        if (targetX < 0) {
+            const nextCol = currentCoords.col - 1;
+            const neighbor = this.gameState.getRoomIndex(currentCoords.row, nextCol);
+            if (neighbor !== null) {
+                targetRoomIndex = neighbor;
+                targetX = limit;
+            } else {
+                targetX = 0;
+            }
+        } else if (targetX > limit) {
+            const nextCol = currentCoords.col + 1;
+            const neighbor = this.gameState.getRoomIndex(currentCoords.row, nextCol);
+            if (neighbor !== null) {
+                targetRoomIndex = neighbor;
+                targetX = 0;
+            } else {
+                targetX = limit;
+            }
+        }
 
-        const tileMap = this.tileManager.getTileMap();
-        const overlayId = tileMap?.overlay?.[ny]?.[nx] ?? null;
-        const groundId = tileMap?.ground?.[ny]?.[nx] ?? null;
+        if (targetY < 0) {
+            const nextRow = currentCoords.row - 1;
+            const neighbor = this.gameState.getRoomIndex(nextRow, currentCoords.col);
+            if (neighbor !== null) {
+                targetRoomIndex = neighbor;
+                targetY = limit;
+            } else {
+                targetY = 0;
+            }
+        } else if (targetY > limit) {
+            const nextRow = currentCoords.row + 1;
+            const neighbor = this.gameState.getRoomIndex(nextRow, currentCoords.col);
+            if (neighbor !== null) {
+                targetRoomIndex = neighbor;
+                targetY = 0;
+            } else {
+                targetY = limit;
+            }
+        }
+
+        const targetRoom = this.gameState.getGame().rooms?.[targetRoomIndex];
+        if (!targetRoom) return;
+
+        if (targetRoom.walls?.[targetY]?.[targetX]) return; // blocked by a wall
+
+        const tileMap = this.tileManager.getTileMap(targetRoomIndex);
+        const overlayId = tileMap?.overlay?.[targetY]?.[targetX] ?? null;
+        const groundId = tileMap?.ground?.[targetY]?.[targetX] ?? null;
         const candidateId = overlayId ?? groundId;
         if (candidateId !== null && candidateId !== undefined) {
             const tile = this.tileManager.getTile(candidateId);
             if (tile?.collision) return; // blocked by a collidable tile
         }
 
-        this.gameState.setPlayerPosition(nx, ny);
+        this.gameState.setPlayerPosition(targetX, targetY, targetRoomIndex !== roomIndex ? targetRoomIndex : null);
         this.checkInteractions();
         this.checkEnemyCollisionAt(this.gameState.getPlayer().x, this.gameState.getPlayer().y);
         this.renderer.draw();
@@ -151,8 +197,10 @@ class GameEngine {
         return this.tileManager.getTiles();
     }
 
-    getTileMap() {
-        return this.tileManager.getTileMap();
+    getTileMap(roomIndex = null) {
+        const playerRoom = this.gameState.getPlayer()?.roomIndex ?? 0;
+        const targetRoom = roomIndex === null || roomIndex === undefined ? playerRoom : roomIndex;
+        return this.tileManager.getTileMap(targetRoom);
     }
 
     getTilePresetNames() {
@@ -168,8 +216,10 @@ class GameEngine {
         this.tileManager.updateTile(tileId, data);
     }
 
-    setMapTile(x, y, tileId) {
-        this.tileManager.setMapTile(x, y, tileId);
+    setMapTile(x, y, tileId, roomIndex = null) {
+        const playerRoom = this.gameState.getPlayer()?.roomIndex ?? 0;
+        const targetRoom = roomIndex === null || roomIndex === undefined ? playerRoom : roomIndex;
+        this.tileManager.setMapTile(x, y, tileId, targetRoom);
     }
 
     addSprite(npc) {
@@ -224,7 +274,6 @@ class GameEngine {
 
         let moved = false;
         const game = this.gameState.getGame();
-        const tileMap = this.tileManager.getTileMap();
         const directions = [
             [0, 0],
             [1, 0],
@@ -243,6 +292,7 @@ class GameEngine {
             if (!room) continue;
             if (room.walls[ny][nx]) continue;
 
+            const tileMap = this.tileManager.getTileMap(roomIndex);
             const groundId = tileMap?.ground?.[ny]?.[nx] ?? null;
             const overlayId = tileMap?.overlay?.[ny]?.[nx] ?? null;
             const candidateId = overlayId ?? groundId;

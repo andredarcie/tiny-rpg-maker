@@ -7,6 +7,7 @@ class EditorManager {
         this.selectedTileId = null;
         this.selectedNpcId = null;
         this.selectedNpcType = null;
+        this.activeRoomIndex = 0;
         this.placingNpc = false;
         this.placingEnemy = false;
         this.selectedEnemyType = 'skull';
@@ -32,6 +33,7 @@ class EditorManager {
 
         this.npcsList = document.getElementById('npcs-list');
         this.npcText = document.getElementById('npc-text');
+        this.worldGrid = document.getElementById('world-grid');
 
         this.titleInput = document.getElementById('game-title');
         this.jsonArea = document.getElementById('json-area');
@@ -83,8 +85,12 @@ class EditorManager {
         }
 
         this.syncUI();
+        const startRoomIndex = this.gameEngine.getGame()?.start?.roomIndex ?? 0;
+        const totalRooms = this.gameEngine.getGame()?.rooms?.length || 1;
+        this.activeRoomIndex = Math.max(0, Math.min(totalRooms - 1, startRoomIndex));
         this.gameEngine.npcManager?.ensureDefaultNPCs?.();
         this.renderTileList();
+        this.renderWorldGrid();
         this.renderNpcs();
         this.renderEnemies();
         this.renderEditor();
@@ -124,10 +130,12 @@ class EditorManager {
         const coord = this.getTileFromEvent(ev);
         if (!coord) return;
 
+        const roomIndex = this.activeRoomIndex;
+
         if (this.placingNpc && this.selectedNpcId) {
             const npc = this.gameEngine.getSprites().find((s) => s.id === this.selectedNpcId);
             if (!npc) return;
-            this.gameEngine.npcManager?.setNPCPosition?.(npc.id, coord.x, coord.y, 0);
+            this.gameEngine.npcManager?.setNPCPosition?.(npc.id, coord.x, coord.y, roomIndex);
             this.toggleNpcPlacement(true);
             this.renderNpcs();
             this.renderEditor();
@@ -138,7 +146,6 @@ class EditorManager {
         }
 
         if (this.placingEnemy) {
-            const roomIndex = 0;
             const existing = (this.gameEngine.getEnemyDefinitions?.() ?? []).find((enemy) =>
                 enemy.roomIndex === roomIndex && enemy.x === coord.x && enemy.y === coord.y
             );
@@ -154,7 +161,7 @@ class EditorManager {
         }
 
         if (this.selectedTileId === null || this.selectedTileId === undefined) return;
-        this.gameEngine.setMapTile(coord.x, coord.y, this.selectedTileId);
+        this.gameEngine.setMapTile(coord.x, coord.y, this.selectedTileId, roomIndex);
         this.renderEditor();
         this.gameEngine.draw();
     }
@@ -175,11 +182,10 @@ class EditorManager {
     renderEditor() {
         if (!this.ectx || !this.editorCanvas) return;
         const game = this.gameEngine.getGame();
-        const state = this.gameEngine.getState();
-        const roomIndex = state.player?.roomIndex ?? 0;
+        const roomIndex = this.activeRoomIndex;
         const room = game.rooms?.[roomIndex];
         const tileSize = Math.floor(this.editorCanvas.width / 8);
-        const tileMap = this.gameEngine.getTileMap();
+        const tileMap = this.gameEngine.getTileMap(roomIndex);
         const ground = tileMap?.ground ?? [];
         const overlay = tileMap?.overlay ?? [];
 
@@ -346,6 +352,7 @@ class EditorManager {
     renderNpcs() {
         if (!this.npcsList) return;
         this.gameEngine.npcManager?.ensureDefaultNPCs?.();
+        const game = this.gameEngine.getGame();
         const definitions = this.gameEngine.npcManager?.getDefinitions?.() ?? [];
         const npcs = this.gameEngine.getSprites();
         this.npcsList.innerHTML = '';
@@ -373,7 +380,10 @@ class EditorManager {
             const pos = document.createElement('div');
             pos.className = 'npc-position';
             if (npc?.placed) {
-                pos.textContent = `Sala ${npc.roomIndex + 1} - (${npc.x}, ${npc.y})`;
+                const cols = game.world?.cols || 1;
+                const roomRow = Math.floor(npc.roomIndex / cols) + 1;
+                const roomCol = (npc.roomIndex % cols) + 1;
+                pos.textContent = `Mapa (${roomCol}, ${roomRow}) - (${npc.x}, ${npc.y})`;
                 card.classList.add('npc-card-placed');
             } else {
                 pos.textContent = 'Disponivel';
@@ -404,6 +414,7 @@ class EditorManager {
             this.btnAddNpc.disabled = !remaining;
         }
 
+        this.renderWorldGrid();
         this.updateNpcSelection();
     }
 
@@ -451,7 +462,8 @@ class EditorManager {
 
     renderEnemies() {
         if (!this.enemiesList) return;
-        const enemies = this.gameEngine.getEnemyDefinitions?.() ?? [];
+        const roomIndex = this.activeRoomIndex;
+        const enemies = (this.gameEngine.getEnemyDefinitions?.() ?? []).filter((enemy) => enemy.roomIndex === roomIndex);
         this.enemiesList.innerHTML = '';
 
         if (!enemies.length) {
@@ -476,6 +488,7 @@ class EditorManager {
             card.append(info, removeBtn);
             this.enemiesList.appendChild(card);
         });
+        this.renderWorldGrid();
     }
 
     removeEnemy(enemyId) {
@@ -488,6 +501,94 @@ class EditorManager {
         this.gameEngine.draw();
         this.updateJSON();
         this.pushHistory();
+    }
+
+    setActiveRoom(index) {
+        const target = Number(index);
+        if (!Number.isFinite(target)) return;
+        const clamped = Math.max(0, Math.min((this.gameEngine.getGame().rooms?.length || 1) - 1, Math.floor(target)));
+        if (clamped === this.activeRoomIndex) return;
+        if (this.placingNpc) {
+            this.toggleNpcPlacement(true);
+        }
+        if (this.placingEnemy) {
+            this.toggleEnemyPlacement(true);
+        }
+        this.activeRoomIndex = clamped;
+        this.renderWorldGrid();
+        this.renderEditor();
+        this.renderEnemies();
+    }
+
+    renderWorldGrid() {
+        if (!this.worldGrid) return;
+        const game = this.gameEngine.getGame();
+        const rows = game.world?.rows || 1;
+        const cols = game.world?.cols || 1;
+        const startIndex = game.start?.roomIndex ?? 0;
+        const playerRoom = this.gameEngine.getState()?.player?.roomIndex ?? 0;
+        const npcs = this.gameEngine.getSprites();
+        const enemies = this.gameEngine.getEnemyDefinitions?.() ?? [];
+
+        this.worldGrid.innerHTML = '';
+        this.worldGrid.style.setProperty('--world-cols', cols);
+        for (let row = 0; row < rows; row++) {
+            for (let col = 0; col < cols; col++) {
+                const index = row * cols + col;
+                const cell = document.createElement('button');
+                cell.type = 'button';
+                cell.className = 'world-cell';
+                if (index === this.activeRoomIndex) cell.classList.add('active');
+
+                const label = document.createElement('span');
+                label.className = 'world-cell-label';
+                label.textContent = `${col + 1},${row + 1}`;
+                cell.appendChild(label);
+
+                const badges = document.createElement('div');
+                badges.className = 'world-cell-badges';
+
+                if (index === startIndex) {
+                    const badge = document.createElement('span');
+                    badge.classList.add('world-cell-badge', 'badge-start');
+                    badge.textContent = 'Start';
+                    badges.appendChild(badge);
+                    cell.classList.add('start');
+                }
+
+                if (index === playerRoom) {
+                    const badge = document.createElement('span');
+                    badge.classList.add('world-cell-badge', 'badge-player');
+                    badge.textContent = 'Player';
+                    badges.appendChild(badge);
+                    cell.classList.add('player');
+                }
+
+                if (npcs.some((npc) => npc.placed && npc.roomIndex === index)) {
+                    const badge = document.createElement('span');
+                    badge.classList.add('world-cell-badge', 'badge-npc');
+                    badge.textContent = 'NPC';
+                    badges.appendChild(badge);
+                    cell.classList.add('has-npc');
+                }
+
+                if (enemies.some((enemy) => enemy.roomIndex === index)) {
+                    const badge = document.createElement('span');
+                    badge.classList.add('world-cell-badge', 'badge-enemy');
+                    badge.textContent = 'Inimigo';
+                    badges.appendChild(badge);
+                    cell.classList.add('has-enemy');
+                }
+
+                if (badges.children.length) {
+                    cell.appendChild(badges);
+                }
+
+                cell.title = `Mapa (${col + 1}, ${row + 1})`;
+                cell.addEventListener('click', () => this.setActiveRoom(index));
+                this.worldGrid.appendChild(cell);
+            }
+        }
     }
 
     addNPC() {

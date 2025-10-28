@@ -103,7 +103,8 @@
             const id = sequentialId || existingId || this.generateId();
             const name = def?.name || npc.name || 'NPC';
             const text = typeof npc.text === 'string' ? npc.text : (def?.defaultText || '');
-            const roomIndex = clamp(Number(npc.roomIndex), 0, 3, 0);
+            const maxRoomIndex = Math.max(0, (this.gameState?.game?.rooms?.length ?? 1) - 1);
+            const roomIndex = clamp(Number(npc.roomIndex), 0, maxRoomIndex, 0);
             const x = clamp(Number(npc.x), 0, 7, 1);
             const y = clamp(Number(npc.y), 0, 7, 1);
             const placed = npc.placed !== undefined ? Boolean(npc.placed) : true;
@@ -184,7 +185,8 @@
             npc.x = clamp(Number(x), 0, 7, npc.x);
             npc.y = clamp(Number(y), 0, 7, npc.y);
             if (roomIndex !== null && roomIndex !== undefined) {
-                npc.roomIndex = clamp(Number(roomIndex), 0, 3, npc.roomIndex);
+                const maxRoomIndex = Math.max(0, (this.gameState?.game?.rooms?.length ?? 1) - 1);
+                npc.roomIndex = clamp(Number(roomIndex), 0, maxRoomIndex, npc.roomIndex);
             }
             npc.placed = true;
         }

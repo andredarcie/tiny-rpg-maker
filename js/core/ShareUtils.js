@@ -11,12 +11,18 @@
     const NPC_DEFINITIONS = definitionsSource.NPC_DEFINITIONS || [];
 
     const LEGACY_VERSION = 1;
-    const VERSION = 2;
+    const PREVIOUS_VERSION = 2;
+    const VERSION = 3;
     const MATRIX_SIZE = 8;
     const TILE_COUNT = MATRIX_SIZE * MATRIX_SIZE;
+    const WORLD_ROWS = 3;
+    const WORLD_COLS = 3;
+    const WORLD_ROOM_COUNT = WORLD_ROWS * WORLD_COLS;
+    const MAX_ROOM_INDEX = WORLD_ROOM_COUNT - 1;
     const NULL_CHAR = 'z';
     const GROUND_SPARSE_PREFIX = 'x'; // Marks sparse ground encoding to avoid legacy clashes.
     const OVERLAY_BINARY_PREFIX = 'y'; // Marks new overlay bitmask encoding to avoid legacy clashes.
+    const POSITION_WIDE_PREFIX = '~'; // Marks extended position encoding that supports more rooms.
     const DEFAULT_TITLE = 'My Tiny RPG Game';
     const DEFAULT_PALETTE = [
         '#000000', '#1D2B53', '#7E2553', '#008751',
@@ -28,6 +34,10 @@
     function clamp(value, min, max, fallback) {
         if (!Number.isFinite(value)) return fallback;
         return Math.max(min, Math.min(max, value));
+    }
+
+    function clampRoomIndex(value) {
+        return clamp(Number(value), 0, MAX_ROOM_INDEX, 0);
     }
 
     function normalizeGround(matrix) {
@@ -60,11 +70,33 @@
         return rows;
     }
 
+    function collectGroundMatrices(gameData, roomCount) {
+        const maps = Array.isArray(gameData?.tileset?.maps) ? gameData.tileset.maps : [];
+        const fallbackGround = gameData?.tileset?.map?.ground ?? null;
+        const matrices = [];
+        for (let index = 0; index < roomCount; index++) {
+            const source = maps[index]?.ground ?? (index === 0 ? fallbackGround : null);
+            matrices.push(source ?? []);
+        }
+        return matrices;
+    }
+
+    function collectOverlayMatrices(gameData, roomCount) {
+        const maps = Array.isArray(gameData?.tileset?.maps) ? gameData.tileset.maps : [];
+        const fallbackOverlay = gameData?.tileset?.map?.overlay ?? null;
+        const matrices = [];
+        for (let index = 0; index < roomCount; index++) {
+            const source = maps[index]?.overlay ?? (index === 0 ? fallbackOverlay : null);
+            matrices.push(source ?? []);
+        }
+        return matrices;
+    }
+
     function normalizeStart(start) {
         return {
             x: clamp(Number(start?.x), 0, MATRIX_SIZE - 1, 1),
             y: clamp(Number(start?.y), 0, MATRIX_SIZE - 1, 1),
-            roomIndex: clamp(Number(start?.roomIndex), 0, 3, 0)
+            roomIndex: clampRoomIndex(start?.roomIndex)
         };
     }
 
@@ -104,7 +136,7 @@
                 name: def.name,
                 x,
                 y,
-                roomIndex: clamp(Number(npc?.roomIndex), 0, 3, 0),
+                roomIndex: clampRoomIndex(npc?.roomIndex),
                 text: typeof npc?.text === 'string' ? npc.text : (def.defaultText || '')
             });
             seen.add(type);
@@ -118,7 +150,7 @@
             .map((enemy, index) => ({
                 x: clamp(Number(enemy?.x), 0, MATRIX_SIZE - 1, 0),
                 y: clamp(Number(enemy?.y), 0, MATRIX_SIZE - 1, 0),
-                roomIndex: clamp(Number(enemy?.roomIndex), 0, 3, 0),
+                roomIndex: clampRoomIndex(enemy?.roomIndex),
                 type: enemy?.type || 'skull',
                 id: enemy?.id || `enemy-${index + 1}`
             }))
@@ -158,13 +190,13 @@
         return total;
     }
 
-    let cachedTileMaskBase64Length = null;
-    function getTileMaskBase64Length() {
-        if (cachedTileMaskBase64Length === null) {
-            const maskBytes = new Uint8Array(Math.ceil(TILE_COUNT / 8));
-            cachedTileMaskBase64Length = toBase64Url(maskBytes).length;
+    const tileMaskLengthCache = new Map();
+    function getTileMaskBase64Length(tileCount) {
+        if (!tileMaskLengthCache.has(tileCount)) {
+            const maskBytes = new Uint8Array(Math.ceil(tileCount / 8));
+            tileMaskLengthCache.set(tileCount, toBase64Url(maskBytes).length);
         }
-        return cachedTileMaskBase64Length;
+        return tileMaskLengthCache.get(tileCount);
     }
 
     function encodeGround(matrix) {
@@ -226,7 +258,7 @@
 
         const useSparseEncoding = text?.[0] === GROUND_SPARSE_PREFIX && version !== LEGACY_VERSION;
         if (useSparseEncoding) {
-            const maskLength = getTileMaskBase64Length();
+            const maskLength = getTileMaskBase64Length(TILE_COUNT);
             const maskSlice = text.slice(1, 1 + maskLength);
             const valuesSlice = text.slice(1 + maskLength);
             const maskBytes = fromBase64Url(maskSlice);
@@ -303,7 +335,7 @@
         const grid = [];
 
         if (useBinaryEncoding) {
-            const maskLength = getTileMaskBase64Length();
+            const maskLength = getTileMaskBase64Length(TILE_COUNT);
             const maskSlice = text.slice(1, 1 + maskLength);
             const valuesSlice = text.slice(1 + maskLength);
             const maskBytes = fromBase64Url(maskSlice);
@@ -349,23 +381,64 @@
         return grid;
     }
 
+    function decodeWorldGround(text, version, roomCount) {
+        if (version >= VERSION) {
+            const segments = text ? text.split(',') : [];
+            const matrices = [];
+            for (let index = 0; index < roomCount; index++) {
+                const segment = segments[index] ?? '';
+                matrices.push(decodeGround(segment, version));
+            }
+            return matrices;
+        }
+        return [decodeGround(text, version)];
+    }
+
+    function decodeWorldOverlay(text, version, roomCount) {
+        if (version >= VERSION) {
+            const segments = text ? text.split(',') : [];
+            const matrices = [];
+            for (let index = 0; index < roomCount; index++) {
+                const segment = segments[index] ?? '';
+                matrices.push(decodeOverlay(segment, version));
+            }
+            return matrices;
+        }
+        return [decodeOverlay(text || '', version)];
+    }
+
     function positionToByte(entry) {
-        const room = clamp(Number(entry?.roomIndex), 0, 3, 0) & 0x03;
+        const room = clampRoomIndex(entry?.roomIndex) & 0x0f;
         const y = clamp(Number(entry?.y), 0, MATRIX_SIZE - 1, 0) & 0x07;
         const x = clamp(Number(entry?.x), 0, MATRIX_SIZE - 1, 0) & 0x07;
-        return (room << 6) | (y << 3) | x;
+        return ((room & 0x03) << 6) | (y << 3) | x;
     }
 
     function byteToPosition(byte) {
         return {
             x: byte & 0x07,
             y: (byte >> 3) & 0x07,
-            roomIndex: (byte >> 6) & 0x03
+            roomIndex: clampRoomIndex((byte >> 6) & 0x03)
         };
     }
 
     function encodePositions(entries) {
         if (!entries.length) return '';
+        const maxRoomIndex = entries.reduce((max, entry) => Math.max(max, clampRoomIndex(entry?.roomIndex)), 0);
+        const useWide = maxRoomIndex > 3;
+        if (useWide) {
+            const bytes = new Uint8Array(entries.length * 2);
+            for (let i = 0; i < entries.length; i++) {
+                const room = clampRoomIndex(entries[i]?.roomIndex) & 0x0f;
+                const y = clamp(Number(entries[i]?.y), 0, MATRIX_SIZE - 1, 0) & 0x07;
+                const x = clamp(Number(entries[i]?.x), 0, MATRIX_SIZE - 1, 0) & 0x07;
+                const offset = i * 2;
+                bytes[offset] = ((room & 0x03) << 6) | (y << 3) | x;
+                bytes[offset + 1] = (room >> 2) & 0x0f;
+            }
+            return POSITION_WIDE_PREFIX + toBase64Url(bytes);
+        }
+
         const bytes = new Uint8Array(entries.length);
         for (let i = 0; i < entries.length; i++) {
             bytes[i] = positionToByte(entries[i]);
@@ -391,6 +464,21 @@
 
     function decodePositions(text) {
         if (!text) return [];
+        if (text[0] === POSITION_WIDE_PREFIX) {
+            const bytes = fromBase64Url(text.slice(1));
+            const positions = [];
+            for (let i = 0; i < bytes.length; i += 2) {
+                const low = bytes[i] ?? 0;
+                const high = bytes[i + 1] ?? 0;
+                const x = low & 0x07;
+                const y = (low >> 3) & 0x07;
+                const roomLower = (low >> 6) & 0x03;
+                const roomUpper = high & 0x0f;
+                const roomIndex = clampRoomIndex((roomUpper << 2) | roomLower);
+                positions.push({ x, y, roomIndex });
+            }
+            return positions;
+        }
         const bytes = fromBase64Url(text);
         return Array.from(bytes, (byte) => byteToPosition(byte));
     }
@@ -493,26 +581,40 @@
     }
 
     function buildShareCode(gameData) {
-        const ground = encodeGround(gameData?.tileset?.map?.ground ?? []);
-        const { text: overlayText, hasData: hasOverlay } = encodeOverlay(gameData?.tileset?.map?.overlay ?? []);
+        const roomCount = WORLD_ROOM_COUNT;
+        const groundMatrices = collectGroundMatrices(gameData, roomCount);
+        const overlayMatrices = collectOverlayMatrices(gameData, roomCount);
         const start = normalizeStart(gameData?.start ?? {});
         const sprites = normalizeSprites(gameData?.sprites);
         const enemies = normalizeEnemies(gameData?.enemies);
 
+        const groundSegments = groundMatrices.map((matrix) => encodeGround(matrix));
+        const hasGround = groundSegments.some((segment) => Boolean(segment));
+
+        const overlaySegments = [];
+        let hasOverlay = false;
+        for (let index = 0; index < roomCount; index++) {
+            const { text, hasData } = encodeOverlay(overlayMatrices[index] ?? []);
+            overlaySegments.push(text);
+            if (hasData) hasOverlay = true;
+        }
+
         const parts = [];
         parts.push('v' + VERSION.toString(36));
-        if (ground) {
-            parts.push('g' + ground);
+        if (hasGround) {
+            parts.push('g' + groundSegments.join(','));
         }
         if (hasOverlay) {
-            parts.push('o' + overlayText);
+            parts.push('o' + overlaySegments.join(','));
         }
 
         const defaultStart = normalizeStart({});
         const needsStart = start.x !== defaultStart.x || start.y !== defaultStart.y || start.roomIndex !== defaultStart.roomIndex;
         if (needsStart) {
             const startCode = encodePositions([start]);
-            parts.push('s' + startCode);
+            if (startCode) {
+                parts.push('s' + startCode);
+            }
         }
 
         if (sprites.length) {
@@ -531,7 +633,10 @@
         }
 
         if (enemies.length) {
-            parts.push('e' + encodePositions(enemies));
+            const enemyPositions = encodePositions(enemies);
+            if (enemyPositions) {
+                parts.push('e' + enemyPositions);
+            }
         }
 
         const title = typeof gameData?.title === 'string' ? gameData.title.trim() : '';
@@ -554,12 +659,13 @@
         }
 
         const version = payload.v ? parseInt(payload.v, 36) : NaN;
-        if (!Number.isFinite(version) || (version !== VERSION && version !== LEGACY_VERSION)) {
+        if (!Number.isFinite(version) || (version !== VERSION && version !== PREVIOUS_VERSION && version !== LEGACY_VERSION)) {
             return null;
         }
 
-        const ground = decodeGround(payload.g || '', version);
-        const overlay = payload.o ? decodeOverlay(payload.o, version) : normalizeOverlay([]);
+        const roomCount = version >= VERSION ? WORLD_ROOM_COUNT : 1;
+        const groundMaps = decodeWorldGround(payload.g || '', version, roomCount);
+        const overlayMaps = decodeWorldOverlay(payload.o || '', version, roomCount);
         const startPosition = decodePositions(payload.s || '')?.[0] ?? normalizeStart({});
         const npcPositions = decodePositions(payload.p || '');
         const npcTexts = decodeTextArray(payload.t || '');
@@ -609,18 +715,25 @@
             roomIndex: pos.roomIndex
         }));
 
+        const rooms = Array.from({ length: roomCount }, () => ({ bg: 0 }));
+        const maps = [];
+        for (let index = 0; index < roomCount; index++) {
+            const ground = groundMaps[index] ?? normalizeGround([]);
+            const overlay = overlayMaps[index] ?? normalizeOverlay([]);
+            maps.push({ ground, overlay });
+        }
+
         return {
             title,
             start: startPosition,
             sprites,
             enemies,
-            rooms: [{ bg: 0 }],
+            world: version >= VERSION ? { rows: WORLD_ROWS, cols: WORLD_COLS } : { rows: 1, cols: 1 },
+            rooms,
             tileset: {
                 tiles: [],
-                map: {
-                    ground,
-                    overlay
-                }
+                maps,
+                map: maps[0] || { ground: normalizeGround([]), overlay: normalizeOverlay([]) }
             }
         };
     }

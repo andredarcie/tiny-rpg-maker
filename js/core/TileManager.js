@@ -96,6 +96,7 @@ class TileManager {
     ensureDefaultTiles() {
         const tileset = this.gameState.game.tileset;
         const size = this.gameState.game.roomSize || 8;
+        const totalRooms = (this.gameState.game.world?.rows || 1) * (this.gameState.game.world?.cols || 1);
 
         if (!Array.isArray(tileset.tiles) || tileset.tiles.length === 0) {
             tileset.tiles = this.presets.map(tile => this.cloneTile(tile));
@@ -119,10 +120,15 @@ class TileManager {
             return rows;
         };
 
-        const map = tileset.map ?? {};
-        map.ground = normalizeLayer(map.ground, defaultTileId);
-        map.overlay = normalizeLayer(map.overlay, null);
-        tileset.map = map;
+        const maps = Array.isArray(tileset.maps) ? tileset.maps : [];
+        tileset.maps = Array.from({ length: totalRooms }, (_, index) => {
+            const map = maps[index] ?? {};
+            return {
+                ground: normalizeLayer(map.ground, defaultTileId),
+                overlay: normalizeLayer(map.overlay, null)
+            };
+        });
+        tileset.map = tileset.maps[0];
     }
 
     getPresetTileNames() {
@@ -155,9 +161,10 @@ class TileManager {
         }
     }
 
-    setMapTile(x, y, tileId) {
+    setMapTile(x, y, tileId, roomIndex = 0) {
         if (y < 0 || y >= 8 || x < 0 || x >= 8) return;
-        const map = this.gameState.game.tileset.map;
+        const maps = this.gameState.game.tileset.maps;
+        const map = Array.isArray(maps) ? maps[roomIndex] : null;
         if (!map) return;
 
         if (tileId === null) {
@@ -176,7 +183,11 @@ class TileManager {
         }
     }
 
-    getTileMap() {
+    getTileMap(roomIndex = 0) {
+        const maps = this.gameState.game.tileset.maps;
+        if (Array.isArray(maps) && maps[roomIndex]) {
+            return maps[roomIndex];
+        }
         return this.gameState.game.tileset.map;
     }
 
