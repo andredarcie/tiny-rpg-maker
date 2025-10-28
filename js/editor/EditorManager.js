@@ -13,6 +13,7 @@ class EditorManager {
         this.selectedEnemyType = 'skull';
         this.mapPainting = false;
         this.history = { stack: [], index: -1 };
+        this.npcTextUpdateTimer = null;
 
         this.handleCanvasResize = this.handleCanvasResize.bind(this);
         this.finishMapPaint = this.finishMapPaint.bind(this);
@@ -730,11 +731,19 @@ class EditorManager {
         if (!this.selectedNpcType || !this.npcText) return;
         const npc = this.gameEngine.getSprites().find((s) => s.type === this.selectedNpcType);
         if (!npc) return;
-        npc.text = this.npcText.value;
+        const newText = this.npcText.value;
+        if (npc.text === newText) return;
+        npc.text = newText;
         this.gameEngine.npcManager?.updateNPCDialog?.(npc.id, npc.text);
-        this.renderNpcs();
-        this.updateJSON();
-        this.pushHistory();
+        if (this.npcTextUpdateTimer) {
+            clearTimeout(this.npcTextUpdateTimer);
+        }
+        this.npcTextUpdateTimer = setTimeout(() => {
+            this.renderNpcs();
+            this.updateJSON();
+            this.pushHistory();
+            this.npcTextUpdateTimer = null;
+        }, 250);
     }
 
     handleCanvasResize(force = false) {
