@@ -27,7 +27,9 @@ class GameEngine {
     tryMove(dx, dy) {
         const dialog = this.gameState.getDialog();
         if (dialog.active) {
-            this.gameState.setDialog(false);
+            if (dialog.page == dialog.maxPages) {
+                this.gameState.setDialog(false);
+            }
             this.renderer.draw();
             return;
         }

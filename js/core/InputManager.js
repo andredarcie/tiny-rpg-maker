@@ -17,14 +17,17 @@ class InputManager {
     handleKeyDown(ev) {
         const dialog = this.gameEngine.gameState.getDialog();
 
-        // When a dialog is open, only allow confirmation keys to close it
+        // When a dialog is open, only allow confirmation keys to handle it
         if (dialog.active) {
             switch (ev.key.toLowerCase()) {
                 case "z":
                 case "enter":
                 case " ":
                     ev.preventDefault();
-                    this.gameEngine.gameState.setDialog(false);
+                    const dialog = this.gameEngine.gameState.getDialog()
+                    if (dialog.page == dialog.maxPages) {
+                        this.gameEngine.gameState.setDialog(false);
+                    }
                     this.gameEngine.renderer.draw();
                     break;
             }
