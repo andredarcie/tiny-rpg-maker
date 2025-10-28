@@ -8,10 +8,42 @@
 
     const NPC_DEFINITIONS = definitionsSource.NPC_DEFINITIONS || [];
     const getNpcDefinition = definitionsSource.getNpcDefinition || (() => null);
+    const NPC_ID_PREFIX = 'npc-';
+    const TYPE_TO_INDEX = new Map();
+    for (let i = 0; i < NPC_DEFINITIONS.length; i++) {
+        TYPE_TO_INDEX.set(NPC_DEFINITIONS[i].type, i + 1);
+    }
+    let nextNpcId = NPC_DEFINITIONS.length + 1;
 
     function clamp(value, min, max, fallback) {
         if (!Number.isFinite(value)) return fallback;
         return Math.max(min, Math.min(max, value));
+    }
+
+    function parseSequentialId(id) {
+        if (typeof id !== 'string') return null;
+        if (!id.startsWith(NPC_ID_PREFIX)) return null;
+        const value = Number(id.slice(NPC_ID_PREFIX.length));
+        return Number.isFinite(value) && value > 0 ? value : null;
+    }
+
+    function ensureCounterAbove(value) {
+        if (Number.isFinite(value) && value >= nextNpcId) {
+            nextNpcId = value + 1;
+        }
+    }
+
+    function sequentialIdForType(type) {
+        if (!TYPE_TO_INDEX.has(type)) return null;
+        const index = TYPE_TO_INDEX.get(type);
+        ensureCounterAbove(index);
+        return `${NPC_ID_PREFIX}${index}`;
+    }
+
+    function allocateSequentialId() {
+        const id = `${NPC_ID_PREFIX}${nextNpcId}`;
+        nextNpcId += 1;
+        return id;
     }
 
     class NPCManager {
@@ -20,11 +52,7 @@
         }
 
         generateId() {
-            const cryptoObj = (typeof window !== 'undefined' ? window.crypto : (typeof crypto !== 'undefined' ? crypto : null));
-            if (cryptoObj?.randomUUID) {
-                return cryptoObj.randomUUID();
-            }
-            return 'id-' + Math.random().toString(36).slice(2, 9);
+            return allocateSequentialId();
         }
 
         getDefinitions() {
@@ -66,7 +94,13 @@
 
         normalizeNPC(npc) {
             const def = getNpcDefinition(npc.type);
-            const id = def?.id || npc.id || this.generateId();
+            const sequentialId = def ? sequentialIdForType(def.type) : null;
+            const existingId = typeof npc?.id === 'string' ? npc.id.trim() : '';
+            const parsed = parseSequentialId(existingId);
+            if (parsed) {
+                ensureCounterAbove(parsed);
+            }
+            const id = sequentialId || existingId || this.generateId();
             const name = def?.name || npc.name || 'NPC';
             const text = typeof npc.text === 'string' ? npc.text : (def?.defaultText || '');
             const roomIndex = clamp(Number(npc.roomIndex), 0, 3, 0);
@@ -88,7 +122,7 @@
 
         createFromDefinition(def) {
             return {
-                id: def.id,
+                id: sequentialIdForType(def.type) || this.generateId(),
                 type: def.type,
                 name: def.name,
                 text: def.defaultText || '',

@@ -10,10 +10,12 @@
 
     const NPC_DEFINITIONS = definitionsSource.NPC_DEFINITIONS || [];
 
-    const VERSION = 1;
+    const LEGACY_VERSION = 1;
+    const VERSION = 2;
     const MATRIX_SIZE = 8;
+    const TILE_COUNT = MATRIX_SIZE * MATRIX_SIZE;
     const NULL_CHAR = 'z';
-    const HEX_DIGITS = '0123456789abcdef';
+    const OVERLAY_BINARY_PREFIX = 'y'; // Marks new overlay bitmask encoding to avoid legacy clashes.
     const DEFAULT_TITLE = 'Tiny RPG Adventure';
     const DEFAULT_PALETTE = [
         '#000000', '#1D2B53', '#7E2553', '#008751',
@@ -122,26 +124,85 @@
             .filter((enemy) => Number.isFinite(enemy.x) && Number.isFinite(enemy.y));
     }
 
-    function encodeGround(matrix) {
-        const normalized = normalizeGround(matrix);
-        let output = '';
-        for (let y = 0; y < MATRIX_SIZE; y++) {
-            for (let x = 0; x < MATRIX_SIZE; x++) {
-                output += HEX_DIGITS[normalized[y][x] & 0x0f];
-            }
+    function packNibbles(values) {
+        const byteLength = Math.ceil(values.length / 2);
+        const bytes = new Uint8Array(byteLength);
+        for (let i = 0; i < values.length; i += 2) {
+            const high = values[i] & 0x0f;
+            const low = values[i + 1] !== undefined ? (values[i + 1] & 0x0f) : 0;
+            const index = i >> 1;
+            bytes[index] = (high << 4) | low;
         }
-        return output;
+        return bytes;
     }
 
-    function decodeGround(text) {
+    function unpackNibbles(bytes, expectedCount) {
+        const values = new Array(expectedCount);
+        for (let i = 0; i < expectedCount; i++) {
+            const byte = bytes[i >> 1] || 0;
+            values[i] = (i % 2 === 0) ? ((byte >> 4) & 0x0f) : (byte & 0x0f);
+        }
+        return values;
+    }
+
+    function countSetBits(bytes) {
+        let total = 0;
+        for (let i = 0; i < bytes.length; i++) {
+            let value = bytes[i] || 0;
+            while (value) {
+                value &= value - 1;
+                total++;
+            }
+        }
+        return total;
+    }
+
+    let cachedOverlayMaskBase64Length = null;
+    function getOverlayMaskBase64Length() {
+        if (cachedOverlayMaskBase64Length === null) {
+            const maskBytes = new Uint8Array(Math.ceil(TILE_COUNT / 8));
+            cachedOverlayMaskBase64Length = toBase64Url(maskBytes).length;
+        }
+        return cachedOverlayMaskBase64Length;
+    }
+
+    function encodeGround(matrix) {
+        const normalized = normalizeGround(matrix);
+        const values = [];
+        for (let y = 0; y < MATRIX_SIZE; y++) {
+            for (let x = 0; x < MATRIX_SIZE; x++) {
+                values.push(normalized[y][x] & 0x0f);
+            }
+        }
+        return toBase64Url(packNibbles(values));
+    }
+
+    function decodeGround(text, version) {
+        const useLegacy = version === LEGACY_VERSION ||
+            (text?.length === TILE_COUNT && /^[0-9a-f]+$/i.test(text));
         const grid = [];
-        let index = 0;
+        if (useLegacy) {
+            let index = 0;
+            for (let y = 0; y < MATRIX_SIZE; y++) {
+                const row = [];
+                for (let x = 0; x < MATRIX_SIZE; x++) {
+                    const char = text?.[index++] ?? '0';
+                    const value = parseInt(char, 16);
+                    row.push(Number.isFinite(value) ? clamp(value, 0, 15, 0) : 0);
+                }
+                grid.push(row);
+            }
+            return grid;
+        }
+
+        const bytes = fromBase64Url(text);
+        const values = unpackNibbles(bytes, TILE_COUNT);
+        let valueIndex = 0;
         for (let y = 0; y < MATRIX_SIZE; y++) {
             const row = [];
             for (let x = 0; x < MATRIX_SIZE; x++) {
-                const char = text?.[index++] ?? '0';
-                const value = parseInt(char, 16);
-                row.push(Number.isFinite(value) ? clamp(value, 0, 15, 0) : 0);
+                const value = values[valueIndex++] ?? 0;
+                row.push(clamp(value, 0, 15, 0));
             }
             grid.push(row);
         }
@@ -150,24 +211,72 @@
 
     function encodeOverlay(matrix) {
         const normalized = normalizeOverlay(matrix);
-        let output = '';
+        const maskBytes = new Uint8Array(Math.ceil(TILE_COUNT / 8));
+        const values = [];
         let hasData = false;
+        let bitIndex = 0;
+
         for (let y = 0; y < MATRIX_SIZE; y++) {
             for (let x = 0; x < MATRIX_SIZE; x++) {
                 const value = normalized[y][x];
+                const currentIndex = bitIndex++;
                 if (value === null || value === undefined) {
-                    output += NULL_CHAR;
-                } else {
-                    hasData = true;
-                    output += HEX_DIGITS[value & 0x0f];
+                    continue;
                 }
+                hasData = true;
+                const byteIndex = currentIndex >> 3;
+                const bitPosition = currentIndex & 0x07;
+                maskBytes[byteIndex] |= (1 << bitPosition);
+                values.push(value & 0x0f);
             }
         }
-        return { text: output, hasData };
+
+        if (!hasData) {
+            return { text: '', hasData: false };
+        }
+
+        const encodedMask = toBase64Url(maskBytes);
+        const encodedValues = values.length ? toBase64Url(packNibbles(values)) : '';
+        return {
+            text: `${OVERLAY_BINARY_PREFIX}${encodedMask}${encodedValues}`,
+            hasData: true
+        };
     }
 
-    function decodeOverlay(text) {
+    function decodeOverlay(text, version) {
+        const useBinaryEncoding = text?.[0] === OVERLAY_BINARY_PREFIX && version !== LEGACY_VERSION;
         const grid = [];
+
+        if (useBinaryEncoding) {
+            const maskLength = getOverlayMaskBase64Length();
+            const maskSlice = text.slice(1, 1 + maskLength);
+            const valuesSlice = text.slice(1 + maskLength);
+            const maskBytes = fromBase64Url(maskSlice);
+            const nonNullCount = countSetBits(maskBytes);
+            const valueBytes = valuesSlice ? fromBase64Url(valuesSlice) : new Uint8Array(0);
+            const values = unpackNibbles(valueBytes, nonNullCount);
+            let bitIndex = 0;
+            let valueIndex = 0;
+
+            for (let y = 0; y < MATRIX_SIZE; y++) {
+                const row = [];
+                for (let x = 0; x < MATRIX_SIZE; x++) {
+                    const byteIndex = bitIndex >> 3;
+                    const bitPosition = bitIndex & 0x07;
+                    const hasTile = (maskBytes[byteIndex] & (1 << bitPosition)) !== 0;
+                    if (hasTile) {
+                        const value = values[valueIndex++] ?? 0;
+                        row.push(clamp(value, 0, 15, 0));
+                    } else {
+                        row.push(null);
+                    }
+                    bitIndex++;
+                }
+                grid.push(row);
+            }
+            return grid;
+        }
+
         let index = 0;
         for (let y = 0; y < MATRIX_SIZE; y++) {
             const row = [];
@@ -376,18 +485,20 @@
             payload[key] = value;
         }
 
-        if (!payload.v || parseInt(payload.v, 36) !== VERSION) {
+        const version = payload.v ? parseInt(payload.v, 36) : NaN;
+        if (!Number.isFinite(version) || (version !== VERSION && version !== LEGACY_VERSION)) {
             return null;
         }
 
-        const ground = decodeGround(payload.g || '');
-        const overlay = payload.o ? decodeOverlay(payload.o) : normalizeOverlay([]);
+        const ground = decodeGround(payload.g || '', version);
+        const overlay = payload.o ? decodeOverlay(payload.o, version) : normalizeOverlay([]);
         const startPosition = decodePositions(payload.s || '')?.[0] ?? normalizeStart({});
         const npcPositions = decodePositions(payload.p || '');
         const npcTexts = decodeTextArray(payload.t || '');
         const npcTypeIndexes = decodeNpcTypeIndexes(payload.i || '');
         const enemyPositions = decodePositions(payload.e || '');
         const title = decodeText(payload.n, DEFAULT_TITLE) || DEFAULT_TITLE;
+        const buildNpcId = (index) => `npc-${index + 1}`;
 
         const canUseDefinitions = NPC_DEFINITIONS.length > 0 && (npcTypeIndexes.length > 0 || npcPositions.length <= NPC_DEFINITIONS.length);
         const sprites = [];
@@ -398,7 +509,7 @@
                 if (!def) continue;
                 const pos = npcPositions[index];
                 sprites.push({
-                    id: def.id,
+                    id: buildNpcId(index),
                     type: def.type,
                     name: def.name,
                     x: pos.x,
@@ -412,7 +523,7 @@
             for (let index = 0; index < npcPositions.length; index++) {
                 const pos = npcPositions[index];
                 sprites.push({
-                    id: `npc-${index + 1}`,
+                    id: buildNpcId(index),
                     name: `NPC ${index + 1}`,
                     x: pos.x,
                     y: pos.y,
@@ -432,19 +543,10 @@
 
         return {
             title,
-            palette: DEFAULT_PALETTE.slice(),
-            roomSize: MATRIX_SIZE,
-            rooms: [{
-                size: MATRIX_SIZE,
-                bg: 0,
-                tiles: Array.from({ length: MATRIX_SIZE }, () => Array(MATRIX_SIZE).fill(0)),
-                walls: Array.from({ length: MATRIX_SIZE }, () => Array(MATRIX_SIZE).fill(false))
-            }],
             start: startPosition,
             sprites,
             enemies,
-            items: [],
-            exits: [],
+            rooms: [{ bg: 0 }],
             tileset: {
                 tiles: [],
                 map: {
