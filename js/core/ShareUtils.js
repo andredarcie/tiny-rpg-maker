@@ -169,10 +169,18 @@
     function encodeGround(matrix) {
         const normalized = normalizeGround(matrix);
         const values = [];
+        let hasNonZero = false;
         for (let y = 0; y < MATRIX_SIZE; y++) {
             for (let x = 0; x < MATRIX_SIZE; x++) {
-                values.push(normalized[y][x] & 0x0f);
+                const value = normalized[y][x] & 0x0f;
+                if (!hasNonZero && value !== 0) {
+                    hasNonZero = true;
+                }
+                values.push(value);
             }
+        }
+        if (!hasNonZero) {
+            return '';
         }
         return toBase64Url(packNibbles(values));
     }
@@ -321,11 +329,16 @@
     function encodeNpcTypeIndexes(sprites) {
         if (!sprites.length) return '';
         const bytes = new Uint8Array(sprites.length);
+        let hasNonSequential = false;
         for (let i = 0; i < sprites.length; i++) {
             const sprite = sprites[i];
             const index = NPC_DEFINITIONS.findIndex((def) => def.type === sprite.type);
             bytes[i] = index >= 0 ? index : 255;
+            if (!hasNonSequential && bytes[i] !== i) {
+                hasNonSequential = true;
+            }
         }
+        if (!hasNonSequential) return '';
         return toBase64Url(bytes);
     }
 
@@ -441,7 +454,9 @@
 
         const parts = [];
         parts.push('v' + VERSION.toString(36));
-        parts.push('g' + ground);
+        if (ground) {
+            parts.push('g' + ground);
+        }
         if (hasOverlay) {
             parts.push('o' + overlayText);
         }
@@ -456,7 +471,13 @@
         if (sprites.length) {
             const positions = encodePositions(sprites);
             const typeIndexes = encodeNpcTypeIndexes(sprites);
-            const texts = encodeTextArray(sprites.map((npc) => npc.text || ''));
+            const spriteTexts = sprites.map((npc) => (typeof npc.text === 'string' ? npc.text : ''));
+            const needsNpcTexts = sprites.some((sprite, index) => {
+                const def = NPC_DEFINITIONS.find((entry) => entry.type === sprite.type);
+                const fallback = def ? (def.defaultText || '') : '';
+                return spriteTexts[index] !== fallback;
+            });
+            const texts = needsNpcTexts ? encodeTextArray(spriteTexts) : '';
             if (positions) parts.push('p' + positions);
             if (typeIndexes) parts.push('i' + typeIndexes);
             if (texts) parts.push('t' + texts);
