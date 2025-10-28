@@ -27,8 +27,6 @@ class InputManager {
                     const dialog = this.gameEngine.gameState.getDialog()
                     if (dialog.page == dialog.maxPages) {
                         this.gameEngine.gameState.setDialog(false);
-                        this.gameEngine.renderer.draw();
-                        break;
                     }
                     this.gameEngine.renderer.draw();
                     break;
