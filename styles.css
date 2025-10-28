@@ -611,15 +611,14 @@ textarea {
 }
 
 .npc-card .npc-preview {
-    width: 32px;
-    height: 32px;
+    width: 48px;
+    height: 48px;
     border: 1px solid var(--border);
     border-radius: 4px;
-    display: grid;
-    place-items: center;
-    font-size: 1rem;
-    color: #fff;
-    background: var(--accent);
+    background: var(--panel);
+    display: block;
+    image-rendering: pixelated;
+    flex-shrink: 0;
 }
 
 .npc-card .npc-name {

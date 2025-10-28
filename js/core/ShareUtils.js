@@ -15,8 +15,9 @@
     const MATRIX_SIZE = 8;
     const TILE_COUNT = MATRIX_SIZE * MATRIX_SIZE;
     const NULL_CHAR = 'z';
+    const GROUND_SPARSE_PREFIX = 'x'; // Marks sparse ground encoding to avoid legacy clashes.
     const OVERLAY_BINARY_PREFIX = 'y'; // Marks new overlay bitmask encoding to avoid legacy clashes.
-    const DEFAULT_TITLE = 'Tiny RPG Adventure';
+    const DEFAULT_TITLE = 'My Tiny RPG Game';
     const DEFAULT_PALETTE = [
         '#000000', '#1D2B53', '#7E2553', '#008751',
         '#AB5236', '#5F574F', '#C2C3C7', '#FFF1E8',
@@ -157,32 +158,52 @@
         return total;
     }
 
-    let cachedOverlayMaskBase64Length = null;
-    function getOverlayMaskBase64Length() {
-        if (cachedOverlayMaskBase64Length === null) {
+    let cachedTileMaskBase64Length = null;
+    function getTileMaskBase64Length() {
+        if (cachedTileMaskBase64Length === null) {
             const maskBytes = new Uint8Array(Math.ceil(TILE_COUNT / 8));
-            cachedOverlayMaskBase64Length = toBase64Url(maskBytes).length;
+            cachedTileMaskBase64Length = toBase64Url(maskBytes).length;
         }
-        return cachedOverlayMaskBase64Length;
+        return cachedTileMaskBase64Length;
     }
 
     function encodeGround(matrix) {
         const normalized = normalizeGround(matrix);
         const values = [];
+        const nonZeroValues = [];
+        const maskBytes = new Uint8Array(Math.ceil(TILE_COUNT / 8));
         let hasNonZero = false;
+        let bitIndex = 0;
         for (let y = 0; y < MATRIX_SIZE; y++) {
             for (let x = 0; x < MATRIX_SIZE; x++) {
                 const value = normalized[y][x] & 0x0f;
                 if (!hasNonZero && value !== 0) {
                     hasNonZero = true;
                 }
+                if (value !== 0) {
+                    const byteIndex = bitIndex >> 3;
+                    const bitPosition = bitIndex & 0x07;
+                    maskBytes[byteIndex] |= (1 << bitPosition);
+                    nonZeroValues.push(value);
+                }
                 values.push(value);
+                bitIndex++;
             }
         }
         if (!hasNonZero) {
             return '';
         }
-        return toBase64Url(packNibbles(values));
+        const dense = toBase64Url(packNibbles(values));
+        if (!nonZeroValues.length) {
+            return dense;
+        }
+        const encodedMask = toBase64Url(maskBytes);
+        const encodedValues = toBase64Url(packNibbles(nonZeroValues));
+        const sparseLength = 1 + encodedMask.length + encodedValues.length;
+        if (sparseLength < dense.length) {
+            return `${GROUND_SPARSE_PREFIX}${encodedMask}${encodedValues}`;
+        }
+        return dense;
     }
 
     function decodeGround(text, version) {
@@ -197,6 +218,32 @@
                     const char = text?.[index++] ?? '0';
                     const value = parseInt(char, 16);
                     row.push(Number.isFinite(value) ? clamp(value, 0, 15, 0) : 0);
+                }
+                grid.push(row);
+            }
+            return grid;
+        }
+
+        const useSparseEncoding = text?.[0] === GROUND_SPARSE_PREFIX && version !== LEGACY_VERSION;
+        if (useSparseEncoding) {
+            const maskLength = getTileMaskBase64Length();
+            const maskSlice = text.slice(1, 1 + maskLength);
+            const valuesSlice = text.slice(1 + maskLength);
+            const maskBytes = fromBase64Url(maskSlice);
+            const nonZeroCount = countSetBits(maskBytes);
+            const valueBytes = valuesSlice ? fromBase64Url(valuesSlice) : new Uint8Array(0);
+            const values = unpackNibbles(valueBytes, nonZeroCount);
+            let valueIndex = 0;
+            let bitIndex = 0;
+            for (let y = 0; y < MATRIX_SIZE; y++) {
+                const row = [];
+                for (let x = 0; x < MATRIX_SIZE; x++) {
+                    const byteIndex = bitIndex >> 3;
+                    const bitPosition = bitIndex & 0x07;
+                    const hasValue = (maskBytes[byteIndex] & (1 << bitPosition)) !== 0;
+                    const tile = hasValue ? (values[valueIndex++] ?? 0) : 0;
+                    row.push(clamp(tile, 0, 15, 0));
+                    bitIndex++;
                 }
                 grid.push(row);
             }
@@ -256,7 +303,7 @@
         const grid = [];
 
         if (useBinaryEncoding) {
-            const maskLength = getOverlayMaskBase64Length();
+            const maskLength = getTileMaskBase64Length();
             const maskSlice = text.slice(1, 1 + maskLength);
             const valuesSlice = text.slice(1 + maskLength);
             const maskBytes = fromBase64Url(maskSlice);

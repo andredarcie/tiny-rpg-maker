@@ -357,9 +357,11 @@ class EditorManager {
             card.dataset.id = npc?.id || '';
             if (def.type === this.selectedNpcType) card.classList.add('selected');
 
-            const preview = document.createElement('div');
+            const preview = document.createElement('canvas');
             preview.className = 'npc-preview';
-            preview.textContent = def.previewLabel || def.name;
+            preview.width = 48;
+            preview.height = 48;
+            this.drawNpcPreview(preview, def);
 
             const meta = document.createElement('div');
             meta.className = 'meta';
@@ -403,6 +405,48 @@ class EditorManager {
         }
 
         this.updateNpcSelection();
+    }
+
+    drawNpcPreview(canvas, definition) {
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        ctx.imageSmoothingEnabled = false;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const renderer = this.gameEngine?.renderer;
+        const sprite = renderer?.npcSprites?.[definition.type] || renderer?.npcSprites?.default || null;
+
+        if (!sprite || !sprite.length || !sprite[0]?.length) {
+            ctx.fillStyle = '#1D2B53';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#fff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = '10px sans-serif';
+            const label = (definition.previewLabel || definition.name || '?').slice(0, 1).toUpperCase();
+            ctx.fillText(label, canvas.width / 2, canvas.height / 2);
+            return;
+        }
+
+        const spriteHeight = sprite.length;
+        const spriteWidth = sprite[0].length;
+        const step = Math.max(1, Math.floor(Math.min(canvas.width / spriteWidth, canvas.height / spriteHeight)));
+        const offsetX = Math.floor((canvas.width - spriteWidth * step) / 2);
+        const offsetY = Math.floor((canvas.height - spriteHeight * step) / 2);
+
+        if (renderer?.drawSprite) {
+            renderer.drawSprite(ctx, sprite, offsetX, offsetY, step);
+        } else {
+            for (let y = 0; y < spriteHeight; y++) {
+                for (let x = 0; x < spriteWidth; x++) {
+                    const color = sprite[y][x];
+                    if (!color) continue;
+                    ctx.fillStyle = color;
+                    ctx.fillRect(offsetX + x * step, offsetY + y * step, step, step);
+                }
+            }
+        }
     }
 
     renderEnemies() {
