@@ -47,6 +47,20 @@
         }
 
         console.log('Tiny RPG Maker engine initialized successfully.');
+        const touchPad = document.querySelectorAll('.game-touch-pad .pad-button[data-direction]');
+        touchPad.forEach((btn) => {
+            btn.addEventListener('touchstart', (ev) => {
+                ev.preventDefault();
+                const dir = btn.dataset.direction;
+                if (!dir) return;
+                const map = { left: [-1, 0], right: [1, 0], up: [0, -1], down: [0, 1] };
+                const delta = map[dir];
+                if (delta) {
+                    gameEngine.tryMove(delta[0], delta[1]);
+                }
+            }, { passive: false });
+        });
+
     }
 
     function setupTabs() {
@@ -140,3 +154,4 @@
         scheduleResize();
     });
 })();
+

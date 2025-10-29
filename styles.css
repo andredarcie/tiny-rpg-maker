@@ -319,6 +319,81 @@ body.game-mode #tab-game .game-controls button {
     flex: 0 0 auto;
 }
 
+.game-touch-pad {
+    display: none;
+}
+
+.game-touch-pad .pad-button {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: linear-gradient(145deg, rgba(44, 54, 72, 0.95), rgba(20, 24, 36, 0.95));
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1rem;
+    padding: 0;
+    touch-action: manipulation;
+    transition: transform 0.1s ease, box-shadow 0.1s ease, border-color 0.1s ease;
+}
+
+.game-touch-pad .pad-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 3px rgba(0, 0, 0, 0.35);
+    border-color: rgba(100, 181, 246, 0.5);
+}
+
+.game-touch-pad .pad-middle-row {
+    display: flex;
+    gap: 12px;
+}
+
+.game-touch-pad .pad-center {
+    opacity: 0.2;
+}
+
+.game-touch-pad .pad-up::before {
+    content: '▲';
+}
+
+.game-touch-pad .pad-down::before {
+    content: '▼';
+}
+
+.game-touch-pad .pad-left::before {
+    content: '◀';
+}
+
+.game-touch-pad .pad-right::before {
+    content: '▶';
+}
+
+@media (max-width: 720px) {
+    .game-touch-pad {
+        position: absolute;
+        bottom: clamp(24px, 12vw, 48px);
+        left: 50%;
+        transform: translateX(-50%);
+        display: grid;
+        gap: 12px;
+        justify-items: center;
+        background: rgba(12, 15, 24, 0.65);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        padding: 18px 22px;
+        border-radius: 16px;
+        box-shadow: 0 12px 26px rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(6px);
+    }
+
+    body.game-mode #tab-game .game-controls {
+        right: clamp(12px, 5vw, 24px);
+        bottom: clamp(12px, 5vw, 24px);
+    }
+}
+
 .game-minimap {
     position: absolute;
     top: clamp(12px, 3vw, 28px);
