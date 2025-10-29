@@ -1,8 +1,12 @@
 const npcDefinitionsSource = (typeof module !== 'undefined' && module.exports)
     ? require('./NPCDefinitions')
     : ((typeof window !== 'undefined' ? window.NPCDefinitions : null) || {});
+const rendererObjectDefinitionsSource = (typeof module !== 'undefined' && module.exports)
+    ? require('./ObjectDefinitions')
+    : ((typeof window !== 'undefined' ? window.ObjectDefinitions : null) || {});
 
 const NPC_DEFINITIONS = npcDefinitionsSource.NPC_DEFINITIONS || [];
+const RENDERER_OBJECT_DEFINITIONS = rendererObjectDefinitionsSource.OBJECT_DEFINITIONS || [];
 
 /**
  * Renderer handles drawing the game scene and editor surfaces.
@@ -18,6 +22,7 @@ class Renderer {
         this.playerSprite = this.buildPlayerSprite();
         this.npcSprites = this.buildNpcSprites();
         this.enemySprite = this.buildEnemySprite();
+        this.objectSprites = this.buildObjectSprites();
         this.hudElement = typeof document !== 'undefined'
             ? document.getElementById('game-hud')
             : null;
@@ -32,6 +37,7 @@ class Renderer {
         this.drawBackground();
         this.drawTiles();
         this.drawWalls();
+        this.drawObjects();
         this.drawItems();
         this.drawNPCs();
         this.drawEnemies();
@@ -96,6 +102,23 @@ class Renderer {
         }
     }
 
+    drawObjects() {
+        const game = this.gameState.getGame();
+        const player = this.gameState.getPlayer();
+        const tileSize = this.getTilePixelSize();
+        const step = tileSize / 8;
+        const objects = Array.isArray(game.objects) ? game.objects : [];
+
+        for (const object of objects) {
+            if (object.roomIndex !== player.roomIndex) continue;
+            if (object.type === 'key' && object.collected) continue;
+            if (object.type === 'door' && object.opened) continue;
+            const px = object.x * tileSize;
+            const py = object.y * tileSize;
+            this.drawObjectSprite(this.ctx, object.type, px, py, step);
+        }
+    }
+
     drawItems() {
         const game = this.gameState.getGame();
         const player = this.gameState.getPlayer();
@@ -146,6 +169,14 @@ class Renderer {
         this.drawSprite(ctx, this.enemySprite, px, py, step);
     }
 
+    drawObjectSprite(ctx, type, px, py, stepOverride) {
+        if (!this.objectSprites) return;
+        const sprite = this.objectSprites[type];
+        if (!sprite) return;
+        const step = stepOverride || (this.getTilePixelSize() / 8);
+        this.drawSprite(ctx, sprite, px, py, step);
+    }
+
     drawPlayer() {
         const player = this.gameState.getPlayer();
         const tileSize = this.getTilePixelSize();
@@ -176,7 +207,10 @@ class Renderer {
         const hud = this.hudElement;
         if (!hud) return;
         const lives = this.gameState.getLives();
-        hud.textContent = `Vidas: ${lives}`;
+        const keys = typeof this.gameState.getKeys === 'function'
+            ? this.gameState.getKeys()
+            : 0;
+        hud.textContent = `Vidas: ${lives} | Chaves: ${keys}`;
         hud.style.visibility = 'visible';
     }
 
@@ -388,6 +422,21 @@ class Renderer {
             sprites[def.type] = mapPixels(def.sprite);
         }
         sprites.default = this.buildNpcSprite(picoPalette);
+        return sprites;
+    }
+
+    buildObjectSprites() {
+        const picoPalette = this.getPicoPalette();
+        const sprites = {};
+        for (const def of RENDERER_OBJECT_DEFINITIONS) {
+            if (!Array.isArray(def.sprite)) continue;
+            sprites[def.type] = def.sprite.map((row) =>
+                row.map((value) => {
+                    if (value === null || value === undefined) return null;
+                    return picoPalette[value] ?? null;
+                })
+            );
+        }
         return sprites;
     }
 

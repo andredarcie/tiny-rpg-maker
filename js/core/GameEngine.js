@@ -88,6 +88,21 @@ class GameEngine {
 
         if (targetRoom.walls?.[targetY]?.[targetX]) return; // blocked by a wall
 
+        const objectAtTarget = this.gameState.getObjectAt?.(targetRoomIndex, targetX, targetY) ?? null;
+        if (objectAtTarget?.type === 'door' && !objectAtTarget.opened) {
+            const consumeKey = typeof this.gameState.consumeKey === 'function'
+                ? this.gameState.consumeKey()
+                : false;
+            if (consumeKey) {
+                objectAtTarget.opened = true;
+                this.showDialog('Abriu a porta com chave.');
+            } else {
+                this.showDialog('A porta esta trancada.');
+                this.renderer.draw();
+                return;
+            }
+        }
+
         const tileMap = this.tileManager.getTileMap(targetRoomIndex);
         const overlayId = tileMap?.overlay?.[targetY]?.[targetX] ?? null;
         const groundId = tileMap?.ground?.[targetY]?.[targetX] ?? null;
@@ -115,6 +130,21 @@ class GameEngine {
                 item.y === player.y) {
                 item.collected = true;
                 this.showDialog(item.text || "You picked up an item.");
+                break;
+            }
+        }
+
+        // Objetos
+        const objects = this.gameState.getObjectsForRoom?.(player.roomIndex) ?? [];
+        for (const object of objects) {
+            if (object.type !== 'key') continue;
+            if (object.collected) continue;
+            if (object.x === player.x && object.y === player.y) {
+                object.collected = true;
+                const totalKeys = typeof this.gameState.addKeys === 'function'
+                    ? this.gameState.addKeys(1)
+                    : null;
+                this.showDialog('Voce pegou uma chave.');
                 break;
             }
         }
@@ -207,6 +237,33 @@ class GameEngine {
 
     getTilePresetNames() {
         return this.tileManager.getPresetTileNames();
+    }
+
+    getObjects() {
+        return this.gameState.getObjects();
+    }
+
+    getObjectsForRoom(roomIndex = null) {
+        const playerRoom = this.gameState.getPlayer()?.roomIndex ?? 0;
+        const targetRoom = roomIndex === null || roomIndex === undefined ? playerRoom : roomIndex;
+        return this.gameState.getObjectsForRoom(targetRoom);
+    }
+
+    setObjectPosition(type, roomIndex, x, y) {
+        const entry = this.gameState.setObjectPosition(type, roomIndex, x, y);
+        this.renderer.draw();
+        return entry;
+    }
+
+    removeObject(type, roomIndex) {
+        this.gameState.removeObject(type, roomIndex);
+        this.renderer.draw();
+    }
+
+    getKeyCount() {
+        return typeof this.gameState.getKeys === 'function'
+            ? this.gameState.getKeys()
+            : 0;
     }
 
     getSprites() {
@@ -302,6 +359,9 @@ class GameEngine {
                 const tile = this.tileManager.getTile(candidateId);
                 if (tile?.collision) continue;
             }
+
+            const blockingObject = this.gameState.getObjectAt?.(roomIndex, nx, ny) ?? null;
+            if (blockingObject?.type === 'door' && !blockingObject.opened) continue;
 
             const occupied = enemies.some((other, index) =>
                 index !== i &&

@@ -19,6 +19,7 @@ class GameState {
             sprites: [],
             enemies: [],
             items: [],
+            objects: [],
             exits: [],
             tileset: {
                 tiles: [],
@@ -28,7 +29,7 @@ class GameState {
         this.game.tileset.map = this.game.tileset.maps[0];
 
         this.state = {
-            player: { x: 1, y: 1, roomIndex: 0, lives: 3 },
+            player: { x: 1, y: 1, roomIndex: 0, lives: 3, keys: 0 },
             dialog: { active: false, text: "", page: 0, maxPages: 1 },
             enemies: []
         };
@@ -104,12 +105,21 @@ class GameState {
         this.state.player.y = this.clampCoordinate(this.game.start.y);
         this.state.player.roomIndex = this.clampRoomIndex(this.game.start.roomIndex);
         this.state.player.lives = 3;
+        this.state.player.keys = 0;
         this.state.dialog.active = false;
         this.state.dialog.text = "";
         this.state.enemies = this.cloneEnemies(this.game.enemies);
 
         // Reset collected items
         this.game.items.forEach((item) => item.collected = false);
+        this.game.objects.forEach((object) => {
+            if (object.type === 'key') {
+                object.collected = false;
+            }
+            if (object.type === 'door') {
+                object.opened = false;
+            }
+        });
     }
 
     exportGameData() {
@@ -123,6 +133,7 @@ class GameState {
             sprites: this.game.sprites,
             enemies: this.game.enemies,
             items: this.game.items,
+            objects: this.game.objects,
             exits: this.game.exits,
             tileset: this.game.tileset
         };
@@ -141,6 +152,7 @@ class GameState {
             data.tileset?.maps ?? data.tileset?.map ?? null,
             totalRooms
         );
+        const normalizedObjects = this.normalizeObjects(data.objects);
 
         Object.assign(this.game, {
             title: data.title || "My Tiny RPG Game",
@@ -152,6 +164,7 @@ class GameState {
             sprites: Array.isArray(data.sprites) ? data.sprites : [],
             enemies: Array.isArray(data.enemies) ? data.enemies : [],
             items: Array.isArray(data.items) ? data.items : [],
+            objects: normalizedObjects,
             exits: Array.isArray(data.exits) ? data.exits : [],
             tileset: {
                 tiles: tilesetTiles,
@@ -221,6 +234,32 @@ class GameState {
         return emptyMaps;
     }
 
+    normalizeObjects(objects) {
+        if (!Array.isArray(objects)) return [];
+        return objects
+            .map((object) => {
+                const type = object?.type === 'door' ? 'door' : (object?.type === 'key' ? 'key' : null);
+                if (!type) return null;
+                const roomIndex = this.clampRoomIndex(object?.roomIndex ?? 0);
+                const x = this.clampCoordinate(object?.x ?? 0);
+                const y = this.clampCoordinate(object?.y ?? 0);
+                const id = typeof object?.id === 'string' && object.id.trim()
+                    ? object.id.trim()
+                    : this.generateObjectId(type, roomIndex);
+
+                return {
+                    id,
+                    type,
+                    roomIndex,
+                    x,
+                    y,
+                    collected: type === 'key' ? Boolean(object?.collected) : false,
+                    opened: type === 'door' ? Boolean(object?.opened) : false
+                };
+            })
+            .filter(Boolean);
+    }
+
     cloneEnemies(enemies) {
         return (enemies || []).map((enemy) => ({
             id: enemy.id,
@@ -230,6 +269,89 @@ class GameState {
             y: this.clampCoordinate(enemy.y ?? 0),
             lives: enemy.lives ?? 1
         }));
+    }
+
+    generateObjectId(type, roomIndex) {
+        return `${type}-${roomIndex}`;
+    }
+
+    getObjects() {
+        return this.game.objects;
+    }
+
+    getObjectsForRoom(roomIndex) {
+        const target = this.clampRoomIndex(roomIndex ?? 0);
+        return this.game.objects.filter((object) => object.roomIndex === target);
+    }
+
+    getObjectAt(roomIndex, x, y) {
+        const targetRoom = this.clampRoomIndex(roomIndex ?? 0);
+        const cx = this.clampCoordinate(x ?? 0);
+        const cy = this.clampCoordinate(y ?? 0);
+        return this.game.objects.find((object) =>
+            object.roomIndex === targetRoom &&
+            object.x === cx &&
+            object.y === cy
+        ) || null;
+    }
+
+    setObjectPosition(type, roomIndex, x, y) {
+        const normalizedType = type === 'door' ? 'door' : (type === 'key' ? 'key' : null);
+        if (!normalizedType) return null;
+        const targetRoom = this.clampRoomIndex(roomIndex ?? 0);
+        const cx = this.clampCoordinate(x ?? 0);
+        const cy = this.clampCoordinate(y ?? 0);
+        let entry = this.game.objects.find((object) =>
+            object.type === normalizedType && object.roomIndex === targetRoom
+        );
+        if (!entry) {
+            entry = {
+                id: this.generateObjectId(normalizedType, targetRoom),
+                type: normalizedType,
+                roomIndex: targetRoom,
+                x: cx,
+                y: cy
+            };
+            this.game.objects.push(entry);
+        } else {
+            entry.roomIndex = targetRoom;
+            entry.x = cx;
+            entry.y = cy;
+        }
+        if (normalizedType === 'key') {
+            entry.collected = false;
+        }
+        if (normalizedType === 'door') {
+            entry.opened = false;
+        }
+        return entry;
+    }
+
+    removeObject(type, roomIndex) {
+        const normalizedType = type === 'door' ? 'door' : (type === 'key' ? 'key' : null);
+        if (!normalizedType) return;
+        const targetRoom = this.clampRoomIndex(roomIndex ?? 0);
+        this.game.objects = this.game.objects.filter((object) =>
+            !(object.type === normalizedType && object.roomIndex === targetRoom)
+        );
+    }
+
+    addKeys(amount = 1) {
+        const numeric = Number(amount);
+        if (!Number.isFinite(numeric)) return this.state.player.keys;
+        const delta = Math.floor(numeric);
+        this.state.player.keys = Math.max(0, this.state.player.keys + delta);
+        return this.state.player.keys;
+    }
+
+    consumeKey() {
+        if (this.state.player.keys <= 0) return false;
+        this.state.player.keys -= 1;
+        return true;
+    }
+
+    getKeys() {
+        return this.state.player.keys;
     }
 
     getEnemies() {

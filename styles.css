@@ -597,6 +597,55 @@ textarea {
     color: var(--muted);
 }
 
+.objects-panel {
+    display: grid;
+    gap: 12px;
+}
+
+.objects-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.objects-actions button {
+    flex: 1 1 150px;
+}
+
+.objects-actions button.placing {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(100, 181, 246, 0.12);
+}
+
+.objects-list {
+    display: grid;
+    gap: 8px;
+}
+
+.object-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    background: rgba(18, 22, 34, 0.6);
+}
+
+.object-card .object-name {
+    font-weight: 600;
+}
+
+.object-card .object-info {
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+.object-card .object-remove {
+    margin-left: auto;
+}
+
 
 .npcs-actions,
 .project-actions,
@@ -817,6 +866,16 @@ textarea {
 .world-cell .badge-enemy {
     background: rgba(244, 67, 54, 0.25);
     color: #ffcdd2;
+}
+
+.world-cell .badge-door {
+    background: rgba(255, 163, 0, 0.25);
+    color: #ffe0b2;
+}
+
+.world-cell .badge-key {
+    background: rgba(255, 255, 39, 0.25);
+    color: #fff59d;
 }
 
 .npc-card .npc-name {

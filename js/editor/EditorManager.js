@@ -1,3 +1,10 @@
+const editorObjectDefinitionsSource = (typeof module !== 'undefined' && module.exports)
+    ? require('../core/ObjectDefinitions')
+    : ((typeof window !== 'undefined' ? window.ObjectDefinitions : null) || {});
+
+const EDITOR_OBJECT_DEFINITIONS = editorObjectDefinitionsSource.OBJECT_DEFINITIONS || [];
+const OBJECT_TYPE_ORDER = ['door', 'key'];
+
 /**
  * EditorManager keeps the editor UI in sync with the runtime engine.
  */
@@ -10,6 +17,7 @@ class EditorManager {
         this.activeRoomIndex = 0;
         this.placingNpc = false;
         this.placingEnemy = false;
+        this.placingObjectType = null;
         this.selectedEnemyType = 'skull';
         this.mapPainting = false;
         this.history = { stack: [], index: -1 };
@@ -40,6 +48,10 @@ class EditorManager {
         this.jsonArea = document.getElementById('json-area');
         this.fileInput = document.getElementById('file-input');
 
+        this.btnPlaceDoor = document.getElementById('btn-place-door');
+        this.btnPlaceKey = document.getElementById('btn-place-key');
+        this.objectsList = document.getElementById('objects-list');
+
         this.btnAddNpc = document.getElementById('btn-add-npc');
         this.btnPlaceNpc = document.getElementById('btn-place-npc');
         this.btnNpcDelete = document.getElementById('npc-delete');
@@ -56,6 +68,8 @@ class EditorManager {
         this.btnPlaceNpc?.addEventListener('click', () => this.toggleNpcPlacement());
         this.btnNpcDelete?.addEventListener('click', () => this.removeSelectedNpc());
         this.btnPlaceEnemy?.addEventListener('click', () => this.toggleEnemyPlacement());
+        this.btnPlaceDoor?.addEventListener('click', () => this.toggleObjectPlacement('door'));
+        this.btnPlaceKey?.addEventListener('click', () => this.toggleObjectPlacement('key'));
 
         this.btnGenerateUrl?.addEventListener('click', () => this.generateShareableUrl());
 
@@ -94,6 +108,7 @@ class EditorManager {
         this.renderWorldGrid();
         this.renderNpcs();
         this.renderEnemies();
+        this.renderObjects();
         this.renderEditor();
         this.updateSelectedTilePreview();
         this.handleCanvasResize(true);
@@ -161,6 +176,18 @@ class EditorManager {
             return;
         }
 
+        if (this.placingObjectType) {
+            this.gameEngine.setObjectPosition(this.placingObjectType, roomIndex, coord.x, coord.y);
+            this.toggleObjectPlacement(this.placingObjectType, true);
+            this.renderObjects();
+            this.renderWorldGrid();
+            this.renderEditor();
+            this.gameEngine.draw();
+            this.updateJSON();
+            this.pushHistory();
+            return;
+        }
+
         if (this.selectedTileId === null || this.selectedTileId === undefined) return;
         this.gameEngine.setMapTile(coord.x, coord.y, this.selectedTileId, roomIndex);
         this.renderEditor();
@@ -216,6 +243,19 @@ class EditorManager {
             }
         }
 
+        const objects = this.gameEngine.getObjectsForRoom?.(roomIndex) ?? [];
+        const objectStep = tileSize / 8;
+        objects.forEach((object) => {
+            const ox = object.x * tileSize;
+            const oy = object.y * tileSize;
+            this.gameEngine.renderer.drawObjectSprite(this.ectx, object.type, ox, oy, objectStep);
+            this.ectx.strokeStyle = object.type === 'door'
+                ? 'rgba(255, 163, 0, 0.6)'
+                : 'rgba(255, 255, 39, 0.6)';
+            this.ectx.lineWidth = 1;
+            this.ectx.strokeRect(ox + 1, oy + 1, tileSize - 2, tileSize - 2);
+        });
+
         const sprites = game.sprites ?? [];
         sprites.forEach((npc) => {
             if (npc.roomIndex !== roomIndex) return;
@@ -268,7 +308,7 @@ class EditorManager {
             groups.get(category).push(tile);
         });
 
-        const categoryOrder = ['Terreno', 'Natureza', 'Agua', 'Construcoes', 'Interior', 'Decoracao', 'Diversos'];
+        const categoryOrder = ['Terreno', 'Natureza', 'Agua', 'Construcoes', 'Interior', 'Decoracao', 'Objetos', 'Diversos'];
         const categories = Array.from(groups.keys()).sort((a, b) => {
             const ia = categoryOrder.indexOf(a);
             const ib = categoryOrder.indexOf(b);
@@ -492,6 +532,100 @@ class EditorManager {
         this.renderWorldGrid();
     }
 
+    renderObjects() {
+        if (!this.objectsList) return;
+        const roomIndex = this.activeRoomIndex;
+        const objects = this.gameEngine.getObjectsForRoom?.(roomIndex) ?? [];
+        this.objectsList.innerHTML = '';
+
+        OBJECT_TYPE_ORDER.forEach((type) => {
+            const object = objects.find((entry) => entry.type === type) || null;
+            const card = document.createElement('div');
+            card.className = 'object-card';
+
+            const name = document.createElement('div');
+            name.className = 'object-name';
+            name.textContent = this.getObjectLabel(type);
+
+            const info = document.createElement('div');
+            info.className = 'object-info';
+            info.textContent = object ? `(${object.x}, ${object.y})` : 'Nao colocado';
+
+            card.append(name, info);
+
+            if (object) {
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'object-remove';
+                removeBtn.textContent = 'Remover';
+                removeBtn.addEventListener('click', () => this.removeObject(type, roomIndex));
+                card.appendChild(removeBtn);
+            }
+
+            this.objectsList.appendChild(card);
+        });
+
+        this.updateObjectPlacementButtons();
+    }
+
+    removeObject(type, roomIndex) {
+        if (this.placingObjectType === type) {
+            this.toggleObjectPlacement(type, true);
+        }
+        this.gameEngine.removeObject(type, roomIndex);
+        this.renderObjects();
+        this.renderWorldGrid();
+        this.renderEditor();
+        this.gameEngine.draw();
+        this.updateJSON();
+        this.pushHistory();
+    }
+
+    getObjectLabel(type) {
+        const def = EDITOR_OBJECT_DEFINITIONS.find((entry) => entry.type === type);
+        if (def?.name) return def.name;
+        if (type === 'door') return 'Porta';
+        if (type === 'key') return 'Chave';
+        return type;
+    }
+
+    toggleObjectPlacement(type, forceOff = false) {
+        if (forceOff) {
+            if (!this.placingObjectType) return;
+            this.placingObjectType = null;
+            if (this.editorCanvas) {
+                this.editorCanvas.style.cursor = 'default';
+            }
+            this.updateObjectPlacementButtons();
+            return;
+        }
+        if (!type) return;
+        if (this.placingNpc) {
+            this.toggleNpcPlacement(true);
+        }
+        if (this.placingEnemy) {
+            this.toggleEnemyPlacement(true);
+        }
+        this.placingObjectType = this.placingObjectType === type ? null : type;
+        if (this.editorCanvas) {
+            this.editorCanvas.style.cursor = this.placingObjectType ? 'crosshair' : 'default';
+        }
+        this.updateObjectPlacementButtons();
+    }
+
+    updateObjectPlacementButtons() {
+        if (this.btnPlaceDoor) {
+            const activeDoor = this.placingObjectType === 'door';
+            this.btnPlaceDoor.classList.toggle('placing', activeDoor);
+            this.btnPlaceDoor.textContent = activeDoor ? 'Cancelar colocacao' : 'Colocar porta';
+        }
+        if (this.btnPlaceKey) {
+            const activeKey = this.placingObjectType === 'key';
+            this.btnPlaceKey.classList.toggle('placing', activeKey);
+            this.btnPlaceKey.textContent = activeKey ? 'Cancelar colocacao' : 'Colocar chave';
+        }
+    }
+
     removeEnemy(enemyId) {
         if (this.placingEnemy) {
             this.toggleEnemyPlacement(true);
@@ -517,6 +651,7 @@ class EditorManager {
         }
         this.activeRoomIndex = clamped;
         this.renderWorldGrid();
+        this.renderObjects();
         this.renderEditor();
         this.renderEnemies();
     }
@@ -530,6 +665,7 @@ class EditorManager {
         const playerRoom = this.gameEngine.getState()?.player?.roomIndex ?? 0;
         const npcs = this.gameEngine.getSprites();
         const enemies = this.gameEngine.getEnemyDefinitions?.() ?? [];
+        const objects = this.gameEngine.getObjects?.() ?? [];
 
         this.worldGrid.innerHTML = '';
         this.worldGrid.style.setProperty('--world-cols', cols);
@@ -581,6 +717,24 @@ class EditorManager {
                     cell.classList.add('has-enemy');
                 }
 
+                const hasDoor = objects.some((object) => object.roomIndex === index && object.type === 'door');
+                if (hasDoor) {
+                    const badge = document.createElement('span');
+                    badge.classList.add('world-cell-badge', 'badge-door');
+                    badge.textContent = 'Porta';
+                    badges.appendChild(badge);
+                    cell.classList.add('has-door');
+                }
+
+                const hasKey = objects.some((object) => object.roomIndex === index && object.type === 'key');
+                if (hasKey) {
+                    const badge = document.createElement('span');
+                    badge.classList.add('world-cell-badge', 'badge-key');
+                    badge.textContent = 'Chave';
+                    badges.appendChild(badge);
+                    cell.classList.add('has-key');
+                }
+
                 if (badges.children.length) {
                     cell.appendChild(badges);
                 }
@@ -626,6 +780,9 @@ class EditorManager {
     toggleNpcPlacement(skipRender = false) {
         const npc = this.gameEngine.getSprites().find((s) => s.id === this.selectedNpcId);
         if (!npc) return;
+        if (!skipRender && this.placingObjectType) {
+            this.toggleObjectPlacement(null, true);
+        }
         if (this.placingEnemy) {
             this.toggleEnemyPlacement(true);
         }
@@ -650,6 +807,9 @@ class EditorManager {
 
     toggleEnemyPlacement(forceOff = false) {
         const nextState = forceOff ? false : !this.placingEnemy;
+        if (!forceOff && this.placingObjectType) {
+            this.toggleObjectPlacement(null, true);
+        }
         this.placingEnemy = nextState;
         if (this.placingEnemy) {
             this.placingNpc = false;
@@ -880,6 +1040,7 @@ class EditorManager {
         this.syncUI();
         this.renderTileList();
         this.renderNpcs();
+        this.renderObjects();
         this.renderEnemies();
         this.renderEditor();
         this.updateSelectedTilePreview();
