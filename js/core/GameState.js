@@ -30,7 +30,7 @@ class GameState {
 
         this.state = {
             player: { x: 1, y: 1, roomIndex: 0, lives: 3, keys: 0 },
-            dialog: { active: false, text: "", page: 0, maxPages: 1 },
+            dialog: { active: false, text: "", page: 1, maxPages: 1 },
             enemies: []
         };
         this.state.enemies = this.cloneEnemies(this.game.enemies);
@@ -91,7 +91,7 @@ class GameState {
     }
 
     setDialog(active, text = "") {
-        if (this.state.dialog.active && !active) {this.state.dialog.page = 0;}
+        if (this.state.dialog.active && !active) {this.state.dialog.page = 1;}
         this.state.dialog.active = active;
         this.state.dialog.text = text;
     }
