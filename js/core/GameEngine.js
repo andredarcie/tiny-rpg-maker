@@ -28,8 +28,11 @@ class GameEngine {
         const dialog = this.gameState.getDialog();
         if (dialog.active) {
             if (dialog.page == dialog.maxPages) {
+                this.renderer.draw();
                 this.gameState.setDialog(false);
+                return;
             }
+            this.gameState.setDialogPage(dialog.page+1)
             this.renderer.draw();
             return;
         }

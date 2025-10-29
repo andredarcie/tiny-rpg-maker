@@ -191,7 +191,6 @@ class Renderer {
         const dialog = this.gameState.getDialog();
         
         if (!dialog.active || !dialog.text) return;
-        dialog.page+=1;
         
         this.drawDialogBox(dialog);
     }
