@@ -11,8 +11,10 @@
     const NPC_DEFINITIONS = definitionsSource.NPC_DEFINITIONS || [];
 
     const LEGACY_VERSION = 1;
-    const PREVIOUS_VERSION = 2;
-    const VERSION = 3;
+    const EARLY_VERSION = 2;
+    const PREVIOUS_VERSION = 3;
+    const VERSION = 4;
+    const OBJECTS_VERSION = 4;
     const MATRIX_SIZE = 8;
     const TILE_COUNT = MATRIX_SIZE * MATRIX_SIZE;
     const WORLD_ROWS = 3;
@@ -155,6 +157,52 @@
                 id: enemy?.id || `enemy-${index + 1}`
             }))
             .filter((enemy) => Number.isFinite(enemy.x) && Number.isFinite(enemy.y));
+    }
+
+    function normalizeObjectPositions(list, type) {
+        if (!Array.isArray(list)) return [];
+        if (!Array.isArray(list)) return [];
+        const seenRooms = new Set();
+        const result = [];
+        for (const entry of list) {
+            if (entry?.type !== type) continue;
+            const x = clamp(Number(entry?.x), 0, MATRIX_SIZE - 1, 0);
+            const y = clamp(Number(entry?.y), 0, MATRIX_SIZE - 1, 0);
+            if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+            const roomIndex = clampRoomIndex(entry?.roomIndex);
+            const key = roomIndex;
+            if (seenRooms.has(key)) continue;
+            seenRooms.add(key);
+            result.push({ x, y, roomIndex });
+        }
+        return result.sort((a, b) => {
+            if (a.roomIndex !== b.roomIndex) return a.roomIndex - b.roomIndex;
+            if (a.y !== b.y) return a.y - b.y;
+            return a.x - b.x;
+        });
+    }
+
+    function buildObjectEntries(positions, type) {
+        if (!Array.isArray(positions) || !positions.length) return [];
+        return positions.map((pos) => {
+            const roomIndex = clampRoomIndex(pos?.roomIndex);
+            const x = clamp(Number(pos?.x), 0, MATRIX_SIZE - 1, 0);
+            const y = clamp(Number(pos?.y), 0, MATRIX_SIZE - 1, 0);
+            const entry = {
+                id: `${type}-${roomIndex}`,
+                type,
+                roomIndex,
+                x,
+                y
+            };
+            if (type === 'key') {
+                entry.collected = false;
+            }
+            if (type === 'door') {
+                entry.opened = false;
+            }
+            return entry;
+        });
     }
 
     function packNibbles(values) {
@@ -587,6 +635,9 @@
         const start = normalizeStart(gameData?.start ?? {});
         const sprites = normalizeSprites(gameData?.sprites);
         const enemies = normalizeEnemies(gameData?.enemies);
+        const objects = Array.isArray(gameData?.objects) ? gameData.objects : [];
+        const doorPositions = normalizeObjectPositions(objects, 'door');
+        const keyPositions = normalizeObjectPositions(objects, 'key');
 
         const groundSegments = groundMatrices.map((matrix) => encodeGround(matrix));
         const hasGround = groundSegments.some((segment) => Boolean(segment));
@@ -639,6 +690,20 @@
             }
         }
 
+        if (doorPositions.length) {
+            const doorCode = encodePositions(doorPositions);
+            if (doorCode) {
+                parts.push('d' + doorCode);
+            }
+        }
+
+        if (keyPositions.length) {
+            const keyCode = encodePositions(keyPositions);
+            if (keyCode) {
+                parts.push('k' + keyCode);
+            }
+        }
+
         const title = typeof gameData?.title === 'string' ? gameData.title.trim() : '';
         if (title && title !== DEFAULT_TITLE) {
             parts.push('n' + encodeText(title.slice(0, 80)));
@@ -659,11 +724,16 @@
         }
 
         const version = payload.v ? parseInt(payload.v, 36) : NaN;
-        if (!Number.isFinite(version) || (version !== VERSION && version !== PREVIOUS_VERSION && version !== LEGACY_VERSION)) {
+        if (!Number.isFinite(version) || (
+            version !== VERSION &&
+            version !== PREVIOUS_VERSION &&
+            version !== EARLY_VERSION &&
+            version !== LEGACY_VERSION
+        )) {
             return null;
         }
 
-        const roomCount = version >= VERSION ? WORLD_ROOM_COUNT : 1;
+        const roomCount = version >= PREVIOUS_VERSION ? WORLD_ROOM_COUNT : 1;
         const groundMaps = decodeWorldGround(payload.g || '', version, roomCount);
         const overlayMaps = decodeWorldOverlay(payload.o || '', version, roomCount);
         const startPosition = decodePositions(payload.s || '')?.[0] ?? normalizeStart({});
@@ -671,6 +741,8 @@
         const npcTexts = decodeTextArray(payload.t || '');
         const npcTypeIndexes = decodeNpcTypeIndexes(payload.i || '');
         const enemyPositions = decodePositions(payload.e || '');
+        const doorPositions = version >= OBJECTS_VERSION ? decodePositions(payload.d || '') : [];
+        const keyPositions = version >= OBJECTS_VERSION ? decodePositions(payload.k || '') : [];
         const title = decodeText(payload.n, DEFAULT_TITLE) || DEFAULT_TITLE;
         const buildNpcId = (index) => `npc-${index + 1}`;
 
@@ -723,6 +795,11 @@
             maps.push({ ground, overlay });
         }
 
+        const objects = [
+            ...buildObjectEntries(doorPositions, 'door'),
+            ...buildObjectEntries(keyPositions, 'key')
+        ];
+
         return {
             title,
             start: startPosition,
@@ -730,6 +807,7 @@
             enemies,
             world: version >= VERSION ? { rows: WORLD_ROWS, cols: WORLD_COLS } : { rows: 1, cols: 1 },
             rooms,
+            objects,
             tileset: {
                 tiles: [],
                 maps,
