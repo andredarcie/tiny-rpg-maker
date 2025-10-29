@@ -400,7 +400,7 @@ body.game-mode #tab-game .game-controls button {
     }
 
     #game-canvas {
-        margin-top: clamp(20px, 8vw, 40px);
+        margin-top: clamp(48px, 10vw, 72px);
     }
 }
 
