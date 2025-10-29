@@ -392,6 +392,16 @@ body.game-mode #tab-game .game-controls button {
         right: clamp(12px, 5vw, 24px);
         bottom: clamp(12px, 5vw, 24px);
     }
+
+    body.game-mode #game-container {
+        padding-bottom: clamp(140px, 30vw, 220px);
+        justify-content: flex-start;
+        gap: 8px;
+    }
+
+    #game-canvas {
+        margin-top: clamp(20px, 8vw, 40px);
+    }
 }
 
 .game-minimap {
