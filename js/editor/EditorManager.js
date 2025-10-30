@@ -352,7 +352,8 @@ class EditorManager {
 
             const categoryTiles = groups.get(category) || [];
             categoryTiles.forEach((tile) => {
-                const card = document.createElement('div');
+                const card = document.createElement('button');
+                card.type = 'button';
                 card.className = 'tile-card';
                 if (tile.id === this.selectedTileId) {
                     card.classList.add('selected');
@@ -367,20 +368,7 @@ class EditorManager {
                     this.gameEngine.renderer.drawTileOnCanvas(preview, tile);
                 }
 
-                const meta = document.createElement('div');
-                meta.className = 'meta';
-
-                const name = document.createElement('div');
-                name.className = 'tile-name';
-                name.textContent = tile.name || 'Tile';
-
-                const info = document.createElement('div');
-                info.className = 'tile-info';
-                info.textContent = tile.collision ? 'Bloqueia movimento' : 'Passavel';
-
-                meta.append(name, info);
-                card.append(preview, meta);
-
+                card.appendChild(preview);
                 card.addEventListener('click', () => {
                     this.selectedTileId = tile.id;
                     this.updateSelectedTilePreview();
