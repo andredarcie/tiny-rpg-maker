@@ -135,16 +135,16 @@ class TileDefinitions {
             [ null, null,  4,  4,  4,  4, null, null ]
         ], false, 'Construcoes'),
 
-        this.tile(9, 'Porta Fechada', [
-            [ 4,  4,  4,  4,  4,  4,  4,  4],
-            [ 4,  9,  9,  9,  9,  9,  9,  4],
-            [ 4,  9,  9,  9,  9,  9,  9,  4],
-            [ 4,  9,  9,  9,  9,  9,  9,  4],
-            [ 4,  9,  9,  9,  9,  9,  9,  4],
-            [ 4,  9,  9,  9,  9,  9,  9,  4],
-            [ 4,  9,  9,  9,  9,  9,  9,  4],
-            [ 4,  4,  4,  4,  4,  4,  4,  4]
-        ], true, 'Construcoes'),
+        this.tile(9, 'Arbusto Denso', [
+            [ null, null, null, null, null, null, null, null ],
+            [ null, null, null, null, null, null, null, null ],
+            [ null, null, null, null, null, null, null, null ],
+            [ null, null,  1,  1,  1,  1, null, null ],
+            [ null,  1, 11, 11, 11, 11,  1, null ],
+            [  1, 11, 11, 11, 11,  3, 11,  1 ],
+            [  1, 11,  3, 11, 11, 11, 11,  1 ],
+            [  1,  1,  1,  1,  1,  1,  1,  1 ]
+        ], true, 'Natureza'),
 
         this.tile(10, 'Parede de Pedra', [
             [  6,  7,  6,  5, 13,  5, 13,  6 ],
