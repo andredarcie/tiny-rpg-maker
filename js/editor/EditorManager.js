@@ -1,8 +1,6 @@
-const editorObjectDefinitionsSource = (typeof module !== 'undefined' && module.exports)
-    ? require('../core/ObjectDefinitions')
-    : ((typeof window !== 'undefined' ? window.ObjectDefinitions : null) || {});
-
-const EDITOR_OBJECT_DEFINITIONS = editorObjectDefinitionsSource.OBJECT_DEFINITIONS || [];
+const EDITOR_OBJECT_DEFINITIONS = (typeof window !== 'undefined' && window.ObjectDefinitions)
+    ? (window.ObjectDefinitions.definitions || window.ObjectDefinitions.OBJECT_DEFINITIONS || [])
+    : [];
 const OBJECT_TYPE_ORDER = ['door', 'door-variable', 'key'];
 
 /**
@@ -1336,8 +1334,6 @@ class EditorManager {
 
 }
 
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = EditorManager;
-} else {
+if (typeof window !== 'undefined') {
     window.EditorManager = EditorManager;
 }

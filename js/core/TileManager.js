@@ -1,26 +1,13 @@
 /**
  * TileManager supplies a curated medieval fantasy tileset and handles placement.
  */
-const tileDefinitions = (() => {
-    if (typeof module !== 'undefined' && module.exports) {
-        try {
-            return require('./TileDefinitions');
-        } catch (error) {
-            return null;
-        }
-    }
-    if (typeof window !== 'undefined') {
-        return {
-            PICO8_COLORS: window.PICO8_COLORS,
-            TILE_PRESETS: window.TILE_PRESETS
-        };
-    }
-    return null;
-})();
+const tileDefinitions = (typeof window !== 'undefined' && window.TileDefinitions)
+    ? window.TileDefinitions
+    : null;
 
 const TILE_PRESETS_SOURCE = Array.isArray(tileDefinitions?.TILE_PRESETS)
     ? tileDefinitions.TILE_PRESETS
-    : [];
+    : (typeof window !== 'undefined' && Array.isArray(window.TILE_PRESETS) ? window.TILE_PRESETS : []);
 
 class TileManager {
     constructor(gameState) {
@@ -193,11 +180,7 @@ class TileManager {
 
 }
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = TileManager;
-} else {
+if (typeof window !== 'undefined') {
     window.TileManager = TileManager;
 }
-
 

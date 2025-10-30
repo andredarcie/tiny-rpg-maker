@@ -148,9 +148,6 @@ class InputManager {
     }
 }
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = InputManager;
-} else {
+if (typeof window !== 'undefined') {
     window.InputManager = InputManager;
 }

@@ -1,9 +1,8 @@
 /**
- * Defines the placeable interactive objects (chave, porta e porta magica) available in the editor.
- * Each entry exposes metadata and an 8x8 sprite using PICO-8 palette indices.
+ * ObjectDefinitions encapsula os objetos interativos disponiveis no editor.
  */
-(function (global) {
-    const OBJECT_DEFINITIONS = [
+class ObjectDefinitions {
+    static OBJECT_DEFINITIONS = [
         {
             type: 'key',
             id: 'object-key',
@@ -51,19 +50,13 @@
         }
     ];
 
-    function getObjectDefinition(type) {
-        return OBJECT_DEFINITIONS.find((entry) => entry.type === type) || null;
+    static get definitions() {
+        return this.OBJECT_DEFINITIONS;
     }
 
-    const api = {
-        OBJECT_DEFINITIONS,
-        getObjectDefinition
-    };
-
-    if (typeof module !== 'undefined' && module.exports) {
-        module.exports = api;
-    } else {
-        global.ObjectDefinitions = api;
+    static getObjectDefinition(type) {
+        return this.OBJECT_DEFINITIONS.find((entry) => entry.type === type) || null;
     }
-})(typeof window !== 'undefined' ? window : globalThis);
+}
 
+window.ObjectDefinitions = ObjectDefinitions;

@@ -1,75 +1,80 @@
 /**
  * Main entry point that boots the game and the editor.
  */
-(function() {
-    "use strict";
+'use strict';
 
-    document.addEventListener('DOMContentLoaded', () => {
-        initializeApplication();
-    });
+class TinyRPGApplication {
+    static boot() {
+        document.addEventListener('DOMContentLoaded', () => {
+            this.initializeApplication();
+            this.setupResponsiveCanvas();
+        });
+    }
 
-    function initializeApplication() {
-        // Configure tab behavior
-        setupTabs();
+    static initializeApplication() {
+        this.setupTabs();
 
-        // Initialize the core game engine
         const gameCanvas = document.getElementById('game-canvas');
-        const gameEngine = new GameEngine(gameCanvas);
-        loadSharedGameIfAvailable(gameEngine);
+        if (!gameCanvas) return;
 
-        // Expose the public runtime API
+        const gameEngine = new GameEngine(gameCanvas);
+        this.loadSharedGameIfAvailable(gameEngine);
+
         window.TinyRPGMaker = {
             exportGameData: () => gameEngine.exportGameData(),
             importGameData: (data) => gameEngine.importGameData(data),
             getState: () => gameEngine.getState(),
             draw: () => gameEngine.draw(),
             resetGame: () => gameEngine.resetGame(),
-
-            // Tile API
             updateTile: (tileId, data) => gameEngine.updateTile(tileId, data),
             setMapTile: (x, y, tileId) => gameEngine.setMapTile(x, y, tileId),
             getTiles: () => gameEngine.getTiles(),
             getTileMap: () => gameEngine.getTileMap(),
             getTilePresetNames: () => gameEngine.getTilePresetNames(),
-
-            // Variable API
             getVariables: () => gameEngine.getVariableDefinitions(),
             setVariableDefault: (variableId, value) => gameEngine.setVariableDefault(variableId, value),
-
-            // NPC API
             addSprite: (npc) => gameEngine.addSprite(npc),
             getSprites: () => gameEngine.getSprites()
         };
 
-        // Initialize the editor controller
         const editorManager = new EditorManager(gameEngine);
-
-        // Wire the reset button
-        const resetButton = document.getElementById('btn-reset');
-        if (resetButton) {
-            resetButton.addEventListener('click', () => gameEngine.resetGame());
-        }
+        this.bindResetButton(gameEngine);
+        this.bindTouchPad(gameEngine);
 
         console.log('Tiny RPG Maker engine initialized successfully.');
+    }
+
+    static bindResetButton(gameEngine) {
+        const resetButton = document.getElementById('btn-reset');
+        if (!resetButton) return;
+        resetButton.addEventListener('click', () => gameEngine.resetGame());
+    }
+
+    static bindTouchPad(gameEngine) {
         const touchPad = document.querySelectorAll('.game-touch-pad .pad-button[data-direction]');
+        const directionMap = {
+            left: [-1, 0],
+            right: [1, 0],
+            up: [0, -1],
+            down: [0, 1]
+        };
         touchPad.forEach((btn) => {
             btn.addEventListener('touchstart', (ev) => {
                 ev.preventDefault();
                 const dir = btn.dataset.direction;
                 if (!dir) return;
-                const map = { left: [-1, 0], right: [1, 0], up: [0, -1], down: [0, 1] };
-                const delta = map[dir];
+                const delta = directionMap[dir];
                 if (delta) {
                     gameEngine.tryMove(delta[0], delta[1]);
                 }
             }, { passive: false });
         });
-
     }
 
-    function setupTabs() {
+    static setupTabs() {
         const tabs = document.querySelectorAll('.tab-button');
         const tabContents = document.querySelectorAll('.tab-content');
+
         const applyLayoutMode = (tabName) => {
             const isEditor = tabName === 'editor';
             const isGame = tabName === 'game';
@@ -79,20 +84,17 @@
 
         tabs.forEach((btn) => {
             btn.addEventListener('click', () => {
-                // Clear the active state from every tab button
                 tabs.forEach((other) => {
                     other.classList.remove('active');
                     other.setAttribute('aria-selected', 'false');
                 });
 
-                // Hide every tab content panel
                 tabContents.forEach((content) => content.classList.remove('active'));
 
-                // Activate the selected tab and panel
                 btn.classList.add('active');
                 btn.setAttribute('aria-selected', 'true');
 
-                const targetId = 'tab-' + btn.dataset.tab;
+                const targetId = `tab-${btn.dataset.tab}`;
                 const targetContent = document.getElementById(targetId);
                 if (targetContent) {
                     targetContent.classList.add('active');
@@ -122,7 +124,7 @@
         }
     }
 
-    function loadSharedGameIfAvailable(gameEngine) {
+    static loadSharedGameIfAvailable(gameEngine) {
         const share = window.TinyRPGShare;
         if (!share?.extractGameDataFromLocation) return;
         const data = share.extractGameDataFromLocation(window.location);
@@ -131,15 +133,13 @@
         }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    static setupResponsiveCanvas() {
         const gameCanvas = document.getElementById('game-canvas');
         const gameContainer = document.getElementById('game-container');
-
         if (!gameCanvas || !gameContainer) {
             return;
         }
 
-        // Keep the canvas centered and responsive
         const resizeCanvas = () => {
             const rect = gameContainer.getBoundingClientRect();
             const availableWidth = rect.width || window.innerWidth;
@@ -156,6 +156,8 @@
         document.addEventListener('game-tab-activated', scheduleResize);
 
         scheduleResize();
-    });
-})();
+    }
+}
 
+TinyRPGApplication.boot();
+window.TinyRPGApplication = TinyRPGApplication;

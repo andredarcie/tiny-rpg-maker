@@ -1,10 +1,8 @@
 /**
- * Defines the fixed set of NPCs available in the editor.
- * Each entry includes metadata, default dialogue, a simple preview label,
- * and an 8x8 sprite expressed using PICO-8 palette indices.
+ * NPCDefinitions centraliza os NPCs fixos disponiveis no editor.
  */
-(function (global) {
-    const NPC_DEFINITIONS = [
+class NPCDefinitions {
+    static NPC_DEFINITIONS = [
         {
             type: 'old-mage',
             id: 'npc-old-mage',
@@ -78,7 +76,7 @@
             id: 'npc-wooden-sign',
             name: 'Placa de madeira',
             previewLabel: 'Placa',
-            defaultText: 'Atenção aos perigos à frente.',
+            defaultText: 'Atencao aos perigos a frente.',
             sprite: [
                 [ null, null, null, null, null, null, null, null ],
                 [ null,  4,  4,  4,  4,  4,  4, null ],
@@ -92,19 +90,13 @@
         }
     ];
 
-    function getNpcDefinition(type) {
-        return NPC_DEFINITIONS.find((entry) => entry.type === type) || null;
+    static get definitions() {
+        return this.NPC_DEFINITIONS;
     }
 
-    const api = {
-        NPC_DEFINITIONS,
-        getNpcDefinition
-    };
-
-    if (typeof module !== 'undefined' && module.exports) {
-        module.exports = api;
-    } else {
-        global.NPCDefinitions = api;
+    static getNpcDefinition(type) {
+        return this.NPC_DEFINITIONS.find((entry) => entry.type === type) || null;
     }
-})(typeof window !== 'undefined' ? window : globalThis);
+}
 
+window.NPCDefinitions = NPCDefinitions;

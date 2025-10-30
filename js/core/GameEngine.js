@@ -502,9 +502,6 @@ class GameEngine {
     }
 }
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = GameEngine;
-} else {
+if (typeof window !== 'undefined') {
     window.GameEngine = GameEngine;
 }

@@ -571,9 +571,6 @@ class GameState {
     }
 }
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = GameState;
-} else {
+if (typeof window !== 'undefined') {
     window.GameState = GameState;
 }

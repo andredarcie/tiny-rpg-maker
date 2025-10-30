@@ -1,12 +1,9 @@
-const npcDefinitionsSource = (typeof module !== 'undefined' && module.exports)
-    ? require('./NPCDefinitions')
-    : ((typeof window !== 'undefined' ? window.NPCDefinitions : null) || {});
-const rendererObjectDefinitionsSource = (typeof module !== 'undefined' && module.exports)
-    ? require('./ObjectDefinitions')
-    : ((typeof window !== 'undefined' ? window.ObjectDefinitions : null) || {});
-
-const NPC_DEFINITIONS = npcDefinitionsSource.NPC_DEFINITIONS || [];
-const RENDERER_OBJECT_DEFINITIONS = rendererObjectDefinitionsSource.OBJECT_DEFINITIONS || [];
+const RENDERER_NPC_DEFINITIONS = (typeof window !== 'undefined' && window.NPCDefinitions)
+    ? (window.NPCDefinitions.definitions || window.NPCDefinitions.NPC_DEFINITIONS || [])
+    : [];
+const RENDERER_OBJECT_DEFINITIONS = (typeof window !== 'undefined' && window.ObjectDefinitions)
+    ? (window.ObjectDefinitions.definitions || window.ObjectDefinitions.OBJECT_DEFINITIONS || [])
+    : [];
 
 /**
  * Renderer handles drawing the game scene and editor surfaces.
@@ -431,7 +428,7 @@ class Renderer {
         };
 
         const sprites = {};
-        for (const def of NPC_DEFINITIONS) {
+        for (const def of RENDERER_NPC_DEFINITIONS) {
             sprites[def.type] = mapPixels(def.sprite);
         }
         sprites.default = this.buildNpcSprite(picoPalette);
@@ -497,17 +494,7 @@ class Renderer {
     }
 }
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Renderer;
-} else {
+if (typeof window !== 'undefined') {
     window.Renderer = Renderer;
 }
-
-
-
-
-
-
-
 
