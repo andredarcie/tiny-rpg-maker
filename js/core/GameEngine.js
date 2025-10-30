@@ -181,6 +181,7 @@ class GameEngine {
                 npc.y === player.y) {
                 const conditionId = this.gameState.normalizeVariableId?.(npc.conditionVariableId) ?? null;
                 const rewardId = this.gameState.normalizeVariableId?.(npc.rewardVariableId) ?? null;
+                const conditionalRewardId = this.gameState.normalizeVariableId?.(npc.conditionalRewardVariableId) ?? null;
                 const conditionalText = typeof npc.conditionText === 'string' ? npc.conditionText : '';
                 const baseText = typeof npc.text === 'string' ? npc.text : '';
                 const useConditional = conditionId && this.gameState.isVariableOn?.(conditionId) && conditionalText.trim();
@@ -188,9 +189,14 @@ class GameEngine {
                 if (!dialogText) {
                     dialogText = baseText || (useConditional ? conditionalText : '') || "Hello!";
                 }
-                const meta = (!useConditional && rewardId)
-                    ? { setVariableId: rewardId, rewardAllowed: true }
-                    : null;
+                let meta = null;
+                if (useConditional) {
+                    if (conditionalRewardId) {
+                        meta = { setVariableId: conditionalRewardId, rewardAllowed: true };
+                    }
+                } else if (rewardId) {
+                    meta = { setVariableId: rewardId, rewardAllowed: true };
+                }
                 this.showDialog(dialogText, meta || undefined);
                 break;
             }

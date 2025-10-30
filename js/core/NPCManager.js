@@ -110,9 +110,11 @@ class NPCManager {
         const rawConditionId = npc.conditionVariableId ?? npc.conditionalVariableId ?? null;
         const rawConditionText = npc.conditionText ?? npc.conditionalText ?? '';
         const rawRewardId = npc.rewardVariableId ?? npc.activateVariableId ?? npc.onCompleteVariableId ?? null;
+        const rawConditionalRewardId = npc.conditionalRewardVariableId ?? npc.alternativeRewardVariableId ?? null;
         const conditionVariableId = this.gameState.normalizeVariableId?.(rawConditionId) ?? null;
         const conditionText = typeof rawConditionText === 'string' ? rawConditionText : '';
         const rewardVariableId = this.gameState.normalizeVariableId?.(rawRewardId) ?? null;
+        const conditionalRewardVariableId = this.gameState.normalizeVariableId?.(rawConditionalRewardId) ?? null;
 
         return {
             id,
@@ -125,7 +127,8 @@ class NPCManager {
             placed,
             conditionVariableId,
             conditionText,
-            rewardVariableId
+            rewardVariableId,
+            conditionalRewardVariableId
         };
     }
 
@@ -141,7 +144,8 @@ class NPCManager {
             placed: false,
             conditionVariableId: null,
             conditionText: '',
-            rewardVariableId: null
+            rewardVariableId: null,
+            conditionalRewardVariableId: null
         };
     }
 

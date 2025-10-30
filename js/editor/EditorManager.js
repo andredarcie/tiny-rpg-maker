@@ -66,6 +66,7 @@ class EditorManager {
         this.npcConditionalVariable = document.getElementById('npc-conditional-variable');
         this.npcConditionalText = document.getElementById('npc-conditional-text');
         this.npcRewardVariable = document.getElementById('npc-reward-variable');
+        this.npcConditionalRewardVariable = document.getElementById('npc-conditional-reward-variable');
     }
 
     bindEvents() {
@@ -88,6 +89,7 @@ class EditorManager {
         this.npcConditionalText?.addEventListener('input', () => this.updateNpcConditionalText());
         this.npcConditionalVariable?.addEventListener('change', () => this.handleNpcConditionVariableChange());
         this.npcRewardVariable?.addEventListener('change', () => this.handleNpcRewardVariableChange());
+        this.npcConditionalRewardVariable?.addEventListener('change', () => this.handleNpcConditionalRewardVariableChange());
         this.fileInput?.addEventListener('change', (ev) => this.loadGameFile(ev));
 
         this.variablesList?.addEventListener('click', (ev) => this.handleVariableToggleClick(ev));
@@ -1030,6 +1032,10 @@ class EditorManager {
         if (this.npcRewardVariable) {
             this.npcRewardVariable.disabled = !hasNpc;
         }
+        this.populateVariableSelect(this.npcConditionalRewardVariable, npc?.conditionalRewardVariableId || '');
+        if (this.npcConditionalRewardVariable) {
+            this.npcConditionalRewardVariable.disabled = !hasNpc;
+        }
         this.suppressNpcFormUpdates = false;
 
         if (this.btnPlaceNpc) {
@@ -1146,6 +1152,22 @@ class EditorManager {
         const current = npc.rewardVariableId || null;
         if (current === normalized) return;
         this.gameEngine.npcManager?.updateNPC?.(npc.id, { rewardVariableId: normalized });
+        this.updateNpcSelection();
+        this.updateJSON();
+        this.gameEngine.draw();
+        this.pushHistory();
+    }
+
+    handleNpcConditionalRewardVariableChange() {
+        if (!this.selectedNpcId || !this.npcConditionalRewardVariable || this.suppressNpcFormUpdates) return;
+        const npc = this.gameEngine.npcManager?.getNPC?.(this.selectedNpcId)
+            || this.gameEngine.getSprites().find((s) => s.id === this.selectedNpcId);
+        if (!npc) return;
+        const rawValue = this.npcConditionalRewardVariable.value || '';
+        const normalized = rawValue || null;
+        const current = npc.conditionalRewardVariableId || null;
+        if (current === normalized) return;
+        this.gameEngine.npcManager?.updateNPC?.(npc.id, { conditionalRewardVariableId: normalized });
         this.updateNpcSelection();
         this.updateJSON();
         this.gameEngine.draw();

@@ -19,13 +19,15 @@ const VERSION_4 = 4;
 const VERSION_5 = 5;
 const VERSION_6 = 6;
 const VERSION_7 = 7;
-const VERSION = VERSION_7;
+const VERSION_8 = 8;
+const VERSION = VERSION_8;
 const LEGACY_VERSION = VERSION_1;
 const OBJECTS_VERSION = VERSION_4;
 const VARIABLES_VERSION = VERSION_5;
 const WORLD_MULTIMAP_VERSION = VERSION_6;
 const NPC_VARIABLE_TEXT_VERSION = VERSION_6;
 const MAGIC_DOOR_VERSION = VERSION_7;
+const NPC_CONDITIONAL_REWARD_VERSION = VERSION_8;
 const MATRIX_SIZE = 8;
 const TILE_COUNT = MATRIX_SIZE * MATRIX_SIZE;
 const WORLD_ROWS = 3;
@@ -46,7 +48,7 @@ const DEFAULT_PALETTE = [
 const VARIABLE_IDS = ['var-1', 'var-2', 'var-3', 'var-4', 'var-5', 'var-6'];
 const VARIABLE_NAMES = ['1 - Preto', '2 - Azul Escuro', '3 - Roxo', '4 - Verde', '5 - Marrom', '6 - Cinza'];
 const VARIABLE_COLORS = ['#000000', '#1D2B53', '#7E2553', '#008751', '#AB5236', '#5F574F'];
-const SUPPORTED_VERSIONS = new Set([VERSION_1, VERSION_2, VERSION_3, VERSION_4, VERSION_5, VERSION_6, VERSION]);
+const SUPPORTED_VERSIONS = new Set([VERSION_1, VERSION_2, VERSION_3, VERSION_4, VERSION_5, VERSION_6, VERSION_7, VERSION]);
 
 function clamp(value, min, max, fallback) {
     if (!Number.isFinite(value)) return fallback;
@@ -153,6 +155,9 @@ function normalizeSprites(list) {
         const rewardId = typeof npc?.rewardVariableId === 'string'
             ? npc.rewardVariableId
             : (typeof npc?.activateVariableId === 'string' ? npc.activateVariableId : null);
+        const conditionalRewardId = typeof npc?.conditionalRewardVariableId === 'string'
+            ? npc.conditionalRewardVariableId
+            : (typeof npc?.alternativeRewardVariableId === 'string' ? npc.alternativeRewardVariableId : null);
         normalized.push({
             type,
             id: def.id,
@@ -165,7 +170,8 @@ function normalizeSprites(list) {
             conditionText: typeof npc?.conditionText === 'string'
                 ? npc.conditionText
                 : (typeof npc?.conditionalText === 'string' ? npc.conditionalText : ''),
-            rewardVariableId: VARIABLE_IDS.includes(rewardId) ? rewardId : null
+            rewardVariableId: VARIABLE_IDS.includes(rewardId) ? rewardId : null,
+            conditionalRewardVariableId: VARIABLE_IDS.includes(conditionalRewardId) ? conditionalRewardId : null
         });
         seen.add(type);
     }
@@ -803,30 +809,33 @@ function buildShareCode(gameData) {
         }
     }
 
-    if (sprites.length) {
-        const positions = encodePositions(sprites);
-        const typeIndexes = encodeNpcTypeIndexes(sprites);
-        const spriteTexts = sprites.map((npc) => (typeof npc.text === 'string' ? npc.text : ''));
-        const conditionalTexts = sprites.map((npc) => (typeof npc.conditionText === 'string' ? npc.conditionText : ''));
-        const conditionIndexes = sprites.map((npc) => variableIdToNibble(npc.conditionVariableId));
-        const rewardIndexes = sprites.map((npc) => variableIdToNibble(npc.rewardVariableId));
-        const needsNpcTexts = sprites.some((sprite, index) => {
-            const def = SHARE_UTILS_NPC_DEFINITIONS.find((entry) => entry.type === sprite.type);
-            const fallback = def ? (def.defaultText || '') : '';
-            return spriteTexts[index] !== fallback;
-        });
-        const hasConditionalTexts = conditionalTexts.some((text) => typeof text === 'string' && text.trim().length);
-        const texts = needsNpcTexts ? encodeTextArray(spriteTexts) : '';
-        const conditionalTextCode = hasConditionalTexts ? encodeTextArray(conditionalTexts) : '';
-        const conditionCode = encodeVariableNibbleArray(conditionIndexes);
-        const rewardCode = encodeVariableNibbleArray(rewardIndexes);
-        if (positions) parts.push('p' + positions);
-        if (typeIndexes) parts.push('i' + typeIndexes);
-        if (texts) parts.push('t' + texts);
-        if (conditionalTextCode) parts.push('u' + conditionalTextCode);
-        if (conditionCode) parts.push('c' + conditionCode);
-        if (rewardCode) parts.push('r' + rewardCode);
-    }
+        if (sprites.length) {
+            const positions = encodePositions(sprites);
+            const typeIndexes = encodeNpcTypeIndexes(sprites);
+            const spriteTexts = sprites.map((npc) => (typeof npc.text === 'string' ? npc.text : ''));
+            const conditionalTexts = sprites.map((npc) => (typeof npc.conditionText === 'string' ? npc.conditionText : ''));
+            const conditionIndexes = sprites.map((npc) => variableIdToNibble(npc.conditionVariableId));
+            const rewardIndexes = sprites.map((npc) => variableIdToNibble(npc.rewardVariableId));
+            const conditionalRewardIndexes = sprites.map((npc) => variableIdToNibble(npc.conditionalRewardVariableId));
+            const needsNpcTexts = sprites.some((sprite, index) => {
+                const def = SHARE_UTILS_NPC_DEFINITIONS.find((entry) => entry.type === sprite.type);
+                const fallback = def ? (def.defaultText || '') : '';
+                return spriteTexts[index] !== fallback;
+            });
+            const hasConditionalTexts = conditionalTexts.some((text) => typeof text === 'string' && text.trim().length);
+            const texts = needsNpcTexts ? encodeTextArray(spriteTexts) : '';
+            const conditionalTextCode = hasConditionalTexts ? encodeTextArray(conditionalTexts) : '';
+            const conditionCode = encodeVariableNibbleArray(conditionIndexes);
+            const rewardCode = encodeVariableNibbleArray(rewardIndexes);
+            const conditionalRewardCode = encodeVariableNibbleArray(conditionalRewardIndexes);
+            if (positions) parts.push('p' + positions);
+            if (typeIndexes) parts.push('i' + typeIndexes);
+            if (texts) parts.push('t' + texts);
+            if (conditionalTextCode) parts.push('u' + conditionalTextCode);
+            if (conditionCode) parts.push('c' + conditionCode);
+            if (rewardCode) parts.push('r' + rewardCode);
+            if (conditionalRewardCode) parts.push('h' + conditionalRewardCode);
+        }
 
     if (enemies.length) {
         const enemyPositions = encodePositions(enemies);
@@ -898,6 +907,7 @@ function decodeShareCode(code) {
     const npcConditionalTexts = version >= NPC_VARIABLE_TEXT_VERSION ? decodeTextArray(payload.u || '') : [];
     const npcConditionIndexes = version >= NPC_VARIABLE_TEXT_VERSION ? decodeVariableNibbleArray(payload.c || '', npcPositions.length) : [];
     const npcRewardIndexes = version >= NPC_VARIABLE_TEXT_VERSION ? decodeVariableNibbleArray(payload.r || '', npcPositions.length) : [];
+    const npcConditionalRewardIndexes = version >= NPC_CONDITIONAL_REWARD_VERSION ? decodeVariableNibbleArray(payload.h || '', npcPositions.length) : [];
     const enemyPositions = decodePositions(payload.e || '');
     const doorPositions = version >= OBJECTS_VERSION ? decodePositions(payload.d || '') : [];
     const keyPositions = version >= OBJECTS_VERSION ? decodePositions(payload.k || '') : [];
@@ -919,6 +929,7 @@ function decodeShareCode(code) {
             const pos = npcPositions[index];
             const conditionVariableId = nibbleToVariableId(npcConditionIndexes[index] ?? 0);
             const rewardVariableId = nibbleToVariableId(npcRewardIndexes[index] ?? 0);
+            const conditionalRewardVariableId = nibbleToVariableId(npcConditionalRewardIndexes[index] ?? 0);
             sprites.push({
                 id: buildNpcId(index),
                 type: def.type,
@@ -930,7 +941,8 @@ function decodeShareCode(code) {
                 placed: true,
                 conditionVariableId,
                 conditionText: npcConditionalTexts[index] ?? '',
-                rewardVariableId
+                rewardVariableId,
+                conditionalRewardVariableId
             });
         }
     } else {
@@ -938,6 +950,7 @@ function decodeShareCode(code) {
             const pos = npcPositions[index];
             const conditionVariableId = nibbleToVariableId(npcConditionIndexes[index] ?? 0);
             const rewardVariableId = nibbleToVariableId(npcRewardIndexes[index] ?? 0);
+            const conditionalRewardVariableId = nibbleToVariableId(npcConditionalRewardIndexes[index] ?? 0);
             sprites.push({
                 id: buildNpcId(index),
                 name: `NPC ${index + 1}`,
@@ -948,7 +961,8 @@ function decodeShareCode(code) {
                 placed: true,
                 conditionVariableId,
                 conditionText: npcConditionalTexts[index] ?? '',
-                rewardVariableId
+                rewardVariableId,
+                conditionalRewardVariableId
             });
         }
     }
