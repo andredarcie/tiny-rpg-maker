@@ -14,10 +14,11 @@
     const VERSION_2 = 2;
     const VERSION_3 = 3;
     const VERSION_4 = 4;
-    const VERSION = 5;
+    const VERSION_5 = 5;
+    const VERSION = 6;
     const LEGACY_VERSION = VERSION_1;
     const OBJECTS_VERSION = VERSION_4;
-    const VARIABLES_VERSION = VERSION;
+    const VARIABLES_VERSION = VERSION_5;
     const MATRIX_SIZE = 8;
     const TILE_COUNT = MATRIX_SIZE * MATRIX_SIZE;
     const WORLD_ROWS = 3;
@@ -38,7 +39,7 @@
     const VARIABLE_IDS = ['var-1', 'var-2', 'var-3', 'var-4', 'var-5', 'var-6'];
     const VARIABLE_NAMES = ['1 - Preto', '2 - Azul Escuro', '3 - Roxo', '4 - Verde', '5 - Marrom', '6 - Cinza'];
     const VARIABLE_COLORS = ['#000000', '#1D2B53', '#7E2553', '#008751', '#AB5236', '#5F574F'];
-    const SUPPORTED_VERSIONS = new Set([VERSION_1, VERSION_2, VERSION_3, VERSION_4, VERSION]);
+    const SUPPORTED_VERSIONS = new Set([VERSION_1, VERSION_2, VERSION_3, VERSION_4, VERSION_5, VERSION]);
 
     function clamp(value, min, max, fallback) {
         if (!Number.isFinite(value)) return fallback;
@@ -139,6 +140,12 @@
             const x = clamp(Number(npc?.x), 0, MATRIX_SIZE - 1, 0);
             const y = clamp(Number(npc?.y), 0, MATRIX_SIZE - 1, 0);
             if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+            const conditionId = typeof npc?.conditionVariableId === 'string'
+                ? npc.conditionVariableId
+                : (typeof npc?.conditionalVariableId === 'string' ? npc.conditionalVariableId : null);
+            const rewardId = typeof npc?.rewardVariableId === 'string'
+                ? npc.rewardVariableId
+                : (typeof npc?.activateVariableId === 'string' ? npc.activateVariableId : null);
             normalized.push({
                 type,
                 id: def.id,
@@ -146,7 +153,12 @@
                 x,
                 y,
                 roomIndex: clampRoomIndex(npc?.roomIndex),
-                text: typeof npc?.text === 'string' ? npc.text : (def.defaultText || '')
+                text: typeof npc?.text === 'string' ? npc.text : (def.defaultText || ''),
+                conditionVariableId: VARIABLE_IDS.includes(conditionId) ? conditionId : null,
+                conditionText: typeof npc?.conditionText === 'string'
+                    ? npc.conditionText
+                    : (typeof npc?.conditionalText === 'string' ? npc.conditionalText : ''),
+                rewardVariableId: VARIABLE_IDS.includes(rewardId) ? rewardId : null
             });
             seen.add(type);
         }
@@ -239,6 +251,33 @@
             states[i] = Boolean(mask & (1 << i));
         }
         return states;
+    }
+
+    function variableIdToNibble(variableId) {
+        if (typeof variableId !== 'string') return 0;
+        const index = VARIABLE_IDS.indexOf(variableId);
+        return index >= 0 ? (index + 1) : 0;
+    }
+
+    function nibbleToVariableId(value) {
+        if (!Number.isFinite(value) || value <= 0) return null;
+        const index = value - 1;
+        return VARIABLE_IDS[index] || null;
+    }
+
+    function encodeVariableNibbleArray(values) {
+        if (!Array.isArray(values) || !values.length) return '';
+        const hasData = values.some((entry) => Number.isFinite(entry) && entry > 0);
+        if (!hasData) return '';
+        return toBase64Url(packNibbles(values.map((entry) => Number(entry) & 0x0f)));
+    }
+
+    function decodeVariableNibbleArray(text, expectedCount) {
+        const safeCount = Number.isFinite(expectedCount) && expectedCount > 0 ? expectedCount : 0;
+        if (!text || !safeCount) return new Array(safeCount).fill(0);
+        const bytes = fromBase64Url(text);
+        const values = unpackNibbles(bytes, safeCount);
+        return values.map((value) => (Number.isFinite(value) ? value : 0));
     }
 
     function buildVariableEntries(states) {
@@ -723,15 +762,25 @@
             const positions = encodePositions(sprites);
             const typeIndexes = encodeNpcTypeIndexes(sprites);
             const spriteTexts = sprites.map((npc) => (typeof npc.text === 'string' ? npc.text : ''));
+            const conditionalTexts = sprites.map((npc) => (typeof npc.conditionText === 'string' ? npc.conditionText : ''));
+            const conditionIndexes = sprites.map((npc) => variableIdToNibble(npc.conditionVariableId));
+            const rewardIndexes = sprites.map((npc) => variableIdToNibble(npc.rewardVariableId));
             const needsNpcTexts = sprites.some((sprite, index) => {
                 const def = NPC_DEFINITIONS.find((entry) => entry.type === sprite.type);
                 const fallback = def ? (def.defaultText || '') : '';
                 return spriteTexts[index] !== fallback;
             });
+            const hasConditionalTexts = conditionalTexts.some((text) => typeof text === 'string' && text.trim().length);
             const texts = needsNpcTexts ? encodeTextArray(spriteTexts) : '';
+            const conditionalTextCode = hasConditionalTexts ? encodeTextArray(conditionalTexts) : '';
+            const conditionCode = encodeVariableNibbleArray(conditionIndexes);
+            const rewardCode = encodeVariableNibbleArray(rewardIndexes);
             if (positions) parts.push('p' + positions);
             if (typeIndexes) parts.push('i' + typeIndexes);
             if (texts) parts.push('t' + texts);
+            if (conditionalTextCode) parts.push('u' + conditionalTextCode);
+            if (conditionCode) parts.push('c' + conditionCode);
+            if (rewardCode) parts.push('r' + rewardCode);
         }
 
         if (enemies.length) {
@@ -790,6 +839,9 @@
         const npcPositions = decodePositions(payload.p || '');
         const npcTexts = decodeTextArray(payload.t || '');
         const npcTypeIndexes = decodeNpcTypeIndexes(payload.i || '');
+        const npcConditionalTexts = version >= VERSION ? decodeTextArray(payload.u || '') : [];
+        const npcConditionIndexes = version >= VERSION ? decodeVariableNibbleArray(payload.c || '', npcPositions.length) : [];
+        const npcRewardIndexes = version >= VERSION ? decodeVariableNibbleArray(payload.r || '', npcPositions.length) : [];
         const enemyPositions = decodePositions(payload.e || '');
         const doorPositions = version >= OBJECTS_VERSION ? decodePositions(payload.d || '') : [];
         const keyPositions = version >= OBJECTS_VERSION ? decodePositions(payload.k || '') : [];
@@ -805,6 +857,8 @@
                 const def = NPC_DEFINITIONS[typeIndex];
                 if (!def) continue;
                 const pos = npcPositions[index];
+                const conditionVariableId = nibbleToVariableId(npcConditionIndexes[index] ?? 0);
+                const rewardVariableId = nibbleToVariableId(npcRewardIndexes[index] ?? 0);
                 sprites.push({
                     id: buildNpcId(index),
                     type: def.type,
@@ -813,19 +867,28 @@
                     y: pos.y,
                     roomIndex: pos.roomIndex,
                     text: npcTexts[index] ?? (def.defaultText || ''),
-                    placed: true
+                    placed: true,
+                    conditionVariableId,
+                    conditionText: npcConditionalTexts[index] ?? '',
+                    rewardVariableId
                 });
             }
         } else {
             for (let index = 0; index < npcPositions.length; index++) {
                 const pos = npcPositions[index];
+                const conditionVariableId = nibbleToVariableId(npcConditionIndexes[index] ?? 0);
+                const rewardVariableId = nibbleToVariableId(npcRewardIndexes[index] ?? 0);
                 sprites.push({
                     id: buildNpcId(index),
                     name: `NPC ${index + 1}`,
                     x: pos.x,
                     y: pos.y,
                     roomIndex: pos.roomIndex,
-                    text: npcTexts[index] ?? ''
+                    text: npcTexts[index] ?? '',
+                    placed: true,
+                    conditionVariableId,
+                    conditionText: npcConditionalTexts[index] ?? '',
+                    rewardVariableId
                 });
             }
         }
