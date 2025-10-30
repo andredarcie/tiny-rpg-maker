@@ -133,7 +133,7 @@ class TileDefinitions {
             [ null,  1,  1,  4,  4,  1,  1, null ],
             [ null, null, null,  4,  4, null, null, null ],
             [ null, null,  4,  4,  4,  4, null, null ]
-        ], false, 'Construcoes'),
+        ], true, 'Natureza'),
 
         this.tile(9, 'Arbusto Denso', [
             [ null, null, null, null, null, null, null, null ],
