@@ -78,7 +78,7 @@ class TileDefinitions {
             [  3,  3,  3,  5,  6,  6,  5,  3 ],
             [  3,  3,  3,  3,  3,  3,  3,  3 ],
             [  3,  3,  3,  3,  3,  3,  3,  3 ]
-        ], true, 'Terreno'),
+        ], false, 'Terreno'),
 
         this.tile(4, 'Areia Macia', [
             [15, 15, 15, 15, 15, 15, 15, 15],
@@ -111,7 +111,7 @@ class TileDefinitions {
             [  8,  9, 10,  8,  8, 10,  9,  8 ],
             [  8, 10,  9, 10,  9, 10,  8,  8 ],
             [ 10,  8,  8,  8,  8,  8,  9,  8 ]
-        ], false, 'Perigo'),
+        ], true, 'Perigo'),
 
         this.tile(7, 'Pedra Grande', [
             [ null, null, null, null, null, null, null, null ],
