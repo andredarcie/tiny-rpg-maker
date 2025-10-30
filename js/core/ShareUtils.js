@@ -15,10 +15,15 @@
     const VERSION_3 = 3;
     const VERSION_4 = 4;
     const VERSION_5 = 5;
-    const VERSION = 6;
+    const VERSION_6 = 6;
+    const VERSION_7 = 7;
+    const VERSION = VERSION_7;
     const LEGACY_VERSION = VERSION_1;
     const OBJECTS_VERSION = VERSION_4;
     const VARIABLES_VERSION = VERSION_5;
+    const WORLD_MULTIMAP_VERSION = VERSION_6;
+    const NPC_VARIABLE_TEXT_VERSION = VERSION_6;
+    const MAGIC_DOOR_VERSION = VERSION_7;
     const MATRIX_SIZE = 8;
     const TILE_COUNT = MATRIX_SIZE * MATRIX_SIZE;
     const WORLD_ROWS = 3;
@@ -39,7 +44,7 @@
     const VARIABLE_IDS = ['var-1', 'var-2', 'var-3', 'var-4', 'var-5', 'var-6'];
     const VARIABLE_NAMES = ['1 - Preto', '2 - Azul Escuro', '3 - Roxo', '4 - Verde', '5 - Marrom', '6 - Cinza'];
     const VARIABLE_COLORS = ['#000000', '#1D2B53', '#7E2553', '#008751', '#AB5236', '#5F574F'];
-    const SUPPORTED_VERSIONS = new Set([VERSION_1, VERSION_2, VERSION_3, VERSION_4, VERSION_5, VERSION]);
+    const SUPPORTED_VERSIONS = new Set([VERSION_1, VERSION_2, VERSION_3, VERSION_4, VERSION_5, VERSION_6, VERSION]);
 
     function clamp(value, min, max, fallback) {
         if (!Number.isFinite(value)) return fallback;
@@ -180,7 +185,6 @@
 
     function normalizeObjectPositions(list, type) {
         if (!Array.isArray(list)) return [];
-        if (!Array.isArray(list)) return [];
         const seenRooms = new Set();
         const result = [];
         for (const entry of list) {
@@ -201,9 +205,34 @@
         });
     }
 
-    function buildObjectEntries(positions, type) {
+    function normalizeVariableDoorObjects(list) {
+        if (!Array.isArray(list)) return [];
+        const seenRooms = new Set();
+        const fallbackNibble = variableIdToNibble(VARIABLE_IDS[0]) || 1;
+        const result = [];
+        for (const entry of list) {
+            if (entry?.type !== 'door-variable') continue;
+            const x = clamp(Number(entry?.x), 0, MATRIX_SIZE - 1, 0);
+            const y = clamp(Number(entry?.y), 0, MATRIX_SIZE - 1, 0);
+            if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+            const roomIndex = clampRoomIndex(entry?.roomIndex);
+            if (seenRooms.has(roomIndex)) continue;
+            seenRooms.add(roomIndex);
+            const variableNibble = variableIdToNibble(typeof entry?.variableId === 'string' ? entry.variableId : null) || fallbackNibble;
+            result.push({ x, y, roomIndex, variableNibble });
+        }
+        return result.sort((a, b) => {
+            if (a.roomIndex !== b.roomIndex) return a.roomIndex - b.roomIndex;
+            if (a.y !== b.y) return a.y - b.y;
+            return a.x - b.x;
+        });
+    }
+
+    function buildObjectEntries(positions, type, options = {}) {
         if (!Array.isArray(positions) || !positions.length) return [];
-        return positions.map((pos) => {
+        const variableNibbles = Array.isArray(options.variableNibbles) ? options.variableNibbles : [];
+        const fallbackVariableId = VARIABLE_IDS[0] || null;
+        return positions.map((pos, index) => {
             const roomIndex = clampRoomIndex(pos?.roomIndex);
             const x = clamp(Number(pos?.x), 0, MATRIX_SIZE - 1, 0);
             const y = clamp(Number(pos?.y), 0, MATRIX_SIZE - 1, 0);
@@ -219,6 +248,13 @@
             }
             if (type === 'door') {
                 entry.opened = false;
+            }
+            if (type === 'door-variable') {
+                const nibble = variableNibbles[index] ?? variableIdToNibble(fallbackVariableId);
+                const variableId = nibbleToVariableId(nibble) || fallbackVariableId;
+                if (variableId) {
+                    entry.variableId = variableId;
+                }
             }
             return entry;
         });
@@ -518,7 +554,7 @@
     }
 
     function decodeWorldGround(text, version, roomCount) {
-        if (version >= VERSION) {
+        if (version >= WORLD_MULTIMAP_VERSION) {
             const segments = text ? text.split(',') : [];
             const matrices = [];
             for (let index = 0; index < roomCount; index++) {
@@ -531,7 +567,7 @@
     }
 
     function decodeWorldOverlay(text, version, roomCount) {
-        if (version >= VERSION) {
+        if (version >= WORLD_MULTIMAP_VERSION) {
             const segments = text ? text.split(',') : [];
             const matrices = [];
             for (let index = 0; index < roomCount; index++) {
@@ -726,6 +762,13 @@
         const objects = Array.isArray(gameData?.objects) ? gameData.objects : [];
         const doorPositions = normalizeObjectPositions(objects, 'door');
         const keyPositions = normalizeObjectPositions(objects, 'key');
+        const magicDoorEntries = normalizeVariableDoorObjects(objects);
+        const magicDoorPositions = magicDoorEntries.map((entry) => ({
+            x: entry.x,
+            y: entry.y,
+            roomIndex: entry.roomIndex
+        }));
+        const magicDoorVariableNibbles = magicDoorEntries.map((entry) => entry.variableNibble ?? 0);
         const variables = Array.isArray(gameData?.variables) ? gameData.variables : [];
         const variableCode = encodeVariables(variables);
 
@@ -797,6 +840,17 @@
             }
         }
 
+        if (magicDoorPositions.length) {
+            const magicDoorCode = encodePositions(magicDoorPositions);
+            if (magicDoorCode) {
+                parts.push('m' + magicDoorCode);
+            }
+            const magicDoorVariableCode = encodeVariableNibbleArray(magicDoorVariableNibbles);
+            if (magicDoorVariableCode) {
+                parts.push('q' + magicDoorVariableCode);
+            }
+        }
+
         if (keyPositions.length) {
             const keyCode = encodePositions(keyPositions);
             if (keyCode) {
@@ -839,12 +893,16 @@
         const npcPositions = decodePositions(payload.p || '');
         const npcTexts = decodeTextArray(payload.t || '');
         const npcTypeIndexes = decodeNpcTypeIndexes(payload.i || '');
-        const npcConditionalTexts = version >= VERSION ? decodeTextArray(payload.u || '') : [];
-        const npcConditionIndexes = version >= VERSION ? decodeVariableNibbleArray(payload.c || '', npcPositions.length) : [];
-        const npcRewardIndexes = version >= VERSION ? decodeVariableNibbleArray(payload.r || '', npcPositions.length) : [];
+        const npcConditionalTexts = version >= NPC_VARIABLE_TEXT_VERSION ? decodeTextArray(payload.u || '') : [];
+        const npcConditionIndexes = version >= NPC_VARIABLE_TEXT_VERSION ? decodeVariableNibbleArray(payload.c || '', npcPositions.length) : [];
+        const npcRewardIndexes = version >= NPC_VARIABLE_TEXT_VERSION ? decodeVariableNibbleArray(payload.r || '', npcPositions.length) : [];
         const enemyPositions = decodePositions(payload.e || '');
         const doorPositions = version >= OBJECTS_VERSION ? decodePositions(payload.d || '') : [];
         const keyPositions = version >= OBJECTS_VERSION ? decodePositions(payload.k || '') : [];
+        const magicDoorPositions = version >= MAGIC_DOOR_VERSION ? decodePositions(payload.m || '') : [];
+        const magicDoorVariableNibbles = version >= MAGIC_DOOR_VERSION
+            ? decodeVariableNibbleArray(payload.q || '', magicDoorPositions.length)
+            : [];
         const variableStates = version >= VARIABLES_VERSION ? decodeVariables(payload.b || '') : [];
         const title = decodeText(payload.n, DEFAULT_TITLE) || DEFAULT_TITLE;
         const buildNpcId = (index) => `npc-${index + 1}`;
@@ -911,7 +969,8 @@
 
         const objects = [
             ...buildObjectEntries(doorPositions, 'door'),
-            ...buildObjectEntries(keyPositions, 'key')
+            ...buildObjectEntries(keyPositions, 'key'),
+            ...buildObjectEntries(magicDoorPositions, 'door-variable', { variableNibbles: magicDoorVariableNibbles })
         ];
 
         return {

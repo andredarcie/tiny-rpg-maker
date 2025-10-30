@@ -3,7 +3,7 @@ const editorObjectDefinitionsSource = (typeof module !== 'undefined' && module.e
     : ((typeof window !== 'undefined' ? window.ObjectDefinitions : null) || {});
 
 const EDITOR_OBJECT_DEFINITIONS = editorObjectDefinitionsSource.OBJECT_DEFINITIONS || [];
-const OBJECT_TYPE_ORDER = ['door', 'key'];
+const OBJECT_TYPE_ORDER = ['door', 'door-variable', 'key'];
 
 /**
  * EditorManager keeps the editor UI in sync with the runtime engine.
@@ -50,6 +50,7 @@ class EditorManager {
         this.fileInput = document.getElementById('file-input');
 
         this.btnPlaceDoor = document.getElementById('btn-place-door');
+        this.btnPlaceDoorVariable = document.getElementById('btn-place-door-variable');
         this.btnPlaceKey = document.getElementById('btn-place-key');
         this.objectsList = document.getElementById('objects-list');
 
@@ -75,6 +76,7 @@ class EditorManager {
         this.btnNpcDelete?.addEventListener('click', () => this.removeSelectedNpc());
         this.btnPlaceEnemy?.addEventListener('click', () => this.toggleEnemyPlacement());
         this.btnPlaceDoor?.addEventListener('click', () => this.toggleObjectPlacement('door'));
+        this.btnPlaceDoorVariable?.addEventListener('click', () => this.toggleObjectPlacement('door-variable'));
         this.btnPlaceKey?.addEventListener('click', () => this.toggleObjectPlacement('key'));
 
         this.btnGenerateUrl?.addEventListener('click', () => this.generateShareableUrl());
@@ -261,9 +263,13 @@ class EditorManager {
             const ox = object.x * tileSize;
             const oy = object.y * tileSize;
             this.gameEngine.renderer.drawObjectSprite(this.ectx, object.type, ox, oy, objectStep);
-            this.ectx.strokeStyle = object.type === 'door'
-                ? 'rgba(255, 163, 0, 0.6)'
-                : 'rgba(255, 255, 39, 0.6)';
+            let strokeColor = 'rgba(255, 255, 39, 0.6)';
+            if (object.type === 'door') {
+                strokeColor = 'rgba(255, 163, 0, 0.6)';
+            } else if (object.type === 'door-variable') {
+                strokeColor = 'rgba(64, 224, 208, 0.65)';
+            }
+            this.ectx.strokeStyle = strokeColor;
             this.ectx.lineWidth = 1;
             this.ectx.strokeRect(ox + 1, oy + 1, tileSize - 2, tileSize - 2);
         });
@@ -545,6 +551,8 @@ class EditorManager {
         const roomIndex = this.activeRoomIndex;
         const objects = this.gameEngine.getObjectsForRoom?.(roomIndex) ?? [];
         this.objectsList.innerHTML = '';
+        const variableDefinitions = this.gameEngine.getVariableDefinitions?.() ?? [];
+        const runtimeVariables = this.gameEngine.getRuntimeVariables?.() ?? [];
 
         OBJECT_TYPE_ORDER.forEach((type) => {
             const object = objects.find((entry) => entry.type === type) || null;
@@ -557,11 +565,69 @@ class EditorManager {
 
             const info = document.createElement('div');
             info.className = 'object-info';
-            info.textContent = object ? `(${object.x}, ${object.y})` : 'Nao colocado';
+            if (object) {
+                if (type === 'door-variable') {
+                    const variableDef = variableDefinitions.find((entry) => entry.id === object.variableId) || null;
+                    const variableLabel = variableDef?.name || object.variableId || 'Nao configurada';
+                    const runtimeValue = runtimeVariables.find((entry) => entry.id === object.variableId) || null;
+                    const stateLabel = runtimeValue?.value ? 'ON' : 'OFF';
+                    info.textContent = `(${object.x}, ${object.y}) - ${variableLabel} (${stateLabel})`;
+                } else {
+                    info.textContent = `(${object.x}, ${object.y})`;
+                }
+            } else {
+                info.textContent = 'Nao colocado';
+            }
 
-            card.append(name, info);
+            const header = document.createElement('div');
+            header.className = 'object-header';
+            header.append(name, info);
+            card.appendChild(header);
 
             if (object) {
+                if (type === 'door-variable') {
+                    const config = document.createElement('div');
+                    config.className = 'object-config';
+
+                    const label = document.createElement('label');
+                    label.className = 'object-config-label';
+                    label.textContent = 'Variavel vinculada';
+
+                    const select = document.createElement('select');
+                    select.className = 'object-config-select';
+                    variableDefinitions.forEach((variable) => {
+                        const option = document.createElement('option');
+                        option.value = variable.id;
+                        option.textContent = variable.name || variable.id;
+                        select.appendChild(option);
+                    });
+                    const fallbackId = variableDefinitions[0]?.id ?? '';
+                    select.value = object.variableId || fallbackId;
+                    select.addEventListener('change', () => {
+                        const nextId = select.value;
+                        this.gameEngine.setObjectVariable('door-variable', roomIndex, nextId);
+                        this.renderObjects();
+                        this.renderWorldGrid();
+                        this.renderEditor();
+                        this.gameEngine.draw();
+                        this.updateJSON();
+                        this.pushHistory();
+                    });
+
+                    label.appendChild(select);
+                    config.appendChild(label);
+
+                    const runtimeEntry = runtimeVariables.find((entry) => entry.id === (object.variableId || select.value)) || null;
+                    const status = document.createElement('div');
+                    status.className = 'object-status';
+                    const isOn = Boolean(runtimeEntry?.value);
+                    status.classList.toggle('is-on', isOn);
+                    status.textContent = `Estado atual: ${isOn ? 'ON' : 'OFF'}`;
+                    config.appendChild(status);
+
+                    card.appendChild(config);
+                }
+
                 const removeBtn = document.createElement('button');
                 removeBtn.type = 'button';
                 removeBtn.className = 'object-remove';
@@ -627,6 +693,11 @@ class EditorManager {
             this.btnPlaceDoor.classList.toggle('placing', activeDoor);
             this.btnPlaceDoor.textContent = activeDoor ? 'Cancelar colocacao' : 'Colocar porta';
         }
+        if (this.btnPlaceDoorVariable) {
+            const activeVariableDoor = this.placingObjectType === 'door-variable';
+            this.btnPlaceDoorVariable.classList.toggle('placing', activeVariableDoor);
+            this.btnPlaceDoorVariable.textContent = activeVariableDoor ? 'Cancelar colocacao' : 'Colocar porta magica';
+        }
         if (this.btnPlaceKey) {
             const activeKey = this.placingObjectType === 'key';
             this.btnPlaceKey.classList.toggle('placing', activeKey);
@@ -689,6 +760,7 @@ class EditorManager {
         const changed = this.gameEngine.setVariableDefault(variableId, targetValue);
         if (!changed) return;
         this.renderVariables();
+        this.renderObjects();
         this.updateNpcSelection();
         this.gameEngine.draw();
         this.updateJSON();
@@ -793,6 +865,15 @@ class EditorManager {
                     badge.textContent = 'Porta';
                     badges.appendChild(badge);
                     cell.classList.add('has-door');
+                }
+
+                const hasVariableDoor = objects.some((object) => object.roomIndex === index && object.type === 'door-variable');
+                if (hasVariableDoor) {
+                    const badge = document.createElement('span');
+                    badge.classList.add('world-cell-badge', 'badge-door-variable');
+                    badge.textContent = 'Porta magica';
+                    badges.appendChild(badge);
+                    cell.classList.add('has-door-variable');
                 }
 
                 const hasKey = objects.some((object) => object.roomIndex === index && object.type === 'key');

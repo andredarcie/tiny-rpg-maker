@@ -270,16 +270,22 @@ class GameState {
 
     normalizeObjects(objects) {
         if (!Array.isArray(objects)) return [];
+        const allowedTypes = new Set(['door', 'door-variable', 'key']);
         return objects
             .map((object) => {
-                const type = object?.type === 'door' ? 'door' : (object?.type === 'key' ? 'key' : null);
-                if (!type) return null;
+                const sourceType = typeof object?.type === 'string' ? object.type : null;
+                if (!allowedTypes.has(sourceType)) return null;
+                const type = sourceType;
                 const roomIndex = this.clampRoomIndex(object?.roomIndex ?? 0);
                 const x = this.clampCoordinate(object?.x ?? 0);
                 const y = this.clampCoordinate(object?.y ?? 0);
                 const id = typeof object?.id === 'string' && object.id.trim()
                     ? object.id.trim()
                     : this.generateObjectId(type, roomIndex);
+                const fallbackVariableId = this.game.variables?.[0]?.id ?? VARIABLE_PRESETS[0]?.id ?? null;
+                const normalizedVariable = type === 'door-variable'
+                    ? (this.normalizeVariableId?.(object?.variableId) ?? fallbackVariableId)
+                    : null;
 
                 return {
                     id,
@@ -288,7 +294,8 @@ class GameState {
                     x,
                     y,
                     collected: type === 'key' ? Boolean(object?.collected) : false,
-                    opened: type === 'door' ? Boolean(object?.opened) : false
+                    opened: type === 'door' ? Boolean(object?.opened) : false,
+                    variableId: normalizedVariable
                 };
             })
             .filter(Boolean);
@@ -330,7 +337,7 @@ class GameState {
     }
 
     setObjectPosition(type, roomIndex, x, y) {
-        const normalizedType = type === 'door' ? 'door' : (type === 'key' ? 'key' : null);
+        const normalizedType = ['door', 'door-variable', 'key'].includes(type) ? type : null;
         if (!normalizedType) return null;
         const targetRoom = this.clampRoomIndex(roomIndex ?? 0);
         const cx = this.clampCoordinate(x ?? 0);
@@ -358,16 +365,34 @@ class GameState {
         if (normalizedType === 'door') {
             entry.opened = false;
         }
+        if (normalizedType === 'door-variable') {
+            const fallbackVariableId = this.game.variables?.[0]?.id ?? VARIABLE_PRESETS[0]?.id ?? null;
+            entry.variableId = this.normalizeVariableId?.(entry.variableId) ?? fallbackVariableId;
+        }
         return entry;
     }
 
     removeObject(type, roomIndex) {
-        const normalizedType = type === 'door' ? 'door' : (type === 'key' ? 'key' : null);
+        const normalizedType = ['door', 'door-variable', 'key'].includes(type) ? type : null;
         if (!normalizedType) return;
         const targetRoom = this.clampRoomIndex(roomIndex ?? 0);
         this.game.objects = this.game.objects.filter((object) =>
             !(object.type === normalizedType && object.roomIndex === targetRoom)
         );
+    }
+
+    setObjectVariable(type, roomIndex, variableId) {
+        if (type !== 'door-variable') return null;
+        const targetRoom = this.clampRoomIndex(roomIndex ?? 0);
+        const entry = this.game.objects.find((object) =>
+            object.type === 'door-variable' &&
+            object.roomIndex === targetRoom
+        );
+        if (!entry) return null;
+        const fallbackVariableId = this.game.variables?.[0]?.id ?? VARIABLE_PRESETS[0]?.id ?? null;
+        const normalized = this.normalizeVariableId(variableId);
+        entry.variableId = normalized ?? fallbackVariableId;
+        return entry.variableId;
     }
 
     addKeys(amount = 1) {

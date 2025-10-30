@@ -113,6 +113,12 @@ class Renderer {
             if (object.roomIndex !== player.roomIndex) continue;
             if (object.type === 'key' && object.collected) continue;
             if (object.type === 'door' && object.opened) continue;
+            if (object.type === 'door-variable') {
+                const isOpen = object.variableId
+                    ? this.gameState.isVariableOn?.(object.variableId)
+                    : false;
+                if (isOpen) continue;
+            }
             const px = object.x * tileSize;
             const py = object.y * tileSize;
             this.drawObjectSprite(this.ctx, object.type, px, py, step);

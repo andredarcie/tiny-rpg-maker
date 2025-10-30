@@ -92,6 +92,18 @@ class GameEngine {
         if (targetRoom.walls?.[targetY]?.[targetX]) return; // blocked by a wall
 
         const objectAtTarget = this.gameState.getObjectAt?.(targetRoomIndex, targetX, targetY) ?? null;
+        if (objectAtTarget?.type === 'door-variable') {
+            const variableId = objectAtTarget.variableId;
+            const doorOpen = variableId ? this.gameState.isVariableOn(variableId) : false;
+            if (!doorOpen) {
+                const variable = variableId ? this.gameState.getVariable?.(variableId) ?? null : null;
+                const variableLabel = variable?.name || variable?.id || variableId || 'uma variavel';
+                const message = "Não abre com chave.";
+                this.showDialog(message);
+                this.renderer.draw();
+                return;
+            }
+        }
         if (objectAtTarget?.type === 'door' && !objectAtTarget.opened) {
             const consumeKey = typeof this.gameState.consumeKey === 'function'
                 ? this.gameState.consumeKey()
@@ -318,6 +330,12 @@ class GameEngine {
         return entry;
     }
 
+    setObjectVariable(type, roomIndex, variableId) {
+        const updated = this.gameState.setObjectVariable?.(type, roomIndex, variableId);
+        this.renderer.draw();
+        return updated;
+    }
+
     removeObject(type, roomIndex) {
         this.gameState.removeObject(type, roomIndex);
         this.renderer.draw();
@@ -425,6 +443,12 @@ class GameEngine {
 
             const blockingObject = this.gameState.getObjectAt?.(roomIndex, nx, ny) ?? null;
             if (blockingObject?.type === 'door' && !blockingObject.opened) continue;
+            if (blockingObject?.type === 'door-variable') {
+                const isOpen = blockingObject.variableId
+                    ? this.gameState.isVariableOn(blockingObject.variableId)
+                    : false;
+                if (!isOpen) continue;
+            }
 
             const occupied = enemies.some((other, index) =>
                 index !== i &&
