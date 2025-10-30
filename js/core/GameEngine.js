@@ -13,6 +13,7 @@ class GameEngine {
         this.renderer = new Renderer(canvas, this.gameState, this.tileManager, this.npcManager);
         this.inputManager = new InputManager(this);
         this.enemyMoveTimer = null;
+        this.pendingDialogAction = null;
 
         // Ensure there is at least a ground layer
         this.tileManager.ensureDefaultTiles();
@@ -27,12 +28,11 @@ class GameEngine {
     tryMove(dx, dy) {
         const dialog = this.gameState.getDialog();
         if (dialog.active) {
-            if (dialog.page == dialog.maxPages) {
-                this.renderer.draw();
-                this.gameState.setDialog(false);
+            if (dialog.page >= dialog.maxPages) {
+                this.closeDialog();
                 return;
             }
-            this.gameState.setDialogPage(dialog.page+1)
+            this.gameState.setDialogPage(dialog.page + 1);
             this.renderer.draw();
             return;
         }
@@ -98,9 +98,15 @@ class GameEngine {
                 : false;
             if (consumeKey) {
                 objectAtTarget.opened = true;
-                this.showDialog('Abriu a porta com chave.');
+                const remainingKeys = typeof this.gameState.getKeys === 'function'
+                    ? this.gameState.getKeys()
+                    : null;
+                const message = Number.isFinite(remainingKeys)
+                    ? `Voce usou uma chave para abrir a porta. Chaves restantes: ${remainingKeys}.`
+                    : 'Voce usou uma chave para abrir a porta.';
+                this.showDialog(message);
             } else {
-                this.showDialog('A porta esta trancada.');
+                this.showDialog('A porta esta trancada. Voce precisa de uma chave.');
                 this.renderer.draw();
                 return;
             }
@@ -147,7 +153,10 @@ class GameEngine {
                 const totalKeys = typeof this.gameState.addKeys === 'function'
                     ? this.gameState.addKeys(1)
                     : null;
-                this.showDialog('Voce pegou uma chave.');
+                const message = Number.isFinite(totalKeys)
+                    ? `Voce pegou uma chave. Agora possui ${totalKeys}.`
+                    : 'Voce pegou uma chave.';
+                this.showDialog(message);
                 break;
             }
         }
@@ -158,7 +167,19 @@ class GameEngine {
             if (npc.roomIndex === player.roomIndex &&
                 npc.x === player.x &&
                 npc.y === player.y) {
-                this.showDialog(npc.text || "Hello!");
+                const conditionId = this.gameState.normalizeVariableId?.(npc.conditionVariableId) ?? null;
+                const rewardId = this.gameState.normalizeVariableId?.(npc.rewardVariableId) ?? null;
+                const conditionalText = typeof npc.conditionText === 'string' ? npc.conditionText : '';
+                const baseText = typeof npc.text === 'string' ? npc.text : '';
+                const useConditional = conditionId && this.gameState.isVariableOn?.(conditionId) && conditionalText.trim();
+                let dialogText = useConditional ? conditionalText : baseText;
+                if (!dialogText) {
+                    dialogText = baseText || (useConditional ? conditionalText : '') || "Hello!";
+                }
+                const meta = (!useConditional && rewardId)
+                    ? { setVariableId: rewardId, rewardAllowed: true }
+                    : null;
+                this.showDialog(dialogText, meta || undefined);
                 break;
             }
         }
@@ -180,13 +201,31 @@ class GameEngine {
         }
     }
 
-    showDialog(text) {
-        this.gameState.setDialog(true, text);
+    showDialog(text, options = {}) {
+        const meta = options && Object.keys(options).length ? { ...options } : null;
+        this.pendingDialogAction = meta;
+        this.gameState.setDialog(true, text, meta);
+    }
+
+    completeDialog() {
+        if (this.pendingDialogAction?.setVariableId &&
+            this.pendingDialogAction.rewardAllowed !== false) {
+            this.gameState.setVariableValue?.(this.pendingDialogAction.setVariableId, true);
+        }
+        this.pendingDialogAction = null;
+    }
+
+    closeDialog() {
+        if (!this.gameState.getDialog().active) return;
+        this.completeDialog();
+        this.gameState.setDialog(false);
+        this.renderer.draw();
     }
 
     resetGame() {
         this.gameState.resetGame();
         this.startEnemyLoop();
+        this.pendingDialogAction = null;
         this.renderer.draw();
     }
 
@@ -201,6 +240,7 @@ class GameEngine {
         this.tileManager.ensureDefaultTiles();
         this.syncDocumentTitle();
         this.startEnemyLoop();
+        this.pendingDialogAction = null;
         this.renderer.draw();
     }
 
@@ -240,6 +280,26 @@ class GameEngine {
 
     getTilePresetNames() {
         return this.tileManager.getPresetTileNames();
+    }
+
+    getVariableDefinitions() {
+        return this.gameState.getVariableDefinitions();
+    }
+
+    getRuntimeVariables() {
+        return this.gameState.getVariables();
+    }
+
+    setVariableDefault(variableId, value) {
+        const changed = this.gameState.setVariableValue(variableId, value, true);
+        if (changed) {
+            this.renderer.draw();
+        }
+        return changed;
+    }
+
+    isVariableOn(variableId) {
+        return this.gameState.isVariableOn(variableId);
     }
 
     getObjects() {

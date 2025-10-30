@@ -1,3 +1,12 @@
+const VARIABLE_PRESETS = Object.freeze([
+    { id: 'var-1', order: 1, name: '1 - Preto', color: '#000000' },
+    { id: 'var-2', order: 2, name: '2 - Azul Escuro', color: '#1D2B53' },
+    { id: 'var-3', order: 3, name: '3 - Roxo', color: '#7E2553' },
+    { id: 'var-4', order: 4, name: '4 - Verde', color: '#008751' },
+    { id: 'var-5', order: 5, name: '5 - Marrom', color: '#AB5236' },
+    { id: 'var-6', order: 6, name: '6 - Cinza', color: '#5F574F' }
+]);
+
 /**
  * GameState stores the persistent game definition and runtime state.
  */
@@ -20,6 +29,7 @@ class GameState {
             enemies: [],
             items: [],
             objects: [],
+            variables: [],
             exits: [],
             tileset: {
                 tiles: [],
@@ -27,11 +37,13 @@ class GameState {
             }
         };
         this.game.tileset.map = this.game.tileset.maps[0];
+        this.ensureDefaultVariables();
 
         this.state = {
             player: { x: 1, y: 1, roomIndex: 0, lives: 3, keys: 0 },
-            dialog: { active: false, text: "", page: 1, maxPages: 1 },
-            enemies: []
+            dialog: { active: false, text: "", page: 1, maxPages: 1, meta: null },
+            enemies: [],
+            variables: this.cloneVariables(this.game.variables)
         };
         this.state.enemies = this.cloneEnemies(this.game.enemies);
     }
@@ -90,14 +102,28 @@ class GameState {
         }
     }
 
-    setDialog(active, text = "") {
-        if (this.state.dialog.active && !active) {this.state.dialog.page = 1;}
-        this.state.dialog.active = active;
+    setDialog(active, text = "", meta = null) {
+        if (!active) {
+            this.state.dialog.active = false;
+            this.state.dialog.text = "";
+            this.state.dialog.page = 1;
+            this.state.dialog.maxPages = 1;
+            this.state.dialog.meta = null;
+            return;
+        }
+        this.state.dialog.active = true;
         this.state.dialog.text = text;
+        this.state.dialog.page = 1;
+        this.state.dialog.maxPages = 1;
+        this.state.dialog.meta = meta || null;
     }
 
     setDialogPage(page) {
-        this.state.dialog.page = page
+        const numeric = Number(page);
+        if (!Number.isFinite(numeric)) return;
+        const maxPages = Math.max(1, this.state.dialog.maxPages || 1);
+        const clamped = Math.min(Math.max(1, Math.floor(numeric)), maxPages);
+        this.state.dialog.page = clamped;
     }
 
     resetGame() {
@@ -108,7 +134,11 @@ class GameState {
         this.state.player.keys = 0;
         this.state.dialog.active = false;
         this.state.dialog.text = "";
+        this.state.dialog.page = 1;
+        this.state.dialog.maxPages = 1;
+        this.state.dialog.meta = null;
         this.state.enemies = this.cloneEnemies(this.game.enemies);
+        this.state.variables = this.cloneVariables(this.game.variables);
 
         // Reset collected items
         this.game.items.forEach((item) => item.collected = false);
@@ -134,6 +164,7 @@ class GameState {
             enemies: this.game.enemies,
             items: this.game.items,
             objects: this.game.objects,
+            variables: this.game.variables,
             exits: this.game.exits,
             tileset: this.game.tileset
         };
@@ -153,6 +184,7 @@ class GameState {
             totalRooms
         );
         const normalizedObjects = this.normalizeObjects(data.objects);
+        const normalizedVariables = this.normalizeVariables(data.variables);
 
         Object.assign(this.game, {
             title: data.title || "My Tiny RPG Game",
@@ -165,6 +197,7 @@ class GameState {
             enemies: Array.isArray(data.enemies) ? data.enemies : [],
             items: Array.isArray(data.items) ? data.items : [],
             objects: normalizedObjects,
+            variables: normalizedVariables,
             exits: Array.isArray(data.exits) ? data.exits : [],
             tileset: {
                 tiles: tilesetTiles,
@@ -178,6 +211,7 @@ class GameState {
             roomIndex: this.clampRoomIndex(data.start?.roomIndex ?? 0)
         };
 
+        this.ensureDefaultVariables();
         this.resetGame();
     }
 
@@ -352,6 +386,83 @@ class GameState {
 
     getKeys() {
         return this.state.player.keys;
+    }
+
+    ensureDefaultVariables() {
+        this.game.variables = this.normalizeVariables(this.game.variables);
+    }
+
+    cloneVariables(list) {
+        return (list || []).map((entry) => ({
+            id: entry.id,
+            order: entry.order,
+            name: entry.name,
+            color: entry.color,
+            value: Boolean(entry.value)
+        }));
+    }
+
+    normalizeVariables(source) {
+        const incoming = Array.isArray(source) ? source : [];
+        const byId = new Map(incoming.map((entry) => [entry?.id, entry]));
+        return VARIABLE_PRESETS.map((preset) => {
+            const current = byId.get(preset.id) || {};
+            return {
+                id: preset.id,
+                order: preset.order,
+                name: typeof current.name === 'string' && current.name.trim() ? current.name.trim() : preset.name,
+                color: typeof current.color === 'string' && current.color.trim() ? current.color.trim() : preset.color,
+                value: Boolean(current.value)
+            };
+        });
+    }
+
+    getVariableDefinitions() {
+        return this.game.variables;
+    }
+
+    getVariables() {
+        return this.state.variables;
+    }
+
+    normalizeVariableId(variableId) {
+        if (typeof variableId !== 'string') return null;
+        return this.game.variables.some((variable) => variable.id === variableId) ? variableId : null;
+    }
+
+    getVariable(variableId) {
+        if (!variableId) return null;
+        return this.state.variables.find((variable) => variable.id === variableId) || null;
+    }
+
+    isVariableOn(variableId) {
+        const entry = this.getVariable(variableId);
+        return entry ? Boolean(entry.value) : false;
+    }
+
+    setVariableValue(variableId, value, persist = false) {
+        let updated = false;
+        this.state.variables.forEach((variable) => {
+            if (variable.id === variableId) {
+                const next = Boolean(value);
+                if (variable.value !== next) {
+                    variable.value = next;
+                    updated = true;
+                }
+            }
+        });
+        if (persist) {
+            this.game.variables.forEach((variable) => {
+                if (variable.id === variableId) {
+                    const next = Boolean(value);
+                    if (variable.value !== next) {
+                        variable.value = next;
+                        updated = true;
+                    }
+                }
+            });
+        }
+        return updated;
     }
 
     getEnemies() {

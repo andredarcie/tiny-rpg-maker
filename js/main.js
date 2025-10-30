@@ -32,6 +32,10 @@
             getTileMap: () => gameEngine.getTileMap(),
             getTilePresetNames: () => gameEngine.getTilePresetNames(),
 
+            // Variable API
+            getVariables: () => gameEngine.getVariableDefinitions(),
+            setVariableDefault: (variableId, value) => gameEngine.setVariableDefault(variableId, value),
+
             // NPC API
             addSprite: (npc) => gameEngine.addSprite(npc),
             getSprites: () => gameEngine.getSprites()

@@ -191,6 +191,9 @@ class Renderer {
         const dialog = this.gameState.getDialog();
         
         if (!dialog.active || !dialog.text) return;
+        if (!dialog.page || dialog.page < 1) {
+            dialog.page = 1;
+        }
         
         this.drawDialogBox(dialog);
     }
@@ -261,11 +264,16 @@ class Renderer {
         const maxWidth = w - 16;
 
         const pages = this.calculateDialogPages(dialog, this.ctx, maxWidth, lineHeight, h - 8);
-        // Página atual
-        const pageIndex = dialog.page - 1;
-        const lines = pages[pageIndex] || [];
+        const totalPages = Math.max(1, pages.length);
+        if (dialog.maxPages !== totalPages) {
+            dialog.maxPages = totalPages;
+        }
+        const currentIndex = Math.min(Math.max((dialog.page ?? 1) - 1, 0), totalPages - 1);
+        if (dialog.page !== currentIndex + 1) {
+            dialog.page = currentIndex + 1;
+        }
+        const lines = pages[currentIndex] || [];
 
-        // Desenha cada linha
         let ty = y + 14;
         for (const line of lines) {
             this.ctx.fillText(line, x + 8, ty);
@@ -274,7 +282,7 @@ class Renderer {
     }
 
     calculateDialogPages(dialog, ctx, maxWidth, lineHeight, boxHeight) {
-        const words = dialog.text.split(/\s+/);
+        const words = (dialog.text || '').split(/\s+/);
         let line = "";
         let lines = [];
 
@@ -290,17 +298,17 @@ class Renderer {
             }
         }
         lines.push(line.trim());
-        // Calcula quantas linhas cabem por página
-        const linesPerPage = Math.floor(boxHeight / lineHeight);
+        // Calcula quantas linhas cabem por pagina
+        const linesPerPage = Math.max(1, Math.floor(boxHeight / lineHeight));
         const pages = [];
 
         for (let i = 0; i < lines.length; i += linesPerPage) {
             pages.push(lines.slice(i, i + linesPerPage));
         }
 
-        dialog.maxPages = pages.length;
         return pages;
     }
+
 
     drawCustomTile(tileId, px, py, size) {
         const tile = this.tileManager.getTile(tileId);
@@ -489,6 +497,10 @@ if (typeof module !== 'undefined' && module.exports) {
 } else {
     window.Renderer = Renderer;
 }
+
+
+
+
 
 
 

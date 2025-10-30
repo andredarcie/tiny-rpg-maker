@@ -22,6 +22,7 @@ class EditorManager {
         this.mapPainting = false;
         this.history = { stack: [], index: -1 };
         this.npcTextUpdateTimer = null;
+        this.suppressNpcFormUpdates = false;
 
         this.handleCanvasResize = this.handleCanvasResize.bind(this);
         this.finishMapPaint = this.finishMapPaint.bind(this);
@@ -61,6 +62,11 @@ class EditorManager {
         this.btnApplyJson = document.getElementById('btn-apply-json');
         this.btnUndo = document.getElementById('btn-undo');
         this.btnRedo = document.getElementById('btn-redo');
+
+        this.variablesList = document.getElementById('variables-list');
+        this.npcConditionalVariable = document.getElementById('npc-conditional-variable');
+        this.npcConditionalText = document.getElementById('npc-conditional-text');
+        this.npcRewardVariable = document.getElementById('npc-reward-variable');
     }
 
     bindEvents() {
@@ -79,7 +85,12 @@ class EditorManager {
 
         this.titleInput?.addEventListener('input', () => this.updateGameTitle());
         this.npcText?.addEventListener('input', () => this.updateNpcText());
+        this.npcConditionalText?.addEventListener('input', () => this.updateNpcConditionalText());
+        this.npcConditionalVariable?.addEventListener('change', () => this.handleNpcConditionVariableChange());
+        this.npcRewardVariable?.addEventListener('change', () => this.handleNpcRewardVariableChange());
         this.fileInput?.addEventListener('change', (ev) => this.loadGameFile(ev));
+
+        this.variablesList?.addEventListener('click', (ev) => this.handleVariableToggleClick(ev));
 
         if (this.editorCanvas) {
             this.editorCanvas.addEventListener('pointerdown', (ev) => this.startMapPaint(ev));
@@ -109,6 +120,7 @@ class EditorManager {
         this.renderNpcs();
         this.renderEnemies();
         this.renderObjects();
+        this.renderVariables();
         this.renderEditor();
         this.updateSelectedTilePreview();
         this.handleCanvasResize(true);
@@ -431,11 +443,7 @@ class EditorManager {
                 card.classList.add('npc-card-available');
             }
 
-            const dialog = document.createElement('div');
-            dialog.className = 'npc-dialog';
-            dialog.textContent = npc?.text || 'Sem dialogo';
-
-            meta.append(name, pos, dialog);
+            meta.append(name, pos);
             card.append(preview, meta);
 
             card.addEventListener('click', () => {
@@ -624,6 +632,67 @@ class EditorManager {
             this.btnPlaceKey.classList.toggle('placing', activeKey);
             this.btnPlaceKey.textContent = activeKey ? 'Cancelar colocacao' : 'Colocar chave';
         }
+    }
+
+    renderVariables() {
+        if (!this.variablesList) return;
+        const variables = this.gameEngine.getVariableDefinitions?.() ?? [];
+        this.variablesList.innerHTML = '';
+
+        variables.forEach((variable) => {
+            const card = document.createElement('div');
+            card.className = 'variable-card';
+            card.dataset.variableId = variable.id;
+            card.classList.toggle('is-on', Boolean(variable.value));
+
+            const label = document.createElement('div');
+            label.className = 'variable-label';
+
+            const swatch = document.createElement('span');
+            swatch.className = 'variable-color';
+            if (variable.color) {
+                swatch.style.backgroundColor = variable.color;
+            }
+
+            const name = document.createElement('span');
+            name.className = 'variable-name';
+            name.textContent = variable.name || variable.id;
+
+            label.append(swatch, name);
+
+            const toggle = document.createElement('button');
+            toggle.type = 'button';
+            toggle.className = 'variable-toggle';
+            toggle.textContent = variable.value ? 'ON' : 'OFF';
+            toggle.setAttribute('aria-pressed', variable.value ? 'true' : 'false');
+
+            card.append(label, toggle);
+            this.variablesList.appendChild(card);
+        });
+    }
+
+    handleVariableToggleClick(ev) {
+        const button = ev.target.closest('.variable-toggle');
+        if (!button) return;
+        const card = button.closest('.variable-card');
+        const variableId = card?.dataset?.variableId;
+        if (!variableId) return;
+        ev.preventDefault();
+        const isActive = card.classList.contains('is-on');
+        this.toggleVariableDefault(variableId, !isActive);
+    }
+
+    toggleVariableDefault(variableId, nextValue = null) {
+        if (!variableId || !this.gameEngine.setVariableDefault) return;
+        const current = (this.gameEngine.getVariableDefinitions?.() ?? []).find((entry) => entry.id === variableId);
+        const targetValue = nextValue !== null ? Boolean(nextValue) : !Boolean(current?.value);
+        const changed = this.gameEngine.setVariableDefault(variableId, targetValue);
+        if (!changed) return;
+        this.renderVariables();
+        this.updateNpcSelection();
+        this.gameEngine.draw();
+        this.updateJSON();
+        this.pushHistory();
     }
 
     removeEnemy(enemyId) {
@@ -859,14 +928,33 @@ class EditorManager {
                 card.classList.toggle('selected', card.dataset.type === this.selectedNpcType);
             });
         }
+
         const npc = this.gameEngine.getSprites().find((s) => s.type === this.selectedNpcType) || null;
         this.selectedNpcId = npc?.id || null;
+        const hasNpc = Boolean(npc);
+
         if (this.npcText) {
-            this.npcText.disabled = !npc;
+            this.npcText.disabled = !hasNpc;
             this.npcText.value = npc?.text || '';
         }
+
+        this.suppressNpcFormUpdates = true;
+        if (this.npcConditionalText) {
+            this.npcConditionalText.disabled = !hasNpc;
+            this.npcConditionalText.value = npc?.conditionText || '';
+        }
+        this.populateVariableSelect(this.npcConditionalVariable, npc?.conditionVariableId || '');
+        if (this.npcConditionalVariable) {
+            this.npcConditionalVariable.disabled = !hasNpc;
+        }
+        this.populateVariableSelect(this.npcRewardVariable, npc?.rewardVariableId || '');
+        if (this.npcRewardVariable) {
+            this.npcRewardVariable.disabled = !hasNpc;
+        }
+        this.suppressNpcFormUpdates = false;
+
         if (this.btnPlaceNpc) {
-            if (!npc) {
+            if (!hasNpc) {
                 this.btnPlaceNpc.disabled = true;
                 this.btnPlaceNpc.textContent = 'Colocar NPC no mapa';
                 this.btnPlaceNpc.classList.remove('placing');
@@ -878,32 +966,111 @@ class EditorManager {
                 }
             }
         }
+
         if (this.btnNpcDelete) {
-            this.btnNpcDelete.disabled = !npc || !npc.placed;
+            this.btnNpcDelete.disabled = !hasNpc || !npc.placed;
         }
-        if (!npc) {
+
+        if (!hasNpc) {
             this.placingNpc = false;
             if (this.editorCanvas) this.editorCanvas.style.cursor = 'default';
         }
     }
 
+    populateVariableSelect(selectElement, selectedId = '') {
+        if (!selectElement) return;
+        const variables = this.gameEngine.getVariableDefinitions?.() ?? [];
+        const target = typeof selectedId === 'string' ? selectedId : '';
+
+        const fragment = document.createDocumentFragment();
+        const emptyOption = document.createElement('option');
+        emptyOption.value = '';
+        emptyOption.textContent = 'Nenhuma';
+        fragment.appendChild(emptyOption);
+
+        variables.forEach((variable) => {
+            const option = document.createElement('option');
+            option.value = variable.id;
+            option.textContent = variable.name || variable.id;
+            fragment.appendChild(option);
+        });
+
+        selectElement.innerHTML = '';
+        selectElement.appendChild(fragment);
+
+        const hasTarget = variables.some((variable) => variable.id === target);
+        selectElement.value = hasTarget ? target : '';
+    }
+
     updateNpcText() {
-        if (!this.selectedNpcType || !this.npcText) return;
-        const npc = this.gameEngine.getSprites().find((s) => s.type === this.selectedNpcType);
+        if (!this.selectedNpcId || !this.npcText || this.suppressNpcFormUpdates) return;
+        const npc = this.gameEngine.npcManager?.getNPC?.(this.selectedNpcId)
+            || this.gameEngine.getSprites().find((s) => s.id === this.selectedNpcId);
         if (!npc) return;
         const newText = this.npcText.value;
         if (npc.text === newText) return;
-        npc.text = newText;
-        this.gameEngine.npcManager?.updateNPCDialog?.(npc.id, npc.text);
+        this.gameEngine.npcManager?.updateNPC?.(npc.id, { text: newText });
         if (this.npcTextUpdateTimer) {
             clearTimeout(this.npcTextUpdateTimer);
         }
         this.npcTextUpdateTimer = setTimeout(() => {
-            this.renderNpcs();
             this.updateJSON();
+            this.gameEngine.draw();
             this.pushHistory();
             this.npcTextUpdateTimer = null;
         }, 250);
+    }
+
+    updateNpcConditionalText() {
+        if (!this.selectedNpcId || !this.npcConditionalText || this.suppressNpcFormUpdates) return;
+        const npc = this.gameEngine.npcManager?.getNPC?.(this.selectedNpcId)
+            || this.gameEngine.getSprites().find((s) => s.id === this.selectedNpcId);
+        if (!npc) return;
+        const newText = this.npcConditionalText.value;
+        const current = npc.conditionText || '';
+        if (current === newText) return;
+        this.gameEngine.npcManager?.updateNPC?.(npc.id, { conditionText: newText });
+        if (this.npcTextUpdateTimer) {
+            clearTimeout(this.npcTextUpdateTimer);
+        }
+        this.npcTextUpdateTimer = setTimeout(() => {
+            this.updateJSON();
+            this.gameEngine.draw();
+            this.pushHistory();
+            this.npcTextUpdateTimer = null;
+        }, 250);
+    }
+
+    handleNpcConditionVariableChange() {
+        if (!this.selectedNpcId || !this.npcConditionalVariable || this.suppressNpcFormUpdates) return;
+        const npc = this.gameEngine.npcManager?.getNPC?.(this.selectedNpcId)
+            || this.gameEngine.getSprites().find((s) => s.id === this.selectedNpcId);
+        if (!npc) return;
+        const rawValue = this.npcConditionalVariable.value || '';
+        const normalized = rawValue || null;
+        const current = npc.conditionVariableId || null;
+        if (current === normalized) return;
+        this.gameEngine.npcManager?.updateNPC?.(npc.id, { conditionVariableId: normalized });
+        this.updateNpcSelection();
+        this.updateJSON();
+        this.gameEngine.draw();
+        this.pushHistory();
+    }
+
+    handleNpcRewardVariableChange() {
+        if (!this.selectedNpcId || !this.npcRewardVariable || this.suppressNpcFormUpdates) return;
+        const npc = this.gameEngine.npcManager?.getNPC?.(this.selectedNpcId)
+            || this.gameEngine.getSprites().find((s) => s.id === this.selectedNpcId);
+        if (!npc) return;
+        const rawValue = this.npcRewardVariable.value || '';
+        const normalized = rawValue || null;
+        const current = npc.rewardVariableId || null;
+        if (current === normalized) return;
+        this.gameEngine.npcManager?.updateNPC?.(npc.id, { rewardVariableId: normalized });
+        this.updateNpcSelection();
+        this.updateJSON();
+        this.gameEngine.draw();
+        this.pushHistory();
     }
 
     handleCanvasResize(force = false) {
@@ -1042,6 +1209,7 @@ class EditorManager {
         this.renderNpcs();
         this.renderObjects();
         this.renderEnemies();
+        this.renderVariables();
         this.renderEditor();
         this.updateSelectedTilePreview();
         this.gameEngine.draw();

@@ -10,11 +10,14 @@
 
     const NPC_DEFINITIONS = definitionsSource.NPC_DEFINITIONS || [];
 
-    const LEGACY_VERSION = 1;
-    const EARLY_VERSION = 2;
-    const PREVIOUS_VERSION = 3;
-    const VERSION = 4;
-    const OBJECTS_VERSION = 4;
+    const VERSION_1 = 1;
+    const VERSION_2 = 2;
+    const VERSION_3 = 3;
+    const VERSION_4 = 4;
+    const VERSION = 5;
+    const LEGACY_VERSION = VERSION_1;
+    const OBJECTS_VERSION = VERSION_4;
+    const VARIABLES_VERSION = VERSION;
     const MATRIX_SIZE = 8;
     const TILE_COUNT = MATRIX_SIZE * MATRIX_SIZE;
     const WORLD_ROWS = 3;
@@ -32,6 +35,10 @@
         '#FF004D', '#FFA300', '#FFFF27', '#00E756',
         '#29ADFF', '#83769C', '#FF77A8', '#FFCCAA'
     ];
+    const VARIABLE_IDS = ['var-1', 'var-2', 'var-3', 'var-4', 'var-5', 'var-6'];
+    const VARIABLE_NAMES = ['1 - Preto', '2 - Azul Escuro', '3 - Roxo', '4 - Verde', '5 - Marrom', '6 - Cinza'];
+    const VARIABLE_COLORS = ['#000000', '#1D2B53', '#7E2553', '#008751', '#AB5236', '#5F574F'];
+    const SUPPORTED_VERSIONS = new Set([VERSION_1, VERSION_2, VERSION_3, VERSION_4, VERSION]);
 
     function clamp(value, min, max, fallback) {
         if (!Number.isFinite(value)) return fallback;
@@ -203,6 +210,48 @@
             }
             return entry;
         });
+    }
+
+    function encodeVariables(variables) {
+        if (!Array.isArray(variables) || !variables.length) return '';
+        const lookup = new Map();
+        for (const entry of variables) {
+            if (typeof entry?.id !== 'string') continue;
+            lookup.set(entry.id, Boolean(entry.value));
+        }
+        let mask = 0;
+        for (let i = 0; i < VARIABLE_IDS.length; i++) {
+            const id = VARIABLE_IDS[i];
+            if (lookup.get(id)) {
+                mask |= (1 << i);
+            }
+        }
+        if (mask === 0) return '';
+        return toBase64Url(Uint8Array.from([mask]));
+    }
+
+    function decodeVariables(text) {
+        const states = new Array(VARIABLE_IDS.length).fill(false);
+        if (!text) return states;
+        const bytes = fromBase64Url(text);
+        const mask = bytes[0] ?? 0;
+        for (let i = 0; i < VARIABLE_IDS.length; i++) {
+            states[i] = Boolean(mask & (1 << i));
+        }
+        return states;
+    }
+
+    function buildVariableEntries(states) {
+        const normalized = Array.isArray(states) && states.length === VARIABLE_IDS.length
+            ? states
+            : new Array(VARIABLE_IDS.length).fill(false);
+        return VARIABLE_IDS.map((id, index) => ({
+            id,
+            order: index + 1,
+            name: VARIABLE_NAMES[index] || id,
+            color: VARIABLE_COLORS[index] || '#000000',
+            value: Boolean(normalized[index])
+        }));
     }
 
     function packNibbles(values) {
@@ -638,6 +687,8 @@
         const objects = Array.isArray(gameData?.objects) ? gameData.objects : [];
         const doorPositions = normalizeObjectPositions(objects, 'door');
         const keyPositions = normalizeObjectPositions(objects, 'key');
+        const variables = Array.isArray(gameData?.variables) ? gameData.variables : [];
+        const variableCode = encodeVariables(variables);
 
         const groundSegments = groundMatrices.map((matrix) => encodeGround(matrix));
         const hasGround = groundSegments.some((segment) => Boolean(segment));
@@ -704,6 +755,10 @@
             }
         }
 
+        if (variableCode) {
+            parts.push('b' + variableCode);
+        }
+
         const title = typeof gameData?.title === 'string' ? gameData.title.trim() : '';
         if (title && title !== DEFAULT_TITLE) {
             parts.push('n' + encodeText(title.slice(0, 80)));
@@ -724,16 +779,11 @@
         }
 
         const version = payload.v ? parseInt(payload.v, 36) : NaN;
-        if (!Number.isFinite(version) || (
-            version !== VERSION &&
-            version !== PREVIOUS_VERSION &&
-            version !== EARLY_VERSION &&
-            version !== LEGACY_VERSION
-        )) {
+        if (!Number.isFinite(version) || !SUPPORTED_VERSIONS.has(version)) {
             return null;
         }
 
-        const roomCount = version >= PREVIOUS_VERSION ? WORLD_ROOM_COUNT : 1;
+        const roomCount = version >= VERSION_3 ? WORLD_ROOM_COUNT : 1;
         const groundMaps = decodeWorldGround(payload.g || '', version, roomCount);
         const overlayMaps = decodeWorldOverlay(payload.o || '', version, roomCount);
         const startPosition = decodePositions(payload.s || '')?.[0] ?? normalizeStart({});
@@ -743,6 +793,7 @@
         const enemyPositions = decodePositions(payload.e || '');
         const doorPositions = version >= OBJECTS_VERSION ? decodePositions(payload.d || '') : [];
         const keyPositions = version >= OBJECTS_VERSION ? decodePositions(payload.k || '') : [];
+        const variableStates = version >= VARIABLES_VERSION ? decodeVariables(payload.b || '') : [];
         const title = decodeText(payload.n, DEFAULT_TITLE) || DEFAULT_TITLE;
         const buildNpcId = (index) => `npc-${index + 1}`;
 
@@ -805,9 +856,10 @@
             start: startPosition,
             sprites,
             enemies,
-            world: version >= VERSION ? { rows: WORLD_ROWS, cols: WORLD_COLS } : { rows: 1, cols: 1 },
+            world: version >= VERSION_3 ? { rows: WORLD_ROWS, cols: WORLD_COLS } : { rows: 1, cols: 1 },
             rooms,
             objects,
+            variables: buildVariableEntries(variableStates),
             tileset: {
                 tiles: [],
                 maps,

@@ -117,6 +117,15 @@
 
                         <div class="editor-section">
                             <details open>
+                                <summary>Variaveis</summary>
+                                <div class="variables-panel">
+                                    <div id="variables-list" class="variables-list"></div>
+                                </div>
+                            </details>
+                        </div>
+
+                        <div class="editor-section">
+                            <details open>
                                 <summary>NPCs</summary>
                                 <div class="npcs-panel">
                                     <div class="npcs-actions">
@@ -125,10 +134,20 @@
                                     </div>
                                     <div id="npcs-list" class="npcs-list"></div>
                                     <div class="npc-editor">
-                                        <label for="npc-text">Diálogo:</label>
-                                        <textarea id="npc-text" placeholder="Digite o diálogo do NPC..."></textarea>
-                                        <button id="npc-delete">Deletar NPC</button>
+                                    <label for="npc-text">Dialogo padrao:</label>
+                                    <textarea id="npc-text" placeholder="Digite o dialogo do NPC..."></textarea>
+                                    <div class="npc-reward-group">
+                                        <label for="npc-reward-variable">Ao concluir o dialogo padrao, ativar variavel:</label>
+                                        <select id="npc-reward-variable"></select>
                                     </div>
+                                    <div class="npc-conditional-group">
+                                        <label for="npc-conditional-variable">Variavel para dialogo alternativo:</label>
+                                        <select id="npc-conditional-variable"></select>
+                                        <label for="npc-conditional-text">Texto alternativo:</label>
+                                        <textarea id="npc-conditional-text" placeholder="Mensagem exibida quando a variavel estiver ON."></textarea>
+                                    </div>
+                                    <button id="npc-delete">Deletar NPC</button>
+                                </div>
                             </div>
                         </details>
                     </div>
@@ -183,6 +202,11 @@
     <script src="js/main.js?v=20250208"></script>
 </body>
 </html>
+
+
+
+
+
 
 
 

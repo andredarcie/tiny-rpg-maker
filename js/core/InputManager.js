@@ -24,14 +24,12 @@ class InputManager {
                 case "enter":
                 case " ":
                     ev.preventDefault();
-                    const dialog = this.gameEngine.gameState.getDialog()
-                    if (dialog.page == dialog.maxPages) {
-                        this.gameEngine.gameState.setDialog(false);
+                    if (dialog.page >= dialog.maxPages) {
+                        this.gameEngine.closeDialog();
+                    } else {
+                        this.gameEngine.gameState.setDialogPage(dialog.page + 1);
                         this.gameEngine.renderer.draw();
-                        break;
                     }
-                    this.gameEngine.gameState.setDialogPage(dialog.page+1)
-                    this.gameEngine.renderer.draw();
                     break;
             }
             return;

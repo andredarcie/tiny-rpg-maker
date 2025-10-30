@@ -108,6 +108,12 @@
             const x = clamp(Number(npc.x), 0, 7, 1);
             const y = clamp(Number(npc.y), 0, 7, 1);
             const placed = npc.placed !== undefined ? Boolean(npc.placed) : true;
+            const rawConditionId = npc.conditionVariableId ?? npc.conditionalVariableId ?? null;
+            const rawConditionText = npc.conditionText ?? npc.conditionalText ?? '';
+            const rawRewardId = npc.rewardVariableId ?? npc.activateVariableId ?? npc.onCompleteVariableId ?? null;
+            const conditionVariableId = this.gameState.normalizeVariableId?.(rawConditionId) ?? null;
+            const conditionText = typeof rawConditionText === 'string' ? rawConditionText : '';
+            const rewardVariableId = this.gameState.normalizeVariableId?.(rawRewardId) ?? null;
 
             return {
                 id,
@@ -117,7 +123,10 @@
                 roomIndex,
                 x,
                 y,
-                placed
+                placed,
+                conditionVariableId,
+                conditionText,
+                rewardVariableId
             };
         }
 
@@ -130,7 +139,10 @@
                 roomIndex: 0,
                 x: 1,
                 y: 1,
-                placed: false
+                placed: false,
+                conditionVariableId: null,
+                conditionText: '',
+                rewardVariableId: null
             };
         }
 
@@ -192,9 +204,11 @@
         }
 
         updateNPCDialog(npcId, text) {
-            const npc = this.getNPC(npcId);
-            if (!npc) return;
-            npc.text = typeof text === 'string' ? text : npc.text;
+            if (typeof text === 'object' && text !== null) {
+                this.updateNPC(npcId, text);
+                return;
+            }
+            this.updateNPC(npcId, { text });
         }
     }
 
