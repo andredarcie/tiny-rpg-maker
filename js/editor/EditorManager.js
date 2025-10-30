@@ -312,9 +312,12 @@ class EditorManager {
 
     renderTileList() {
         if (!this.tileList) return;
+        const summary = this.tileSummary;
         const tiles = this.gameEngine.getTiles();
-        if (this.tileSummary) {
-            this.tileSummary.textContent = '';
+        if (summary) {
+            const tile = tiles.find((entry) => entry.id === this.selectedTileId);
+            const name = tile?.name || 'Nenhum';
+            summary.textContent = `Tile selecionado: ${name}`;
         }
 
         const groups = new Map();
