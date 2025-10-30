@@ -40,7 +40,7 @@ class TileManager {
         const name = typeof tile.name === 'string' && tile.name.trim()
             ? tile.name.trim()
             : `Tile ${fallbackIndex + 1}`;
-        const collision = !!tile.collision;
+        const collision = tile.collision;
         const pixels = Array.from({ length: 8 }, (_, y) =>
             Array.from({ length: 8 }, (_, x) => {
                 const row = Array.isArray(tile.pixels) ? tile.pixels : null;
@@ -87,7 +87,7 @@ class TileManager {
         return {
             id: tile.id,
             name: tile.name,
-            collision: !!tile.collision,
+            collision: tile.collision,
             pixels: tile.pixels.map(row => row.slice()),
             category: tile.category || 'Diversos'
         };
