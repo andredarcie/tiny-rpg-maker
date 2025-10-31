@@ -289,7 +289,7 @@ body.game-mode #tab-game .game-controls button {
 }
 
 #editor-canvas {
-    width: clamp(220px, 50vw, 420px);
+    width: clamp(160px, 45vw, 320px);
     max-width: 100%;
     height: auto;
 }
@@ -1184,4 +1184,11 @@ textarea {
     outline-offset: 2px;
 }
 
+
+
+@media (max-width: 960px) {
+    .editor-left .editor-section canvas {
+        width: clamp(200px, 80vw, 320px);
+    }
+}
 
