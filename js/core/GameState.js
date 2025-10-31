@@ -116,16 +116,13 @@ class GameState {
     }
 
     importGameData(data) {
-        const start = this.dataManager.importGameData(data);
+        this.dataManager.importGameData(data);
         this.enemyManager.setGame(this.game);
         this.itemManager.setGame(this.game);
         this.objectManager.setGame(this.game);
         this.variableManager.setGame(this.game);
         this.ensureDefaultVariables();
         this.resetGame();
-        if (start) {
-            this.playerManager.reset(this.game.start);
-        }
     }
 
     normalizeRooms(rooms, totalRooms, cols) {
@@ -276,4 +273,3 @@ class GameState {
 if (typeof window !== 'undefined') {
     window.GameState = GameState;
 }
-
