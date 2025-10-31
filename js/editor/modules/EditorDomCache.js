@@ -13,7 +13,6 @@ class EditorDomCache {
         this.npcConditionalRewardVariable = root.getElementById('npc-conditional-reward-variable');
         this.worldGrid = root.getElementById('world-grid');
         this.titleInput = root.getElementById('game-title');
-        this.jsonArea = root.getElementById('json-area');
         this.fileInput = root.getElementById('file-input');
         this.btnPlaceDoor = root.getElementById('btn-place-door');
         this.btnPlaceDoorVariable = root.getElementById('btn-place-door-variable');
@@ -24,7 +23,6 @@ class EditorDomCache {
         this.btnNpcDelete = root.getElementById('npc-delete');
         this.btnPlaceEnemy = root.getElementById('btn-place-enemy');
         this.btnGenerateUrl = root.getElementById('btn-generate-url');
-        this.btnApplyJson = root.getElementById('btn-apply-json');
         this.btnUndo = root.getElementById('btn-undo');
         this.btnRedo = root.getElementById('btn-redo');
         this.enemiesList = root.getElementById('enemies-list');
@@ -35,4 +33,3 @@ class EditorDomCache {
 if (typeof window !== 'undefined') {
     window.EditorDomCache = EditorDomCache;
 }
-

@@ -63,18 +63,6 @@ class EditorShareService {
         reader.readAsText(file);
         ev.target.value = '';
     }
-
-    applyJSON() {
-        const jsonArea = this.manager.domCache.jsonArea;
-        if (!jsonArea) return;
-        try {
-            const data = JSON.parse(jsonArea.value);
-            this.manager.restore(data, { skipHistory: true });
-            this.manager.history.pushCurrentState();
-        } catch {
-            alert('JSON invalido.');
-        }
-    }
 }
 
 if (typeof window !== 'undefined') {

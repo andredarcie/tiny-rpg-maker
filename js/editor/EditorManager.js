@@ -102,7 +102,6 @@ class EditorManager {
             btnPlaceDoorVariable,
             btnPlaceKey,
             btnGenerateUrl,
-            btnApplyJson,
             btnUndo,
             btnRedo,
             titleInput,
@@ -133,7 +132,6 @@ class EditorManager {
         btnPlaceKey?.addEventListener('click', () => this.objectService.togglePlacement('key'));
 
         btnGenerateUrl?.addEventListener('click', () => this.shareService.generateShareableUrl());
-        btnApplyJson?.addEventListener('click', () => this.shareService.applyJSON());
         btnUndo?.addEventListener('click', () => this.undo());
         btnRedo?.addEventListener('click', () => this.redo());
 
@@ -375,10 +373,6 @@ class EditorManager {
 
     loadGameFile(ev) {
         this.shareService.loadGameFile(ev);
-    }
-
-    applyJSON() {
-        this.shareService.applyJSON();
     }
 
     // History
