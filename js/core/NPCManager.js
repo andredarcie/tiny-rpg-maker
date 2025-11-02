@@ -204,6 +204,7 @@ class NPCManager {
             npc.roomIndex = clamp(Number(roomIndex), 0, maxRoomIndex, npc.roomIndex);
         }
         npc.placed = true;
+        return true;
     }
 
     updateNPCDialog(npcId, text) {
