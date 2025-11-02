@@ -283,19 +283,19 @@ body.game-mode #tab-game .game-controls button {
 }
 
 #game-canvas {
-    width: clamp(160px, 45vw, 320px);
+    width: clamp(128px, 45vw, 384px);
     max-width: 100%;
     height: auto;
 }
 
 #editor-canvas {
-    width: clamp(160px, 45vw, 320px);
+    width: clamp(128px, 45vw, 512px);
     max-width: 100%;
     height: auto;
 }
 
 #tile-canvas {
-    width: clamp(160px, 45vw, 320px);
+    width: clamp(128px, 45vw, 384px);
     max-width: 100%;
     height: auto;
 }
