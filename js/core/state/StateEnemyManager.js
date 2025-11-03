@@ -24,6 +24,7 @@ class StateEnemyManager {
             roomIndex: this.worldManager.clampRoomIndex(enemy.roomIndex ?? 0),
             x: this.worldManager.clampCoordinate(enemy.x ?? 0),
             y: this.worldManager.clampCoordinate(enemy.y ?? 0),
+            lastX: this.worldManager.clampCoordinate(enemy.x ?? 0),
             lives: enemy.lives ?? 1
         }));
     }
@@ -49,7 +50,8 @@ class StateEnemyManager {
             type: enemy.type || 'skull',
             roomIndex: this.worldManager.clampRoomIndex(enemy.roomIndex ?? 0),
             x: this.worldManager.clampCoordinate(enemy.x ?? 0),
-            y: this.worldManager.clampCoordinate(enemy.y ?? 0)
+            y: this.worldManager.clampCoordinate(enemy.y ?? 0),
+            lastX: this.worldManager.clampCoordinate(enemy.x ?? 0)
         };
         this.game.enemies.push(entry);
         this.state.enemies.push({ ...entry });
@@ -64,6 +66,7 @@ class StateEnemyManager {
     setEnemyPosition(enemyId, x, y, roomIndex = null) {
         const enemy = this.getEnemies().find((entry) => entry.id === enemyId);
         if (!enemy) return;
+        enemy.lastX = enemy.x;
         enemy.x = this.worldManager.clampCoordinate(x);
         enemy.y = this.worldManager.clampCoordinate(y);
         if (roomIndex !== null && roomIndex !== undefined) {
