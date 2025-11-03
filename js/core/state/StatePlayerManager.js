@@ -22,6 +22,7 @@ class StatePlayerManager {
 
     setPosition(x, y, roomIndex = null) {
         if (!this.player) return;
+        this.player.lastX = this.player.x;
         this.player.x = this.worldManager.clampCoordinate(x);
         this.player.y = this.worldManager.clampCoordinate(y);
         if (roomIndex !== null && roomIndex !== undefined) {

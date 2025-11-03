@@ -32,7 +32,7 @@ class GameState {
         this.game.tileset.map = this.game.tileset.maps[0];
 
         this.state = {
-            player: { x: 1, y: 1, roomIndex: 0, lives: 3, keys: 0 },
+            player: { x: 1, y: 1, lastX: 1, roomIndex: 0, lives: 3, keys: 0 },
             dialog: { active: false, text: "", page: 1, maxPages: 1, meta: null },
             enemies: [],
             variables: []
@@ -51,9 +51,12 @@ class GameState {
             objectManager: this.objectManager,
             variableManager: this.variableManager
         });
-
+        this.playing = true;
         this.ensureDefaultVariables();
         this.resetGame();
+
+        document.addEventListener('game-tab-activated', () => this.playing = true);
+        document.addEventListener('editor-tab-activated', () => this.playing = false);
     }
 
     createEmptyRoom(size, index = 0, cols = 1) {

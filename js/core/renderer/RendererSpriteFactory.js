@@ -112,6 +112,11 @@ class RendererSpriteFactory {
             })
         );
     }
+
+    turnSpriteHorizontally(sprite) {
+        if (!sprite) return;
+        return sprite.map(line => [...line].reverse());
+    }
 }
 
 if (typeof window !== 'undefined') {

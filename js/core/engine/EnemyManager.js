@@ -24,7 +24,8 @@ class EnemyManager {
             type: enemy.type || 'skull',
             roomIndex: enemy.roomIndex ?? 0,
             x: enemy.x ?? 0,
-            y: enemy.y ?? 0
+            y: enemy.y ?? 0,
+            lastX: enemy.x ?? 0
         });
         this.renderer.draw();
         return id;
@@ -58,6 +59,8 @@ class EnemyManager {
     }
 
     tick() {
+        if (!this.gameState.playing) return;
+        
         const enemies = this.gameState.getEnemies();
         if (!this.hasMovableEnemies(enemies)) return;
 
@@ -135,6 +138,7 @@ class EnemyManager {
             return 'none';
         }
 
+        enemy.lastX = enemy.x;
         enemy.x = target.x;
         enemy.y = target.y;
 

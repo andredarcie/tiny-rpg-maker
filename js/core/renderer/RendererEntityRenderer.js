@@ -62,7 +62,8 @@ class RendererEntityRenderer {
             if (npc.roomIndex !== player.roomIndex) continue;
             const px = npc.x * tileSize;
             const py = npc.y * tileSize;
-            const sprite = npcSprites[npc.type] || npcSprites.default;
+            let sprite = npcSprites[npc.type] || npcSprites.default;
+            sprite = this.adjustSpriteHorizontally(player.x, npc.x, sprite);
             this.canvasHelper.drawSprite(ctx, sprite, px, py, step);
         }
     }
@@ -73,10 +74,11 @@ class RendererEntityRenderer {
         const player = this.gameState.getPlayer();
         const tileSize = this.canvasHelper.getTilePixelSize();
         const step = tileSize / 8;
-        const enemySprite = this.spriteFactory.getEnemySprite();
+        let enemySprite = this.spriteFactory.getEnemySprite();
 
         enemies.forEach((enemy) => {
             if (enemy.roomIndex !== player.roomIndex) return;
+            enemySprite = this.adjustSpriteHorizontally(enemy.x, enemy.lastX, enemySprite);
             this.canvasHelper.drawSprite(ctx, enemySprite, enemy.x * tileSize, enemy.y * tileSize, step);
         });
     }
@@ -87,8 +89,16 @@ class RendererEntityRenderer {
         const step = tileSize / 8;
         const px = player.x * tileSize;
         const py = player.y * tileSize;
+        let sprite = this.spriteFactory.getPlayerSprite()
+        sprite = this.adjustSpriteHorizontally(player.x, player.lastX, sprite);
+        this.canvasHelper.drawSprite(ctx, sprite, px, py, step);
+    }
 
-        this.canvasHelper.drawSprite(ctx, this.spriteFactory.getPlayerSprite(), px, py, step);
+    adjustSpriteHorizontally(targetX, baseX, sprite) {
+        if (targetX < baseX) {
+            return this.spriteFactory.turnSpriteHorizontally(sprite);
+        }
+        return sprite;
     }
 }
 
