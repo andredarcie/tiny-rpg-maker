@@ -61,14 +61,14 @@ class EnemyDefinitions {
             description: 'o mago das trevas.',
             damage: 4,
             sprite: [
-                [ null, null, 13, 13, 13, 13, null, null ],
-                [ null, 13, 7, 7, 7, 7, 13, null ],
-                [ null, 13, 14, 7, 7, 14, 13, null ],
-                [ 13, 14, 14, 13, 13, 14, 14, 13 ],
-                [ 13, 14, 13, 13, 13, 13, 14, 13 ],
-                [ null, 13, 13, 14, 14, 13, 13, null ],
-                [ null, 13, 13, 14, 14, 13, 13, null ],
-                [ null, 13, 13, null, null, 13, 13, null ]
+                [ null, null, 15, 15, 15, 15, null,  8 ],
+                [ null, null, 15,  8, 15,  8, null,  4 ],
+                [ null, null, 15, 15, 15, 15, null,  4 ],
+                [ null, null,  2,  2,  2,  2,  2,  2 ],
+                [ null, null,  2,  2,  2,  2,  2,  4 ],
+                [ null, null,  2,  2,  2,  2, null,  4 ],
+                [ null,  2,  2,  2,  2,  2,  2,  4 ],
+                [  2,  2,  2,  2,  2,  2,  2,  2 ]
             ]
         },
         {
@@ -78,14 +78,14 @@ class EnemyDefinitions {
             description: 'o monstro lendário.',
             damage: 5,
             sprite: [
-                [ null, 3, 3, 3, 3, 3, 3, null ],
-                [ 3, 11, 11, 3, 3, 11, 11, 3 ],
-                [ 3, 11, 8, 3, 3, 8, 11, 3 ],
-                [ null, 3, 3, 11, 11, 3, 3, null ],
-                [ null, null, 3, 11, 11, 3, null, null ],
-                [ null, null, 3, 3, 3, 3, null, null ],
-                [ null, 3, 3, null, null, 3, 3, null ],
-                [ null, 3, null, null, null, null, 3, null ]
+                [ null, null,  3, 11, 11, 11, 11, 11 ],
+                [ null,  3, 11, 11, 11,  8, 11,  8 ],
+                [ null,  3,  3, 11, 11, 11, 11, 11 ],
+                [ null, null,  3,  3,  3,  7, null,  7 ],
+                [ 11, null, null,  3, 11, null, null, null ],
+                [ 11, null, 11, 11, 11,  3, null, null ],
+                [ 11,  3,  3,  3, null,  3, null, null ],
+                [ 11, 11, null, 11, null, null, null, null ]
             ]
         },
         {
@@ -96,14 +96,14 @@ class EnemyDefinitions {
             damage: 2,
             aliases: ['skull'],
             sprite: [
-                [ null, null, 7, 7, 7, 7, null, null ],
-                [ null, 7, 6, 7, 7, 6, 7, null ],
-                [ null, 7, 7, 7, 7, 7, 7, null ],
-                [ null, 7, 6, 6, 6, 6, 7, null ],
-                [ null, 7, 7, 7, 7, 7, 7, null ],
-                [ null, 7, 6, 7, 7, 6, 7, null ],
-                [ null, null, 7, 7, 7, 7, null, null ],
-                [ null, null, 6, null, null, 6, null, null ]
+                [ null, null,  7,  7,  7,  7, null, null ],
+                [ null, null,  7,  8,  7,  8, null, null ],
+                [ null, null,  7,  7,  7,  7, null, null ],
+                [ null,  7, null,  7,  7, null,  7, null ],
+                [ null,  7,  7,  7,  7,  7,  7, null ],
+                [ null,  7, null,  7, null, null,  7, null ],
+                [ null, null,  7,  7,  7,  7, null, null ],
+                [ null, null,  7, null, null,  7, null, null ]
             ]
         },
         {
@@ -113,14 +113,14 @@ class EnemyDefinitions {
             description: 'o chefe trágico corrompido pelo poder.',
             damage: 5,
             sprite: [
-                [ null, null, 10, 10, 10, 10, null, null ],
-                [ null, 10, 9, 10, 10, 9, 10, null ],
-                [ null, 4, 15, 12, 12, 15, 4, null ],
-                [ 4, 4, 4, 4, 4, 4, 4, 4 ],
-                [ 4, null, 4, 4, 4, 4, null, 4 ],
-                [ 4, null, 4, 4, 4, 4, null, 4 ],
-                [ 4, null, 4, null, null, 4, null, 4 ],
-                [ 4, null, 4, null, null, 4, null, 4 ]
+                [ null, 10, null, 10, null, 10, null, null ],
+                [ null,  9,  9,  9,  9,  9, null, 10 ],
+                [ null,  5, 15,  8, 15,  8, null,  9 ],
+                [ null,  5,  5, 15, 15,  5, null,  9 ],
+                [ null,  2,  7,  5,  5,  7, null,  9 ],
+                [ null,  2,  2,  7,  2,  2,  2, 15 ],
+                [  2,  2,  2,  7,  2,  2, null,  9 ],
+                [  7,  7,  7,  7,  7,  7, null,  9 ]
             ]
         },
         {
@@ -130,14 +130,14 @@ class EnemyDefinitions {
             description: 'o mal primordial e final.',
             damage: 6,
             sprite: [
-                [ null, null, 8, 8, 8, 8, null, null ],
-                [ null, 8, 14, 8, 8, 14, 8, null ],
-                [ null, 8, 2, 14, 14, 2, 8, null ],
-                [ 8, 14, 8, 2, 2, 8, 14, 8 ],
-                [ 8, 14, 14, 8, 8, 14, 14, 8 ],
-                [ null, 8, 14, 14, 14, 14, 8, null ],
-                [ null, 8, 14, null, null, 14, 8, null ],
-                [ null, 8, 14, null, null, 14, 8, null ]
+                [ null, null,  8, null, null,  8, null, null ],
+                [ null, null,  8,  8,  8,  8, null, null ],
+                [ null, null,  8,  0,  8,  0, null, null ],
+                [ null,  8,  8,  8,  8,  8,  8, null ],
+                [  8,  8,  8,  8,  8,  8,  8,  8 ],
+                [  8, null,  8,  8,  8,  8, null,  8 ],
+                [ null, null,  8,  8,  8,  8, null, null ],
+                [ null, null,  8, null, null,  8, null, null ]
             ]
         }
     ];
