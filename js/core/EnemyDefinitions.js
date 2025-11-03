@@ -10,14 +10,14 @@ class EnemyDefinitions {
             description: 'o primeiro inimigo fraco.',
             damage: 1,
             sprite: [
-                [ null, null, 5, 5, 5, 5, null, null ],
-                [ null, 4, 5, 6, 6, 5, 4, null ],
-                [ 4, 5, 6, 6, 6, 6, 5, 4 ],
-                [ 4, 6, 6, 8, 8, 6, 6, 4 ],
-                [ 4, 6, 6, 6, 6, 6, 6, 4 ],
-                [ null, 4, 6, 6, 6, 6, 4, null ],
-                [ null, null, 4, 4, 4, 4, null, null ],
-                [ null, null, 4, null, null, 4, null, null ]
+                [ null, null, null, 15, 15, null, 15, 15 ],
+                [ 15, null, null, 15, 15, null, 15, 15 ],
+                [ 15, null, null, 13, 13, 13, 13, 13 ],
+                [ 15, null,  1, 13,  8, 13,  8, 13 ],
+                [ null,  1,  1,  1, 13, 13, 13, null ],
+                [ null,  1,  1,  1,  1, 15, null, null ],
+                [ null,  1,  1,  1,  1, null, null, null ],
+                [ null, 15, null, null, 15, null, null, null ]
             ]
         },
         {
@@ -27,14 +27,14 @@ class EnemyDefinitions {
             description: 'inimigo humano comum.',
             damage: 2,
             sprite: [
-                [ null, null, 1, 1, 1, 1, null, null ],
-                [ null, 1, 7, 7, 7, 7, 1, null ],
-                [ null, 1, 15, 12, 15, 12, 1, null ],
-                [ null, 4, 4, 1, 1, 4, 4, null ],
-                [ 4, 4, 4, 4, 4, 4, 4, 4 ],
-                [ 4, null, 4, 4, 4, 4, null, 4 ],
-                [ 4, null, 4, null, null, 4, null, 4 ],
-                [ 4, null, 4, null, null, 4, null, 4 ]
+                [ null, 15, 15, 15, 15, null,  6, null ],
+                [ null, 15,  8, 15,  8, null,  7, null ],
+                [ null,  1,  1,  1,  1, null,  7, null ],
+                [  5,  5,  1,  1,  1,  5,  6, null ],
+                [  5,  5,  5,  1,  5, 13, 13, 13 ],
+                [  1,  5,  5,  5,  5, null,  1, null ],
+                [ null, 13, 13, 13, 13, null, null, null ],
+                [ null, 13, null, null, 13, null, null, null ]
             ]
         },
         {
@@ -44,14 +44,14 @@ class EnemyDefinitions {
             description: 'o guerreiro corrompido.',
             damage: 3,
             sprite: [
-                [ null, null, 1, 1, 1, 1, null, null ],
-                [ null, 1, 8, 8, 8, 8, 1, null ],
-                [ null, 1, 12, 1, 1, 12, 1, null ],
-                [ 1, 12, 1, 1, 1, 1, 12, 1 ],
-                [ 1, 12, 12, 1, 1, 12, 12, 1 ],
-                [ null, 1, 12, 12, 12, 12, 1, null ],
-                [ null, 1, 12, null, null, 12, 1, null ],
-                [ null, 1, 12, null, null, 12, 1, null ]
+                [ null,  6,  5,  5,  5, null,  2, null ],
+                [ null,  5,  8,  5,  8, null,  2, null ],
+                [ null,  5,  5,  5,  5, null,  2, null ],
+                [  5,  5, 13,  5, 13,  5,  2, null ],
+                [ 13, 13,  5, 13,  5, 14, 14, 14 ],
+                [  5,  5, 13,  5, 13, null,  5, null ],
+                [ null,  5,  5,  5,  5, null, null, null ],
+                [ null,  5, null, null,  5, null, null, null ]
             ]
         },
         {
