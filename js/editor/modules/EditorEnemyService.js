@@ -15,42 +15,31 @@ class EditorEnemyService {
         return this.manager.gameEngine;
     }
 
-    togglePlacement(forceOff = false) {
-        const nextState = forceOff ? false : !this.state.placingEnemy;
-        if (!nextState && this.state.placingEnemy === nextState) return;
+    activatePlacement() {
+        const definition = this.getEnemyDefinition(this.manager.selectedEnemyType);
+        if (!definition) return;
+        if (this.state.placingEnemy) return;
 
-        const enemyButton = this.dom.btnPlaceEnemy;
-        const npcButton = this.dom.btnPlaceNpc;
-        const canvas = this.dom.editorCanvas;
-
-        if (!nextState) {
-            this.state.placingEnemy = false;
-            if (enemyButton) {
-                enemyButton.textContent = 'Colocar caveira';
-                enemyButton.classList.remove('placing');
-            }
-            if (!this.state.placingNpc && canvas) {
-                canvas.style.cursor = 'default';
-            }
-            return;
+        this.manager.npcService?.clearSelection?.();
+        if (this.state.placingObjectType) {
+            this.manager.objectService?.togglePlacement?.(this.state.placingObjectType, true);
         }
 
         this.state.placingEnemy = true;
         this.state.placingNpc = false;
         this.state.placingObjectType = null;
 
-        if (npcButton) {
-            npcButton.textContent = 'Colocar NPC no mapa';
-            npcButton.classList.remove('placing');
+        if (this.dom.editorCanvas) {
+            this.dom.editorCanvas.style.cursor = 'crosshair';
         }
-        if (enemyButton) {
-            enemyButton.textContent = 'Cancelar colocacao';
-            enemyButton.classList.add('placing');
+    }
+
+    deactivatePlacement() {
+        if (!this.state.placingEnemy) return;
+        this.state.placingEnemy = false;
+        if (!this.state.placingNpc && !this.state.placingObjectType && this.dom.editorCanvas) {
+            this.dom.editorCanvas.style.cursor = 'default';
         }
-        if (canvas) {
-            canvas.style.cursor = 'crosshair';
-        }
-        this.manager.objectService?.updatePlacementButtons();
     }
 
     placeEnemyAt(coord) {
@@ -61,11 +50,14 @@ class EditorEnemyService {
         if (existing) {
             return;
         }
+        const definition = this.getEnemyDefinition(this.state.selectedEnemyType);
+        const fallback = EditorConstants.ENEMY_DEFINITIONS[0]?.type || 'giant-rat';
+        const type = definition?.type || fallback;
         this.gameEngine.addEnemy({
             x: coord.x,
             y: coord.y,
             roomIndex,
-            type: this.state.selectedEnemyType || 'skull'
+            type
         });
         this.manager.renderService.renderEnemies();
         this.manager.renderService.renderWorldGrid();
@@ -76,9 +68,6 @@ class EditorEnemyService {
     }
 
     removeEnemy(enemyId) {
-        if (this.state.placingEnemy) {
-            this.togglePlacement(true);
-        }
         this.gameEngine.removeEnemy(enemyId);
         this.manager.renderService.renderEnemies();
         this.manager.renderService.renderWorldGrid();
@@ -87,6 +76,33 @@ class EditorEnemyService {
         this.manager.updateJSON();
         this.manager.history.pushCurrentState();
     }
+
+    selectEnemyType(type) {
+        const definition = this.getEnemyDefinition(type);
+        if (!definition) return;
+        if (this.state.selectedEnemyType !== definition.type) {
+            this.manager.selectedEnemyType = definition.type;
+            this.manager.renderEnemyCatalog();
+        }
+        this.activatePlacement();
+    }
+
+    getEnemyDefinition(type = null) {
+        const target = typeof type === 'string' && type.length > 0
+            ? type
+            : this.state.selectedEnemyType;
+        if (typeof EnemyDefinitions?.getEnemyDefinition === 'function') {
+            const definition = EnemyDefinitions.getEnemyDefinition(target);
+            if (definition) {
+                return definition;
+            }
+        }
+        const definitions = EditorConstants.ENEMY_DEFINITIONS;
+        return definitions.find((entry) => entry.type === target) ||
+            definitions.find((entry) => Array.isArray(entry.aliases) && entry.aliases.includes(target)) ||
+            null;
+    }
+
 }
 
 if (typeof window !== 'undefined') {

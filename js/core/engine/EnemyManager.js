@@ -19,9 +19,10 @@ class EnemyManager {
 
     addEnemy(enemy) {
         const id = enemy.id || this.generateEnemyId();
+        const type = this.normalizeEnemyType(enemy.type);
         this.gameState.addEnemy({
             id,
-            type: enemy.type || 'skull',
+            type,
             roomIndex: enemy.roomIndex ?? 0,
             x: enemy.x ?? 0,
             y: enemy.y ?? 0,
@@ -86,8 +87,10 @@ class EnemyManager {
         const enemies = this.gameState.getEnemies();
         const enemy = enemies[enemyIndex];
         if (!enemy) return;
+        enemy.type = this.normalizeEnemyType(enemy.type);
         enemies.splice(enemyIndex, 1);
-        const lives = this.gameState.damagePlayer(1);
+        const damage = this.getEnemyDamage(enemy.type);
+        const lives = this.gameState.damagePlayer(damage);
         if (lives <= 0) {
             this.onPlayerDefeated();
         } else {
@@ -129,6 +132,7 @@ class EnemyManager {
     tryMoveEnemy(enemies, index, game) {
         const enemy = enemies[index];
         if (!enemy) return 'none';
+        enemy.type = this.normalizeEnemyType(enemy.type);
 
         const dir = this.pickRandomDirection();
         const target = this.getTargetPosition(enemy, dir);
@@ -205,6 +209,23 @@ class EnemyManager {
             return true;
         }
         return false;
+    }
+
+    normalizeEnemyType(type) {
+        if (typeof EnemyDefinitions?.normalizeType === 'function') {
+            return EnemyDefinitions.normalizeType(type);
+        }
+        return type || 'giant-rat';
+    }
+
+    getEnemyDamage(type) {
+        if (typeof EnemyDefinitions?.getEnemyDefinition === 'function') {
+            const definition = EnemyDefinitions.getEnemyDefinition(type);
+            if (definition && Number.isFinite(definition.damage)) {
+                return Math.max(1, definition.damage);
+            }
+        }
+        return 1;
     }
 }
 

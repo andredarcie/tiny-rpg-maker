@@ -104,11 +104,14 @@ class EditorRenderService {
         }
 
         const enemies = this.gameEngine.getActiveEnemies().filter((enemy) => enemy.roomIndex === roomIndex);
-        const enemySprite = this.gameEngine.renderer.enemySprite;
+        const renderer = this.gameEngine.renderer;
+        const enemySprites = renderer.enemySprites || {};
         for (const enemy of enemies) {
-            this.gameEngine.renderer.drawSprite(
+            const sprite = enemySprites[enemy.type] || renderer.enemySprite;
+            if (!sprite) continue;
+            renderer.drawSprite(
                 ctx,
-                enemySprite,
+                sprite,
                 enemy.x * tileSize,
                 enemy.y * tileSize,
                 step
@@ -296,21 +299,6 @@ class EditorRenderService {
         if (npcRewardVariable) npcRewardVariable.disabled = !hasNpc;
         if (npcConditionalRewardVariable) npcConditionalRewardVariable.disabled = !hasNpc;
 
-        const btnPlaceNpc = this.dom.btnPlaceNpc;
-        if (btnPlaceNpc) {
-            if (!hasNpc) {
-                btnPlaceNpc.disabled = true;
-                btnPlaceNpc.textContent = 'Colocar NPC no mapa';
-                btnPlaceNpc.classList.remove('placing');
-            } else {
-                btnPlaceNpc.disabled = false;
-                if (!this.manager.placingNpc) {
-                    btnPlaceNpc.textContent = npc.placed ? 'Mover NPC no mapa' : 'Colocar NPC no mapa';
-                    btnPlaceNpc.classList.remove('placing');
-                }
-            }
-        }
-
         const btnNpcDelete = this.dom.btnNpcDelete;
         if (btnNpcDelete) {
             btnNpcDelete.disabled = !hasNpc || !npc?.placed;
@@ -322,13 +310,32 @@ class EditorRenderService {
         if (!list) return;
         list.innerHTML = '';
 
-        const enemies = this.gameEngine.getActiveEnemies().filter((enemy) => enemy.roomIndex === this.state.activeRoomIndex);
+        const activeRoom = this.state.activeRoomIndex;
+        const enemies = this.gameEngine
+            .getActiveEnemies()
+            .filter((enemy) => enemy.roomIndex === activeRoom);
+        if (!enemies.length) return;
+
+        const definitions = EditorConstants.ENEMY_DEFINITIONS;
+        const definitionMap = new Map();
+        definitions.forEach((entry) => {
+            definitionMap.set(entry.type, entry);
+            if (Array.isArray(entry.aliases)) {
+                entry.aliases.forEach((alias) => definitionMap.set(alias, entry));
+            }
+        });
+
         enemies.forEach((enemy) => {
-            const item = document.createElement('li');
+            const definition = definitionMap.get(enemy.type);
+            const item = document.createElement('div');
             item.className = 'enemy-item';
 
             const label = document.createElement('span');
-            label.textContent = `${enemy.type || 'skull'} @ (${enemy.x}, ${enemy.y})`;
+            const displayName = definition?.name || enemy.type || 'inimigo';
+            const damageInfo = Number.isFinite(definition?.damage)
+                ? ` - Dano: ${definition.damage}`
+                : '';
+            label.textContent = `${displayName} @ (${enemy.x}, ${enemy.y})${damageInfo}`;
 
             const removeBtn = document.createElement('button');
             removeBtn.type = 'button';
@@ -339,6 +346,82 @@ class EditorRenderService {
             item.append(label, removeBtn);
             list.appendChild(item);
         });
+    }
+
+    renderEnemyCatalog() {
+        const container = this.dom.enemyTypes;
+        if (!container) return;
+        container.innerHTML = '';
+
+        const definitions = EditorConstants.ENEMY_DEFINITIONS;
+        if (!definitions.length) return;
+
+        const selectedType = this.manager.selectedEnemyType;
+
+        definitions.forEach((definition) => {
+            const card = document.createElement('div');
+            card.className = 'enemy-card';
+            card.dataset.type = definition.type;
+            if (definition.type === selectedType) {
+                card.classList.add('selected');
+            }
+
+            const preview = document.createElement('canvas');
+            preview.width = 48;
+            preview.height = 48;
+            this.drawEnemyPreview(preview, definition);
+
+            const meta = document.createElement('div');
+            meta.className = 'enemy-meta';
+
+            const name = document.createElement('div');
+            name.className = 'enemy-name';
+            name.textContent = definition.name;
+
+            const description = document.createElement('div');
+            description.className = 'enemy-description';
+            description.textContent = definition.description;
+
+            const damage = document.createElement('div');
+            damage.className = 'enemy-damage';
+            damage.textContent = `Dano: ${definition.damage}`;
+
+            meta.append(name, description, damage);
+            card.append(preview, meta);
+            container.appendChild(card);
+        });
+    }
+
+    drawEnemyPreview(canvas, definition) {
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.imageSmoothingEnabled = false;
+
+        const renderer = this.gameEngine.renderer;
+        let sprite = renderer?.enemySprites?.[definition.type] ?? null;
+        if (!sprite && renderer?.enemySprite) {
+            sprite = renderer.enemySprite;
+        }
+
+        if (!sprite && Array.isArray(definition.sprite) && renderer?.spriteFactory?.mapPixels) {
+            const palette = renderer.paletteManager?.getPicoPalette?.() || RendererConstants.DEFAULT_PALETTE;
+            sprite = renderer.spriteFactory.mapPixels(definition.sprite, palette);
+        }
+
+        if (!Array.isArray(sprite)) return;
+        const step = canvas.width / 8;
+        for (let y = 0; y < sprite.length; y++) {
+            const row = sprite[y];
+            if (!Array.isArray(row)) continue;
+            for (let x = 0; x < row.length; x++) {
+                const color = row[x];
+                if (!color) continue;
+                ctx.fillStyle = color;
+                ctx.fillRect(x * step, y * step, step, step);
+            }
+        }
     }
 
     renderObjects() {

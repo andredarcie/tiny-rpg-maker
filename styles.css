@@ -795,6 +795,106 @@ textarea {
     font-size: 0.85rem;
 }
 
+.enemies-panel {
+    display: grid;
+    gap: 12px;
+}
+
+.enemy-types {
+    display: grid;
+    gap: 8px;
+    max-height: min(40vh, 260px);
+    overflow-y: auto;
+    padding-right: 4px;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.enemy-types::-webkit-scrollbar {
+    width: 6px;
+}
+
+.enemy-types::-webkit-scrollbar-thumb {
+    background: #232734;
+    border-radius: 999px;
+}
+
+.enemy-card {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px;
+    align-items: center;
+    padding: 8px 10px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.enemy-card:hover {
+    border-color: rgba(100, 181, 246, 0.6);
+    transform: translateY(-1px);
+}
+
+.enemy-card.selected {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.15);
+}
+
+.enemy-card canvas {
+    width: 48px;
+    height: 48px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: rgba(15, 18, 29, 0.6);
+}
+
+.enemy-meta {
+    display: grid;
+    gap: 2px;
+}
+
+.enemy-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.enemy-description {
+    font-size: 0.75rem;
+    color: var(--muted);
+}
+
+.enemy-damage {
+    font-size: 0.75rem;
+    color: var(--accent);
+}
+
+.enemies-list {
+    display: grid;
+    gap: 6px;
+}
+
+.enemy-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: rgba(18, 22, 34, 0.6);
+    font-size: 0.8rem;
+}
+
+.enemy-remove {
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: rgba(15, 18, 29, 0.9);
+    color: var(--text);
+    cursor: pointer;
+}
+
 .tile-list,
 .npcs-list {
     display: grid;

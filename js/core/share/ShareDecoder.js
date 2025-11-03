@@ -92,9 +92,10 @@ class ShareDecoder {
             }
         }
 
+        const defaultEnemyType = ShareDataNormalizer.normalizeEnemyType();
         const enemies = enemyPositions.map((pos, index) => ({
             id: `enemy-${index + 1}`,
-            type: 'skull',
+            type: defaultEnemyType,
             x: pos.x,
             y: pos.y,
             roomIndex: pos.roomIndex
@@ -137,4 +138,3 @@ class ShareDecoder {
 if (typeof window !== 'undefined') {
     window.ShareDecoder = ShareDecoder;
 }
-

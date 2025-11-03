@@ -95,9 +95,7 @@ class EditorManager {
     bindEvents() {
         const {
             btnAddNpc,
-            btnPlaceNpc,
             btnNpcDelete,
-            btnPlaceEnemy,
             btnPlaceDoor,
             btnPlaceDoorVariable,
             btnPlaceKey,
@@ -113,6 +111,7 @@ class EditorManager {
             fileInput,
             variablesList,
             editorCanvas,
+            enemyTypes,
             enemiesList,
             objectsList,
             tileList,
@@ -122,10 +121,15 @@ class EditorManager {
         } = this.dom;
 
         btnAddNpc?.addEventListener('click', () => this.npcService.addNpc());
-        btnPlaceNpc?.addEventListener('click', () => this.npcService.togglePlacement());
         btnNpcDelete?.addEventListener('click', () => this.npcService.removeSelectedNpc());
 
-        btnPlaceEnemy?.addEventListener('click', () => this.enemyService.togglePlacement());
+        enemyTypes?.addEventListener('click', (ev) => {
+            const card = ev.target.closest('.enemy-card');
+            if (!card) return;
+            const type = card.dataset.type || null;
+            if (!type) return;
+            this.enemyService.selectEnemyType(type);
+        });
 
         btnPlaceDoor?.addEventListener('click', () => this.objectService.togglePlacement('door'));
         btnPlaceDoorVariable?.addEventListener('click', () => this.objectService.togglePlacement('door-variable'));
@@ -151,6 +155,11 @@ class EditorManager {
             if (!button) return;
             const tileId = Number(button.dataset.tileId);
             if (!Number.isFinite(tileId)) return;
+            if (this.state.placingObjectType) {
+                this.objectService.togglePlacement(this.state.placingObjectType, true);
+            }
+            this.npcService.clearSelection();
+            this.enemyService.deactivatePlacement();
             this.selectedTileId = tileId;
             this.renderService.updateSelectedTilePreview();
             this.renderService.renderTileList();
@@ -216,6 +225,14 @@ class EditorManager {
         this.activeRoomIndex = Math.max(0, Math.min(totalRooms - 1, startRoomIndex));
         this.gameEngine.npcManager?.ensureDefaultNPCs?.();
 
+        const enemyDefinitions = EditorConstants.ENEMY_DEFINITIONS;
+        if (enemyDefinitions.length > 0) {
+            const hasCurrent = enemyDefinitions.some((entry) => entry.type === this.selectedEnemyType);
+            if (!hasCurrent) {
+                this.selectedEnemyType = enemyDefinitions[0].type;
+            }
+        }
+
         this.renderAll();
         this.handleCanvasResize(true);
         this.history.pushCurrentState();
@@ -225,6 +242,7 @@ class EditorManager {
         this.renderService.renderTileList();
         this.renderService.renderWorldGrid();
         this.renderService.renderNpcs();
+        this.renderService.renderEnemyCatalog();
         this.renderService.renderEnemies();
         this.renderService.renderObjects();
         this.renderService.renderVariables();
@@ -251,6 +269,10 @@ class EditorManager {
 
     renderEnemies() {
         this.renderService.renderEnemies();
+    }
+
+    renderEnemyCatalog() {
+        this.renderService.renderEnemyCatalog();
     }
 
     renderObjects() {
@@ -281,10 +303,6 @@ class EditorManager {
     // NPC delegation
     addNPC() {
         this.npcService.addNpc();
-    }
-
-    toggleNpcPlacement(forceOff = false) {
-        this.npcService.togglePlacement(forceOff);
     }
 
     removeSelectedNpc() {
@@ -323,18 +341,8 @@ class EditorManager {
         this.npcService.handleConditionalRewardVariableChange(select.value);
     }
 
-    // Enemy delegation
-    toggleEnemyPlacement(forceOff = false) {
-        this.enemyService.togglePlacement(forceOff);
-    }
-
     removeEnemy(enemyId) {
         this.enemyService.removeEnemy(enemyId);
-    }
-
-    // Object delegation
-    toggleObjectPlacement(type, forceOff = false) {
-        this.objectService.togglePlacement(type, forceOff);
     }
 
     removeObject(type, roomIndex) {
@@ -426,9 +434,14 @@ class EditorManager {
             this.placingNpc = false;
         }
 
-        const enemies = this.gameEngine.getActiveEnemies();
-        if (!enemies.find((enemy) => enemy.type === this.selectedEnemyType)) {
-            this.selectedEnemyType = 'skull';
+        const definitions = EditorConstants.ENEMY_DEFINITIONS;
+        const normalizedType = typeof EnemyDefinitions?.normalizeType === 'function'
+            ? EnemyDefinitions.normalizeType(this.selectedEnemyType)
+            : this.selectedEnemyType;
+        if (normalizedType !== this.selectedEnemyType) {
+            this.selectedEnemyType = normalizedType;
+        } else if (!definitions.some((entry) => entry.type === this.selectedEnemyType)) {
+            this.selectedEnemyType = definitions[0]?.type || 'giant-rat';
         }
 
         this.renderAll();
@@ -464,18 +477,18 @@ class EditorManager {
     handleKey(ev) {
         if (ev.defaultPrevented) return;
         if (ev.key === 'Escape') {
-            if (this.placingNpc) {
-                this.npcService.togglePlacement(true);
+            if (this.placingNpc || this.selectedNpcId || this.selectedNpcType) {
+                this.npcService.clearSelection();
                 ev.preventDefault();
                 return;
             }
             if (this.placingEnemy) {
-                this.enemyService.togglePlacement(true);
+                this.enemyService.deactivatePlacement();
                 ev.preventDefault();
                 return;
             }
             if (this.placingObjectType) {
-                this.objectService.togglePlacement(null, true);
+                this.objectService.togglePlacement(this.placingObjectType, true);
                 ev.preventDefault();
                 return;
             }

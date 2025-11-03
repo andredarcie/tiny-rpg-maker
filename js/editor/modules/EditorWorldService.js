@@ -22,11 +22,11 @@ class EditorWorldService {
         const clamped = Math.max(0, Math.min(totalRooms - 1, Math.floor(target)));
         if (clamped === this.state.activeRoomIndex) return;
 
-        if (this.state.placingNpc) {
-            this.manager.npcService.togglePlacement(true);
+        if (this.state.placingNpc || this.state.selectedNpcId || this.state.selectedNpcType) {
+            this.manager.npcService.clearSelection();
         }
         if (this.state.placingEnemy) {
-            this.manager.enemyService.togglePlacement(true);
+            this.manager.enemyService.deactivatePlacement();
         }
         this.state.activeRoomIndex = clamped;
         this.manager.renderService.renderWorldGrid();
@@ -39,4 +39,3 @@ class EditorWorldService {
 if (typeof window !== 'undefined') {
     window.EditorWorldService = EditorWorldService;
 }
-

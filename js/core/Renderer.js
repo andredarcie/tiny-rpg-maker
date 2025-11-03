@@ -23,6 +23,7 @@ class Renderer {
         // Compatibilidade com código existente que acessa sprites diretamente.
         this.playerSprite = this.spriteFactory.getPlayerSprite();
         this.npcSprites = this.spriteFactory.getNpcSprites();
+        this.enemySprites = this.spriteFactory.getEnemySprites();
         this.enemySprite = this.spriteFactory.getEnemySprite();
         this.objectSprites = this.spriteFactory.getObjectSprites();
     }
@@ -89,6 +90,7 @@ class Renderer {
     }
 
     buildEnemySprite() {
+        this.enemySprites = this.spriteFactory.getEnemySprites();
         this.enemySprite = this.spriteFactory.getEnemySprite();
         return this.enemySprite;
     }

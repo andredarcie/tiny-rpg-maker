@@ -27,11 +27,9 @@ class EditorObjectService {
         }
 
         if (!type) return;
-        if (this.state.placingNpc) {
-            this.manager.npcService.togglePlacement(true);
-        }
+        this.manager.npcService?.clearSelection?.();
         if (this.state.placingEnemy) {
-            this.manager.enemyService.togglePlacement(true);
+            this.manager.enemyService.deactivatePlacement();
         }
         this.state.placingObjectType = this.state.placingObjectType === type ? null : type;
         this.updatePlacementButtons();

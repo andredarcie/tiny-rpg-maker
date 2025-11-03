@@ -74,7 +74,7 @@ class ShareDataNormalizer {
                 x: ShareMath.clamp(Number(enemy?.x), 0, ShareConstants.MATRIX_SIZE - 1, 0),
                 y: ShareMath.clamp(Number(enemy?.y), 0, ShareConstants.MATRIX_SIZE - 1, 0),
                 roomIndex: ShareMath.clampRoomIndex(enemy?.roomIndex),
-                type: enemy?.type || 'skull',
+                type: ShareDataNormalizer.normalizeEnemyType(enemy?.type),
                 id: enemy?.id || `enemy-${index + 1}`
             }))
             .filter((enemy) => Number.isFinite(enemy.x) && Number.isFinite(enemy.y));
@@ -156,9 +156,18 @@ class ShareDataNormalizer {
             return entry;
         });
     }
+
+    static normalizeEnemyType(type) {
+        if (typeof EnemyDefinitions?.normalizeType === 'function') {
+            return EnemyDefinitions.normalizeType(type);
+        }
+        if (typeof type === 'string' && type) {
+            return type;
+        }
+        return 'giant-rat';
+    }
 }
 
 if (typeof window !== 'undefined') {
     window.ShareDataNormalizer = ShareDataNormalizer;
 }
-

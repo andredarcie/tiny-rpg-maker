@@ -29,6 +29,21 @@ class RendererConstants {
         return this._objectDefinitions || [];
     }
 
+    static get ENEMY_DEFINITIONS() {
+        const hasWindowDefinitions = typeof window !== 'undefined' && window.EnemyDefinitions;
+        if (!this._enemyDefinitions || (hasWindowDefinitions && !this._enemyDefinitions.length)) {
+            if (hasWindowDefinitions) {
+                this._enemyDefinitions =
+                    window.EnemyDefinitions.definitions ||
+                    window.EnemyDefinitions.ENEMY_DEFINITIONS ||
+                    [];
+            } else if (!this._enemyDefinitions) {
+                this._enemyDefinitions = [];
+            }
+        }
+        return this._enemyDefinitions || [];
+    }
+
     static get DEFAULT_PALETTE() {
         return [
             "#000000", "#1D2B53", "#7E2553", "#008751",
@@ -42,4 +57,3 @@ class RendererConstants {
 if (typeof window !== 'undefined') {
     window.RendererConstants = RendererConstants;
 }
-

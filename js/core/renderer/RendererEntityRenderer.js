@@ -74,12 +74,12 @@ class RendererEntityRenderer {
         const player = this.gameState.getPlayer();
         const tileSize = this.canvasHelper.getTilePixelSize();
         const step = tileSize / 8;
-        let enemySprite = this.spriteFactory.getEnemySprite();
-
         enemies.forEach((enemy) => {
             if (enemy.roomIndex !== player.roomIndex) return;
-            enemySprite = this.adjustSpriteHorizontally(enemy.x, enemy.lastX, enemySprite);
-            this.canvasHelper.drawSprite(ctx, enemySprite, enemy.x * tileSize, enemy.y * tileSize, step);
+            const baseSprite = this.spriteFactory.getEnemySprite(enemy.type);
+            if (!baseSprite) return;
+            const sprite = this.adjustSpriteHorizontally(enemy.x, enemy.lastX, baseSprite);
+            this.canvasHelper.drawSprite(ctx, sprite, enemy.x * tileSize, enemy.y * tileSize, step);
         });
     }
 

@@ -3,6 +3,7 @@ class RendererSpriteFactory {
         this.paletteManager = paletteManager;
         this.playerSprite = null;
         this.enemySprite = null;
+        this.enemySprites = null;
         this.npcSprites = null;
         this.objectSprites = null;
     }
@@ -14,11 +15,31 @@ class RendererSpriteFactory {
         return this.playerSprite;
     }
 
-    getEnemySprite() {
+    getEnemySprite(type = null) {
+        if (!this.enemySprites) {
+            this.enemySprites = this.buildEnemySprites();
+        }
+        const sprites = this.enemySprites;
+        if (type && sprites[type]) {
+            return sprites[type];
+        }
+        if (type && typeof EnemyDefinitions?.normalizeType === 'function') {
+            const normalized = EnemyDefinitions.normalizeType(type);
+            if (sprites[normalized]) {
+                return sprites[normalized];
+            }
+        }
         if (!this.enemySprite) {
-            this.enemySprite = this.buildEnemySprite();
+            this.enemySprite = sprites.default || this.buildEnemySprite();
         }
         return this.enemySprite;
+    }
+
+    getEnemySprites() {
+        if (!this.enemySprites) {
+            this.enemySprites = this.buildEnemySprites();
+        }
+        return this.enemySprites;
     }
 
     getNpcSprites() {
@@ -70,6 +91,26 @@ class RendererSpriteFactory {
         return sprites;
     }
 
+    buildEnemySprites() {
+        const picoPalette = this.paletteManager.getPicoPalette();
+        const defaultSprite = this.buildDefaultEnemySprite(picoPalette);
+        const sprites = { default: defaultSprite };
+        const definitions = RendererConstants.ENEMY_DEFINITIONS;
+        if (Array.isArray(definitions)) {
+            for (const def of definitions) {
+                if (!Array.isArray(def.sprite)) continue;
+                const sprite = this.mapPixels(def.sprite, picoPalette, () => defaultSprite);
+                sprites[def.type] = sprite;
+                if (Array.isArray(def.aliases)) {
+                    for (const alias of def.aliases) {
+                        sprites[alias] = sprite;
+                    }
+                }
+            }
+        }
+        return sprites;
+    }
+
     buildDefaultNpcSprite(picoPalette) {
         const pixels = [
             [ null, null, null,  5,  5,  5, null, null ],
@@ -85,7 +126,14 @@ class RendererSpriteFactory {
     }
 
     buildEnemySprite() {
-        const picoPalette = this.paletteManager.getPicoPalette();
+        const sprites = this.buildEnemySprites();
+        this.enemySprites = sprites;
+        this.enemySprite = sprites.default;
+        return this.enemySprite;
+    }
+
+    buildDefaultEnemySprite(palette) {
+        const picoPalette = palette || this.paletteManager.getPicoPalette();
         const pixels = [
             [ null, null,  6, null, null, null,  6, null ],
             [ null, null,  6,  6,  6,  6,  6, null ],

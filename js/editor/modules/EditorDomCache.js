@@ -19,12 +19,11 @@ class EditorDomCache {
         this.btnPlaceKey = root.getElementById('btn-place-key');
         this.objectsList = root.getElementById('objects-list');
         this.btnAddNpc = root.getElementById('btn-add-npc');
-        this.btnPlaceNpc = root.getElementById('btn-place-npc');
         this.btnNpcDelete = root.getElementById('npc-delete');
-        this.btnPlaceEnemy = root.getElementById('btn-place-enemy');
         this.btnGenerateUrl = root.getElementById('btn-generate-url');
         this.btnUndo = root.getElementById('btn-undo');
         this.btnRedo = root.getElementById('btn-redo');
+        this.enemyTypes = root.getElementById('enemy-types');
         this.enemiesList = root.getElementById('enemies-list');
         this.variablesList = root.getElementById('variables-list');
     }

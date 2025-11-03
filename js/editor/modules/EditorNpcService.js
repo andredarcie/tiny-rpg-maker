@@ -45,6 +45,7 @@ class EditorNpcService {
             this.state.selectedNpcType = npc.type;
         }
 
+        this.activatePlacement();
         this.manager.renderService.renderNpcs();
         this.manager.renderService.renderWorldGrid();
         this.manager.renderService.renderEditor();
@@ -53,46 +54,43 @@ class EditorNpcService {
         this.manager.history.pushCurrentState();
     }
 
-    togglePlacement(forceOff = false) {
-        const btn = this.dom.btnPlaceNpc;
-        const canvas = this.dom.editorCanvas;
-        if (forceOff || this.state.placingNpc) {
-            this.state.placingNpc = false;
-            if (btn) {
-                btn.textContent = 'Colocar NPC no mapa';
-                btn.classList.remove('placing');
-                btn.disabled = !this.state.selectedNpcId;
-            }
-            if (!this.state.placingEnemy && canvas) {
-                canvas.style.cursor = 'default';
-            }
-            return;
-        }
-
+    activatePlacement() {
         if (!this.state.selectedNpcId) {
             alert('Selecione um NPC para colocar.');
             return;
+        }
+        if (this.state.placingNpc) return;
+
+        this.manager.enemyService?.deactivatePlacement();
+        if (this.state.placingObjectType) {
+            this.manager.objectService?.togglePlacement?.(this.state.placingObjectType, true);
         }
 
         this.state.placingNpc = true;
         this.state.placingEnemy = false;
         this.state.placingObjectType = null;
 
-        if (btn) {
-            btn.textContent = 'Cancelar colocacao';
-            btn.classList.add('placing');
+        if (this.dom.editorCanvas) {
+            this.dom.editorCanvas.style.cursor = 'crosshair';
         }
+    }
 
-        const enemyButton = this.dom.btnPlaceEnemy;
-        if (enemyButton) {
-            enemyButton.textContent = 'Colocar caveira';
-            enemyButton.classList.remove('placing');
+    deactivatePlacement() {
+        if (!this.state.placingNpc) return;
+        this.state.placingNpc = false;
+        if (!this.state.placingEnemy && !this.state.placingObjectType && this.dom.editorCanvas) {
+            this.dom.editorCanvas.style.cursor = 'default';
         }
+    }
 
-        if (canvas) {
-            canvas.style.cursor = 'crosshair';
+    clearSelection({ render = true } = {}) {
+        const hadSelection = Boolean(this.state.selectedNpcId || this.state.selectedNpcType);
+        this.state.selectedNpcId = null;
+        this.state.selectedNpcType = null;
+        this.deactivatePlacement();
+        if (render && hadSelection) {
+            this.manager.renderService.renderNpcs();
         }
-        this.manager.objectService?.updatePlacementButtons();
     }
 
     removeSelectedNpc() {
@@ -100,16 +98,7 @@ class EditorNpcService {
         const removed = this.gameEngine.npcManager?.removeNPC?.(this.state.selectedNpcId);
         if (!removed) return;
 
-        this.state.placingNpc = false;
-        const btn = this.dom.btnPlaceNpc;
-        if (btn) {
-            btn.textContent = 'Colocar NPC no mapa';
-            btn.classList.remove('placing');
-            btn.disabled = true;
-        }
-        if (!this.state.placingEnemy && this.dom.editorCanvas) {
-            this.dom.editorCanvas.style.cursor = 'default';
-        }
+        this.clearSelection({ render: false });
         this.manager.renderService.renderNpcs();
         this.manager.renderService.renderWorldGrid();
         this.manager.renderService.renderEditor();
@@ -119,20 +108,20 @@ class EditorNpcService {
     }
 
     updateNpcSelection(type, id) {
+        if (!id) {
+            this.clearSelection();
+            return;
+        }
         this.state.selectedNpcType = type;
         this.state.selectedNpcId = id;
         this.manager.renderService.renderNpcs();
-        this.togglePlacement(true);
-        const btn = this.dom.btnPlaceNpc;
-        if (btn) {
-            btn.disabled = !id;
-        }
+        this.activatePlacement();
     }
 
     placeNpcAt(coord) {
         if (!this.state.selectedNpcId) {
             alert('Selecione um NPC para colocar.');
-            this.togglePlacement(true);
+            this.deactivatePlacement();
             return;
         }
         const roomIndex = this.state.activeRoomIndex;
@@ -146,7 +135,6 @@ class EditorNpcService {
             alert('Nao foi possivel posicionar o NPC.');
             return;
         }
-        this.togglePlacement(true);
         this.manager.renderService.renderNpcs();
         this.manager.renderService.renderWorldGrid();
         this.manager.renderService.renderEditor();

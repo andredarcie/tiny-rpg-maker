@@ -127,7 +127,6 @@
                                 <div class="npcs-panel">
                                     <div class="npcs-actions">
                                         <button id="btn-add-npc">+ Adicionar NPC</button>
-                                        <button id="btn-place-npc" disabled>Colocar NPC no mapa</button>
                                     </div>
                                     <div id="npcs-list" class="npcs-list"></div>
                                     <div class="npc-editor">
@@ -157,7 +156,7 @@
                         <details open>
                             <summary>Inimigos</summary>
                             <div class="enemies-panel">
-                                <button id="btn-place-enemy">Colocar caveira</button>
+                                <div id="enemy-types" class="enemy-types"></div>
                                 <div id="enemies-list" class="enemies-list"></div>
                             </div>
                         </details>
@@ -227,6 +226,7 @@
     <script src="js/editor/modules/EditorWorldService.js?v=20250208"></script>
     <script src="js/core/TileDefinitions.js?v=20250208"></script>
     <script src="js/core/NPCDefinitions.js?v=20250208"></script>
+    <script src="js/core/EnemyDefinitions.js?v=20250208"></script>
     <script src="js/core/ObjectDefinitions.js?v=20250208"></script>
     <script src="js/core/ShareUtils.js?v=20250208"></script>
     <script src="js/core/TileManager.js?v=20250208"></script>

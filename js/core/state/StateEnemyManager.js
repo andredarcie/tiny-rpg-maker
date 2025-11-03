@@ -20,7 +20,7 @@ class StateEnemyManager {
     cloneEnemies(enemies) {
         return (enemies || []).map((enemy) => ({
             id: enemy.id,
-            type: enemy.type || 'skull',
+            type: this.normalizeEnemyType(enemy.type),
             roomIndex: this.worldManager.clampRoomIndex(enemy.roomIndex ?? 0),
             x: this.worldManager.clampCoordinate(enemy.x ?? 0),
             y: this.worldManager.clampCoordinate(enemy.y ?? 0),
@@ -47,7 +47,7 @@ class StateEnemyManager {
         if (!this.game || !this.state) return;
         const entry = {
             id: enemy.id,
-            type: enemy.type || 'skull',
+            type: this.normalizeEnemyType(enemy.type),
             roomIndex: this.worldManager.clampRoomIndex(enemy.roomIndex ?? 0),
             x: this.worldManager.clampCoordinate(enemy.x ?? 0),
             y: this.worldManager.clampCoordinate(enemy.y ?? 0),
@@ -72,6 +72,13 @@ class StateEnemyManager {
         if (roomIndex !== null && roomIndex !== undefined) {
             enemy.roomIndex = this.worldManager.clampRoomIndex(roomIndex);
         }
+    }
+
+    normalizeEnemyType(type) {
+        if (typeof EnemyDefinitions?.normalizeType === 'function') {
+            return EnemyDefinitions.normalizeType(type);
+        }
+        return type || 'giant-rat';
     }
 }
 
