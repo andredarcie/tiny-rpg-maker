@@ -8,7 +8,9 @@ class EnemyManager {
         this.enemyMoveTimer = null;
         this.directions = options.directions || this.defaultDirections();
         this.dialogManager = options.dialogManager || null;
-        this.missChance = this.normalizeMissChance(options.missChance);
+        this.fallbackMissChance = this.normalizeMissChance(
+            options.missChance === undefined ? 0.25 : options.missChance
+        );
     }
 
     getEnemyDefinitions() {
@@ -92,7 +94,8 @@ class EnemyManager {
         enemy.type = this.normalizeEnemyType(enemy.type);
         enemies.splice(enemyIndex, 1);
         const experienceReward = this.getExperienceReward(enemy.type);
-        const attackMissed = this.attackMissed();
+        const missChance = this.getEnemyMissChance(enemy.type);
+        const attackMissed = this.attackMissed(missChance);
         if (!attackMissed) {
             const damage = this.getEnemyDamage(enemy.type);
             const lives = this.gameState.damagePlayer(damage);
@@ -270,6 +273,16 @@ class EnemyManager {
         return 0;
     }
 
+    getEnemyMissChance(type) {
+        if (typeof EnemyDefinitions?.getMissChance === 'function') {
+            const explicit = EnemyDefinitions.getMissChance(type);
+            if (explicit !== null && explicit !== undefined) {
+                return this.normalizeMissChance(explicit);
+            }
+        }
+        return this.fallbackMissChance;
+    }
+
     normalizeMissChance(value) {
         const numeric = Number(value);
         if (!Number.isFinite(numeric)) {
@@ -278,12 +291,17 @@ class EnemyManager {
         return Math.max(0, Math.min(1, numeric));
     }
 
-    attackMissed() {
-        const chance = this.normalizeMissChance(this.missChance);
-        this.missChance = chance;
-        if (chance <= 0) return false;
-        if (chance >= 1) return true;
-        return Math.random() < chance;
+    attackMissed(chance) {
+        let normalized;
+        if (chance === undefined) {
+            normalized = this.normalizeMissChance(this.fallbackMissChance);
+            this.fallbackMissChance = normalized;
+        } else {
+            normalized = this.normalizeMissChance(chance);
+        }
+        if (normalized <= 0) return false;
+        if (normalized >= 1) return true;
+        return Math.random() < normalized;
     }
 
     showMissFeedback() {
