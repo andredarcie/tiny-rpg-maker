@@ -7,9 +7,10 @@ class ShareConstants {
     static get VERSION_6() { return 6; }
     static get VERSION_7() { return 7; }
     static get VERSION_8() { return 8; }
+    static get VERSION_9() { return 9; }
 
     static get VERSION() {
-        return ShareConstants.VERSION_8;
+        return ShareConstants.VERSION_9;
     }
 
     static get LEGACY_VERSION() {
@@ -38,6 +39,10 @@ class ShareConstants {
 
     static get NPC_CONDITIONAL_REWARD_VERSION() {
         return ShareConstants.VERSION_8;
+    }
+
+    static get ENEMY_TYPE_VERSION() {
+        return ShareConstants.VERSION_9;
     }
 
     static get MATRIX_SIZE() {
@@ -115,6 +120,7 @@ class ShareConstants {
                 ShareConstants.VERSION_5,
                 ShareConstants.VERSION_6,
                 ShareConstants.VERSION_7,
+                ShareConstants.VERSION_8,
                 ShareConstants.VERSION
             ]);
         }
@@ -134,6 +140,21 @@ class ShareConstants {
             }
         }
         return this._npcDefinitions || [];
+    }
+
+    static get ENEMY_DEFINITIONS() {
+        const hasWindowDefinitions = typeof window !== 'undefined' && window.EnemyDefinitions;
+        if (!this._enemyDefinitions || (hasWindowDefinitions && !this._enemyDefinitions.length)) {
+            if (hasWindowDefinitions) {
+                this._enemyDefinitions =
+                    window.EnemyDefinitions.definitions ||
+                    window.EnemyDefinitions.ENEMY_DEFINITIONS ||
+                    [];
+            } else if (!this._enemyDefinitions) {
+                this._enemyDefinitions = [];
+            }
+        }
+        return this._enemyDefinitions || [];
     }
 }
 

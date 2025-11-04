@@ -33,6 +33,9 @@ class ShareDecoder {
             ? ShareVariableCodec.decodeVariableNibbleArray(payload.h || '', npcPositions.length)
             : [];
         const enemyPositions = SharePositionCodec.decodePositions(payload.e || '');
+        const enemyTypeIndexes = version >= ShareConstants.ENEMY_TYPE_VERSION
+            ? SharePositionCodec.decodeEnemyTypeIndexes(payload.f || '', enemyPositions.length)
+            : [];
         const doorPositions = version >= ShareConstants.OBJECTS_VERSION ? SharePositionCodec.decodePositions(payload.d || '') : [];
         const keyPositions = version >= ShareConstants.OBJECTS_VERSION ? SharePositionCodec.decodePositions(payload.k || '') : [];
         const magicDoorPositions = version >= ShareConstants.MAGIC_DOOR_VERSION ? SharePositionCodec.decodePositions(payload.m || '') : [];
@@ -93,9 +96,16 @@ class ShareDecoder {
         }
 
         const defaultEnemyType = ShareDataNormalizer.normalizeEnemyType();
+        const enemyDefinitions = ShareConstants.ENEMY_DEFINITIONS;
         const enemies = enemyPositions.map((pos, index) => ({
             id: `enemy-${index + 1}`,
-            type: defaultEnemyType,
+            type: (() => {
+                const idx = enemyTypeIndexes[index];
+                if (Number.isFinite(idx) && idx >= 0 && idx < enemyDefinitions.length) {
+                    return ShareDataNormalizer.normalizeEnemyType(enemyDefinitions[idx]?.type);
+                }
+                return defaultEnemyType;
+            })(),
             x: pos.x,
             y: pos.y,
             roomIndex: pos.roomIndex

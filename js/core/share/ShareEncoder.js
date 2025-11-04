@@ -80,8 +80,12 @@ class ShareEncoder {
 
         if (enemies.length) {
             const enemyPositions = SharePositionCodec.encodePositions(enemies);
+            const enemyTypeIndexes = SharePositionCodec.encodeEnemyTypeIndexes(enemies);
             if (enemyPositions) {
                 parts.push('e' + enemyPositions);
+            }
+            if (enemyTypeIndexes) {
+                parts.push('f' + enemyTypeIndexes);
             }
         }
 
@@ -126,4 +130,3 @@ class ShareEncoder {
 if (typeof window !== 'undefined') {
     window.ShareEncoder = ShareEncoder;
 }
-

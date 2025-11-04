@@ -69,14 +69,22 @@ class ShareDataNormalizer {
 
     static normalizeEnemies(list) {
         if (!Array.isArray(list)) return [];
+        const defs = ShareConstants.ENEMY_DEFINITIONS;
         return list
-            .map((enemy, index) => ({
-                x: ShareMath.clamp(Number(enemy?.x), 0, ShareConstants.MATRIX_SIZE - 1, 0),
-                y: ShareMath.clamp(Number(enemy?.y), 0, ShareConstants.MATRIX_SIZE - 1, 0),
-                roomIndex: ShareMath.clampRoomIndex(enemy?.roomIndex),
-                type: ShareDataNormalizer.normalizeEnemyType(enemy?.type),
-                id: enemy?.id || `enemy-${index + 1}`
-            }))
+            .map((enemy, index) => {
+                const type = ShareDataNormalizer.normalizeEnemyType(enemy?.type);
+                const typeIndex = Array.isArray(defs) && defs.length
+                    ? defs.findIndex((def) => def.type === type)
+                    : -1;
+                return {
+                    x: ShareMath.clamp(Number(enemy?.x), 0, ShareConstants.MATRIX_SIZE - 1, 0),
+                    y: ShareMath.clamp(Number(enemy?.y), 0, ShareConstants.MATRIX_SIZE - 1, 0),
+                    roomIndex: ShareMath.clampRoomIndex(enemy?.roomIndex),
+                    type,
+                    id: enemy?.id || `enemy-${index + 1}`,
+                    typeIndex
+                };
+            })
             .filter((enemy) => Number.isFinite(enemy.x) && Number.isFinite(enemy.y));
     }
 

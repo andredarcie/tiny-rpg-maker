@@ -83,9 +83,38 @@ class SharePositionCodec {
         if (!text) return [];
         return Array.from(ShareBase64.fromBase64Url(text), (byte) => byte);
     }
+
+    static encodeEnemyTypeIndexes(enemies) {
+        if (!enemies.length) return '';
+        const defs = ShareConstants.ENEMY_DEFINITIONS;
+        if (!Array.isArray(defs) || !defs.length) return '';
+        const bytes = new Uint8Array(enemies.length);
+        for (let i = 0; i < enemies.length; i++) {
+            const enemy = enemies[i] || {};
+            let index = Number.isInteger(enemy.typeIndex) ? enemy.typeIndex : -1;
+            if (index < 0 || index >= defs.length) {
+                const type = typeof enemy.type === 'string' ? enemy.type : null;
+                index = type ? defs.findIndex((def) => def.type === type) : -1;
+            }
+            bytes[i] = index >= 0 ? index : 255;
+        }
+        return ShareBase64.toBase64Url(bytes);
+    }
+
+    static decodeEnemyTypeIndexes(text, expectedLength = 0) {
+        if (!text) {
+            return Array.from({ length: expectedLength }, () => 255);
+        }
+        const bytes = Array.from(ShareBase64.fromBase64Url(text), (byte) => byte);
+        if (expectedLength > 0 && bytes.length < expectedLength) {
+            while (bytes.length < expectedLength) {
+                bytes.push(255);
+            }
+        }
+        return bytes;
+    }
 }
 
 if (typeof window !== 'undefined') {
     window.SharePositionCodec = SharePositionCodec;
 }
-
