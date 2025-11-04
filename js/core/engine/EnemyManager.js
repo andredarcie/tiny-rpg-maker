@@ -8,6 +8,7 @@ class EnemyManager {
         this.enemyMoveTimer = null;
         this.directions = options.directions || this.defaultDirections();
         this.dialogManager = options.dialogManager || null;
+        this.missChance = this.normalizeMissChance(options.missChance);
     }
 
     getEnemyDefinitions() {
@@ -90,12 +91,17 @@ class EnemyManager {
         if (!enemy) return;
         enemy.type = this.normalizeEnemyType(enemy.type);
         enemies.splice(enemyIndex, 1);
-        const damage = this.getEnemyDamage(enemy.type);
         const experienceReward = this.getExperienceReward(enemy.type);
-        const lives = this.gameState.damagePlayer(damage);
-        if (lives <= 0) {
-            this.onPlayerDefeated();
-            return;
+        const attackMissed = this.attackMissed();
+        if (!attackMissed) {
+            const damage = this.getEnemyDamage(enemy.type);
+            const lives = this.gameState.damagePlayer(damage);
+            if (lives <= 0) {
+                this.onPlayerDefeated();
+                return;
+            }
+        } else {
+            this.showMissFeedback();
         }
 
         const defeatResult = typeof this.gameState.handleEnemyDefeated === 'function'
@@ -262,6 +268,29 @@ class EnemyManager {
             }
         }
         return 0;
+    }
+
+    normalizeMissChance(value) {
+        const numeric = Number(value);
+        if (!Number.isFinite(numeric)) {
+            return 0.25;
+        }
+        return Math.max(0, Math.min(1, numeric));
+    }
+
+    attackMissed() {
+        const chance = this.normalizeMissChance(this.missChance);
+        this.missChance = chance;
+        if (chance <= 0) return false;
+        if (chance >= 1) return true;
+        return Math.random() < chance;
+    }
+
+    showMissFeedback() {
+        const fn = this.renderer?.showCombatIndicator;
+        if (typeof fn === 'function') {
+            fn.call(this.renderer, 'Miss', { duration: 500 });
+        }
     }
 }
 

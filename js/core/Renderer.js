@@ -26,6 +26,14 @@ class Renderer {
         this.enemySprites = this.spriteFactory.getEnemySprites();
         this.enemySprite = this.spriteFactory.getEnemySprite();
         this.objectSprites = this.spriteFactory.getObjectSprites();
+        this.combatIndicatorElement = typeof document !== 'undefined'
+            ? document.getElementById('combat-indicator')
+            : null;
+        this.combatIndicatorTimeout = null;
+        if (this.combatIndicatorElement) {
+            this.combatIndicatorElement.classList.remove('visible');
+            this.combatIndicatorElement.setAttribute('data-visible', 'false');
+        }
     }
 
     draw() {
@@ -87,6 +95,36 @@ class Renderer {
         ctx.textBaseline = 'middle';
         ctx.fillText('Game Over', this.canvas.width / 2, this.canvas.height / 2);
         ctx.restore();
+    }
+
+    showCombatIndicator(text, options = {}) {
+        const element = this.combatIndicatorElement;
+        if (!element) return;
+        const duration = Number.isFinite(options.duration)
+            ? Math.max(0, options.duration)
+            : 600;
+
+        if (this.combatIndicatorTimeout) {
+            clearTimeout(this.combatIndicatorTimeout);
+            this.combatIndicatorTimeout = null;
+        }
+
+        element.classList.remove('visible');
+        element.setAttribute('data-visible', 'false');
+        element.textContent = '';
+        // Force layout so the transition can replay on subsequent calls.
+        void element.offsetWidth;
+
+        element.textContent = text ?? '';
+        element.classList.add('visible');
+        element.setAttribute('data-visible', 'true');
+
+        this.combatIndicatorTimeout = setTimeout(() => {
+            element.classList.remove('visible');
+            element.setAttribute('data-visible', 'false');
+            element.textContent = '';
+            this.combatIndicatorTimeout = null;
+        }, duration);
     }
 
     drawObjectSprite(ctx, type, px, py, stepOverride) {

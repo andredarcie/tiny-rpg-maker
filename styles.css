@@ -282,6 +282,28 @@ body.game-mode #tab-game .game-controls button {
     text-align: center;
 }
 
+.combat-indicator {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: clamp(18px, 4vw, 24px);
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.55);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.12s ease-in-out;
+    will-change: opacity;
+    z-index: 4;
+}
+
+.combat-indicator.visible {
+    opacity: 1;
+}
+
 #game-canvas {
     width: clamp(128px, 45vw, 384px);
     max-width: 100%;
