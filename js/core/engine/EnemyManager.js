@@ -92,14 +92,18 @@ class EnemyManager {
         enemies.splice(enemyIndex, 1);
         const damage = this.getEnemyDamage(enemy.type);
         const experienceReward = this.getExperienceReward(enemy.type);
-        let lives = this.gameState.damagePlayer(damage);
+        const lives = this.gameState.damagePlayer(damage);
+        if (lives <= 0) {
+            this.onPlayerDefeated();
+            return;
+        }
+
         const defeatResult = typeof this.gameState.handleEnemyDefeated === 'function'
             ? this.gameState.handleEnemyDefeated(experienceReward)
             : typeof this.gameState.addExperience === 'function'
                 ? this.gameState.addExperience(experienceReward)
                 : null;
         if (defeatResult?.leveledUp) {
-            lives = defeatResult.currentLives ?? lives;
             if (this.dialogManager?.showDialog) {
                 const finalLevel = Number.isFinite(defeatResult.level)
                     ? Math.max(1, Math.floor(defeatResult.level))
@@ -112,11 +116,8 @@ class EnemyManager {
                 });
             }
         }
-        if (lives <= 0) {
-            this.onPlayerDefeated();
-        } else {
-            this.renderer.draw();
-        }
+
+        this.renderer.draw();
     }
 
     checkCollisionAt(x, y) {
