@@ -2,6 +2,8 @@ class StatePlayerManager {
     constructor(state, worldManager) {
         this.state = state;
         this.worldManager = worldManager;
+        this.maxLevel = 9;
+        this.baseMaxLives = 3;
     }
 
     setState(state) {
@@ -28,13 +30,17 @@ class StatePlayerManager {
         if (roomIndex !== null && roomIndex !== undefined) {
             this.player.roomIndex = this.worldManager.clampRoomIndex(roomIndex);
         }
+        this.ensurePlayerStats();
     }
 
     reset(start) {
         const fallback = start || { x: 1, y: 1, roomIndex: 0 };
         this.setPosition(fallback.x, fallback.y, fallback.roomIndex);
         if (!this.player) return;
-        this.player.lives = 3;
+        this.player.level = 1;
+        this.player.maxLives = this.calculateMaxLives(this.player.level);
+        this.player.currentLives = this.player.maxLives;
+        this.player.lives = this.player.currentLives;
         this.player.keys = 0;
     }
 
@@ -60,13 +66,82 @@ class StatePlayerManager {
 
     damage(amount = 1) {
         if (!this.player) return 0;
+        this.ensurePlayerStats();
         const delta = Number.isFinite(amount) ? amount : 1;
-        this.player.lives = Math.max(0, this.player.lives - delta);
-        return this.player.lives;
+        this.player.currentLives = Math.max(0, this.player.currentLives - delta);
+        this.player.lives = this.player.currentLives;
+        return this.player.currentLives;
     }
 
     getLives() {
-        return this.player?.lives ?? 0;
+        this.ensurePlayerStats();
+        return this.player?.currentLives ?? 0;
+    }
+
+    getMaxLives() {
+        this.ensurePlayerStats();
+        return this.player?.maxLives ?? 0;
+    }
+
+    getLevel() {
+        this.ensurePlayerStats();
+        return this.player?.level ?? 1;
+    }
+
+    calculateMaxLives(level) {
+        const numericLevel = Number.isFinite(level) ? Math.floor(level) : 1;
+        return this.baseMaxLives + Math.max(0, numericLevel - 1);
+    }
+
+    clampLevel(level) {
+        const numeric = Number.isFinite(level) ? Math.floor(level) : 1;
+        return Math.max(1, Math.min(this.maxLevel, numeric));
+    }
+
+    ensurePlayerStats() {
+        if (!this.player) return;
+        const level = this.clampLevel(this.player.level ?? 1);
+        this.player.level = level;
+        const expectedMax = this.calculateMaxLives(level);
+        this.player.maxLives = expectedMax;
+        const currentLives = Number.isFinite(this.player.currentLives)
+            ? Math.floor(this.player.currentLives)
+            : this.player.maxLives;
+        this.player.currentLives = Math.max(0, Math.min(this.player.maxLives, currentLives));
+        this.player.lives = this.player.currentLives;
+    }
+
+    healToFull() {
+        if (!this.player) return this.getLives();
+        this.ensurePlayerStats();
+        this.player.currentLives = this.player.maxLives;
+        this.player.lives = this.player.currentLives;
+        return this.player.currentLives;
+    }
+
+    handleEnemyDefeated() {
+        if (!this.player) {
+            return { leveledUp: false, level: 0, maxLives: 0, currentLives: 0 };
+        }
+        this.ensurePlayerStats();
+        if (this.player.level >= this.maxLevel) {
+            return {
+                leveledUp: false,
+                level: this.player.level,
+                maxLives: this.player.maxLives,
+                currentLives: this.player.currentLives
+            };
+        }
+        this.player.level += 1;
+        this.player.maxLives = this.calculateMaxLives(this.player.level);
+        this.player.currentLives = this.player.maxLives;
+        this.player.lives = this.player.currentLives;
+        return {
+            leveledUp: true,
+            level: this.player.level,
+            maxLives: this.player.maxLives,
+            currentLives: this.player.currentLives
+        };
     }
 }
 

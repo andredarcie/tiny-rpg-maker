@@ -7,6 +7,7 @@ class EnemyManager {
         this.interval = options.interval || 600;
         this.enemyMoveTimer = null;
         this.directions = options.directions || this.defaultDirections();
+        this.dialogManager = options.dialogManager || null;
     }
 
     getEnemyDefinitions() {
@@ -90,7 +91,16 @@ class EnemyManager {
         enemy.type = this.normalizeEnemyType(enemy.type);
         enemies.splice(enemyIndex, 1);
         const damage = this.getEnemyDamage(enemy.type);
-        const lives = this.gameState.damagePlayer(damage);
+        let lives = this.gameState.damagePlayer(damage);
+        const defeatResult = typeof this.gameState.handleEnemyDefeated === 'function'
+            ? this.gameState.handleEnemyDefeated()
+            : null;
+        if (defeatResult?.leveledUp) {
+            lives = defeatResult.currentLives ?? lives;
+            if (this.dialogManager?.showDialog) {
+                this.dialogManager.showDialog('Level Up!');
+            }
+        }
         if (lives <= 0) {
             this.onPlayerDefeated();
         } else {

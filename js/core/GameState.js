@@ -32,7 +32,17 @@ class GameState {
         this.game.tileset.map = this.game.tileset.maps[0];
 
         this.state = {
-            player: { x: 1, y: 1, lastX: 1, roomIndex: 0, lives: 3, keys: 0 },
+            player: {
+                x: 1,
+                y: 1,
+                lastX: 1,
+                roomIndex: 0,
+                level: 1,
+                maxLives: 3,
+                currentLives: 3,
+                lives: 3,
+                keys: 0
+            },
             dialog: { active: false, text: "", page: 1, maxPages: 1, meta: null },
             enemies: [],
             variables: []
@@ -270,6 +280,30 @@ class GameState {
 
     getLives() {
         return this.playerManager.getLives();
+    }
+
+    getMaxLives() {
+        return typeof this.playerManager.getMaxLives === 'function'
+            ? this.playerManager.getMaxLives()
+            : 0;
+    }
+
+    getLevel() {
+        return typeof this.playerManager.getLevel === 'function'
+            ? this.playerManager.getLevel()
+            : 1;
+    }
+
+    healPlayerToFull() {
+        return typeof this.playerManager.healToFull === 'function'
+            ? this.playerManager.healToFull()
+            : this.getLives();
+    }
+
+    handleEnemyDefeated() {
+        return typeof this.playerManager.handleEnemyDefeated === 'function'
+            ? this.playerManager.handleEnemyDefeated()
+            : { leveledUp: false };
     }
 }
 

@@ -14,7 +14,8 @@ class GameEngine {
         this.dialogManager = new DialogManager(this.gameState, this.renderer);
         this.interactionManager = new InteractionManager(this.gameState, this.dialogManager);
         this.enemyManager = new EnemyManager(this.gameState, this.renderer, this.tileManager, {
-            onPlayerDefeated: () => this.resetGame()
+            onPlayerDefeated: () => this.resetGame(),
+            dialogManager: this.dialogManager
         });
         this.movementManager = new MovementManager({
             gameState: this.gameState,
