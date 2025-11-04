@@ -9,6 +9,9 @@ class MovementManager {
     }
 
     tryMove(dx, dy) {
+        if (typeof this.gameState.isGameOver === 'function' && this.gameState.isGameOver()) {
+            return;
+        }
         const dialog = this.gameState.getDialog();
         if (dialog.active) {
             if (dialog.page >= dialog.maxPages) {
@@ -127,4 +130,3 @@ class MovementManager {
 if (typeof window !== 'undefined') {
     window.MovementManager = MovementManager;
 }
-

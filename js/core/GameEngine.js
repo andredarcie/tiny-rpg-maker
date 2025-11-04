@@ -14,7 +14,7 @@ class GameEngine {
         this.dialogManager = new DialogManager(this.gameState, this.renderer);
         this.interactionManager = new InteractionManager(this.gameState, this.dialogManager);
         this.enemyManager = new EnemyManager(this.gameState, this.renderer, this.tileManager, {
-            onPlayerDefeated: () => this.resetGame(),
+            onPlayerDefeated: () => this.handlePlayerDefeat(),
             dialogManager: this.dialogManager
         });
         this.movementManager = new MovementManager({
@@ -26,6 +26,7 @@ class GameEngine {
             enemyManager: this.enemyManager
         });
         this.inputManager = new InputManager(this);
+        this.awaitingRestart = false;
 
         // Ensure there is at least a ground layer
         this.tileManager.ensureDefaultTiles();
@@ -58,6 +59,9 @@ class GameEngine {
     }
 
     resetGame() {
+        this.awaitingRestart = false;
+        this.gameState.setGameOver?.(false);
+        this.gameState.resumeGame?.('game-over');
         this.gameState.resetGame();
         this.startEnemyLoop();
         this.dialogManager.reset();
@@ -224,6 +228,26 @@ class GameEngine {
 
     checkEnemyCollisionAt(x, y) {
         this.enemyManager.checkCollisionAt(x, y);
+    }
+
+    handlePlayerDefeat() {
+        this.enemyManager.stop();
+        this.gameState.pauseGame?.('game-over');
+        this.gameState.setGameOver?.(true);
+        this.awaitingRestart = true;
+        this.renderer.draw();
+    }
+
+    isGameOver() {
+        if (typeof this.gameState.isGameOver === 'function') {
+            return this.gameState.isGameOver();
+        }
+        return this.awaitingRestart;
+    }
+
+    handleGameOverInteraction() {
+        if (!this.isGameOver()) return;
+        this.resetGame();
     }
 }
 

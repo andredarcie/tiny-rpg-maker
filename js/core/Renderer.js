@@ -43,6 +43,10 @@ class Renderer {
         this.dialogRenderer.drawDialog(this.ctx, this.canvas);
         this.hudRenderer.drawHUD();
         this.minimapRenderer.drawMinimap();
+
+        if (typeof this.gameState.isGameOver === 'function' && this.gameState.isGameOver()) {
+            this.drawGameOverScreen();
+        }
     }
 
     // Métodos utilitários delegados
@@ -68,6 +72,21 @@ class Renderer {
 
     drawTilePreviewAt(tileId, px, py, size, ctx) {
         this.canvasHelper.drawTilePreview(this.tileManager, tileId, px, py, size, ctx);
+    }
+
+    drawGameOverScreen() {
+        const ctx = this.ctx;
+        if (!ctx) return;
+        ctx.save();
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        ctx.fillStyle = '#FFFFFF';
+        const fontSize = Math.max(8, Math.floor(this.canvas.height / 10));
+        ctx.font = `${fontSize}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('Game Over', this.canvas.width / 2, this.canvas.height / 2);
+        ctx.restore();
     }
 
     drawObjectSprite(ctx, type, px, py, stepOverride) {

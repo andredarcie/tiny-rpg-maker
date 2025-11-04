@@ -46,7 +46,8 @@ class GameState {
             },
             dialog: { active: false, text: "", page: 1, maxPages: 1, meta: null },
             enemies: [],
-            variables: []
+            variables: [],
+            gameOver: false
         };
 
         this.worldManager = new StateWorldManager(this.game, roomSize);
@@ -124,6 +125,8 @@ class GameState {
         this.variableManager.resetRuntime();
         this.itemManager.resetItems();
         this.objectManager.resetRuntime();
+        this.setGameOver(false);
+        this.resumeGame('game-over');
     }
 
     exportGameData() {
@@ -349,6 +352,16 @@ class GameState {
 
     updatePlayingLock() {
         this.playing = !this.pauseReasons || this.pauseReasons.size === 0;
+    }
+
+    setGameOver(active = true) {
+        if (this.state && typeof this.state === 'object') {
+            this.state.gameOver = Boolean(active);
+        }
+    }
+
+    isGameOver() {
+        return Boolean(this.state?.gameOver);
     }
 }
 

@@ -11,6 +11,10 @@ class RendererHudRenderer {
             this.hide();
             return;
         }
+        if (typeof this.gameState.isGameOver === 'function' && this.gameState.isGameOver()) {
+            this.hide();
+            return;
+        }
         const hud = this.hudElement;
         if (!hud) return;
         const lives = this.gameState.getLives();

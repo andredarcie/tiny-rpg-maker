@@ -15,6 +15,11 @@ class InputManager {
     }
 
     handleKeyDown(ev) {
+        if (this.gameEngine.isGameOver?.()) {
+            ev.preventDefault();
+            this.gameEngine.handleGameOverInteraction?.();
+            return;
+        }
         const dialog = this.gameEngine.gameState.getDialog();
 
         // When a dialog is open, only allow confirmation keys to handle it
@@ -57,6 +62,12 @@ class InputManager {
     }
 
     handleTouchStart(ev) {
+        if (this.gameEngine.isGameOver?.()) {
+            ev.preventDefault?.();
+            this.gameEngine.handleGameOverInteraction?.();
+            this.touchStart = null;
+            return;
+        }
         const touch = ev.changedTouches?.[0];
         if (!touch) return;
         this.touchStart = {
@@ -67,6 +78,12 @@ class InputManager {
     }
 
     handleTouchEnd(ev) {
+        if (this.gameEngine.isGameOver?.()) {
+            ev.preventDefault?.();
+            this.gameEngine.handleGameOverInteraction?.();
+            this.touchStart = null;
+            return;
+        }
         const start = this.touchStart;
         if (!start) return;
 
