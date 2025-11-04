@@ -464,15 +464,47 @@ body.game-mode #tab-game .game-controls button {
 
 .editor-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
     gap: 24px;
-    align-items: flex-start;
+    grid-template-columns: minmax(240px, 1fr) minmax(300px, auto) minmax(240px, 1fr);
+    grid-template-areas: "left center right";
+    align-items: start;
 }
 
 .editor-left,
-.editor-right {
+.editor-right,
+.editor-center {
     display: grid;
     gap: 24px;
+    align-content: start;
+    width: 100%;
+}
+
+.editor-left {
+    grid-area: left;
+    max-width: 360px;
+    justify-self: stretch;
+}
+
+.editor-center {
+    grid-area: center;
+    align-content: start;
+    justify-items: center;
+}
+
+.editor-right {
+    grid-area: right;
+    max-width: 360px;
+    justify-self: stretch;
+}
+
+.editor-section--map {
+    width: 100%;
+    max-width: 420px;
+    justify-items: center;
+}
+
+.editor-section--map canvas {
+    margin: 0 auto;
 }
 
 .editor-section {
@@ -982,12 +1014,6 @@ textarea {
     margin-top: 0;
 }
 
-.tile-group-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
-    gap: 8px;
-}
-
 .tile-list::-webkit-scrollbar,
 .npcs-list::-webkit-scrollbar {
     width: 6px;
@@ -1004,6 +1030,8 @@ textarea {
     align-items: center;
     justify-content: center;
     padding: 8px;
+    width: 80px;
+    aspect-ratio: 1 / 1;
     appearance: none;
     -webkit-appearance: none;
     background: var(--panel);
@@ -1251,7 +1279,10 @@ textarea {
 
 @media (max-width: 1200px) {
     .editor-layout {
-        grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-areas:
+            "center center"
+            "left right";
     }
 }
 
@@ -1262,6 +1293,15 @@ textarea {
 
     .editor-layout {
         grid-template-columns: 1fr;
+        grid-template-areas:
+            "center"
+            "left"
+            "right";
+    }
+
+    .editor-left,
+    .editor-right {
+        max-width: none;
     }
 }
 
@@ -1348,3 +1388,9 @@ textarea {
     }
 }
 
+.tile-group-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(96px, max-content));
+    gap: 8px;
+    justify-content: flex-start;
+}

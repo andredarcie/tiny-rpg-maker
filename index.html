@@ -72,15 +72,7 @@
             <div class="tab-content" id="tab-editor">
                 <div class="editor-layout">
                     <div class="editor-left">
-                        <div class="editor-section">
-                            <h3>Mapa</h3>
-                            <canvas id="editor-canvas" width="128" height="128"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="editor-right">
-
-                        <div class="editor-section">
+                        <div class="editor-section editor-section--tiles">
                             <details open>
                                 <summary>Tiles</summary>
                                 <div class="tiles-panel">
@@ -90,16 +82,16 @@
                             </details>
                         </div>
 
-                    <div class="editor-section">
-                        <details open>
-                            <summary>Mundo</summary>
-                            <div class="world-panel">
-                                <div id="world-grid" class="world-grid"></div>
-                            </div>
-                        </details>
-                    </div>
+                        <div class="editor-section editor-section--world">
+                            <details open>
+                                <summary>Mundo</summary>
+                                <div class="world-panel">
+                                    <div id="world-grid" class="world-grid"></div>
+                                </div>
+                            </details>
+                        </div>
 
-                        <div class="editor-section">
+                        <div class="editor-section editor-section--objects">
                             <details open>
                                 <summary>Objetos</summary>
                                 <div class="objects-panel">
@@ -113,7 +105,7 @@
                             </details>
                         </div>
 
-                        <div class="editor-section">
+                        <div class="editor-section editor-section--variables">
                             <details open>
                                 <summary>Variaveis</summary>
                                 <div class="variables-panel">
@@ -121,8 +113,17 @@
                                 </div>
                             </details>
                         </div>
+                    </div>
 
-                        <div class="editor-section">
+                    <div class="editor-center">
+                        <div class="editor-section editor-section--map">
+                            <h3>Mapa</h3>
+                            <canvas id="editor-canvas" width="128" height="128"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="editor-right">
+                        <div class="editor-section editor-section--npcs">
                             <details open>
                                 <summary>NPCs</summary>
                                 <div class="npcs-panel">
@@ -131,43 +132,43 @@
                                     </div>
                                     <div id="npcs-list" class="npcs-list"></div>
                                     <div class="npc-editor">
-                                    <label for="npc-text">Dialogo padrao:</label>
-                                    <textarea id="npc-text" placeholder="Digite o dialogo do NPC..."></textarea>
-                                    <div class="npc-reward-group">
-                                        <label for="npc-reward-variable">Ao concluir o dialogo padrao, ativar variavel:</label>
-                                        <select id="npc-reward-variable"></select>
+                                        <label for="npc-text">Dialogo padrao:</label>
+                                        <textarea id="npc-text" placeholder="Digite o dialogo do NPC..."></textarea>
+                                        <div class="npc-reward-group">
+                                            <label for="npc-reward-variable">Ao concluir o dialogo padrao, ativar variavel:</label>
+                                            <select id="npc-reward-variable"></select>
+                                        </div>
+                                        <div class="npc-conditional-group">
+                                            <label for="npc-conditional-variable">Variavel para dialogo alternativo:</label>
+                                            <select id="npc-conditional-variable"></select>
+                                            <label for="npc-conditional-text">Texto alternativo:</label>
+                                            <textarea id="npc-conditional-text" placeholder="Mensagem exibida quando a variavel estiver ON."></textarea>
+                                        </div>
+                                        <div class="npc-reward-group">
+                                            <label for="npc-conditional-reward-variable">Ao concluir o dialogo alternativo, ativar variavel:</label>
+                                            <select id="npc-conditional-reward-variable"></select>
+                                        </div>
+                                        <button id="npc-delete">Deletar NPC</button>
                                     </div>
-                                    <div class="npc-conditional-group">
-                                        <label for="npc-conditional-variable">Variavel para dialogo alternativo:</label>
-                                        <select id="npc-conditional-variable"></select>
-                                        <label for="npc-conditional-text">Texto alternativo:</label>
-                                        <textarea id="npc-conditional-text" placeholder="Mensagem exibida quando a variavel estiver ON."></textarea>
-                                    </div>
-                                    <div class="npc-reward-group">
-                                        <label for="npc-conditional-reward-variable">Ao concluir o dialogo alternativo, ativar variavel:</label>
-                                        <select id="npc-conditional-reward-variable"></select>
-                                    </div>
-                                    <button id="npc-delete">Deletar NPC</button>
                                 </div>
-                            </div>
-                        </details>
-                    </div>
+                            </details>
+                        </div>
 
-                    <div class="editor-section">
-                        <details open>
-                            <summary>Inimigos</summary>
-                            <div class="enemies-panel">
-                                <div id="enemy-types" class="enemy-types"></div>
-                                <div id="enemies-list" class="enemies-list"></div>
-                            </div>
-                        </details>
-                    </div>
+                        <div class="editor-section editor-section--enemies">
+                            <details open>
+                                <summary>Inimigos</summary>
+                                <div class="enemies-panel">
+                                    <div id="enemy-types" class="enemy-types"></div>
+                                    <div id="enemies-list" class="enemies-list"></div>
+                                </div>
+                            </details>
+                        </div>
 
-                    <div class="editor-section">
-                        <details open>
-                            <summary>Projeto</summary>
-                            <div class="project-actions">
-                                <button id="btn-generate-url">Gerar URL do jogo</button>
+                        <div class="editor-section editor-section--project">
+                            <details open>
+                                <summary>Projeto</summary>
+                                <div class="project-actions">
+                                    <button id="btn-generate-url">Gerar URL do jogo</button>
                                 </div>
                                 <div class="history-actions">
                                     <button id="btn-undo">Desfazer</button>
