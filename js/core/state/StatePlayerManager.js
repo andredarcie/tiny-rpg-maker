@@ -4,6 +4,8 @@ class StatePlayerManager {
         this.worldManager = worldManager;
         this.maxLevel = 9;
         this.baseMaxLives = 3;
+        this.experienceBase = 20;
+        this.experienceGrowth = 1.5;
     }
 
     setState(state) {
@@ -42,6 +44,7 @@ class StatePlayerManager {
         this.player.currentLives = this.player.maxLives;
         this.player.lives = this.player.currentLives;
         this.player.keys = 0;
+        this.player.experience = 0;
     }
 
     addKeys(amount = 1) {
@@ -109,6 +112,15 @@ class StatePlayerManager {
             : this.player.maxLives;
         this.player.currentLives = Math.max(0, Math.min(this.player.maxLives, currentLives));
         this.player.lives = this.player.currentLives;
+        const experience = Number.isFinite(this.player.experience)
+            ? Math.max(0, Math.floor(this.player.experience))
+            : 0;
+        if (level >= this.maxLevel) {
+            this.player.experience = 0;
+        } else {
+            const requirement = this.getExperienceForNextLevel(level);
+            this.player.experience = Math.min(experience, Math.max(0, requirement - 1));
+        }
     }
 
     healToFull() {
@@ -119,29 +131,83 @@ class StatePlayerManager {
         return this.player.currentLives;
     }
 
-    handleEnemyDefeated() {
-        if (!this.player) {
-            return { leveledUp: false, level: 0, maxLives: 0, currentLives: 0 };
-        }
+    getExperience() {
         this.ensurePlayerStats();
-        if (this.player.level >= this.maxLevel) {
+        return this.player?.experience ?? 0;
+    }
+
+    getExperienceForNextLevel(level) {
+        const clamped = this.clampLevel(level);
+        if (clamped >= this.maxLevel) return 0;
+        const value = Math.floor(this.experienceBase * Math.pow(this.experienceGrowth, clamped - 1));
+        return Math.max(5, value);
+    }
+
+    getExperienceToNext() {
+        this.ensurePlayerStats();
+        const level = this.player?.level ?? 1;
+        return this.getExperienceForNextLevel(level);
+    }
+
+    addExperience(amount = 0) {
+        if (!this.player) {
             return {
                 leveledUp: false,
-                level: this.player.level,
-                maxLives: this.player.maxLives,
-                currentLives: this.player.currentLives
+                levelsGained: 0,
+                level: 0,
+                experience: 0,
+                experienceToNext: 0,
+                currentLives: 0,
+                maxLives: 0
             };
         }
-        this.player.level += 1;
-        this.player.maxLives = this.calculateMaxLives(this.player.level);
-        this.player.currentLives = this.player.maxLives;
-        this.player.lives = this.player.currentLives;
+        this.ensurePlayerStats();
+        const gain = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+        if (gain <= 0 || this.player.level >= this.maxLevel) {
+            if (this.player.level >= this.maxLevel) {
+                this.player.experience = 0;
+            }
+            return {
+                leveledUp: false,
+                levelsGained: 0,
+                level: this.player.level,
+                experience: this.player.experience,
+                experienceToNext: this.getExperienceToNext(),
+                currentLives: this.player.currentLives,
+                maxLives: this.player.maxLives
+            };
+        }
+        let experience = this.player.experience + gain;
+        let levelsGained = 0;
+        while (this.player.level < this.maxLevel) {
+            const required = this.getExperienceForNextLevel(this.player.level);
+            if (experience < required) break;
+            experience -= required;
+            this.player.level += 1;
+            levelsGained += 1;
+            this.player.maxLives = this.calculateMaxLives(this.player.level);
+            this.player.currentLives = this.player.maxLives;
+            this.player.lives = this.player.currentLives;
+        }
+        if (this.player.level >= this.maxLevel) {
+            this.player.level = this.maxLevel;
+            this.player.experience = 0;
+        } else {
+            this.player.experience = experience;
+        }
         return {
-            leveledUp: true,
+            leveledUp: levelsGained > 0,
+            levelsGained,
             level: this.player.level,
-            maxLives: this.player.maxLives,
-            currentLives: this.player.currentLives
+            experience: this.player.experience,
+            experienceToNext: this.getExperienceToNext(),
+            currentLives: this.player.currentLives,
+            maxLives: this.player.maxLives
         };
+    }
+
+    handleEnemyDefeated(experienceReward = 0) {
+        return this.addExperience(experienceReward);
     }
 }
 

@@ -41,7 +41,8 @@ class GameState {
                 maxLives: 3,
                 currentLives: 3,
                 lives: 3,
-                keys: 0
+                keys: 0,
+                experience: 0
             },
             dialog: { active: false, text: "", page: 1, maxPages: 1, meta: null },
             enemies: [],
@@ -62,11 +63,12 @@ class GameState {
             variableManager: this.variableManager
         });
         this.playing = true;
+        this.pauseReasons = new Set();
         this.ensureDefaultVariables();
         this.resetGame();
 
-        document.addEventListener('game-tab-activated', () => this.playing = true);
-        document.addEventListener('editor-tab-activated', () => this.playing = false);
+        document.addEventListener('game-tab-activated', () => this.resumeGame('tab'));
+        document.addEventListener('editor-tab-activated', () => this.pauseGame('tab'));
     }
 
     createEmptyRoom(size, index = 0, cols = 1) {
@@ -300,10 +302,53 @@ class GameState {
             : this.getLives();
     }
 
-    handleEnemyDefeated() {
+    getExperience() {
+        return typeof this.playerManager.getExperience === 'function'
+            ? this.playerManager.getExperience()
+            : 0;
+    }
+
+    getExperienceToNext() {
+        return typeof this.playerManager.getExperienceToNext === 'function'
+            ? this.playerManager.getExperienceToNext()
+            : 0;
+    }
+
+    addExperience(amount = 0) {
+        return typeof this.playerManager.addExperience === 'function'
+            ? this.playerManager.addExperience(amount)
+            : { leveledUp: false, levelsGained: 0 };
+    }
+
+    handleEnemyDefeated(experienceReward = 0) {
         return typeof this.playerManager.handleEnemyDefeated === 'function'
-            ? this.playerManager.handleEnemyDefeated()
+            ? this.playerManager.handleEnemyDefeated(experienceReward)
             : { leveledUp: false };
+    }
+
+    pauseGame(reason = 'manual') {
+        if (!this.pauseReasons) {
+            this.pauseReasons = new Set();
+        }
+        const label = reason || 'manual';
+        this.pauseReasons.add(label);
+        this.updatePlayingLock();
+    }
+
+    resumeGame(reason = 'manual') {
+        if (!this.pauseReasons) {
+            this.pauseReasons = new Set();
+        }
+        if (reason === null || reason === undefined) {
+            this.pauseReasons.clear();
+        } else {
+            this.pauseReasons.delete(reason || 'manual');
+        }
+        this.updatePlayingLock();
+    }
+
+    updatePlayingLock() {
+        this.playing = !this.pauseReasons || this.pauseReasons.size === 0;
     }
 }
 

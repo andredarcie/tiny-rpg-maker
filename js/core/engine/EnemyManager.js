@@ -91,14 +91,25 @@ class EnemyManager {
         enemy.type = this.normalizeEnemyType(enemy.type);
         enemies.splice(enemyIndex, 1);
         const damage = this.getEnemyDamage(enemy.type);
+        const experienceReward = this.getExperienceReward(enemy.type);
         let lives = this.gameState.damagePlayer(damage);
         const defeatResult = typeof this.gameState.handleEnemyDefeated === 'function'
-            ? this.gameState.handleEnemyDefeated()
-            : null;
+            ? this.gameState.handleEnemyDefeated(experienceReward)
+            : typeof this.gameState.addExperience === 'function'
+                ? this.gameState.addExperience(experienceReward)
+                : null;
         if (defeatResult?.leveledUp) {
             lives = defeatResult.currentLives ?? lives;
             if (this.dialogManager?.showDialog) {
-                this.dialogManager.showDialog('Level Up!');
+                const finalLevel = Number.isFinite(defeatResult.level)
+                    ? Math.max(1, Math.floor(defeatResult.level))
+                    : null;
+                const message = finalLevel ? `Level Up! Nivel ${finalLevel}` : 'Level Up!';
+                this.dialogManager.showDialog(message, {
+                    pauseGame: true,
+                    resumePlayingOnClose: true,
+                    pauseReason: 'level-up'
+                });
             }
         }
         if (lives <= 0) {
@@ -236,6 +247,20 @@ class EnemyManager {
             }
         }
         return 1;
+    }
+
+    getExperienceReward(type) {
+        if (typeof EnemyDefinitions?.getExperienceReward === 'function') {
+            return EnemyDefinitions.getExperienceReward(type);
+        }
+        if (typeof EnemyDefinitions?.getEnemyDefinition === 'function') {
+            const definition = EnemyDefinitions.getEnemyDefinition(type);
+            const reward = Number(definition?.experience);
+            if (Number.isFinite(reward)) {
+                return Math.max(0, Math.floor(reward));
+            }
+        }
+        return 0;
     }
 }
 

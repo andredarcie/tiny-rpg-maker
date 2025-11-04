@@ -9,6 +9,7 @@ class EnemyDefinitions {
             name: '🐀 Rato Gigante',
             description: 'o primeiro inimigo fraco.',
             damage: 1,
+            experience: 8,
             sprite: [
                 [ null, null, null, 15, 15, null, 15, 15 ],
                 [ 15, null, null, 15, 15, null, 15, 15 ],
@@ -26,6 +27,7 @@ class EnemyDefinitions {
             name: '🧔 Bandido',
             description: 'inimigo humano comum.',
             damage: 2,
+            experience: 14,
             sprite: [
                 [ null, 15, 15, 15, 15, null,  6, null ],
                 [ null, 15,  8, 15,  8, null,  7, null ],
@@ -43,6 +45,7 @@ class EnemyDefinitions {
             name: '⚔️ Cavaleiro Negro',
             description: 'o guerreiro corrompido.',
             damage: 3,
+            experience: 28,
             sprite: [
                 [ null,  6,  5,  5,  5, null,  2, null ],
                 [ null,  5,  8,  5,  8, null,  2, null ],
@@ -60,6 +63,7 @@ class EnemyDefinitions {
             name: '🧙‍♂️ Necromante',
             description: 'o mago das trevas.',
             damage: 4,
+            experience: 45,
             sprite: [
                 [ null, null, 15, 15, 15, 15, null,  8 ],
                 [ null, null, 15,  8, 15,  8, null,  4 ],
@@ -77,6 +81,7 @@ class EnemyDefinitions {
             name: '🐉 Dragão',
             description: 'o monstro lendário.',
             damage: 5,
+            experience: 70,
             sprite: [
                 [ null, null,  3, 11, 11, 11, 11, 11 ],
                 [ null,  3, 11, 11, 11,  8, 11,  8 ],
@@ -94,6 +99,7 @@ class EnemyDefinitions {
             name: '💀 Esqueleto',
             description: 'o morto-vivo clássico.',
             damage: 2,
+            experience: 16,
             aliases: ['skull'],
             sprite: [
                 [ null, null,  7,  7,  7,  7, null, null ],
@@ -112,6 +118,7 @@ class EnemyDefinitions {
             name: '👑 Rei Caído',
             description: 'o chefe trágico corrompido pelo poder.',
             damage: 5,
+            experience: 90,
             sprite: [
                 [ null, 10, null, 10, null, 10, null, null ],
                 [ null,  9,  9,  9,  9,  9, null, 10 ],
@@ -129,6 +136,7 @@ class EnemyDefinitions {
             name: '😈 Demônio Ancião',
             description: 'o mal primordial e final.',
             damage: 6,
+            experience: 125,
             sprite: [
                 [ null, null,  8, null, null,  8, null, null ],
                 [ null, null,  8,  8,  8,  8, null, null ],
@@ -163,6 +171,14 @@ class EnemyDefinitions {
         const definition = this.getEnemyDefinition(type);
         if (definition) return definition.type;
         return this.getDefault()?.type || 'giant-rat';
+    }
+
+    static getExperienceReward(type) {
+        const definition = this.getEnemyDefinition(type);
+        if (!definition) return 0;
+        const reward = Number(definition.experience);
+        if (!Number.isFinite(reward)) return 0;
+        return Math.max(0, Math.floor(reward));
     }
 }
 

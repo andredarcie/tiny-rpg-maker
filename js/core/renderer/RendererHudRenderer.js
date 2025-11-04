@@ -20,14 +20,38 @@ class RendererHudRenderer {
         const level = typeof this.gameState.getLevel === 'function'
             ? this.gameState.getLevel()
             : null;
+        const experience = typeof this.gameState.getExperience === 'function'
+            ? this.gameState.getExperience()
+            : null;
+        const experienceToNext = typeof this.gameState.getExperienceToNext === 'function'
+            ? this.gameState.getExperienceToNext()
+            : null;
         const keys = typeof this.gameState.getKeys === 'function'
             ? this.gameState.getKeys()
             : 0;
         const livesLabel = Number.isFinite(maxLives) && maxLives > 0
             ? `${lives}/${maxLives}`
             : `${lives}`;
-        const levelLabel = Number.isFinite(level) ? ` | Nivel: ${level}` : '';
-        hud.textContent = `Vidas: ${livesLabel}${levelLabel} | Chaves: ${keys}`;
+        const parts = [`Vidas: ${livesLabel}`];
+        if (Number.isFinite(level)) {
+            parts.push(`Nivel: ${level}`);
+        }
+        if (Number.isFinite(experience)) {
+            const currentExp = Math.max(0, Math.floor(experience));
+            let xpLabel;
+            if (Number.isFinite(experienceToNext)) {
+                if (experienceToNext > 0) {
+                    xpLabel = `${currentExp}/${Math.max(1, Math.floor(experienceToNext))}`;
+                } else {
+                    xpLabel = 'Max';
+                }
+            } else {
+                xpLabel = `${currentExp}`;
+            }
+            parts.push(`XP: ${xpLabel}`);
+        }
+        parts.push(`Chaves: ${keys}`);
+        hud.textContent = parts.join(' | ');
         hud.style.visibility = 'visible';
     }
 
