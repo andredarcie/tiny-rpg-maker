@@ -898,14 +898,48 @@ textarea {
 
 .enemy-item {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+    flex-direction: column;
+    gap: 8px;
     padding: 6px 8px;
     border: 1px solid var(--border);
     border-radius: 6px;
     background: rgba(18, 22, 34, 0.6);
     font-size: 0.8rem;
+}
+
+.enemy-item > span {
+    flex: 1 1 auto;
+    text-align: left;
+    line-height: 1.3;
+}
+
+.enemy-variable-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: var(--muted);
+}
+
+.enemy-variable-select {
+    min-width: 120px;
+    padding: 3px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: rgba(15, 18, 29, 0.85);
+    color: var(--text);
+    font-size: 0.75rem;
+}
+
+.enemy-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+.enemy-controls .enemy-variable-wrapper {
+    flex: 1;
 }
 
 .enemy-remove {

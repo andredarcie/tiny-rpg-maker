@@ -30,7 +30,8 @@ class EnemyManager {
             roomIndex: enemy.roomIndex ?? 0,
             x: enemy.x ?? 0,
             y: enemy.y ?? 0,
-            lastX: enemy.x ?? 0
+            lastX: enemy.x ?? 0,
+            defeatVariableId: enemy.defeatVariableId ?? null
         });
         this.renderer.draw();
         return id;
@@ -92,21 +93,23 @@ class EnemyManager {
         const enemy = enemies[enemyIndex];
         if (!enemy) return;
         enemy.type = this.normalizeEnemyType(enemy.type);
-        enemies.splice(enemyIndex, 1);
-        const experienceReward = this.getExperienceReward(enemy.type);
         const missChance = this.getEnemyMissChance(enemy.type);
         const attackMissed = this.attackMissed(missChance);
-        if (!attackMissed) {
+
+        enemies.splice(enemyIndex, 1);
+
+        if (attackMissed) {
+            this.showMissFeedback();
+        } else {
             const damage = this.getEnemyDamage(enemy.type);
             const lives = this.gameState.damagePlayer(damage);
             if (lives <= 0) {
                 this.onPlayerDefeated();
                 return;
             }
-        } else {
-            this.showMissFeedback();
         }
 
+        const experienceReward = this.getExperienceReward(enemy.type);
         const defeatResult = typeof this.gameState.handleEnemyDefeated === 'function'
             ? this.gameState.handleEnemyDefeated(experienceReward)
             : typeof this.gameState.addExperience === 'function'
@@ -125,6 +128,8 @@ class EnemyManager {
                 });
             }
         }
+
+        this.tryTriggerDefeatVariable(enemy);
 
         this.renderer.draw();
     }
@@ -249,12 +254,17 @@ class EnemyManager {
         return type || 'giant-rat';
     }
 
-    getEnemyDamage(type) {
+    getEnemyDefinition(type) {
         if (typeof EnemyDefinitions?.getEnemyDefinition === 'function') {
-            const definition = EnemyDefinitions.getEnemyDefinition(type);
-            if (definition && Number.isFinite(definition.damage)) {
-                return Math.max(1, definition.damage);
-            }
+            return EnemyDefinitions.getEnemyDefinition(type);
+        }
+        return null;
+    }
+
+    getEnemyDamage(type) {
+        const definition = this.getEnemyDefinition(type);
+        if (definition && Number.isFinite(definition.damage)) {
+            return Math.max(1, definition.damage);
         }
         return 1;
     }
@@ -263,12 +273,10 @@ class EnemyManager {
         if (typeof EnemyDefinitions?.getExperienceReward === 'function') {
             return EnemyDefinitions.getExperienceReward(type);
         }
-        if (typeof EnemyDefinitions?.getEnemyDefinition === 'function') {
-            const definition = EnemyDefinitions.getEnemyDefinition(type);
-            const reward = Number(definition?.experience);
-            if (Number.isFinite(reward)) {
-                return Math.max(0, Math.floor(reward));
-            }
+        const definition = this.getEnemyDefinition(type);
+        const reward = Number(definition?.experience);
+        if (Number.isFinite(reward)) {
+            return Math.max(0, Math.floor(reward));
         }
         return 0;
     }
@@ -302,6 +310,55 @@ class EnemyManager {
         if (normalized <= 0) return false;
         if (normalized >= 1) return true;
         return Math.random() < normalized;
+    }
+
+    getDefeatVariableConfig(enemy) {
+        if (!enemy) return null;
+        const definition = this.getEnemyDefinition(enemy.type);
+        const baseConfig = (definition?.activateVariableOnDefeat && typeof definition.activateVariableOnDefeat === 'object')
+            ? definition.activateVariableOnDefeat
+            : null;
+        let variableId = typeof enemy.defeatVariableId === 'string' ? enemy.defeatVariableId : null;
+        if (!variableId) {
+            const fallbackId = typeof baseConfig?.variableId === 'string' ? baseConfig.variableId : null;
+            variableId = fallbackId;
+        }
+        if (typeof this.gameState?.normalizeVariableId === 'function') {
+            variableId = this.gameState.normalizeVariableId(variableId);
+        }
+        if (!variableId) return null;
+        const persist = baseConfig?.persist !== undefined ? Boolean(baseConfig.persist) : true;
+        let message = null;
+        if (typeof baseConfig?.message === 'string' && baseConfig.message.trim().length) {
+            message = baseConfig.message.trim();
+        } else if (typeof definition?.defeatActivationMessage === 'string' && definition.defeatActivationMessage.trim().length) {
+            message = definition.defeatActivationMessage.trim();
+        }
+        return { variableId, persist, message };
+    }
+
+    tryTriggerDefeatVariable(enemy) {
+        const config = this.getDefeatVariableConfig(enemy);
+        if (!config) return false;
+        const setter = this.gameState?.setVariableValue;
+        if (typeof setter !== 'function') return false;
+        const updated = setter.call(this.gameState, config.variableId, true, config.persist);
+        const isActive = typeof this.gameState?.isVariableOn === 'function'
+            ? this.gameState.isVariableOn(config.variableId)
+            : updated;
+        if (!updated && !isActive) {
+            return false;
+        }
+
+        if (config.message) {
+            const indicator = this.renderer?.showCombatIndicator;
+            if (typeof indicator === 'function') {
+                indicator.call(this.renderer, config.message, { duration: 900 });
+            } else if (typeof console !== 'undefined' && typeof console.info === 'function') {
+                console.info('[EnemyManager]', config.message);
+            }
+        }
+        return true;
     }
 
     showMissFeedback() {

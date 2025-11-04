@@ -86,6 +86,7 @@ class EnemyDefinitions {
             description: 'o monstro lendário.',
             damage: 5,
             missChance: 0.08,
+            defeatActivationMessage: 'Selo do Dragão ativado!',
             experience: 70,
             sprite: [
                 [ null, null,  3, 11, 11, 11, 11, 11 ],
@@ -125,6 +126,7 @@ class EnemyDefinitions {
             description: 'o chefe trágico corrompido pelo poder.',
             damage: 5,
             missChance: 0.08,
+            defeatActivationMessage: 'Selo Real despertou!',
             experience: 90,
             sprite: [
                 [ null, 10, null, 10, null, 10, null, null ],
@@ -144,6 +146,8 @@ class EnemyDefinitions {
             description: 'o mal primordial e final.',
             damage: 6,
             missChance: 0.05,
+            defeatActivationMessage: 'Selo Demoníaco ativo!',
+            aliases: ['boss'],
             experience: 125,
             sprite: [
                 [ null, null,  8, null, null,  8, null, null ],

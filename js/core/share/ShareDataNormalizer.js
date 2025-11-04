@@ -76,13 +76,16 @@ class ShareDataNormalizer {
                 const typeIndex = Array.isArray(defs) && defs.length
                     ? defs.findIndex((def) => def.type === type)
                     : -1;
+                const defeatVariableId = ShareDataNormalizer.normalizeEnemyVariable(enemy?.defeatVariableId);
                 return {
                     x: ShareMath.clamp(Number(enemy?.x), 0, ShareConstants.MATRIX_SIZE - 1, 0),
                     y: ShareMath.clamp(Number(enemy?.y), 0, ShareConstants.MATRIX_SIZE - 1, 0),
                     roomIndex: ShareMath.clampRoomIndex(enemy?.roomIndex),
                     type,
                     id: enemy?.id || `enemy-${index + 1}`,
-                    typeIndex
+                    typeIndex,
+                    defeatVariableId,
+                    variableNibble: ShareVariableCodec.variableIdToNibble(defeatVariableId)
                 };
             })
             .filter((enemy) => Number.isFinite(enemy.x) && Number.isFinite(enemy.y));
@@ -173,6 +176,11 @@ class ShareDataNormalizer {
             return type;
         }
         return 'giant-rat';
+    }
+
+    static normalizeEnemyVariable(variableId) {
+        if (typeof variableId !== 'string') return null;
+        return ShareConstants.VARIABLE_IDS.includes(variableId) ? variableId : null;
     }
 }
 

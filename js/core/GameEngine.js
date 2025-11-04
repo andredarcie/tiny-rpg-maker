@@ -214,6 +214,17 @@ class GameEngine {
         return this.enemyManager.generateEnemyId();
     }
 
+    setEnemyVariable(enemyId, variableId = null) {
+        if (typeof this.gameState.setEnemyVariable !== 'function') {
+            return false;
+        }
+        const changed = this.gameState.setEnemyVariable(enemyId, variableId);
+        if (changed) {
+            this.renderer.draw();
+        }
+        return changed;
+    }
+
     startEnemyLoop() {
         this.enemyManager.start();
     }

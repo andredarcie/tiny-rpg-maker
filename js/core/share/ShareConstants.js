@@ -8,9 +8,10 @@ class ShareConstants {
     static get VERSION_7() { return 7; }
     static get VERSION_8() { return 8; }
     static get VERSION_9() { return 9; }
+    static get VERSION_10() { return 10; }
 
     static get VERSION() {
-        return ShareConstants.VERSION_9;
+        return ShareConstants.VERSION_10;
     }
 
     static get LEGACY_VERSION() {
@@ -43,6 +44,10 @@ class ShareConstants {
 
     static get ENEMY_TYPE_VERSION() {
         return ShareConstants.VERSION_9;
+    }
+
+    static get ENEMY_VARIABLE_VERSION() {
+        return ShareConstants.VERSION_10;
     }
 
     static get MATRIX_SIZE() {
@@ -121,6 +126,7 @@ class ShareConstants {
                 ShareConstants.VERSION_6,
                 ShareConstants.VERSION_7,
                 ShareConstants.VERSION_8,
+                ShareConstants.VERSION_9,
                 ShareConstants.VERSION
             ]);
         }

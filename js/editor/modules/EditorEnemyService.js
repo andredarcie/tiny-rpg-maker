@@ -77,6 +77,20 @@ class EditorEnemyService {
         this.manager.history.pushCurrentState();
     }
 
+    handleEnemyVariableChange(enemyId, variableId) {
+        const normalizedId = typeof variableId === 'string' && variableId.trim().length
+            ? variableId
+            : null;
+        const changed = typeof this.gameEngine.setEnemyVariable === 'function'
+            ? this.gameEngine.setEnemyVariable(enemyId, normalizedId)
+            : false;
+        if (!changed) return;
+        this.manager.renderService.renderEnemies();
+        this.manager.renderService.renderWorldGrid();
+        this.manager.updateJSON();
+        this.manager.history.pushCurrentState();
+    }
+
     selectEnemyType(type) {
         const definition = this.getEnemyDefinition(type);
         if (!definition) return;

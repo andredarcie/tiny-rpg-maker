@@ -191,6 +191,14 @@ class EditorManager {
             if (!enemyId) return;
             this.enemyService.removeEnemy(enemyId);
         });
+        enemiesList?.addEventListener('change', (ev) => {
+            const target = ev.target;
+            if (!target || target.tagName !== 'SELECT') return;
+            const enemyId = target.dataset.enemyVariable;
+            if (!enemyId) return;
+            const value = target.value || '';
+            this.enemyService.handleEnemyVariableChange(enemyId, value);
+        });
 
         worldGrid?.addEventListener('click', (ev) => {
             const cell = ev.target.closest('[data-room-index]');

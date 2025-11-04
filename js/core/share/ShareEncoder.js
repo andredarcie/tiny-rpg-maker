@@ -81,11 +81,16 @@ class ShareEncoder {
         if (enemies.length) {
             const enemyPositions = SharePositionCodec.encodePositions(enemies);
             const enemyTypeIndexes = SharePositionCodec.encodeEnemyTypeIndexes(enemies);
+            const enemyVariableNibbles = enemies.map((enemy) => enemy.variableNibble ?? 0);
+            const enemyVariableCode = ShareVariableCodec.encodeVariableNibbleArray(enemyVariableNibbles);
             if (enemyPositions) {
                 parts.push('e' + enemyPositions);
             }
             if (enemyTypeIndexes) {
                 parts.push('f' + enemyTypeIndexes);
+            }
+            if (enemyVariableCode) {
+                parts.push('w' + enemyVariableCode);
             }
         }
 

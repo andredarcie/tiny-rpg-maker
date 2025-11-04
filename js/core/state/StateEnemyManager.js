@@ -25,7 +25,8 @@ class StateEnemyManager {
             x: this.worldManager.clampCoordinate(enemy.x ?? 0),
             y: this.worldManager.clampCoordinate(enemy.y ?? 0),
             lastX: this.worldManager.clampCoordinate(enemy.x ?? 0),
-            lives: enemy.lives ?? 1
+            lives: enemy.lives ?? 1,
+            defeatVariableId: this.normalizeEnemyVariableId(enemy.defeatVariableId)
         }));
     }
 
@@ -51,7 +52,8 @@ class StateEnemyManager {
             roomIndex: this.worldManager.clampRoomIndex(enemy.roomIndex ?? 0),
             x: this.worldManager.clampCoordinate(enemy.x ?? 0),
             y: this.worldManager.clampCoordinate(enemy.y ?? 0),
-            lastX: this.worldManager.clampCoordinate(enemy.x ?? 0)
+            lastX: this.worldManager.clampCoordinate(enemy.x ?? 0),
+            defeatVariableId: this.normalizeEnemyVariableId(enemy.defeatVariableId)
         };
         this.game.enemies.push(entry);
         this.state.enemies.push({ ...entry });
@@ -74,11 +76,39 @@ class StateEnemyManager {
         }
     }
 
+    setEnemyVariable(enemyId, variableId = null) {
+        const normalized = this.normalizeEnemyVariableId(variableId);
+        let changed = false;
+
+        if (Array.isArray(this.game?.enemies)) {
+            const entry = this.game.enemies.find((enemy) => enemy.id === enemyId);
+            if (entry && entry.defeatVariableId !== normalized) {
+                entry.defeatVariableId = normalized;
+                changed = true;
+            }
+        }
+
+        if (Array.isArray(this.state?.enemies)) {
+            const runtime = this.state.enemies.find((enemy) => enemy.id === enemyId);
+            if (runtime && runtime.defeatVariableId !== normalized) {
+                runtime.defeatVariableId = normalized;
+                changed = true;
+            }
+        }
+        return changed;
+    }
+
     normalizeEnemyType(type) {
         if (typeof EnemyDefinitions?.normalizeType === 'function') {
             return EnemyDefinitions.normalizeType(type);
         }
         return type || 'giant-rat';
+    }
+
+    normalizeEnemyVariableId(variableId) {
+        if (typeof variableId !== 'string') return null;
+        const definitions = Array.isArray(this.game?.variables) ? this.game.variables : [];
+        return definitions.some((variable) => variable.id === variableId) ? variableId : null;
     }
 }
 

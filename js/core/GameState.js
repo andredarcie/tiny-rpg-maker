@@ -279,6 +279,11 @@ class GameState {
         this.enemyManager.setEnemyPosition(enemyId, x, y, roomIndex);
     }
 
+    setEnemyVariable(enemyId, variableId = null) {
+        const normalized = this.normalizeVariableId(variableId);
+        return this.enemyManager.setEnemyVariable(enemyId, normalized);
+    }
+
     damagePlayer(amount = 1) {
         return this.playerManager.damage(amount);
     }

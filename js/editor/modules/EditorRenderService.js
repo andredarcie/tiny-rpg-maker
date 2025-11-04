@@ -337,13 +337,30 @@ class EditorRenderService {
                 : '';
             label.textContent = `${displayName} @ (${enemy.x}, ${enemy.y})${damageInfo}`;
 
+            const variableWrapper = document.createElement('label');
+            variableWrapper.className = 'enemy-variable-wrapper';
+            variableWrapper.textContent = 'Variável: ';
+
+            const variableSelect = document.createElement('select');
+            variableSelect.className = 'enemy-variable-select';
+            variableSelect.dataset.enemyVariable = enemy.id;
+            this.manager.npcService.populateVariableSelect(
+                variableSelect,
+                enemy.defeatVariableId || ''
+            );
+            variableWrapper.appendChild(variableSelect);
+
             const removeBtn = document.createElement('button');
             removeBtn.type = 'button';
             removeBtn.className = 'enemy-remove';
             removeBtn.dataset.removeEnemy = enemy.id;
             removeBtn.textContent = 'Remover';
 
-            item.append(label, removeBtn);
+            const controls = document.createElement('div');
+            controls.className = 'enemy-controls';
+            controls.append(variableWrapper, removeBtn);
+
+            item.append(label, controls);
             list.appendChild(item);
         });
     }

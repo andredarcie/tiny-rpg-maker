@@ -36,6 +36,9 @@ class ShareDecoder {
         const enemyTypeIndexes = version >= ShareConstants.ENEMY_TYPE_VERSION
             ? SharePositionCodec.decodeEnemyTypeIndexes(payload.f || '', enemyPositions.length)
             : [];
+        const enemyVariableNibbles = version >= ShareConstants.ENEMY_VARIABLE_VERSION
+            ? ShareVariableCodec.decodeVariableNibbleArray(payload.w || '', enemyPositions.length)
+            : new Array(enemyPositions.length).fill(0);
         const doorPositions = version >= ShareConstants.OBJECTS_VERSION ? SharePositionCodec.decodePositions(payload.d || '') : [];
         const keyPositions = version >= ShareConstants.OBJECTS_VERSION ? SharePositionCodec.decodePositions(payload.k || '') : [];
         const magicDoorPositions = version >= ShareConstants.MAGIC_DOOR_VERSION ? SharePositionCodec.decodePositions(payload.m || '') : [];
@@ -97,19 +100,23 @@ class ShareDecoder {
 
         const defaultEnemyType = ShareDataNormalizer.normalizeEnemyType();
         const enemyDefinitions = ShareConstants.ENEMY_DEFINITIONS;
-        const enemies = enemyPositions.map((pos, index) => ({
-            id: `enemy-${index + 1}`,
-            type: (() => {
-                const idx = enemyTypeIndexes[index];
-                if (Number.isFinite(idx) && idx >= 0 && idx < enemyDefinitions.length) {
-                    return ShareDataNormalizer.normalizeEnemyType(enemyDefinitions[idx]?.type);
-                }
-                return defaultEnemyType;
-            })(),
-            x: pos.x,
-            y: pos.y,
-            roomIndex: pos.roomIndex
-        }));
+        const enemies = enemyPositions.map((pos, index) => {
+            const nibble = enemyVariableNibbles[index] ?? 0;
+            return {
+                id: `enemy-${index + 1}`,
+                type: (() => {
+                    const idx = enemyTypeIndexes[index];
+                    if (Number.isFinite(idx) && idx >= 0 && idx < enemyDefinitions.length) {
+                        return ShareDataNormalizer.normalizeEnemyType(enemyDefinitions[idx]?.type);
+                    }
+                    return defaultEnemyType;
+                })(),
+                x: pos.x,
+                y: pos.y,
+                roomIndex: pos.roomIndex,
+                defeatVariableId: ShareVariableCodec.nibbleToVariableId(nibble)
+            };
+        });
 
         const rooms = Array.from({ length: roomCount }, () => ({ bg: 0 }));
         const maps = [];
