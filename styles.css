@@ -465,7 +465,7 @@ body.game-mode #tab-game .game-controls button {
 .editor-layout {
     display: grid;
     gap: 24px;
-    grid-template-columns: minmax(240px, 1fr) minmax(300px, auto) minmax(240px, 1fr);
+    grid-template-columns: auto 1fr auto;
     grid-template-areas: "left center right";
     align-items: start;
 }
@@ -482,19 +482,20 @@ body.game-mode #tab-game .game-controls button {
 .editor-left {
     grid-area: left;
     max-width: 360px;
-    justify-self: stretch;
+    justify-self: start;
 }
 
 .editor-center {
     grid-area: center;
     align-content: start;
     justify-items: center;
+    justify-self: center;
 }
 
 .editor-right {
     grid-area: right;
     max-width: 360px;
-    justify-self: stretch;
+    justify-self: end;
 }
 
 .editor-section--map {
@@ -1284,6 +1285,16 @@ textarea {
             "center center"
             "left right";
     }
+
+    .editor-left,
+    .editor-right {
+        justify-self: stretch;
+        max-width: none;
+    }
+
+    .editor-center {
+        justify-self: stretch;
+    }
 }
 
 @media (max-width: 960px) {
@@ -1302,6 +1313,12 @@ textarea {
     .editor-left,
     .editor-right {
         max-width: none;
+    }
+
+    .editor-left,
+    .editor-right,
+    .editor-center {
+        justify-self: stretch;
     }
 }
 
