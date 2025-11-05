@@ -9,6 +9,7 @@ class ShareEncoder {
         const objects = Array.isArray(gameData?.objects) ? gameData.objects : [];
         const doorPositions = ShareDataNormalizer.normalizeObjectPositions(objects, 'door');
         const keyPositions = ShareDataNormalizer.normalizeObjectPositions(objects, 'key');
+        const lifePotionPositions = ShareDataNormalizer.normalizeObjectPositions(objects, 'life-potion');
         const magicDoorEntries = ShareDataNormalizer.normalizeVariableDoorObjects(objects);
         const magicDoorPositions = magicDoorEntries.map((entry) => ({
             x: entry.x,
@@ -116,6 +117,13 @@ class ShareEncoder {
             const keyCode = SharePositionCodec.encodePositions(keyPositions);
             if (keyCode) {
                 parts.push('k' + keyCode);
+            }
+        }
+
+        if (lifePotionPositions.length) {
+            const potionCode = SharePositionCodec.encodePositions(lifePotionPositions);
+            if (potionCode) {
+                parts.push('l' + potionCode);
             }
         }
 

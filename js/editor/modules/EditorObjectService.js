@@ -16,53 +16,38 @@ class EditorObjectService {
     }
 
     togglePlacement(type, forceOff = false) {
+        const normalizedType = this.normalizeType(type ?? this.state.placingObjectType ?? this.manager.selectedObjectType);
         if (forceOff) {
             if (!this.state.placingObjectType) return;
             this.state.placingObjectType = null;
-            this.updatePlacementButtons();
             if (!this.state.placingNpc && !this.state.placingEnemy && this.dom.editorCanvas) {
                 this.dom.editorCanvas.style.cursor = 'default';
             }
+            this.manager.renderObjectCatalog();
             return;
         }
 
-        if (!type) return;
-        this.manager.npcService?.clearSelection?.();
-        if (this.state.placingEnemy) {
-            this.manager.enemyService.deactivatePlacement();
+        if (!normalizedType) return;
+        if (this.state.placingObjectType === normalizedType) {
+            this.state.placingObjectType = null;
+            if (!this.state.placingNpc && !this.state.placingEnemy && this.dom.editorCanvas) {
+                this.dom.editorCanvas.style.cursor = 'default';
+            }
+            this.manager.renderObjectCatalog();
+            return;
         }
-        this.state.placingObjectType = this.state.placingObjectType === type ? null : type;
-        this.updatePlacementButtons();
-        if (this.dom.editorCanvas) {
-            this.dom.editorCanvas.style.cursor = this.state.placingObjectType ? 'crosshair' : 'default';
-        }
+        this.selectObjectType(normalizedType);
     }
 
     updatePlacementButtons() {
-        const { btnPlaceDoor, btnPlaceDoorVariable, btnPlaceKey } = this.dom;
-        const activeType = this.state.placingObjectType;
-
-        if (btnPlaceDoor) {
-            const active = activeType === 'door';
-            btnPlaceDoor.classList.toggle('placing', active);
-            btnPlaceDoor.textContent = active ? 'Cancelar colocacao' : 'Colocar porta';
-        }
-        if (btnPlaceDoorVariable) {
-            const active = activeType === 'door-variable';
-            btnPlaceDoorVariable.classList.toggle('placing', active);
-            btnPlaceDoorVariable.textContent = active ? 'Cancelar colocacao' : 'Colocar porta magica';
-        }
-        if (btnPlaceKey) {
-            const active = activeType === 'key';
-            btnPlaceKey.classList.toggle('placing', active);
-            btnPlaceKey.textContent = active ? 'Cancelar colocacao' : 'Colocar chave';
-        }
+        this.manager.renderObjectCatalog();
     }
 
     placeObjectAt(type, coord, roomIndex) {
         const object = this.gameEngine.setObjectPosition(type, roomIndex, coord.x, coord.y);
         if (!object) return;
         this.manager.renderService.renderObjects();
+        this.manager.renderObjectCatalog();
         this.manager.renderService.renderWorldGrid();
         this.manager.renderService.renderEditor();
         this.manager.gameEngine.draw();
@@ -76,11 +61,48 @@ class EditorObjectService {
         }
         this.gameEngine.removeObject(type, roomIndex);
         this.manager.renderService.renderObjects();
+        this.manager.renderObjectCatalog();
         this.manager.renderService.renderWorldGrid();
         this.manager.renderService.renderEditor();
         this.manager.gameEngine.draw();
         this.manager.updateJSON();
         this.manager.history.pushCurrentState();
+    }
+
+    selectObjectType(type) {
+        const normalized = this.normalizeType(type);
+        if (!normalized) return;
+        if (this.manager.selectedObjectType !== normalized) {
+            this.manager.selectedObjectType = normalized;
+        }
+        this.activatePlacement(normalized);
+    }
+
+    activatePlacement(type = null) {
+        const targetType = this.normalizeType(type ?? this.manager.selectedObjectType);
+        if (!targetType) return;
+        this.manager.npcService?.clearSelection?.();
+        if (this.state.placingEnemy) {
+            this.manager.enemyService.deactivatePlacement();
+        }
+        this.state.placingNpc = false;
+        this.state.placingObjectType = targetType;
+        this.manager.selectedObjectType = targetType;
+        if (this.dom.editorCanvas) {
+            this.dom.editorCanvas.style.cursor = 'crosshair';
+        }
+        this.manager.renderObjectCatalog();
+    }
+
+    normalizeType(type) {
+        if (typeof type !== 'string' || !type.length) return null;
+        const definitions = EditorConstants.OBJECT_DEFINITIONS;
+        if (Array.isArray(definitions) && definitions.length) {
+            const normalized = definitions.find((entry) => entry.type === type)?.type || null;
+            if (normalized) return normalized;
+        }
+        const fallbackTypes = new Set(['door', 'door-variable', 'key', 'life-potion']);
+        return fallbackTypes.has(type) ? type : null;
     }
 }
 

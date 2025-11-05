@@ -47,6 +47,21 @@ class ObjectDefinitions {
                 [ null,  6, 13,  6, 13,  6, 13,  6 ],
                 [ null,  6, null,  6, null,  6, null,  6 ]
             ]
+        },
+        {
+            type: 'life-potion',
+            id: 'object-life-potion',
+            name: 'Pocao de Vida',
+            sprite: [
+                [ null, null,  1,  1,  1,  1, null, null ],
+                [ null,  1,  1,  1,  1,  1,  1, null ],
+                [ null, null,  6, null, null,  6, null, null ],
+                [ null, null,  6,  8,  8,  6, null, null ],
+                [ null,  6,  8,  8,  8,  8,  6, null ],
+                [  6,  8,  8,  8,  6,  8,  8,  6 ],
+                [ null,  6,  8,  6,  8,  8,  6, null ],
+                [ null, null,  6,  6,  6,  6, null, null ]
+            ]
         }
     ];
 

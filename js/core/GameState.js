@@ -191,6 +191,12 @@ class GameState {
         return this.playerManager.addKeys(amount);
     }
 
+    addLife(amount = 1) {
+        return typeof this.playerManager.gainLives === 'function'
+            ? this.playerManager.gainLives(amount)
+            : this.getLives();
+    }
+
     consumeKey() {
         return this.playerManager.consumeKey();
     }

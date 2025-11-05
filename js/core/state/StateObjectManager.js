@@ -19,7 +19,7 @@ class StateObjectManager {
 
     normalizeObjects(objects) {
         if (!Array.isArray(objects)) return [];
-        const allowedTypes = new Set(['door', 'door-variable', 'key']);
+        const allowedTypes = new Set(['door', 'door-variable', 'key', 'life-potion']);
         return objects
             .map((object) => {
                 const sourceType = typeof object?.type === 'string' ? object.type : null;
@@ -42,7 +42,7 @@ class StateObjectManager {
                     roomIndex,
                     x,
                     y,
-                    collected: type === 'key' ? Boolean(object?.collected) : false,
+                    collected: (type === 'key' || type === 'life-potion') ? Boolean(object?.collected) : false,
                     opened: type === 'door' ? Boolean(object?.opened) : false,
                     variableId: normalizedVariable
                 };
@@ -53,7 +53,7 @@ class StateObjectManager {
     resetRuntime() {
         if (!this.game?.objects) return;
         this.game.objects.forEach((object) => {
-            if (object.type === 'key') {
+            if (object.type === 'key' || object.type === 'life-potion') {
                 object.collected = false;
             }
             if (object.type === 'door') {
@@ -87,7 +87,7 @@ class StateObjectManager {
     }
 
     setObjectPosition(type, roomIndex, x, y) {
-        const normalizedType = ['door', 'door-variable', 'key'].includes(type) ? type : null;
+        const normalizedType = ['door', 'door-variable', 'key', 'life-potion'].includes(type) ? type : null;
         if (!normalizedType) return null;
         const targetRoom = this.worldManager.clampRoomIndex(roomIndex ?? 0);
         const cx = this.worldManager.clampCoordinate(x ?? 0);
@@ -109,7 +109,7 @@ class StateObjectManager {
             entry.x = cx;
             entry.y = cy;
         }
-        if (normalizedType === 'key') {
+        if (normalizedType === 'key' || normalizedType === 'life-potion') {
             entry.collected = false;
         }
         if (normalizedType === 'door') {
@@ -123,7 +123,7 @@ class StateObjectManager {
     }
 
     removeObject(type, roomIndex) {
-        const normalizedType = ['door', 'door-variable', 'key'].includes(type) ? type : null;
+        const normalizedType = ['door', 'door-variable', 'key', 'life-potion'].includes(type) ? type : null;
         if (!normalizedType) return;
         const targetRoom = this.worldManager.clampRoomIndex(roomIndex ?? 0);
         this.game.objects = this.getObjects().filter((object) =>
@@ -149,4 +149,3 @@ class StateObjectManager {
 if (typeof window !== 'undefined') {
     window.StateObjectManager = StateObjectManager;
 }
-

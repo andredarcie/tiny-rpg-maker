@@ -154,6 +154,9 @@ class ShareDataNormalizer {
             if (type === 'key') {
                 entry.collected = false;
             }
+            if (type === 'life-potion') {
+                entry.collected = false;
+            }
             if (type === 'door') {
                 entry.opened = false;
             }

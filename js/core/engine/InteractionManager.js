@@ -23,9 +23,9 @@ class InteractionManager {
         // Objetos
         const objects = this.gameState.getObjectsForRoom?.(player.roomIndex) ?? [];
         for (const object of objects) {
-            if (object.type !== 'key') continue;
-            if (object.collected) continue;
-            if (object.x === player.x && object.y === player.y) {
+            if (object.x !== player.x || object.y !== player.y) continue;
+            if (object.type === 'key') {
+                if (object.collected) continue;
                 object.collected = true;
                 const totalKeys = typeof this.gameState.addKeys === 'function'
                     ? this.gameState.addKeys(1)
@@ -33,6 +33,18 @@ class InteractionManager {
                 const message = Number.isFinite(totalKeys)
                     ? `Voce pegou uma chave. Agora possui ${totalKeys}.`
                     : 'Voce pegou uma chave.';
+                this.dialogManager.showDialog(message);
+                break;
+            }
+            if (object.type === 'life-potion') {
+                if (object.collected) continue;
+                object.collected = true;
+                const lives = typeof this.gameState.addLife === 'function'
+                    ? this.gameState.addLife(1)
+                    : null;
+                const message = Number.isFinite(lives)
+                    ? `Voce usou uma pocao de vida. Vidas atuais: ${lives}.`
+                    : 'Voce usou uma pocao de vida.';
                 this.dialogManager.showDialog(message);
                 break;
             }
@@ -92,4 +104,3 @@ class InteractionManager {
 if (typeof window !== 'undefined') {
     window.InteractionManager = InteractionManager;
 }
-

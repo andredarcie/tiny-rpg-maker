@@ -74,6 +74,13 @@ class EditorManager {
         this.state.placingObjectType = value;
     }
 
+    get selectedObjectType() {
+        return this.state.selectedObjectType;
+    }
+    set selectedObjectType(value) {
+        this.state.selectedObjectType = value;
+    }
+
     get selectedEnemyType() {
         return this.state.selectedEnemyType;
     }
@@ -96,9 +103,6 @@ class EditorManager {
         const {
             btnAddNpc,
             btnNpcDelete,
-            btnPlaceDoor,
-            btnPlaceDoorVariable,
-            btnPlaceKey,
             btnGenerateUrl,
             btnUndo,
             btnRedo,
@@ -113,6 +117,7 @@ class EditorManager {
             editorCanvas,
             enemyTypes,
             enemiesList,
+            objectTypes,
             objectsList,
             tileList,
             npcsList,
@@ -131,9 +136,13 @@ class EditorManager {
             this.enemyService.selectEnemyType(type);
         });
 
-        btnPlaceDoor?.addEventListener('click', () => this.objectService.togglePlacement('door'));
-        btnPlaceDoorVariable?.addEventListener('click', () => this.objectService.togglePlacement('door-variable'));
-        btnPlaceKey?.addEventListener('click', () => this.objectService.togglePlacement('key'));
+        objectTypes?.addEventListener('click', (ev) => {
+            const card = ev.target.closest('.object-type-card');
+            if (!card) return;
+            const type = card.dataset.type || null;
+            if (!type) return;
+            this.objectService.selectObjectType(type);
+        });
 
         btnGenerateUrl?.addEventListener('click', () => this.shareService.generateShareableUrl());
         btnUndo?.addEventListener('click', () => this.undo());
@@ -241,6 +250,14 @@ class EditorManager {
             }
         }
 
+        const objectDefinitions = EditorConstants.OBJECT_DEFINITIONS;
+        if (objectDefinitions.length > 0) {
+            const hasObjectSelected = objectDefinitions.some((entry) => entry.type === this.selectedObjectType);
+            if (!hasObjectSelected) {
+                this.selectedObjectType = objectDefinitions[0].type;
+            }
+        }
+
         this.renderAll();
         this.handleCanvasResize(true);
         this.history.pushCurrentState();
@@ -252,6 +269,7 @@ class EditorManager {
         this.renderService.renderNpcs();
         this.renderService.renderEnemyCatalog();
         this.renderService.renderEnemies();
+        this.renderService.renderObjectCatalog();
         this.renderService.renderObjects();
         this.renderService.renderVariables();
         this.renderService.renderEditor();
@@ -281,6 +299,10 @@ class EditorManager {
 
     renderEnemyCatalog() {
         this.renderService.renderEnemyCatalog();
+    }
+
+    renderObjectCatalog() {
+        this.renderService.renderObjectCatalog();
     }
 
     renderObjects() {

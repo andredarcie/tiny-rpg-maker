@@ -7,6 +7,7 @@ class EditorState {
         this.placingNpc = false;
         this.placingEnemy = false;
         this.placingObjectType = null;
+        this.selectedObjectType = null;
         this.selectedEnemyType = 'giant-rat';
         this.mapPainting = false;
         this.skipMapHistory = false;

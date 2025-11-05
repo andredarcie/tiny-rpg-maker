@@ -76,6 +76,16 @@ class StatePlayerManager {
         return this.player.currentLives;
     }
 
+    gainLives(amount = 1) {
+        if (!this.player) return 0;
+        this.ensurePlayerStats();
+        const numeric = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+        if (numeric <= 0) return this.player.currentLives;
+        this.player.currentLives = Math.min(this.player.maxLives, this.player.currentLives + numeric);
+        this.player.lives = this.player.currentLives;
+        return this.player.currentLives;
+    }
+
     getLives() {
         this.ensurePlayerStats();
         return this.player?.currentLives ?? 0;

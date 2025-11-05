@@ -14,9 +14,7 @@ class EditorDomCache {
         this.worldGrid = root.getElementById('world-grid');
         this.titleInput = root.getElementById('game-title');
         this.fileInput = root.getElementById('file-input');
-        this.btnPlaceDoor = root.getElementById('btn-place-door');
-        this.btnPlaceDoorVariable = root.getElementById('btn-place-door-variable');
-        this.btnPlaceKey = root.getElementById('btn-place-key');
+        this.objectTypes = root.getElementById('object-types');
         this.objectsList = root.getElementById('objects-list');
         this.btnAddNpc = root.getElementById('btn-add-npc');
         this.btnNpcDelete = root.getElementById('npc-delete');

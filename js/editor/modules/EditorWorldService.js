@@ -31,6 +31,7 @@ class EditorWorldService {
         this.state.activeRoomIndex = clamped;
         this.manager.renderService.renderWorldGrid();
         this.manager.renderService.renderObjects();
+        this.manager.renderObjectCatalog();
         this.manager.renderService.renderEditor();
         this.manager.renderService.renderEnemies();
     }

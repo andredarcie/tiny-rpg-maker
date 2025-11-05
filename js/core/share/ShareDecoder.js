@@ -45,6 +45,9 @@ class ShareDecoder {
         const magicDoorVariableNibbles = version >= ShareConstants.MAGIC_DOOR_VERSION
             ? ShareVariableCodec.decodeVariableNibbleArray(payload.q || '', magicDoorPositions.length)
             : [];
+        const lifePotionPositions = version >= ShareConstants.LIFE_POTION_VERSION
+            ? SharePositionCodec.decodePositions(payload.l || '')
+            : [];
         const variableStates = version >= ShareConstants.VARIABLES_VERSION ? ShareVariableCodec.decodeVariables(payload.b || '') : [];
         const title = ShareTextCodec.decodeText(payload.n, ShareConstants.DEFAULT_TITLE) || ShareConstants.DEFAULT_TITLE;
         const buildNpcId = (index) => `npc-${index + 1}`;
@@ -129,7 +132,8 @@ class ShareDecoder {
         const objects = [
             ...ShareDataNormalizer.buildObjectEntries(doorPositions, 'door'),
             ...ShareDataNormalizer.buildObjectEntries(keyPositions, 'key'),
-            ...ShareDataNormalizer.buildObjectEntries(magicDoorPositions, 'door-variable', { variableNibbles: magicDoorVariableNibbles })
+            ...ShareDataNormalizer.buildObjectEntries(magicDoorPositions, 'door-variable', { variableNibbles: magicDoorVariableNibbles }),
+            ...ShareDataNormalizer.buildObjectEntries(lifePotionPositions, 'life-potion')
         ];
 
         return {

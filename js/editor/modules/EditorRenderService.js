@@ -409,6 +409,54 @@ class EditorRenderService {
         });
     }
 
+    renderObjectCatalog() {
+        const container = this.dom.objectTypes;
+        if (!container) return;
+        container.innerHTML = '';
+
+        const definitions = EditorConstants.OBJECT_DEFINITIONS;
+        if (!Array.isArray(definitions) || !definitions.length) return;
+
+        const selectedType = this.manager.selectedObjectType;
+        const placedObjects = this.gameEngine.getObjectsForRoom(this.state.activeRoomIndex) || [];
+        const placedTypes = new Set(placedObjects.map((object) => object.type));
+
+        definitions.forEach((definition) => {
+            const card = document.createElement('div');
+            card.className = 'object-type-card';
+            card.dataset.type = definition.type;
+            if (definition.type === selectedType) {
+                card.classList.add('selected');
+            }
+            if (placedTypes.has(definition.type)) {
+                card.classList.add('placed');
+            }
+
+            const preview = document.createElement('canvas');
+            preview.width = 48;
+            preview.height = 48;
+            preview.className = 'object-type-preview';
+            this.drawObjectPreview(preview, definition.type);
+
+            const meta = document.createElement('div');
+            meta.className = 'object-type-meta';
+
+            const name = document.createElement('div');
+            name.className = 'object-type-name';
+            name.textContent = definition.name || definition.type;
+
+            const info = document.createElement('div');
+            info.className = 'object-type-info';
+            info.textContent = placedTypes.has(definition.type)
+                ? 'Ja no mapa (1 por cenario)'
+                : 'Disponivel (1 por cenario)';
+
+            meta.append(name, info);
+            card.append(preview, meta);
+            container.appendChild(card);
+        });
+    }
+
     drawEnemyPreview(canvas, definition) {
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
@@ -457,10 +505,20 @@ class EditorRenderService {
             card.dataset.type = object.type;
             card.dataset.roomIndex = String(object.roomIndex);
 
+            const preview = document.createElement('canvas');
+            preview.className = 'object-preview';
+            preview.width = 48;
+            preview.height = 48;
+            this.drawObjectPreview(preview, object.type);
+
+            const body = document.createElement('div');
+            body.className = 'object-body';
+
             const header = document.createElement('div');
             header.className = 'object-header';
 
             const title = document.createElement('h4');
+            title.className = 'object-name';
             title.textContent = this.getObjectLabel(object.type, definitions);
             header.appendChild(title);
 
@@ -469,13 +527,17 @@ class EditorRenderService {
             position.textContent = `(${object.x}, ${object.y})`;
             header.appendChild(position);
 
-            card.appendChild(header);
+            body.appendChild(header);
 
             if (object.type === 'door-variable') {
+                const config = document.createElement('div');
+                config.className = 'object-config';
+
                 const label = document.createElement('label');
-                label.textContent = 'Variavel associada:';
+                label.className = 'object-config-label';
 
                 const select = document.createElement('select');
+                select.className = 'object-config-select';
                 this.manager.npcService.populateVariableSelect(select, object.variableId || '');
                 select.addEventListener('change', () => {
                     this.gameEngine.setObjectVariable('door-variable', object.roomIndex, select.value);
@@ -484,8 +546,8 @@ class EditorRenderService {
                     this.manager.updateJSON();
                     this.manager.history.pushCurrentState();
                 });
-                label.appendChild(select);
-                card.appendChild(label);
+                label.append('Variavel associada: ', select);
+                config.appendChild(label);
 
                 const status = document.createElement('div');
                 status.className = 'object-status';
@@ -493,21 +555,29 @@ class EditorRenderService {
                 const isOn = Boolean(runtimeMap.get(valueId || ''));
                 status.classList.toggle('is-on', isOn);
                 status.textContent = `Estado atual: ${isOn ? 'ON' : 'OFF'}`;
-                card.appendChild(status);
+                config.appendChild(status);
+                body.appendChild(config);
             }
 
             if (object.type === 'door' && object.opened) {
                 const badge = document.createElement('div');
                 badge.className = 'object-status';
                 badge.textContent = 'Porta aberta';
-                card.appendChild(badge);
+                body.appendChild(badge);
             }
 
             if (object.type === 'key' && object.collected) {
                 const badge = document.createElement('div');
                 badge.className = 'object-status';
                 badge.textContent = 'Chave coletada';
-                card.appendChild(badge);
+                body.appendChild(badge);
+            }
+
+            if (object.type === 'life-potion' && object.collected) {
+                const badge = document.createElement('div');
+                badge.className = 'object-status';
+                badge.textContent = 'Pocao coletada';
+                body.appendChild(badge);
             }
 
             const removeBtn = document.createElement('button');
@@ -516,12 +586,11 @@ class EditorRenderService {
             removeBtn.dataset.type = object.type;
             removeBtn.dataset.roomIndex = String(object.roomIndex);
             removeBtn.textContent = 'Remover';
-            card.appendChild(removeBtn);
+            body.appendChild(removeBtn);
 
+            card.append(preview, body);
             container.appendChild(card);
         });
-
-        this.manager.objectService.updatePlacementButtons();
     }
 
     getObjectLabel(type, definitions) {
@@ -531,6 +600,21 @@ class EditorRenderService {
         if (type === 'door-variable') return 'Porta magica';
         if (type === 'key') return 'Chave';
         return type;
+    }
+
+    drawObjectPreview(canvas, type) {
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.imageSmoothingEnabled = false;
+        ctx.fillStyle = '#111827';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const renderer = this.gameEngine.renderer;
+        if (!renderer?.drawObjectSprite) return;
+        const step = canvas.width / 8;
+        renderer.drawObjectSprite(ctx, type, 0, 0, step);
     }
 
     renderVariables() {

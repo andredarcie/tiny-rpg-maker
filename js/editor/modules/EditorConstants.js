@@ -29,7 +29,7 @@ class EditorConstants {
     }
 
     static get OBJECT_TYPE_ORDER() {
-        return ['door', 'door-variable', 'key'];
+        return ['door', 'door-variable', 'key', 'life-potion'];
     }
 }
 
