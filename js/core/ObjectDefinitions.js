@@ -62,6 +62,21 @@ class ObjectDefinitions {
                 [ null,  6,  8,  6,  8,  8,  6, null ],
                 [ null, null,  6,  6,  6,  6, null, null ]
             ]
+        },
+        {
+            type: 'xp-scroll',
+            id: 'object-xp-scroll',
+            name: 'Pergaminho de XP',
+            sprite: [
+                [ null, null, null, null, null, null, null, null ],
+                [ null, null,  6,  6,  6,  6,  6,  6 ],
+                [ null, null,  6,  1,  1,  1,  6,  0 ],
+                [ null, null,  6,  6,  6,  6,  6, null ],
+                [ null, null,  6,  1,  1,  1,  6, null ],
+                [ null, null,  6,  6,  6,  6,  6, null ],
+                [ null,  0,  6,  1,  1,  6,  6, null ],
+                [ null,  6,  6,  6,  6,  6,  6, null ]
+            ]
         }
     ];
 

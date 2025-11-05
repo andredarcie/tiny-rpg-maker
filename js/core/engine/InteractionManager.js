@@ -48,6 +48,22 @@ class InteractionManager {
                 this.dialogManager.showDialog(message);
                 break;
             }
+            if (object.type === 'xp-scroll') {
+                if (object.collected) continue;
+                object.collected = true;
+                const result = typeof this.gameState.addExperience === 'function'
+                    ? this.gameState.addExperience(30)
+                    : null;
+                let message = 'Voce leu um pergaminho de XP e ganhou 30 de experiencia.';
+                if (result && typeof result === 'object' && result.leveledUp) {
+                    const gained = Number.isFinite(result.levelsGained) && result.levelsGained > 0
+                        ? result.levelsGained
+                        : 1;
+                    message += ` Nivel +${gained}!`;
+                }
+                this.dialogManager.showDialog(message);
+                break;
+            }
         }
 
         // NPCs

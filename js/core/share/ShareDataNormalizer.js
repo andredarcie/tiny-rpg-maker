@@ -157,6 +157,9 @@ class ShareDataNormalizer {
             if (type === 'life-potion') {
                 entry.collected = false;
             }
+            if (type === 'xp-scroll') {
+                entry.collected = false;
+            }
             if (type === 'door') {
                 entry.opened = false;
             }

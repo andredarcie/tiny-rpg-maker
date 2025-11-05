@@ -19,6 +19,7 @@ class RendererEntityRenderer {
             if (object.roomIndex !== player.roomIndex) continue;
             if (object.type === 'key' && object.collected) continue;
             if (object.type === 'life-potion' && object.collected) continue;
+            if (object.type === 'xp-scroll' && object.collected) continue;
             if (object.type === 'door' && object.opened) continue;
             if (object.type === 'door-variable') {
                 const isOpen = object.variableId

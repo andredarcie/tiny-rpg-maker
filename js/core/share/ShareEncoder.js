@@ -10,6 +10,7 @@ class ShareEncoder {
         const doorPositions = ShareDataNormalizer.normalizeObjectPositions(objects, 'door');
         const keyPositions = ShareDataNormalizer.normalizeObjectPositions(objects, 'key');
         const lifePotionPositions = ShareDataNormalizer.normalizeObjectPositions(objects, 'life-potion');
+        const xpScrollPositions = ShareDataNormalizer.normalizeObjectPositions(objects, 'xp-scroll');
         const magicDoorEntries = ShareDataNormalizer.normalizeVariableDoorObjects(objects);
         const magicDoorPositions = magicDoorEntries.map((entry) => ({
             x: entry.x,
@@ -124,6 +125,13 @@ class ShareEncoder {
             const potionCode = SharePositionCodec.encodePositions(lifePotionPositions);
             if (potionCode) {
                 parts.push('l' + potionCode);
+            }
+        }
+
+        if (xpScrollPositions.length) {
+            const xpCode = SharePositionCodec.encodePositions(xpScrollPositions);
+            if (xpCode) {
+                parts.push('x' + xpCode);
             }
         }
 
