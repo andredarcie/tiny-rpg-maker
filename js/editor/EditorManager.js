@@ -488,12 +488,13 @@ class EditorManager {
         const container = this.editorCanvas.parentElement;
         if (!container) return;
 
-        const availableWidth = container.clientWidth || this.editorCanvas.parentElement?.offsetWidth || 0;
+        const availableWidth = container.offsetWidth || container.clientWidth || 0;
 
+        const maxCanvasSize = 768;
         let minCanvasSize = 128;
         const highestDivisor = Math.floor((availableWidth + minCanvasSize - 1) / minCanvasSize) * minCanvasSize;
 
-        const size = Math.min(Math.max(highestDivisor, minCanvasSize), 512);
+        const size = Math.min(Math.max(highestDivisor, minCanvasSize), maxCanvasSize);
         if (!force && Math.abs(this.editorCanvas.width - size) < 1) {
             return;
         }
