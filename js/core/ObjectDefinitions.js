@@ -77,6 +77,21 @@ class ObjectDefinitions {
                 [ null,  0,  6,  1,  1,  6,  6, null ],
                 [ null,  6,  6,  6,  6,  6,  6, null ]
             ]
+        },
+        {
+            type: 'sword',
+            id: 'object-sword',
+            name: 'Espada',
+            sprite: [
+                [ null, null, null, null, null, null, null, null ],
+                [  6,  6, null, null, null, null, null, null ],
+                [  6,  6,  6, null, null, null, null, null ],
+                [ null,  6,  6,  6, null, null, null, null ],
+                [ null, null,  6,  6,  6, null,  1, null ],
+                [ null, null, null,  6,  8,  1,  1, null ],
+                [ null, null, null, null,  1,  1, null, null ],
+                [ null, null, null,  1,  1, null,  1, null ]
+            ]
         }
     ];
 

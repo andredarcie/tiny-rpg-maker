@@ -64,6 +64,15 @@ class InteractionManager {
                 this.dialogManager.showDialog(message);
                 break;
             }
+            if (object.type === 'sword') {
+                if (object.collected) continue;
+                object.collected = true;
+                if (typeof this.gameState.addDamageShield === 'function') {
+                    this.gameState.addDamageShield(1);
+                }
+                this.dialogManager.showDialog('Voce pegou uma espada! O proximo ataque inimigo sofrera 1 de dano a menos.');
+                break;
+            }
         }
 
         // NPCs

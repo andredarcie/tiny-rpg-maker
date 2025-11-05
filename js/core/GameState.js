@@ -42,7 +42,9 @@ class GameState {
                 currentLives: 3,
                 lives: 3,
                 keys: 0,
-                experience: 0
+                experience: 0,
+                damageShield: 0,
+                lastDamageReduction: 0
             },
             dialog: { active: false, text: "", page: 1, maxPages: 1, meta: null },
             enemies: [],
@@ -197,12 +199,30 @@ class GameState {
             : this.getLives();
     }
 
+    addDamageShield(amount = 1) {
+        return typeof this.playerManager.addDamageShield === 'function'
+            ? this.playerManager.addDamageShield(amount)
+            : 0;
+    }
+
+    getDamageShield() {
+        return typeof this.playerManager.getDamageShield === 'function'
+            ? this.playerManager.getDamageShield()
+            : 0;
+    }
+
     consumeKey() {
         return this.playerManager.consumeKey();
     }
 
     getKeys() {
         return this.playerManager.getKeys();
+    }
+
+    consumeLastDamageReduction() {
+        return typeof this.playerManager.consumeLastDamageReduction === 'function'
+            ? this.playerManager.consumeLastDamageReduction()
+            : 0;
     }
 
     ensureDefaultVariables() {

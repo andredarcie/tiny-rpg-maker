@@ -11,9 +11,10 @@ class ShareConstants {
     static get VERSION_10() { return 10; }
     static get VERSION_11() { return 11; }
     static get VERSION_12() { return 12; }
+    static get VERSION_13() { return 13; }
 
     static get VERSION() {
-        return ShareConstants.VERSION_12;
+        return ShareConstants.VERSION_13;
     }
 
     static get LEGACY_VERSION() {
@@ -58,6 +59,10 @@ class ShareConstants {
 
     static get XP_SCROLL_VERSION() {
         return ShareConstants.VERSION_12;
+    }
+
+    static get SWORD_VERSION() {
+        return ShareConstants.VERSION_13;
     }
 
     static get MATRIX_SIZE() {
@@ -139,6 +144,7 @@ class ShareConstants {
                 ShareConstants.VERSION_9,
                 ShareConstants.VERSION_10,
                 ShareConstants.VERSION_11,
+                ShareConstants.VERSION_12,
                 ShareConstants.VERSION
             ]);
         }

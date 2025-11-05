@@ -101,7 +101,7 @@ class EditorObjectService {
             const normalized = definitions.find((entry) => entry.type === type)?.type || null;
             if (normalized) return normalized;
         }
-        const fallbackTypes = new Set(['door', 'door-variable', 'key', 'life-potion']);
+        const fallbackTypes = new Set(['door', 'door-variable', 'key', 'life-potion', 'sword', 'xp-scroll']);
         return fallbackTypes.has(type) ? type : null;
     }
 }

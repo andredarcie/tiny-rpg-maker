@@ -587,6 +587,13 @@ class EditorRenderService {
                 body.appendChild(badge);
             }
 
+            if (object.type === 'sword' && object.collected) {
+                const badge = document.createElement('div');
+                badge.className = 'object-status';
+                badge.textContent = 'Espada quebrada';
+                body.appendChild(badge);
+            }
+
             const removeBtn = document.createElement('button');
             removeBtn.type = 'button';
             removeBtn.className = 'object-remove';
@@ -607,6 +614,7 @@ class EditorRenderService {
         if (type === 'door-variable') return 'Porta magica';
         if (type === 'key') return 'Chave';
         if (type === 'life-potion') return 'Pocao de Vida';
+        if (type === 'sword') return 'Espada';
         if (type === 'xp-scroll') return 'Pergaminho de XP';
         return type;
     }

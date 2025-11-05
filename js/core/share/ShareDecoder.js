@@ -51,6 +51,9 @@ class ShareDecoder {
         const xpScrollPositions = version >= ShareConstants.XP_SCROLL_VERSION
             ? SharePositionCodec.decodePositions(payload.x || '')
             : [];
+        const swordPositions = version >= ShareConstants.SWORD_VERSION
+            ? SharePositionCodec.decodePositions(payload.a || '')
+            : [];
         const variableStates = version >= ShareConstants.VARIABLES_VERSION ? ShareVariableCodec.decodeVariables(payload.b || '') : [];
         const title = ShareTextCodec.decodeText(payload.n, ShareConstants.DEFAULT_TITLE) || ShareConstants.DEFAULT_TITLE;
         const buildNpcId = (index) => `npc-${index + 1}`;
@@ -137,7 +140,8 @@ class ShareDecoder {
             ...ShareDataNormalizer.buildObjectEntries(keyPositions, 'key'),
             ...ShareDataNormalizer.buildObjectEntries(magicDoorPositions, 'door-variable', { variableNibbles: magicDoorVariableNibbles }),
             ...ShareDataNormalizer.buildObjectEntries(lifePotionPositions, 'life-potion'),
-            ...ShareDataNormalizer.buildObjectEntries(xpScrollPositions, 'xp-scroll')
+            ...ShareDataNormalizer.buildObjectEntries(xpScrollPositions, 'xp-scroll'),
+            ...ShareDataNormalizer.buildObjectEntries(swordPositions, 'sword')
         ];
 
         return {

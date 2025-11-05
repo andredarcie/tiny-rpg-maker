@@ -103,6 +103,18 @@ class EnemyManager {
         } else {
             const damage = this.getEnemyDamage(enemy.type);
             const lives = this.gameState.damagePlayer(damage);
+            const reduction = typeof this.gameState.consumeLastDamageReduction === 'function'
+                ? this.gameState.consumeLastDamageReduction()
+                : 0;
+            if (reduction > 0) {
+                const indicator = this.renderer?.showCombatIndicator;
+                const text = reduction >= damage
+                    ? 'Ataque bloqueado!'
+                    : `Bloqueado -${reduction}`;
+                if (typeof indicator === 'function') {
+                    indicator.call(this.renderer, text, { duration: 700 });
+                }
+            }
             if (lives <= 0) {
                 this.onPlayerDefeated();
                 return;

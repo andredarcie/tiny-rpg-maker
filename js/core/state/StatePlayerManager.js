@@ -45,6 +45,8 @@ class StatePlayerManager {
         this.player.lives = this.player.currentLives;
         this.player.keys = 0;
         this.player.experience = 0;
+        this.player.damageShield = 0;
+        this.player.lastDamageReduction = 0;
     }
 
     addKeys(amount = 1) {
@@ -70,10 +72,37 @@ class StatePlayerManager {
     damage(amount = 1) {
         if (!this.player) return 0;
         this.ensurePlayerStats();
-        const delta = Number.isFinite(amount) ? amount : 1;
-        this.player.currentLives = Math.max(0, this.player.currentLives - delta);
+        const delta = Number.isFinite(amount) ? Math.max(0, amount) : 1;
+        const shield = Math.max(0, Number(this.player.damageShield) || 0);
+        const reduction = Math.min(shield, delta);
+        const effective = Math.max(0, delta - reduction);
+        this.player.damageShield = Math.max(0, shield - reduction);
+        this.player.lastDamageReduction = reduction;
+        this.player.currentLives = Math.max(0, this.player.currentLives - effective);
         this.player.lives = this.player.currentLives;
         return this.player.currentLives;
+    }
+
+    addDamageShield(amount = 1) {
+        if (!this.player) return 0;
+        const numeric = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+        if (numeric <= 0) return this.player.damageShield ?? 0;
+        this.ensurePlayerStats();
+        const shield = Math.max(0, Number(this.player.damageShield) || 0) + numeric;
+        this.player.damageShield = shield;
+        return shield;
+    }
+
+    getDamageShield() {
+        return Math.max(0, Number(this.player?.damageShield) || 0);
+    }
+
+    consumeLastDamageReduction() {
+        if (!this.player) return 0;
+        this.ensurePlayerStats();
+        const reduction = Math.max(0, Number(this.player.lastDamageReduction) || 0);
+        this.player.lastDamageReduction = 0;
+        return reduction;
     }
 
     gainLives(amount = 1) {
@@ -130,6 +159,14 @@ class StatePlayerManager {
         } else {
             const requirement = this.getExperienceForNextLevel(level);
             this.player.experience = Math.min(experience, Math.max(0, requirement - 1));
+        }
+        if (!Number.isFinite(this.player.damageShield)) {
+            this.player.damageShield = 0;
+        } else {
+            this.player.damageShield = Math.max(0, Math.floor(this.player.damageShield));
+        }
+        if (!Number.isFinite(this.player.lastDamageReduction)) {
+            this.player.lastDamageReduction = 0;
         }
     }
 
