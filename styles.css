@@ -1343,24 +1343,6 @@ textarea {
     text-align: center;
 }
 
-@media (min-width: 1200px) {
-    .editor-layout {
-        zoom: 1;
-    }
-}
-
-@media (min-width: 1300px) {
-    .editor-layout {
-        zoom: 1.1;
-    }
-}
-
-@media (min-width: 1500px) {
-    .editor-layout {
-        zoom: 1.2;
-    }
-}
-
 @media (min-width: 1800px) {
     .editor-layout {
         zoom: 1.3;
