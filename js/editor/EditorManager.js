@@ -490,7 +490,7 @@ class EditorManager {
 
         const availableWidth = container.offsetWidth || container.clientWidth || 0;
 
-        const maxCanvasSize = 768;
+        const maxCanvasSize = 512;
         let minCanvasSize = 128;
         const highestDivisor = Math.floor((availableWidth + minCanvasSize - 1) / minCanvasSize) * minCanvasSize;
 

@@ -311,7 +311,7 @@ body.game-mode #tab-game .game-controls button {
 }
 
 #editor-canvas {
-    width: clamp(128px, 45vw, 768px);
+    width: clamp(128px, 45vw, 512px);
     max-width: 100%;
     height: auto;
 }
