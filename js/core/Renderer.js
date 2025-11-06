@@ -30,9 +30,16 @@ class Renderer {
             ? document.getElementById('combat-indicator')
             : null;
         this.combatIndicatorTimeout = null;
+        this.screenFlashElement = typeof document !== 'undefined'
+            ? document.getElementById('screen-flash')
+            : null;
+        this.screenFlashTimeout = null;
         if (this.combatIndicatorElement) {
             this.combatIndicatorElement.classList.remove('visible');
             this.combatIndicatorElement.setAttribute('data-visible', 'false');
+        }
+        if (this.screenFlashElement) {
+            this.screenFlashElement.classList.remove('visible');
         }
     }
 
@@ -124,6 +131,32 @@ class Renderer {
             element.setAttribute('data-visible', 'false');
             element.textContent = '';
             this.combatIndicatorTimeout = null;
+        }, duration);
+    }
+
+    flashScreen(options = {}) {
+        const element = this.screenFlashElement;
+        if (!element) return;
+        const duration = Number.isFinite(options.duration)
+            ? Math.max(16, options.duration)
+            : 140;
+        if (typeof options.intensity === 'number' && Number.isFinite(options.intensity)) {
+            const clamped = Math.max(0, Math.min(1, options.intensity));
+            element.style.setProperty('--screen-flash-opacity', clamped.toString());
+        }
+        if (typeof options.color === 'string' && options.color.trim()) {
+            element.style.setProperty('--screen-flash-color', options.color.trim());
+        }
+        if (this.screenFlashTimeout) {
+            clearTimeout(this.screenFlashTimeout);
+            this.screenFlashTimeout = null;
+        }
+        element.classList.remove('visible');
+        void element.offsetWidth;
+        element.classList.add('visible');
+        this.screenFlashTimeout = setTimeout(() => {
+            element.classList.remove('visible');
+            this.screenFlashTimeout = null;
         }, duration);
     }
 

@@ -142,6 +142,10 @@ class EnemyManager {
         }
 
         this.tryTriggerDefeatVariable(enemy);
+        const flashScreen = this.renderer?.flashScreen;
+        if (typeof flashScreen === 'function') {
+            flashScreen.call(this.renderer, { intensity: 0.8, duration: 160 });
+        }
 
         this.renderer.draw();
     }

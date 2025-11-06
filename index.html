@@ -29,7 +29,7 @@
             font-family: monospace;
             font-size: 14px;
             background: rgba(0, 0, 0, 0.6);
-            color: #fff;
+            color: var(--hud-text-color);
             pointer-events: none;
             z-index: 2;
         }
@@ -52,8 +52,11 @@
                 <div class="game-container" id="game-container">
                     <div id="game-hud" class="game-hud">Vidas: 3</div>
                     <div id="combat-indicator" class="combat-indicator" aria-live="polite" aria-atomic="true"></div>
+                    <div class="game-screen">
+                        <canvas id="game-canvas" width="128" height="128"></canvas>
+                        <div id="screen-flash" class="screen-flash" aria-hidden="true"></div>
+                    </div>
                     <div id="game-minimap" class="game-minimap" aria-hidden="true"></div>
-                    <canvas id="game-canvas" width="128" height="128"></canvas>
                     <div class="game-controls">
                         <button id="btn-reset">Reiniciar</button>
                     </div>
