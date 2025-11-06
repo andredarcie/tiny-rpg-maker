@@ -304,6 +304,27 @@ body.game-mode #tab-game .game-controls button {
     opacity: 1;
 }
 
+.enemy-label-layer {
+    position: fixed;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+.enemy-damage-label {
+    position: absolute;
+    transform: translate(-50%, -100%);
+    font-size: 11px;
+    line-height: 1;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.9), 0 0 3px rgba(0, 0, 0, 0.8);
+    white-space: nowrap;
+    padding: 1px 2px;
+    letter-spacing: 0.4px;
+}
+
 #game-canvas {
     width: clamp(128px, 45vw, 384px);
     max-width: 100%;

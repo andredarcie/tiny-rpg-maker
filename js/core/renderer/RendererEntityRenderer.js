@@ -5,6 +5,10 @@ class RendererEntityRenderer {
         this.spriteFactory = spriteFactory;
         this.canvasHelper = canvasHelper;
         this.paletteManager = paletteManager;
+        this.enemyLabelCache = new Map();
+        this.enemyLabelNodes = new Map();
+        this.enemyLabelRoot = null;
+        this.setupEditorModeWatcher();
     }
 
     drawObjects(ctx) {
@@ -73,17 +77,45 @@ class RendererEntityRenderer {
 
     drawEnemies(ctx) {
         const enemies = this.gameState.getEnemies?.() ?? [];
-        if (!enemies.length) return;
+        const canvas = this.canvasHelper?.canvas || null;
+        const rect = canvas?.getBoundingClientRect?.();
+        const isEditor = typeof document !== 'undefined' && document.body?.classList?.contains?.('editor-mode');
+        if (!enemies.length || !rect || !rect.width || !rect.height || isEditor || typeof document === 'undefined') {
+            this.cleanupEnemyLabels(new Set());
+            return;
+        }
         const player = this.gameState.getPlayer();
         const tileSize = this.canvasHelper.getTilePixelSize();
         const step = tileSize / 8;
+        let scaleX = 1;
+        let scaleY = 1;
+        const root = this.ensureEnemyLabelRoot();
+        if (!root) {
+            this.cleanupEnemyLabels(new Set());
+            return;
+        }
+        scaleX = rect.width / canvas.width;
+        scaleY = rect.height / canvas.height;
+        const activeLabels = new Set();
         enemies.forEach((enemy) => {
             if (enemy.roomIndex !== player.roomIndex) return;
             const baseSprite = this.spriteFactory.getEnemySprite(enemy.type);
             if (!baseSprite) return;
             const sprite = this.adjustSpriteHorizontally(enemy.x, enemy.lastX, baseSprite);
-            this.canvasHelper.drawSprite(ctx, sprite, enemy.x * tileSize, enemy.y * tileSize, step);
+            const px = enemy.x * tileSize;
+            const py = enemy.y * tileSize;
+            this.canvasHelper.drawSprite(ctx, sprite, px, py, step);
+
+            const damage = this.getEnemyDamage(enemy.type);
+            const label = this.getOrCreateEnemyLabelElement(enemy, damage);
+            if (label) {
+                const screenX = rect.left + (px + tileSize / 2) * scaleX;
+                const screenY = rect.top + (py - tileSize * 0.2) * scaleY;
+                this.positionEnemyLabel(label, screenX, screenY);
+                activeLabels.add(this.getEnemyLabelKey(enemy));
+            }
         });
+        this.cleanupEnemyLabels(activeLabels);
     }
 
     drawPlayer(ctx) {
@@ -102,6 +134,102 @@ class RendererEntityRenderer {
             return this.spriteFactory.turnSpriteHorizontally(sprite);
         }
         return sprite;
+    }
+
+    getEnemyDamage(type) {
+        if (typeof EnemyDefinitions?.getEnemyDefinition === 'function') {
+            const def = EnemyDefinitions.getEnemyDefinition(type);
+            if (def && Number.isFinite(def.damage)) {
+                return Math.max(1, def.damage);
+            }
+        }
+        if (typeof EnemyDefinitions?.normalizeType === 'function') {
+            const normalized = EnemyDefinitions.normalizeType(type);
+            const def = typeof EnemyDefinitions?.getEnemyDefinition === 'function'
+                ? EnemyDefinitions.getEnemyDefinition(normalized)
+                : null;
+            if (def && Number.isFinite(def.damage)) {
+                return Math.max(1, def.damage);
+            }
+        }
+        return 1;
+    }
+
+    getEnemyLabelKey(enemy) {
+        return enemy?.id || `${enemy?.type || 'enemy'}-${enemy?.roomIndex ?? 0}-${enemy?.x ?? 0}-${enemy?.y ?? 0}`;
+    }
+
+    ensureEnemyLabelRoot() {
+        if (this.enemyLabelRoot && this.enemyLabelRoot.isConnected) {
+            return this.enemyLabelRoot;
+        }
+        if (typeof document === 'undefined') return null;
+        const root = document.createElement('div');
+        root.className = 'enemy-label-layer';
+        document.body.appendChild(root);
+        this.enemyLabelRoot = root;
+        return root;
+    }
+
+    getOrCreateEnemyLabelElement(enemy, damage) {
+        const key = this.getEnemyLabelKey(enemy);
+        if (!key) return null;
+        const root = this.ensureEnemyLabelRoot();
+        if (!root) return null;
+        let record = this.enemyLabelNodes.get(key);
+        const text = `Attack: ${damage}`;
+        if (!record) {
+            const element = document.createElement('div');
+            element.className = 'enemy-damage-label';
+            element.dataset.enemyId = key;
+            element.textContent = text;
+            root.appendChild(element);
+            record = { element, text };
+            this.enemyLabelNodes.set(key, record);
+        } else if (record.text !== text) {
+            record.element.textContent = text;
+            record.text = text;
+        }
+        return record.element;
+    }
+
+    positionEnemyLabel(element, screenX, screenY) {
+        if (!element) return;
+        element.style.left = `${screenX}px`;
+        element.style.top = `${screenY}px`;
+    }
+
+    cleanupEnemyLabels(activeKeys = new Set()) {
+        if (!this.enemyLabelNodes) return;
+        for (const [key, record] of Array.from(this.enemyLabelNodes.entries())) {
+            if (!activeKeys.has(key)) {
+                if (record.element?.parentNode) {
+                    record.element.parentNode.removeChild(record.element);
+                }
+                this.enemyLabelNodes.delete(key);
+            }
+        }
+        if (this.enemyLabelRoot && this.enemyLabelRoot.childElementCount === 0) {
+            this.enemyLabelRoot.remove();
+            this.enemyLabelRoot = null;
+        }
+    }
+
+    setupEditorModeWatcher() {
+        if (typeof document === 'undefined') return;
+        const body = document.body;
+        if (!body) return;
+        const handleModeChange = () => {
+            if (body.classList.contains('editor-mode')) {
+                this.cleanupEnemyLabels(new Set());
+            }
+        };
+        if (typeof MutationObserver === 'function') {
+            this.editorModeObserver = new MutationObserver(() => handleModeChange());
+            this.editorModeObserver.observe(body, { attributes: true, attributeFilter: ['class'] });
+        }
+        document.addEventListener?.('editor-tab-activated', handleModeChange);
+        handleModeChange();
     }
 }
 
