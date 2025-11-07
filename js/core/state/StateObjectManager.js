@@ -144,6 +144,15 @@ class StateObjectManager {
         entry.variableId = normalized ?? fallbackVariableId;
         return entry.variableId;
     }
+
+    checkOpenedMagicDoor(variableId, value) {
+        for (const object of this.getObjects()) {
+            if (value && object.type == 'door-variable' && object.variableId == variableId) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
 
 if (typeof window !== 'undefined') {

@@ -20,7 +20,10 @@ class DialogManager {
     completeDialog() {
         if (this.pendingDialogAction?.setVariableId &&
             this.pendingDialogAction.rewardAllowed !== false) {
-            this.gameState.setVariableValue?.(this.pendingDialogAction.setVariableId, true);
+            const [_, openedDoor] = this.gameState.setVariableValue?.(this.pendingDialogAction.setVariableId, true);
+            if (openedDoor) {
+                this.renderer.setIconOverPlayer('door-variable');
+            }
         }
         this.pendingDialogAction = null;
     }

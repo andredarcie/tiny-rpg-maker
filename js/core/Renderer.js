@@ -41,6 +41,8 @@ class Renderer {
         if (this.screenFlashElement) {
             this.screenFlashElement.classList.remove('visible');
         }
+        this.drawIconIdNextFrame = '';
+        this.timeIconOverPlayer = 2000;
     }
 
     draw() {
@@ -54,6 +56,9 @@ class Renderer {
         this.entityRenderer.drawNPCs(this.ctx);
         this.entityRenderer.drawEnemies(this.ctx);
         this.entityRenderer.drawPlayer(this.ctx);
+        if (this.drawIconIdNextFrame) {
+            this.drawTileIconOnPlayer(this.ctx, this.drawIconIdNextFrame);
+        }
 
         this.dialogRenderer.drawDialog(this.ctx, this.canvas);
         this.hudRenderer.drawHUD();
@@ -73,6 +78,13 @@ class Renderer {
         return this.paletteManager.getColor(idx);
     }
 
+    setIconOverPlayer(tileType) {
+        this.drawIconIdNextFrame = tileType;
+        setTimeout(() => {
+            this.drawIconIdNextFrame = '';
+        }, this.timeIconOverPlayer);
+    }
+
     drawCustomTile(tileId, px, py, size) {
         this.canvasHelper.drawCustomTile(this.tileManager, tileId, px, py, size);
     }
@@ -83,6 +95,10 @@ class Renderer {
 
     drawTileOnCanvas(canvas, tile) {
         this.canvasHelper.drawTileOnCanvas(canvas, tile);
+    }
+
+    drawTileIconOnPlayer(ctx, tileId) {
+        this.entityRenderer.drawTileIconOnPlayer(ctx, tileId);
     }
 
     drawTilePreviewAt(tileId, px, py, size, ctx) {

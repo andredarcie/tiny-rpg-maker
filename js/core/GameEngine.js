@@ -130,7 +130,7 @@ class GameEngine {
     }
 
     setVariableDefault(variableId, value) {
-        const changed = this.gameState.setVariableValue(variableId, value, true);
+        const [changed, _] = this.gameState.setVariableValue(variableId, value, true);
         if (changed) {
             this.renderer.draw();
         }

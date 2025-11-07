@@ -129,6 +129,20 @@ class RendererEntityRenderer {
         this.canvasHelper.drawSprite(ctx, sprite, px, py, step);
     }
 
+    drawTileIconOnPlayer(ctx, tileId) {
+        const objectSprites = this.spriteFactory.getObjectSprites();
+        let tileSprite = objectSprites?.[tileId];
+        if (!tileSprite) return;
+
+        const player = this.gameState.getPlayer();
+        let tileSize = this.canvasHelper.getTilePixelSize();
+        tileSize = tileSize / 2;
+        const step = tileSize / 8;
+        const px = (player.x+0.2) * tileSize * 2;
+        const py = (player.y-1) * tileSize * 2;
+        this.canvasHelper.drawSprite(ctx, tileSprite, px, py, step);
+    }
+
     adjustSpriteHorizontally(targetX, baseX, sprite) {
         if (targetX < baseX) {
             return this.spriteFactory.turnSpriteHorizontally(sprite);
