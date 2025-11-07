@@ -1544,3 +1544,10 @@ textarea {
     gap: 8px;
     justify-content: flex-start;
 }
+
+.tile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, max-content));
+    gap: 2px;
+    justify-content: flex-start;
+}

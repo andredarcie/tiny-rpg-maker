@@ -157,21 +157,18 @@ class EditorRenderService {
             return ia - ib;
         });
 
-        tileList.innerHTML = '';
+        const orderedTiles = [];
         categories.forEach((category) => {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'tile-group';
-
-            const heading = document.createElement('h4');
-            heading.className = 'tile-group-title';
-            heading.textContent = category;
-            wrapper.appendChild(heading);
-
-            const grid = document.createElement('div');
-            grid.className = 'tile-group-grid';
-
             const categoryTiles = groups.get(category) || [];
-            categoryTiles.forEach((tile) => {
+            categoryTiles.forEach((tile) => orderedTiles.push(tile));
+        });
+
+        tileList.innerHTML = '';
+
+        const grid = document.createElement('div');
+        grid.className = 'tile-grid';
+
+        orderedTiles.forEach((tile) => {
             const card = document.createElement('button');
             card.type = 'button';
             card.className = 'tile-card';
@@ -193,9 +190,7 @@ class EditorRenderService {
             grid.appendChild(card);
         });
 
-        wrapper.appendChild(grid);
-        tileList.appendChild(wrapper);
-        });
+        tileList.appendChild(grid);
     }
 
     renderNpcs() {
