@@ -8,6 +8,8 @@ class RendererEntityRenderer {
         this.enemyLabelCache = new Map();
         this.enemyLabelNodes = new Map();
         this.enemyLabelRoot = null;
+        this.healthIconDefinitions = {}
+        this.setupHealthIcons();
         this.setupEditorModeWatcher();
     }
 
@@ -129,6 +131,27 @@ class RendererEntityRenderer {
         this.canvasHelper.drawSprite(ctx, sprite, px, py, step);
     }
 
+    drawHealth(ctx) {
+        const currentLives = this.gameState.getLives();
+        const maxLives = this.gameState.getMaxLives();
+
+        let tileSize = this.canvasHelper.getTilePixelSize();
+        tileSize = tileSize / 2;
+        const step = tileSize / 8;
+        let livesBreakLine = 5;
+
+        for (let i=0; i < maxLives; i++) {
+            let sprite = this.healthIconDefinitions.full;
+            if (i >= currentLives) {
+                sprite = this.healthIconDefinitions.empty;
+            }
+            const yStep = Math.floor(i/livesBreakLine);
+            const px = (i-livesBreakLine*yStep) * tileSize;
+            const py = yStep * tileSize;
+            this.canvasHelper.drawSprite(ctx, sprite, px, py, step);
+        }
+    }
+
     drawTileIconOnPlayer(ctx, tileId) {
         const objectSprites = this.spriteFactory.getObjectSprites();
         let tileSprite = objectSprites?.[tileId];
@@ -244,6 +267,33 @@ class RendererEntityRenderer {
         }
         document.addEventListener?.('editor-tab-activated', handleModeChange);
         handleModeChange();
+    }
+
+    setupHealthIcons() {
+        const white = this.paletteManager.getColor(7);
+        const red = this.paletteManager.getColor(8);
+        this.healthIconDefinitions = {
+            full: [
+                [ null, null, null, null, null, null, null, null ],
+                [ null, null, null, null, null, null, null, null ],
+                [ null, null,red,red, null,red,red, null ],
+                [ null,red,red,red,red,red,white,red ],
+                [ null,red,red,red,red,red,red,red ],
+                [ null, null,red,red,red,red,red, null ],
+                [ null, null, null,red,red,red, null, null ],
+                [ null, null, null, null,red, null, null, null ]
+            ],
+            empty: [
+                [ null, null, null, null, null, null, null, null ],
+                [ null, null, null, null, null, null, null, null ],
+                [ null, null,red,red, null,red,red, null ],
+                [ null,red,null,null,red,null,null,red ],
+                [ null,red,null,null,null,null,null,red ],
+                [ null, null,red,null,null,null,red, null ],
+                [ null, null, null,red,null,red, null, null ],
+                [ null, null, null, null,red, null, null, null ]
+            ]
+        }
     }
 }
 

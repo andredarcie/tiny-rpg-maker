@@ -4,10 +4,6 @@ class RendererPalette {
     }
 
     getPalette() {
-        const palette = this.gameState?.getGame?.()?.palette;
-        if (Array.isArray(palette) && palette.length >= 3) {
-            return palette;
-        }
         return this.getPicoPalette();
     }
 

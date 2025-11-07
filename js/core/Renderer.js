@@ -56,6 +56,7 @@ class Renderer {
         this.entityRenderer.drawNPCs(this.ctx);
         this.entityRenderer.drawEnemies(this.ctx);
         this.entityRenderer.drawPlayer(this.ctx);
+        this.entityRenderer.drawHealth(this.ctx);
         if (this.drawIconIdNextFrame) {
             this.drawTileIconOnPlayer(this.ctx, this.drawIconIdNextFrame);
         }
