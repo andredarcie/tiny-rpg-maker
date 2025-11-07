@@ -101,7 +101,6 @@ class EditorManager {
 
     bindEvents() {
         const {
-            btnAddNpc,
             btnNpcDelete,
             btnGenerateUrl,
             btnUndo,
@@ -125,7 +124,6 @@ class EditorManager {
             worldGrid
         } = this.dom;
 
-        btnAddNpc?.addEventListener('click', () => this.npcService.addNpc());
         btnNpcDelete?.addEventListener('click', () => this.npcService.removeSelectedNpc());
 
         enemyTypes?.addEventListener('click', (ev) => {

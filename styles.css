@@ -947,7 +947,6 @@ textarea {
 }
 
 
-.npcs-actions,
 .project-actions,
 .history-actions {
     display: flex;
@@ -955,14 +954,9 @@ textarea {
     gap: 8px;
 }
 
-.npcs-actions button,
 .project-actions button,
 .history-actions button {
     flex: 1 1 160px;
-}
-
-.npcs-actions button {
-    font-size: 0.85rem;
 }
 
 .enemies-panel {
@@ -1108,6 +1102,10 @@ textarea {
     padding-right: 4px;
 }
 
+.npcs-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .tile-group {
     display: grid;
     gap: 6px;
@@ -1219,12 +1217,6 @@ textarea {
     align-items: center;
     gap: 4px;
     cursor: pointer;
-}
-
-.npcs-actions button.placing {
-    background: var(--accent);
-    color: #fff;
-    border-color: var(--accent);
 }
 
 .npc-card.selected {
@@ -1504,7 +1496,6 @@ textarea {
         margin-bottom: 4px;
     }
 
-    .npcs-actions button,
     .project-actions button,
     .history-actions button {
         flex: 1 1 100%;
