@@ -258,7 +258,12 @@ class GameState {
     }
 
     setVariableValue(variableId, value, persist = false) {
-        return this.variableManager.setVariableValue(variableId, value, persist);
+        const success = this.variableManager.setVariableValue(variableId, value, persist);
+        let openedMagicDoor = false;
+        if (success) {
+            openedMagicDoor = this.objectManager.checkOpenedMagicDoor(variableId, value)
+        }
+        return [success, openedMagicDoor];
     }
 
     getEnemies() {

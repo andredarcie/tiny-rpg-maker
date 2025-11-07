@@ -84,7 +84,7 @@ class MovementManager {
             if (!doorOpen) {
                 const variable = variableId ? this.gameState.getVariable?.(variableId) ?? null : null;
                 const variableLabel = variable?.name || variable?.id || variableId || 'uma variavel';
-                const message = "Nǜo abre com chave.";
+                const message = "Não abre com chave.";
                 this.dialogManager.showDialog(message);
                 this.renderer.draw();
                 return;
@@ -100,11 +100,11 @@ class MovementManager {
                     ? this.gameState.getKeys()
                     : null;
                 const message = Number.isFinite(remainingKeys)
-                    ? `Voce usou uma chave para abrir a porta. Chaves restantes: ${remainingKeys}.`
+                    ? `Voce usou uma chave para abrir a porta. Restam: ${remainingKeys}.`
                     : 'Voce usou uma chave para abrir a porta.';
                 this.dialogManager.showDialog(message);
             } else {
-                this.dialogManager.showDialog('A porta esta trancada. Voce precisa de uma chave.');
+                this.dialogManager.showDialog('Porta trancada. Precisa de uma chave.');
                 this.renderer.draw();
                 return;
             }
