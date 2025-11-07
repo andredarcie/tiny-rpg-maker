@@ -39,6 +39,7 @@ class InteractionManager {
             if (object.type === 'life-potion') {
                 if (object.collected) continue;
                 object.collected = true;
+                this.gameState.addLife(1)
                 const message = 'Voce usou uma pocao de vida.';
                 this.dialogManager.showDialog(message);
                 break;

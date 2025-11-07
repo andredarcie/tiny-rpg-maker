@@ -132,9 +132,8 @@ class RendererEntityRenderer {
     }
 
     drawHealth(ctx) {
-        const player = this.gameState.getPlayer();
-        const currentLives = player.currentLives;
-        const maxLives = player.maxLives;
+        const currentLives = this.gameState.getLives();
+        const maxLives = this.gameState.getMaxLives();
 
         let tileSize = this.canvasHelper.getTilePixelSize();
         tileSize = tileSize / 2;
