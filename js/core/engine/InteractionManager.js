@@ -31,7 +31,7 @@ class InteractionManager {
                     ? this.gameState.addKeys(1)
                     : null;
                 const message = Number.isFinite(totalKeys)
-                    ? `Voce pegou uma chave. Agora possui ${totalKeys}.`
+                    ? `Voce pegou uma chave. Possui ${totalKeys}.`
                     : 'Voce pegou uma chave.';
                 this.dialogManager.showDialog(message);
                 break;
@@ -39,12 +39,7 @@ class InteractionManager {
             if (object.type === 'life-potion') {
                 if (object.collected) continue;
                 object.collected = true;
-                const lives = typeof this.gameState.addLife === 'function'
-                    ? this.gameState.addLife(1)
-                    : null;
-                const message = Number.isFinite(lives)
-                    ? `Voce usou uma pocao de vida. Vidas atuais: ${lives}.`
-                    : 'Voce usou uma pocao de vida.';
+                const message = 'Voce usou uma pocao de vida.';
                 this.dialogManager.showDialog(message);
                 break;
             }
@@ -70,7 +65,7 @@ class InteractionManager {
                 if (typeof this.gameState.addDamageShield === 'function') {
                     this.gameState.addDamageShield(1);
                 }
-                this.dialogManager.showDialog('Voce pegou uma espada! O proximo ataque inimigo sofrera 1 de dano a menos.');
+                this.dialogManager.showDialog('Voce pegou uma espada! Ela bloqueia 1 dano do proximo ataque inimigo.');
                 break;
             }
         }

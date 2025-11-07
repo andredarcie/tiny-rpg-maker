@@ -33,10 +33,7 @@ class RendererHudRenderer {
         const keys = typeof this.gameState.getKeys === 'function'
             ? this.gameState.getKeys()
             : 0;
-        const livesLabel = Number.isFinite(maxLives) && maxLives > 0
-            ? `${lives}/${maxLives}`
-            : `${lives}`;
-        const parts = [`Vidas: ${livesLabel}`];
+        const parts = [];
         if (Number.isFinite(level)) {
             parts.push(`Nivel: ${level}`);
         }
