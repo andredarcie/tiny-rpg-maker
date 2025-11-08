@@ -144,10 +144,14 @@ class TinyRPGApplication {
             const rect = gameContainer.getBoundingClientRect();
             const availableWidth = rect.width || window.innerWidth;
             const availableHeight = rect.height || window.innerHeight;
-            const baseSize = Math.min(availableWidth, availableHeight);
-            const size = Math.max(128, baseSize * 0.9);
-            gameCanvas.style.width = `${size}px`;
-            gameCanvas.style.height = `${size}px`;
+            const aspectRatio = (gameCanvas.height || 1) / (gameCanvas.width || 1);
+            const maxWidth = Math.max(128, availableWidth * 0.9);
+            const maxHeight = Math.max(128, availableHeight * 0.9);
+            const widthLimitedByHeight = maxHeight / aspectRatio;
+            const targetWidth = Math.min(maxWidth, widthLimitedByHeight);
+            const targetHeight = targetWidth * aspectRatio;
+            gameCanvas.style.width = `${targetWidth}px`;
+            gameCanvas.style.height = `${targetHeight}px`;
         };
 
         const scheduleResize = () => window.requestAnimationFrame(resizeCanvas);
