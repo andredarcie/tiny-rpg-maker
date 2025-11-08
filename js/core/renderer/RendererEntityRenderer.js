@@ -8,9 +8,14 @@ class RendererEntityRenderer {
         this.enemyLabelCache = new Map();
         this.enemyLabelNodes = new Map();
         this.enemyLabelRoot = null;
+        this.viewportOffsetY = 0;
         this.healthIconDefinitions = {}
         this.setupHealthIcons();
         this.setupEditorModeWatcher();
+    }
+
+    setViewportOffset(offsetY = 0) {
+        this.viewportOffsetY = Number.isFinite(offsetY) ? Math.max(0, offsetY) : 0;
     }
 
     drawObjects(ctx) {
@@ -112,7 +117,8 @@ class RendererEntityRenderer {
             const label = this.getOrCreateEnemyLabelElement(enemy, damage);
             if (label) {
                 const screenX = rect.left + (px + tileSize / 2) * scaleX;
-                const screenY = rect.top + (py - tileSize * 0.2) * scaleY;
+                const offsetY = this.viewportOffsetY || 0;
+                const screenY = rect.top + ((py + offsetY) - tileSize * 0.2) * scaleY;
                 this.positionEnemyLabel(label, screenX, screenY);
                 activeLabels.add(this.getEnemyLabelKey(enemy));
             }
@@ -131,23 +137,32 @@ class RendererEntityRenderer {
         this.canvasHelper.drawSprite(ctx, sprite, px, py, step);
     }
 
-    drawHealth(ctx) {
+    drawHealth(ctx, options = {}) {
+        if (!ctx || typeof this.gameState.getLives !== 'function' || typeof this.gameState.getMaxLives !== 'function') return;
         const currentLives = this.gameState.getLives();
         const maxLives = this.gameState.getMaxLives();
 
-        let tileSize = this.canvasHelper.getTilePixelSize();
-        tileSize = tileSize / 2;
-        const step = tileSize / 8;
-        let livesBreakLine = 5;
+        const offsetX = Number.isFinite(options.offsetX) ? options.offsetX : 0;
+        const offsetY = Number.isFinite(options.offsetY) ? options.offsetY : 0;
+        const gap = Number.isFinite(options.gap) ? Math.max(0, options.gap) : 0;
+        const heartsPerRow = Number.isFinite(options.heartsPerRow)
+            ? Math.max(1, Math.floor(options.heartsPerRow))
+            : 5;
 
-        for (let i=0; i < maxLives; i++) {
-            let sprite = this.healthIconDefinitions.full;
-            if (i >= currentLives) {
-                sprite = this.healthIconDefinitions.empty;
-            }
-            const yStep = Math.floor(i/livesBreakLine);
-            const px = (i-livesBreakLine*yStep) * tileSize;
-            const py = yStep * tileSize;
+        let iconSize = Number.isFinite(options.heartSize) && options.heartSize > 0
+            ? options.heartSize
+            : this.canvasHelper.getTilePixelSize() / 2;
+        iconSize = Math.max(4, iconSize);
+        const step = iconSize / 8;
+
+        for (let i = 0; i < maxLives; i++) {
+            const sprite = i < currentLives
+                ? this.healthIconDefinitions.full
+                : this.healthIconDefinitions.empty;
+            const row = Math.floor(i / heartsPerRow);
+            const col = i % heartsPerRow;
+            const px = offsetX + col * (iconSize + gap);
+            const py = offsetY + row * (iconSize + gap);
             this.canvasHelper.drawSprite(ctx, sprite, px, py, step);
         }
     }

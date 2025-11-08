@@ -646,50 +646,6 @@ class EditorRenderService {
         renderer.drawObjectSprite(ctx, type, 0, 0, step);
     }
 
-    renderVariables() {
-        const container = this.dom.variablesList;
-        if (!container) return;
-        container.innerHTML = '';
-
-        const variables = this.gameEngine.getVariableDefinitions?.() ?? [];
-        const runtimeValues = this.gameEngine.getRuntimeVariables?.() ?? [];
-        const runtimeMap = new Map(runtimeValues.map((entry) => [entry.id, entry.value]));
-
-        variables.forEach((variable) => {
-            const card = document.createElement('div');
-            card.className = 'variable-card';
-            card.dataset.variableId = variable.id;
-            const isOn = Boolean(runtimeMap.get(variable.id) ?? variable.value);
-            if (isOn) {
-                card.classList.add('is-on');
-            }
-
-            const label = document.createElement('div');
-            label.className = 'variable-label';
-
-            const swatch = document.createElement('span');
-            swatch.className = 'variable-color';
-            if (variable.color) {
-                swatch.style.backgroundColor = variable.color;
-            }
-
-            const name = document.createElement('span');
-            name.className = 'variable-name';
-            name.textContent = variable.name || variable.id;
-
-            label.append(swatch, name);
-
-            const toggle = document.createElement('button');
-            toggle.type = 'button';
-            toggle.className = 'variable-toggle';
-            toggle.textContent = isOn ? 'ON' : 'OFF';
-            toggle.setAttribute('aria-pressed', isOn ? 'true' : 'false');
-
-            card.append(label, toggle);
-            container.appendChild(card);
-        });
-    }
-
     renderWorldGrid() {
         const grid = this.dom.worldGrid;
         if (!grid) return;
@@ -731,38 +687,6 @@ class EditorRenderService {
                     badge.textContent = 'Start';
                     badges.appendChild(badge);
                     cell.classList.add('start');
-                }
-
-                if (index === playerRoom) {
-                    const badge = document.createElement('span');
-                    badge.classList.add('world-cell-badge', 'badge-player');
-                    badge.textContent = 'Player';
-                    badges.appendChild(badge);
-                    cell.classList.add('player');
-                }
-
-                if (npcs.some((npc) => npc.placed && npc.roomIndex === index)) {
-                    const badge = document.createElement('span');
-                    badge.classList.add('world-cell-badge', 'badge-npc');
-                    badge.textContent = 'NPC';
-                    badges.appendChild(badge);
-                    cell.classList.add('has-npc');
-                }
-
-                if (enemies.some((enemy) => enemy.roomIndex === index)) {
-                    const badge = document.createElement('span');
-                    badge.classList.add('world-cell-badge', 'badge-enemy');
-                    badge.textContent = 'Inimigo';
-                    badges.appendChild(badge);
-                    cell.classList.add('has-enemy');
-                }
-
-                if (objects.some((object) => object.roomIndex === index)) {
-                    const badge = document.createElement('span');
-                    badge.classList.add('world-cell-badge', 'badge-object');
-                    badge.textContent = 'Objeto';
-                    badges.appendChild(badge);
-                    cell.classList.add('has-object');
                 }
 
                 if (badges.children.length) {

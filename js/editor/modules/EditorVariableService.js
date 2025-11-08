@@ -17,7 +17,6 @@ class EditorVariableService {
         const targetValue = nextValue !== null ? Boolean(nextValue) : !Boolean(current?.value);
         const changed = this.gameEngine.setVariableDefault(variableId, targetValue);
         if (!changed) return;
-        this.manager.renderService.renderVariables();
         this.manager.renderService.renderObjects();
         this.manager.npcService.updateNpcSelection(this.manager.state.selectedNpcType, this.manager.state.selectedNpcId);
         this.gameEngine.draw();
@@ -29,4 +28,3 @@ class EditorVariableService {
 if (typeof window !== 'undefined') {
     window.EditorVariableService = EditorVariableService;
 }
-

@@ -515,7 +515,7 @@ body.game-mode #tab-game .game-controls button {
 .editor-layout {
     display: grid;
     gap: 24px;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: minmax(0, 360px) minmax(0, 1fr) minmax(0, 360px);
     grid-template-areas: "left center right";
     align-items: start;
 }
@@ -527,6 +527,7 @@ body.game-mode #tab-game .game-controls button {
     gap: 24px;
     align-content: start;
     width: 100%;
+    min-width: 0;
 }
 
 .editor-left {
@@ -777,7 +778,8 @@ textarea {
 }
 
 .object-card {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto 1fr;
     align-items: flex-start;
     gap: 12px;
     padding: 8px 12px;
@@ -790,6 +792,10 @@ textarea {
 .object-type-preview {
     width: 48px;
     height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    max-width: 48px;
+    max-height: 48px;
     border: 1px solid var(--border);
     border-radius: 4px;
     background: rgba(15, 19, 32, 0.65);
@@ -799,7 +805,7 @@ textarea {
 }
 
 .object-body {
-    flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -1271,26 +1277,6 @@ textarea {
     color: #ffecb3;
 }
 
-.world-cell .badge-player {
-    background: rgba(76, 175, 80, 0.25);
-    color: #c8e6c9;
-}
-
-.world-cell .badge-npc {
-    background: rgba(156, 39, 176, 0.25);
-    color: #f3e5f5;
-}
-
-.world-cell .badge-enemy {
-    background: rgba(244, 67, 54, 0.25);
-    color: #ffcdd2;
-}
-
-.world-cell .badge-object {
-    background: rgba(255, 163, 0, 0.25);
-    color: #ffe0b2;
-}
-
 .npc-card .npc-name {
     font-size: 0.85rem;
     font-weight: 600;
@@ -1423,6 +1409,21 @@ textarea {
 
     .game-controls {
         flex-direction: column;
+    }
+
+    .object-card {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .object-preview {
+        justify-self: center;
+    }
+
+    .object-card .object-header {
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
     }
 }
 

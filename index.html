@@ -18,21 +18,6 @@
             background-color: #000;
             overflow: hidden;
         }
-
-        .game-hud {
-            position: absolute;
-            top: 8px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-family: monospace;
-            font-size: 14px;
-            background: rgba(0, 0, 0, 0.6);
-            color: var(--hud-text-color);
-            pointer-events: none;
-            z-index: 2;
-        }
     </style>
 </head>
 <body>
@@ -50,10 +35,9 @@
 
             <div class="tab-content active" id="tab-game">
                 <div class="game-container" id="game-container">
-                    <div id="game-hud" class="game-hud">Vidas: 3</div>
                     <div id="combat-indicator" class="combat-indicator" aria-live="polite" aria-atomic="true"></div>
                     <div class="game-screen">
-                        <canvas id="game-canvas" width="128" height="128"></canvas>
+                        <canvas id="game-canvas" width="128" height="152"></canvas>
                         <div id="screen-flash" class="screen-flash" aria-hidden="true"></div>
                     </div>
                     <div id="game-minimap" class="game-minimap" aria-hidden="true"></div>

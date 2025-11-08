@@ -4,8 +4,20 @@
 class Renderer {
     constructor(canvas, gameState, tileManager, npcManager) {
         this.canvas = canvas;
+        const tilePixelSize = Math.max(8, Math.floor(this.canvas.width / 8));
+        this.hudBarHeight = Math.max(24, Math.round(tilePixelSize * 1.5));
+        this.gameplayHeight = tilePixelSize * 8;
+        const desiredHeight = this.gameplayHeight + this.hudBarHeight;
+        if (this.canvas.height !== desiredHeight) {
+            this.canvas.height = desiredHeight;
+        }
         this.ctx = canvas.getContext("2d");
         this.ctx.imageSmoothingEnabled = false;
+        this.gameplayOffsetY = this.hudBarHeight;
+        this.gameplayCanvasBounds = {
+            width: this.canvas.width,
+            height: this.gameplayHeight
+        };
 
         this.gameState = gameState;
         this.tileManager = tileManager;
@@ -16,8 +28,9 @@ class Renderer {
         this.canvasHelper = new RendererCanvasHelper(canvas, this.ctx);
         this.tileRenderer = new RendererTileRenderer(gameState, tileManager, this.paletteManager, this.canvasHelper);
         this.entityRenderer = new RendererEntityRenderer(gameState, tileManager, this.spriteFactory, this.canvasHelper, this.paletteManager);
+        this.entityRenderer.setViewportOffset(this.gameplayOffsetY);
         this.dialogRenderer = new RendererDialogRenderer(gameState, this.paletteManager);
-        this.hudRenderer = new RendererHudRenderer(gameState);
+        this.hudRenderer = new RendererHudRenderer(gameState, this.entityRenderer, this.paletteManager);
         this.minimapRenderer = new RendererMinimapRenderer(gameState);
 
         // Compatibilidade com código existente que acessa sprites diretamente.
@@ -46,23 +59,35 @@ class Renderer {
     }
 
     draw() {
-        this.tileRenderer.clearCanvas(this.ctx, this.canvas);
-        this.tileRenderer.drawBackground(this.ctx, this.canvas);
-        this.tileRenderer.drawTiles(this.ctx, this.canvas);
-        this.tileRenderer.drawWalls(this.ctx);
+        const ctx = this.ctx;
+        if (!ctx) return;
+        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        this.entityRenderer.drawObjects(this.ctx);
-        this.entityRenderer.drawItems(this.ctx);
-        this.entityRenderer.drawNPCs(this.ctx);
-        this.entityRenderer.drawEnemies(this.ctx);
-        this.entityRenderer.drawPlayer(this.ctx);
-        this.entityRenderer.drawHealth(this.ctx);
+        const gameplayCanvas = this.gameplayCanvasBounds;
+        ctx.save();
+        ctx.translate(0, this.gameplayOffsetY);
+
+        this.tileRenderer.clearCanvas(ctx, gameplayCanvas);
+        this.tileRenderer.drawBackground(ctx, gameplayCanvas);
+        this.tileRenderer.drawTiles(ctx, gameplayCanvas);
+        this.tileRenderer.drawWalls(ctx);
+
+        this.entityRenderer.drawObjects(ctx);
+        this.entityRenderer.drawItems(ctx);
+        this.entityRenderer.drawNPCs(ctx);
+        this.entityRenderer.drawEnemies(ctx);
+        this.entityRenderer.drawPlayer(ctx);
         if (this.drawIconIdNextFrame) {
-            this.drawTileIconOnPlayer(this.ctx, this.drawIconIdNextFrame);
+            this.drawTileIconOnPlayer(ctx, this.drawIconIdNextFrame);
         }
 
-        this.dialogRenderer.drawDialog(this.ctx, this.canvas);
-        this.hudRenderer.drawHUD();
+        this.dialogRenderer.drawDialog(ctx, gameplayCanvas);
+        ctx.restore();
+
+        this.hudRenderer.drawHUD(ctx, {
+            width: this.canvas.width,
+            height: this.hudBarHeight
+        });
         this.minimapRenderer.drawMinimap();
 
         if (typeof this.gameState.isGameOver === 'function' && this.gameState.isGameOver()) {
