@@ -31,7 +31,6 @@ class Renderer {
         this.entityRenderer.setViewportOffset(this.gameplayOffsetY);
         this.dialogRenderer = new RendererDialogRenderer(gameState, this.paletteManager);
         this.hudRenderer = new RendererHudRenderer(gameState, this.entityRenderer, this.paletteManager);
-        this.minimapRenderer = new RendererMinimapRenderer(gameState);
 
         // Compatibilidade com código existente que acessa sprites diretamente.
         this.playerSprite = this.spriteFactory.getPlayerSprite();
@@ -88,7 +87,6 @@ class Renderer {
             width: this.canvas.width,
             height: this.hudBarHeight
         });
-        this.minimapRenderer.drawMinimap();
 
         if (typeof this.gameState.isGameOver === 'function' && this.gameState.isGameOver()) {
             this.drawGameOverScreen();
