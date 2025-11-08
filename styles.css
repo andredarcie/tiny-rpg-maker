@@ -863,69 +863,44 @@ textarea {
     color: #8be9a5;
 }
 
-.variables-panel {
-    display: grid;
-    gap: 12px;
-}
-
-.variables-list {
-    display: grid;
-    gap: 8px;
-}
-
-.variable-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 10px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: rgba(18, 22, 34, 0.6);
-    transition: border-color 0.15s ease, background 0.15s ease;
-}
-
-.variable-card.is-on {
-    border-color: rgba(100, 181, 246, 0.6);
-    background: rgba(100, 181, 246, 0.12);
-}
-
-.variable-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 600;
-}
-
-.variable-color {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-}
-
-.variable-name {
-    font-size: 0.85rem;
-}
-
-.variable-toggle {
-    padding: 6px 12px;
-    border-radius: 6px;
-    border: 1px solid var(--border);
-    background: rgba(10, 13, 22, 0.65);
-    color: var(--text);
-    font-size: 0.8rem;
-    cursor: pointer;
-}
-
-.variable-card.is-on .variable-toggle {
-    border-color: rgba(100, 181, 246, 0.6);
-    color: var(--accent);
-}
-
 .npc-conditional-group {
     display: grid;
     gap: 6px;
     margin: 8px 0;
+}
+.npc-conditional-section {
+    display: grid;
+    gap: 8px;
+}
+.npc-conditional-section[hidden] {
+    display: none;
+}
+.npc-conditional-toggle {
+    margin: 8px 0;
+}
+.npc-conditional-toggle button {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    background: rgba(15, 18, 29, 0.5);
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+.npc-conditional-toggle button[aria-expanded="true"] {
+    border-style: solid;
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(100, 181, 246, 0.08);
+}
+.npc-conditional-toggle button:hover,
+.npc-conditional-toggle button:focus-visible {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(100, 181, 246, 0.08);
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
 }
 .npc-reward-group {
     display: grid;
@@ -970,7 +945,7 @@ textarea {
     max-height: min(40vh, 260px);
     overflow-y: auto;
     padding-right: 4px;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .enemy-types::-webkit-scrollbar {
@@ -983,10 +958,9 @@ textarea {
 }
 
 .enemy-card {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 10px;
+    display: flex;
     align-items: center;
+    gap: 10px;
     padding: 8px 10px;
     background: var(--panel);
     border: 1px solid var(--border);
@@ -1005,17 +979,19 @@ textarea {
     box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.15);
 }
 
-.enemy-card canvas {
+.enemy-preview {
     width: 48px;
     height: 48px;
     border: 1px solid var(--border);
     border-radius: 6px;
     background: rgba(15, 18, 29, 0.6);
+    flex-shrink: 0;
 }
 
 .enemy-meta {
     display: grid;
-    gap: 2px;
+    gap: 4px;
+    flex: 1;
 }
 
 .enemy-name {
@@ -1023,13 +999,8 @@ textarea {
     font-weight: 600;
 }
 
-.enemy-description {
-    font-size: 0.75rem;
-    color: var(--muted);
-}
-
 .enemy-damage {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: var(--accent);
 }
 
@@ -1315,19 +1286,9 @@ textarea {
     color: #ffcdd2;
 }
 
-.world-cell .badge-door {
+.world-cell .badge-object {
     background: rgba(255, 163, 0, 0.25);
     color: #ffe0b2;
-}
-
-.world-cell .badge-door-variable {
-    background: rgba(64, 224, 208, 0.25);
-    color: #a7ffeb;
-}
-
-.world-cell .badge-key {
-    background: rgba(255, 255, 39, 0.25);
-    color: #fff59d;
 }
 
 .npc-card .npc-name {
@@ -1542,3 +1503,7 @@ textarea {
     gap: 2px;
     justify-content: flex-start;
 }
+
+
+
+

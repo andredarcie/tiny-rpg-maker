@@ -273,7 +273,15 @@ class EditorRenderService {
 
     updateNpcForm() {
         const npc = this.gameEngine.getSprites().find((entry) => entry.id === this.manager.selectedNpcId);
-        const { npcText, npcConditionalText, npcConditionalVariable, npcRewardVariable, npcConditionalRewardVariable } = this.dom;
+        const {
+            npcText,
+            npcConditionalText,
+            npcConditionalVariable,
+            npcRewardVariable,
+            npcConditionalRewardVariable,
+            btnToggleNpcConditional,
+            npcConditionalSection
+        } = this.dom;
         const hasNpc = Boolean(npc);
 
         if (npcText) {
@@ -297,6 +305,17 @@ class EditorRenderService {
         const btnNpcDelete = this.dom.btnNpcDelete;
         if (btnNpcDelete) {
             btnNpcDelete.disabled = !hasNpc || !npc?.placed;
+        }
+
+        const expanded = Boolean(this.manager.state.conditionalDialogueExpanded);
+        if (npcConditionalSection) {
+            npcConditionalSection.hidden = !expanded;
+        }
+        if (btnToggleNpcConditional) {
+            btnToggleNpcConditional.textContent = expanded
+                ? 'Ocultar dialogo alternativo'
+                : 'Criar dialogo alternativo';
+            btnToggleNpcConditional.setAttribute('aria-expanded', expanded ? 'true' : 'false');
         }
     }
 
@@ -326,7 +345,7 @@ class EditorRenderService {
             item.className = 'enemy-item';
 
             const label = document.createElement('span');
-            const displayName = definition?.name || enemy.type || 'inimigo';
+            const displayName = this.getEnemyDisplayName(definition, enemy.type);
             const damageInfo = Number.isFinite(definition?.damage)
                 ? ` - Dano: ${definition.damage}`
                 : '';
@@ -379,6 +398,7 @@ class EditorRenderService {
             }
 
             const preview = document.createElement('canvas');
+            preview.className = 'enemy-preview';
             preview.width = 48;
             preview.height = 48;
             this.drawEnemyPreview(preview, definition);
@@ -388,17 +408,14 @@ class EditorRenderService {
 
             const name = document.createElement('div');
             name.className = 'enemy-name';
-            name.textContent = definition.name;
-
-            const description = document.createElement('div');
-            description.className = 'enemy-description';
-            description.textContent = definition.description;
+            name.textContent = this.getEnemyDisplayName(definition, definition.type);
 
             const damage = document.createElement('div');
             damage.className = 'enemy-damage';
-            damage.textContent = `Dano: ${definition.damage}`;
+            const damageValue = Number.isFinite(definition.damage) ? definition.damage : '?';
+            damage.textContent = `Dano: ${damageValue}`;
 
-            meta.append(name, description, damage);
+            meta.append(name, damage);
             card.append(preview, meta);
             container.appendChild(card);
         });
@@ -740,28 +757,12 @@ class EditorRenderService {
                     cell.classList.add('has-enemy');
                 }
 
-                if (objects.some((object) => object.roomIndex === index && object.type === 'door')) {
+                if (objects.some((object) => object.roomIndex === index)) {
                     const badge = document.createElement('span');
-                    badge.classList.add('world-cell-badge', 'badge-door');
-                    badge.textContent = 'Porta';
+                    badge.classList.add('world-cell-badge', 'badge-object');
+                    badge.textContent = 'Objeto';
                     badges.appendChild(badge);
-                    cell.classList.add('has-door');
-                }
-
-                if (objects.some((object) => object.roomIndex === index && object.type === 'door-variable')) {
-                    const badge = document.createElement('span');
-                    badge.classList.add('world-cell-badge', 'badge-door-variable');
-                    badge.textContent = 'Porta magica';
-                    badges.appendChild(badge);
-                    cell.classList.add('has-door-variable');
-                }
-
-                if (objects.some((object) => object.roomIndex === index && object.type === 'key')) {
-                    const badge = document.createElement('span');
-                    badge.classList.add('world-cell-badge', 'badge-key');
-                    badge.textContent = 'Chave';
-                    badges.appendChild(badge);
-                    cell.classList.add('has-key');
+                    cell.classList.add('has-object');
                 }
 
                 if (badges.children.length) {
@@ -782,6 +783,16 @@ class EditorRenderService {
         if (this.dom.tileSummary) {
             this.dom.tileSummary.textContent = tile.name || `Tile ${tile.id}`;
         }
+    }
+
+    getEnemyDisplayName(definition, fallback = '') {
+        const raw = definition?.name || fallback || '';
+        if (!raw) return 'Inimigo';
+        const cleaned = raw
+            .replace(/[^\w\s\u00C0-\u024F'()-]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+        return cleaned || fallback || 'Inimigo';
     }
 }
 

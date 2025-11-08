@@ -11,6 +11,8 @@ class EditorDomCache {
         this.npcConditionalVariable = root.getElementById('npc-conditional-variable');
         this.npcRewardVariable = root.getElementById('npc-reward-variable');
         this.npcConditionalRewardVariable = root.getElementById('npc-conditional-reward-variable');
+        this.btnToggleNpcConditional = root.getElementById('btn-toggle-npc-conditional');
+        this.npcConditionalSection = root.getElementById('npc-conditional-section');
         this.worldGrid = root.getElementById('world-grid');
         this.titleInput = root.getElementById('game-title');
         this.fileInput = root.getElementById('file-input');
@@ -22,7 +24,6 @@ class EditorDomCache {
         this.btnRedo = root.getElementById('btn-redo');
         this.enemyTypes = root.getElementById('enemy-types');
         this.enemiesList = root.getElementById('enemies-list');
-        this.variablesList = root.getElementById('variables-list');
     }
 }
 

@@ -87,6 +87,7 @@ class EditorNpcService {
         const hadSelection = Boolean(this.state.selectedNpcId || this.state.selectedNpcType);
         this.state.selectedNpcId = null;
         this.state.selectedNpcType = null;
+        this.state.conditionalDialogueExpanded = false;
         this.deactivatePlacement();
         if (render && hadSelection) {
             this.manager.renderService.renderNpcs();
@@ -114,6 +115,13 @@ class EditorNpcService {
         }
         this.state.selectedNpcType = type;
         this.state.selectedNpcId = id;
+        const npc = this.gameEngine.getSprites().find((entry) => entry.id === id) || null;
+        const hasConditionalData = Boolean(
+            npc?.conditionText ||
+            npc?.conditionVariableId ||
+            npc?.conditionalRewardVariableId
+        );
+        this.state.conditionalDialogueExpanded = hasConditionalData;
         this.manager.renderService.renderNpcs();
         this.activatePlacement();
     }

@@ -111,8 +111,8 @@ class EditorManager {
             npcConditionalVariable,
             npcRewardVariable,
             npcConditionalRewardVariable,
+            btnToggleNpcConditional,
             fileInput,
-            variablesList,
             editorCanvas,
             enemyTypes,
             enemiesList,
@@ -125,6 +125,10 @@ class EditorManager {
         } = this.dom;
 
         btnNpcDelete?.addEventListener('click', () => this.npcService.removeSelectedNpc());
+        btnToggleNpcConditional?.addEventListener('click', () => {
+            this.state.conditionalDialogueExpanded = !this.state.conditionalDialogueExpanded;
+            this.renderService.updateNpcForm();
+        });
 
         enemyTypes?.addEventListener('click', (ev) => {
             const card = ev.target.closest('.enemy-card');
@@ -154,8 +158,6 @@ class EditorManager {
         npcConditionalRewardVariable?.addEventListener('change', (ev) => this.npcService.handleConditionalRewardVariableChange(ev.target.value));
 
         fileInput?.addEventListener('change', (ev) => this.shareService.loadGameFile(ev));
-
-        variablesList?.addEventListener('click', (ev) => this.handleVariableToggleClick(ev));
 
         tileList?.addEventListener('click', (ev) => {
             const button = ev.target.closest('[data-tile-id]');
@@ -269,7 +271,6 @@ class EditorManager {
         this.renderService.renderEnemies();
         this.renderService.renderObjectCatalog();
         this.renderService.renderObjects();
-        this.renderService.renderVariables();
         this.renderService.renderEditor();
         this.renderService.updateSelectedTilePreview();
     }
@@ -305,10 +306,6 @@ class EditorManager {
 
     renderObjects() {
         this.renderService.renderObjects();
-    }
-
-    renderVariables() {
-        this.renderService.renderVariables();
     }
 
     renderWorldGrid() {
@@ -375,18 +372,6 @@ class EditorManager {
 
     removeObject(type, roomIndex) {
         this.objectService.removeObject(type, roomIndex);
-    }
-
-    // Variable delegation
-    handleVariableToggleClick(ev) {
-        const button = ev.target.closest('.variable-toggle');
-        if (!button) return;
-        const card = button.closest('.variable-card');
-        const variableId = card?.dataset?.variableId;
-        if (!variableId) return;
-        ev.preventDefault();
-        const isActive = card.classList.contains('is-on');
-        this.variableService.toggle(variableId, !isActive);
     }
 
     toggleVariableDefault(variableId, nextValue = null) {

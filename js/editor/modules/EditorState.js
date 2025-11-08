@@ -13,6 +13,7 @@ class EditorState {
         this.skipMapHistory = false;
         this.npcTextUpdateTimer = null;
         this.suppressNpcFormUpdates = false;
+        this.conditionalDialogueExpanded = false;
     }
 }
 

@@ -104,14 +104,6 @@
                             </details>
                         </div>
 
-                        <div class="editor-section editor-section--variables">
-                            <details open>
-                                <summary>Variaveis</summary>
-                                <div class="variables-panel">
-                                    <div id="variables-list" class="variables-list"></div>
-                                </div>
-                            </details>
-                        </div>
                     </div>
 
                     <div class="editor-center">
@@ -134,15 +126,20 @@
                                             <label for="npc-reward-variable">Ao concluir o dialogo padrao, ativar variavel:</label>
                                             <select id="npc-reward-variable"></select>
                                         </div>
-                                        <div class="npc-conditional-group">
-                                            <label for="npc-conditional-variable">Variavel para dialogo alternativo:</label>
-                                            <select id="npc-conditional-variable"></select>
-                                            <label for="npc-conditional-text">Texto alternativo:</label>
-                                            <textarea id="npc-conditional-text" placeholder="Mensagem exibida quando a variavel estiver ON."></textarea>
+                                        <div class="npc-conditional-toggle">
+                                            <button type="button" id="btn-toggle-npc-conditional" aria-expanded="false" aria-controls="npc-conditional-section">Criar dialogo alternativo</button>
                                         </div>
-                                        <div class="npc-reward-group">
-                                            <label for="npc-conditional-reward-variable">Ao concluir o dialogo alternativo, ativar variavel:</label>
-                                            <select id="npc-conditional-reward-variable"></select>
+                                        <div id="npc-conditional-section" class="npc-conditional-section" hidden>
+                                            <div class="npc-conditional-group">
+                                                <label for="npc-conditional-variable">Variavel para dialogo alternativo:</label>
+                                                <select id="npc-conditional-variable"></select>
+                                                <label for="npc-conditional-text">Texto alternativo:</label>
+                                                <textarea id="npc-conditional-text" placeholder="Mensagem exibida quando a variavel estiver ON."></textarea>
+                                            </div>
+                                            <div class="npc-reward-group npc-conditional-reward">
+                                                <label for="npc-conditional-reward-variable">Ao concluir o dialogo alternativo, ativar variavel:</label>
+                                                <select id="npc-conditional-reward-variable"></select>
+                                            </div>
                                         </div>
                                         <button id="npc-delete">Deletar NPC</button>
                                     </div>

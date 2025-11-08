@@ -63,7 +63,7 @@ class EnemyDefinitions {
         {
             type: 'necromancer',
             id: 'enemy-necromancer',
-            name: '🧙‍♂️ Necromante',
+            name: '🧙‍♂️ Necro',
             description: 'o mago das trevas.',
             damage: 4,
             missChance: 0.12,
