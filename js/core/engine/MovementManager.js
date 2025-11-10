@@ -6,9 +6,13 @@ class MovementManager {
         this.dialogManager = dialogManager;
         this.interactionManager = interactionManager;
         this.enemyManager = enemyManager;
+        this.transitioning = false;
     }
 
     tryMove(dx, dy) {
+        if (this.transitioning) {
+            return;
+        }
         if (typeof this.gameState.isGameOver === 'function' && this.gameState.isGameOver()) {
             return;
         }
@@ -26,6 +30,13 @@ class MovementManager {
         const player = this.gameState.getPlayer();
         const direction = this.getDirectionFromDelta(dx, dy);
         const roomIndex = player.roomIndex;
+        const previousPosition = {
+            x: player?.x ?? 0,
+            y: player?.y ?? 0,
+            roomIndex,
+            lastX: player?.lastX ?? player?.x ?? 0,
+            facingLeft: (player?.x ?? 0) < (player?.lastX ?? player?.x ?? 0)
+        };
         const currentCoords = this.gameState.getRoomCoords(roomIndex);
         const limit = this.gameState.game.roomSize - 1;
 
@@ -137,10 +148,59 @@ class MovementManager {
             }
         }
 
-        this.gameState.setPlayerPosition(targetX, targetY, targetRoomIndex !== roomIndex ? targetRoomIndex : null);
+        const supportsTransition = enteringNewRoom
+            && typeof this.renderer?.captureGameplayFrame === 'function'
+            && typeof this.renderer?.startRoomTransition === 'function';
+        const fromFrame = supportsTransition ? this.renderer.captureGameplayFrame() : null;
+
+        this.gameState.setPlayerPosition(
+            targetX,
+            targetY,
+            targetRoomIndex !== roomIndex ? targetRoomIndex : null
+        );
+        if (enteringNewRoom) {
+            const updatedPlayer = this.gameState.getPlayer();
+            if (updatedPlayer) {
+                if (dx !== 0) {
+                    updatedPlayer.lastX = updatedPlayer.x - Math.sign(dx);
+                } else if (previousPosition.lastX !== undefined) {
+                    updatedPlayer.lastX = previousPosition.lastX;
+                }
+            }
+        }
         this.interactionManager.handlePlayerInteractions();
         const currentPlayer = this.gameState.getPlayer();
         this.enemyManager.checkCollisionAt(currentPlayer.x, currentPlayer.y);
+
+        if (supportsTransition && fromFrame) {
+            this.renderer.draw();
+            const toFrame = this.renderer.captureGameplayFrame();
+            if (toFrame) {
+                const started = this.renderer.startRoomTransition({
+                    direction,
+                    fromFrame,
+                    toFrame,
+                    playerPath: {
+                        from: previousPosition,
+                        to: { x: targetX, y: targetY, roomIndex: targetRoomIndex },
+                        facingLeft: dx < 0
+                            ? true
+                            : dx > 0
+                                ? false
+                                : previousPosition.facingLeft
+                    },
+                    onComplete: () => {
+                        this.transitioning = false;
+                        this.renderer.draw();
+                    }
+                });
+                if (started) {
+                    this.transitioning = true;
+                    return;
+                }
+            }
+        }
+
         this.renderer.draw();
     }
 

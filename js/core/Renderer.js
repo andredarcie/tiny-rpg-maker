@@ -60,6 +60,7 @@ class Renderer {
         if (this.screenFlashElement) {
             this.screenFlashElement.classList.remove('visible');
         }
+        this.roomTransition = { active: false };
         this.drawIconIdNextFrame = '';
         this.timeIconOverPlayer = 2000;
         this.tileAnimationInterval = 320;
@@ -76,22 +77,26 @@ class Renderer {
         ctx.save();
         ctx.translate(0, this.gameplayOffsetY);
 
-        this.tileRenderer.clearCanvas(ctx, gameplayCanvas);
-        this.tileRenderer.drawBackground(ctx, gameplayCanvas);
-        this.tileRenderer.drawTiles(ctx, gameplayCanvas);
-        this.tileRenderer.drawWalls(ctx);
-        this.drawEdgeFlash(ctx, gameplayCanvas);
+        if (this.isRoomTransitionActive()) {
+            this.drawRoomTransitionFrame(ctx, gameplayCanvas);
+        } else {
+            this.tileRenderer.clearCanvas(ctx, gameplayCanvas);
+            this.tileRenderer.drawBackground(ctx, gameplayCanvas);
+            this.tileRenderer.drawTiles(ctx, gameplayCanvas);
+            this.tileRenderer.drawWalls(ctx);
+            this.drawEdgeFlash(ctx, gameplayCanvas);
 
-        this.entityRenderer.drawObjects(ctx);
-        this.entityRenderer.drawItems(ctx);
-        this.entityRenderer.drawNPCs(ctx);
-        this.entityRenderer.drawEnemies(ctx);
-        this.entityRenderer.drawPlayer(ctx);
-        if (this.drawIconIdNextFrame) {
-            this.drawTileIconOnPlayer(ctx, this.drawIconIdNextFrame);
+            this.entityRenderer.drawObjects(ctx);
+            this.entityRenderer.drawItems(ctx);
+            this.entityRenderer.drawNPCs(ctx);
+            this.entityRenderer.drawEnemies(ctx);
+            this.entityRenderer.drawPlayer(ctx);
+            if (this.drawIconIdNextFrame) {
+                this.drawTileIconOnPlayer(ctx, this.drawIconIdNextFrame);
+            }
+
+            this.dialogRenderer.drawDialog(ctx, gameplayCanvas);
         }
-
-        this.dialogRenderer.drawDialog(ctx, gameplayCanvas);
         ctx.restore();
 
         this.hudRenderer.drawHUD(ctx, {
@@ -138,6 +143,235 @@ class Renderer {
 
     drawTilePreviewAt(tileId, px, py, size, ctx) {
         this.canvasHelper.drawTilePreview(tileId, px, py, size, ctx);
+    }
+
+    captureGameplayFrame() {
+        if (typeof document === 'undefined' || !this.canvas) {
+            return null;
+        }
+        const width = this.gameplayCanvasBounds.width;
+        const height = this.gameplayCanvasBounds.height;
+        const buffer = document.createElement('canvas');
+        buffer.width = width;
+        buffer.height = height;
+        const bufferCtx = buffer.getContext('2d');
+        if (!bufferCtx) return null;
+        bufferCtx.drawImage(
+            this.canvas,
+            0,
+            this.gameplayOffsetY,
+            width,
+            height,
+            0,
+            0,
+            width,
+            height
+        );
+        return buffer;
+    }
+
+    isRoomTransitionActive() {
+        return Boolean(this.roomTransition?.active);
+    }
+
+    startRoomTransition(options = {}) {
+        const fromFrame = options.fromFrame;
+        const toFrame = options.toFrame;
+        if (!fromFrame || !toFrame) {
+            if (typeof options.onComplete === 'function') {
+                options.onComplete();
+            }
+            return false;
+        }
+        const direction = options.direction || 'right';
+        const duration = Number.isFinite(options.duration)
+            ? Math.max(120, options.duration)
+            : 320;
+        const now = (typeof performance !== 'undefined' && typeof performance.now === 'function')
+            ? performance.now()
+            : Date.now();
+
+        if (this.roomTransition?.rafId && typeof window !== 'undefined' && typeof window.cancelAnimationFrame === 'function') {
+            window.cancelAnimationFrame(this.roomTransition.rafId);
+        }
+
+        this.removePlayerFromFrame(fromFrame, options.playerPath?.from);
+        this.removePlayerFromFrame(toFrame, options.playerPath?.to);
+
+        this.roomTransition = {
+            active: true,
+            direction,
+            fromFrame,
+            toFrame,
+            duration,
+            startTime: now,
+            playerPath: options.playerPath || null,
+            onComplete: typeof options.onComplete === 'function' ? options.onComplete : null,
+            rafId: null
+        };
+
+        if (typeof this.gameState?.pauseGame === 'function') {
+            this.gameState.pauseGame('room-transition');
+        }
+
+        this.draw();
+        this.scheduleRoomTransitionTick();
+        return true;
+    }
+
+    removePlayerFromFrame(frameCanvas, coords) {
+        if (!frameCanvas || !coords) return;
+        const ctx = frameCanvas.getContext('2d');
+        if (!ctx) return;
+        const tileSize = Math.max(1, Math.floor(frameCanvas.width / 8));
+        const tileX = Math.max(0, Math.min(7, Math.floor(coords.x ?? 0)));
+        const tileY = Math.max(0, Math.min(7, Math.floor(coords.y ?? 0)));
+        const roomIndex = Number.isFinite(coords.roomIndex)
+            ? coords.roomIndex
+            : (this.gameState.getPlayer()?.roomIndex ?? 0);
+        const room = this.gameState.getGame().rooms?.[roomIndex];
+        ctx.fillStyle = this.paletteManager.getColor(room?.bg ?? 0);
+        ctx.fillRect(tileX * tileSize, tileY * tileSize, tileSize, tileSize);
+        this.drawTileStackOnContext(ctx, roomIndex, tileX, tileY, tileSize);
+    }
+
+    scheduleRoomTransitionTick() {
+        if (typeof window === 'undefined' || typeof window.requestAnimationFrame !== 'function') {
+            return;
+        }
+        const tick = () => {
+            if (!this.isRoomTransitionActive()) {
+                return;
+            }
+            const progress = this.getRoomTransitionProgress();
+            if (progress >= 1) {
+                this.finishRoomTransition();
+                return;
+            }
+            this.draw();
+            this.roomTransition.rafId = window.requestAnimationFrame(tick);
+        };
+        this.roomTransition.rafId = window.requestAnimationFrame(tick);
+    }
+
+    getRoomTransitionProgress() {
+        if (!this.roomTransition?.active) {
+            return 1;
+        }
+        const now = (typeof performance !== 'undefined' && typeof performance.now === 'function')
+            ? performance.now()
+            : Date.now();
+        const elapsed = now - this.roomTransition.startTime;
+        return Math.max(0, Math.min(1, elapsed / this.roomTransition.duration));
+    }
+
+    drawRoomTransitionFrame(ctx, gameplayCanvas) {
+        const transition = this.roomTransition;
+        if (!transition?.active) return;
+        const width = gameplayCanvas.width;
+        const height = gameplayCanvas.height;
+        const progress = this.getRoomTransitionProgress();
+        const deltaX = progress * width;
+        const deltaY = progress * height;
+        let fromX = 0;
+        let fromY = 0;
+        let toX = 0;
+        let toY = 0;
+        switch (transition.direction) {
+            case 'left':
+                fromX = deltaX;
+                toX = deltaX - width;
+                break;
+            case 'right':
+                fromX = -deltaX;
+                toX = width - deltaX;
+                break;
+            case 'up':
+                fromY = deltaY;
+                toY = deltaY - height;
+                break;
+            case 'down':
+                fromY = -deltaY;
+                toY = height - deltaY;
+                break;
+            default:
+                fromX = -deltaX;
+                toX = width - deltaX;
+                break;
+        }
+        ctx.save();
+        ctx.fillStyle = this.paletteManager.getColor(this.gameState.getCurrentRoom()?.bg ?? 0);
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(transition.fromFrame, Math.round(fromX), Math.round(fromY));
+        ctx.drawImage(transition.toFrame, Math.round(toX), Math.round(toY));
+        this.drawTransitionPlayer(ctx, gameplayCanvas, progress);
+        ctx.restore();
+        if (progress >= 1) {
+            this.finishRoomTransition();
+        }
+    }
+
+    drawTransitionPlayer(ctx, gameplayCanvas, progress) {
+        const transition = this.roomTransition;
+        const path = transition?.playerPath;
+        if (!path?.from || !path?.to) return;
+        const tileSize = Math.max(1, Math.floor(gameplayCanvas.width / 8));
+        const step = tileSize / 8;
+        const x = path.from.x + (path.to.x - path.from.x) * progress;
+        const y = path.from.y + (path.to.y - path.from.y) * progress;
+        let sprite = this.spriteFactory.getPlayerSprite();
+        let facingLeft = path.facingLeft;
+        if (facingLeft === undefined) {
+            facingLeft = path.to.x < path.from.x;
+        }
+        if (facingLeft) {
+            sprite = this.spriteFactory.turnSpriteHorizontally(sprite);
+        }
+        this.canvasHelper.drawSprite(ctx, sprite, x * tileSize, y * tileSize, step);
+    }
+
+    drawTileStackOnContext(ctx, roomIndex, tileX, tileY, tileSize) {
+        const tileMap = this.tileManager.getTileMap(roomIndex);
+        if (!tileMap) return;
+        const px = tileX * tileSize;
+        const py = tileY * tileSize;
+        const groundId = tileMap.ground?.[tileY]?.[tileX] ?? null;
+        if (groundId !== null && groundId !== undefined) {
+            this.drawTilePixelsOnContext(ctx, groundId, px, py, tileSize);
+        }
+        const overlayId = tileMap.overlay?.[tileY]?.[tileX] ?? null;
+        if (overlayId !== null && overlayId !== undefined) {
+            this.drawTilePixelsOnContext(ctx, overlayId, px, py, tileSize);
+        }
+    }
+
+    drawTilePixelsOnContext(ctx, tileId, px, py, size) {
+        const pixels = this.tileManager.getTilePixels(tileId);
+        if (!pixels) return;
+        const step = Math.max(1, Math.floor(size / 8));
+        for (let y = 0; y < 8; y++) {
+            for (let x = 0; x < 8; x++) {
+                const col = pixels[y]?.[x];
+                if (!col || col === 'transparent') continue;
+                ctx.fillStyle = col;
+                ctx.fillRect(px + x * step, py + y * step, step, step);
+            }
+        }
+    }
+
+    finishRoomTransition() {
+        if (!this.roomTransition?.active) return;
+        if (typeof window !== 'undefined' && typeof window.cancelAnimationFrame === 'function' && this.roomTransition.rafId) {
+            window.cancelAnimationFrame(this.roomTransition.rafId);
+        }
+        const callback = this.roomTransition.onComplete;
+        this.roomTransition = { active: false };
+        if (typeof this.gameState?.resumeGame === 'function') {
+            this.gameState.resumeGame('room-transition');
+        }
+        if (typeof callback === 'function') {
+            callback();
+        }
     }
 
     flashEdge(direction, options = {}) {
