@@ -106,6 +106,7 @@ class EditorManager {
             btnUndo,
             btnRedo,
             titleInput,
+            authorInput,
             npcText,
             npcConditionalText,
             npcConditionalVariable,
@@ -150,7 +151,8 @@ class EditorManager {
         btnUndo?.addEventListener('click', () => this.undo());
         btnRedo?.addEventListener('click', () => this.redo());
 
-        titleInput?.addEventListener('input', () => this.updateGameTitle());
+        titleInput?.addEventListener('input', () => this.updateGameMetadata());
+        authorInput?.addEventListener('input', () => this.updateGameMetadata());
         npcText?.addEventListener('input', () => this.npcService.updateNpcText(npcText.value));
         npcConditionalText?.addEventListener('input', () => this.npcService.updateNpcConditionalText(npcConditionalText.value));
         npcConditionalVariable?.addEventListener('change', (ev) => this.npcService.handleConditionVariableChange(ev.target.value));
@@ -410,9 +412,18 @@ class EditorManager {
     }
 
     // Game title & JSON sync
-    updateGameTitle() {
+    updateGameMetadata() {
         const game = this.gameEngine.getGame();
-        game.title = this.dom.titleInput?.value || 'Tiny RPG Maker';
+        const title = (this.dom.titleInput?.value || '').trim() || 'Tiny RPG Maker';
+        const author = (this.dom.authorInput?.value || '').trim();
+        game.title = title;
+        game.author = author;
+        if (typeof this.gameEngine.syncDocumentTitle === 'function') {
+            this.gameEngine.syncDocumentTitle();
+        }
+        if (typeof this.gameEngine.refreshIntroScreen === 'function') {
+            this.gameEngine.refreshIntroScreen();
+        }
         this.updateJSON();
     }
 
@@ -425,6 +436,9 @@ class EditorManager {
         const game = this.gameEngine.getGame();
         if (this.dom.titleInput) {
             this.dom.titleInput.value = game.title || '';
+        }
+        if (this.dom.authorInput) {
+            this.dom.authorInput.value = game.author || '';
         }
         this.updateJSON();
     }
@@ -459,7 +473,7 @@ class EditorManager {
 
         this.renderAll();
         this.gameEngine.draw();
-        this.updateJSON();
+        this.syncUI();
         if (!skipHistory) {
             this.history.pushCurrentState();
         }

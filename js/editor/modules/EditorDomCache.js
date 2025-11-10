@@ -15,6 +15,7 @@ class EditorDomCache {
         this.npcConditionalSection = root.getElementById('npc-conditional-section');
         this.worldGrid = root.getElementById('world-grid');
         this.titleInput = root.getElementById('game-title');
+        this.authorInput = root.getElementById('game-author');
         this.fileInput = root.getElementById('file-input');
         this.objectTypes = root.getElementById('object-types');
         this.objectsList = root.getElementById('objects-list');

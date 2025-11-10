@@ -10,7 +10,7 @@ class GameEngine {
         this.tileManager = new TileManager(this.gameState);
         this.npcManager = new NPCManager(this.gameState);
         this.npcManager.ensureDefaultNPCs?.();
-        this.renderer = new Renderer(canvas, this.gameState, this.tileManager, this.npcManager);
+        this.renderer = new Renderer(canvas, this.gameState, this.tileManager, this.npcManager, this);
         this.dialogManager = new DialogManager(this.gameState, this.renderer);
         this.interactionManager = new InteractionManager(this.gameState, this.dialogManager);
         this.enemyManager = new EnemyManager(this.gameState, this.renderer, this.tileManager, {
@@ -27,6 +27,10 @@ class GameEngine {
         });
         this.inputManager = new InputManager(this);
         this.awaitingRestart = false;
+        this.introVisible = false;
+        this.introStartTime = 0;
+        this.introData = { title: 'Tiny RPG Maker', author: '' };
+        this.setupIntroScreen();
 
         // Ensure there is at least a ground layer
         this.tileManager.ensureDefaultTiles();
@@ -34,6 +38,7 @@ class GameEngine {
         // Draw the first frame
         this.syncDocumentTitle();
         this.renderer.draw();
+        this.showIntroScreen();
         this.startEnemyLoop();
     }
 
@@ -66,6 +71,7 @@ class GameEngine {
         this.startEnemyLoop();
         this.dialogManager.reset();
         this.renderer.draw();
+        this.showIntroScreen();
     }
 
     // Data helpers
@@ -81,6 +87,7 @@ class GameEngine {
         this.startEnemyLoop();
         this.dialogManager.reset();
         this.renderer.draw();
+        this.showIntroScreen();
     }
 
     // Compatibility accessors
@@ -104,6 +111,48 @@ class GameEngine {
     syncDocumentTitle() {
         const game = this.gameState.getGame();
         document.title = game.title || 'Tiny RPG Maker';
+    }
+
+    setupIntroScreen() {
+        if (typeof document === 'undefined') return;
+        this.refreshIntroScreen();
+    }
+
+    showIntroScreen() {
+        this.refreshIntroScreen();
+        this.introVisible = true;
+        this.introStartTime = (typeof performance !== 'undefined' && performance.now)
+            ? performance.now()
+            : Date.now();
+        this.gameState.pauseGame?.('intro-screen');
+        this.renderer.draw();
+    }
+
+    dismissIntroScreen() {
+        if (!this.introVisible) return false;
+        this.introVisible = false;
+        this.gameState.resumeGame?.('intro-screen');
+        this.renderer.draw();
+        return true;
+    }
+
+    isIntroVisible() {
+        return Boolean(this.introVisible);
+    }
+
+    refreshIntroScreen() {
+        const game = this.getGame();
+        this.introData = {
+            title: game.title || 'Tiny RPG Maker',
+            author: (game.author || '').trim()
+        };
+        if (typeof this.renderer?.setIntroData === 'function') {
+            this.renderer.setIntroData(this.introData);
+        }
+    }
+
+    getIntroData() {
+        return this.introData || { title: 'Tiny RPG Maker', author: '' };
     }
 
     // Editor-facing helpers

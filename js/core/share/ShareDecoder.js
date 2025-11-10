@@ -56,6 +56,7 @@ class ShareDecoder {
             : [];
         const variableStates = version >= ShareConstants.VARIABLES_VERSION ? ShareVariableCodec.decodeVariables(payload.b || '') : [];
         const title = ShareTextCodec.decodeText(payload.n, ShareConstants.DEFAULT_TITLE) || ShareConstants.DEFAULT_TITLE;
+        const author = ShareTextCodec.decodeText(payload.y, '') || '';
         const buildNpcId = (index) => `npc-${index + 1}`;
 
         const defs = ShareConstants.NPC_DEFINITIONS;
@@ -146,6 +147,7 @@ class ShareDecoder {
 
         return {
             title,
+            author,
             start: startPosition,
             sprites,
             enemies,

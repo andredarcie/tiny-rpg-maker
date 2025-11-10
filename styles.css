@@ -901,9 +901,39 @@ textarea {
     gap: 8px;
 }
 
+.project-actions {
+    align-items: stretch;
+}
+
+.project-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1 1 220px;
+    min-width: 200px;
+}
+
+.project-field span {
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+.project-field input {
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    font-size: 0.95rem;
+}
+
 .project-actions button,
 .history-actions button {
     flex: 1 1 160px;
+}
+
+.project-actions button {
+    flex-basis: 100%;
 }
 
 .enemies-panel {

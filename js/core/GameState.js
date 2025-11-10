@@ -10,6 +10,7 @@ class GameState {
 
         this.game = {
             title: "My Tiny RPG Game",
+            author: "",
             palette: ['#000000', '#1D2B53', '#FFF1E8'],
             roomSize,
             world: {

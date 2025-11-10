@@ -2,7 +2,7 @@
  * Renderer coordena módulos especializados para desenhar a cena.
  */
 class Renderer {
-    constructor(canvas, gameState, tileManager, npcManager) {
+    constructor(canvas, gameState, tileManager, npcManager, gameEngine = null) {
         this.canvas = canvas;
         const tilePixelSize = Math.max(8, Math.floor(this.canvas.width / 8));
         this.hudBarHeight = Math.max(24, Math.round(tilePixelSize * 1.5));
@@ -20,6 +20,7 @@ class Renderer {
         };
 
         this.gameState = gameState;
+        this.gameEngine = gameEngine;
         this.tileManager = tileManager;
         this.npcManager = npcManager;
 
@@ -45,6 +46,7 @@ class Renderer {
             tileX: null,
             tileY: null
         };
+        this.introData = { title: 'Tiny RPG Maker', author: '' };
         this.combatIndicatorElement = typeof document !== 'undefined'
             ? document.getElementById('combat-indicator')
             : null;
@@ -74,6 +76,7 @@ class Renderer {
         ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         const gameplayCanvas = this.gameplayCanvasBounds;
+        const introActive = this.isIntroOverlayActive();
         ctx.save();
         ctx.translate(0, this.gameplayOffsetY);
 
@@ -86,23 +89,34 @@ class Renderer {
             this.tileRenderer.drawWalls(ctx);
             this.drawEdgeFlash(ctx, gameplayCanvas);
 
-            this.entityRenderer.drawObjects(ctx);
-            this.entityRenderer.drawItems(ctx);
-            this.entityRenderer.drawNPCs(ctx);
-            this.entityRenderer.drawEnemies(ctx);
-            this.entityRenderer.drawPlayer(ctx);
-            if (this.drawIconIdNextFrame) {
-                this.drawTileIconOnPlayer(ctx, this.drawIconIdNextFrame);
+            if (!introActive) {
+                this.entityRenderer.drawObjects(ctx);
+                this.entityRenderer.drawItems(ctx);
+                this.entityRenderer.drawNPCs(ctx);
+                this.entityRenderer.drawEnemies(ctx);
+                this.entityRenderer.drawPlayer(ctx);
+                if (this.drawIconIdNextFrame) {
+                    this.drawTileIconOnPlayer(ctx, this.drawIconIdNextFrame);
+                }
+                this.dialogRenderer.drawDialog(ctx, gameplayCanvas);
             }
-
-            this.dialogRenderer.drawDialog(ctx, gameplayCanvas);
+        }
+        if (introActive) {
+            this.drawIntroOverlay(ctx, gameplayCanvas);
         }
         ctx.restore();
 
-        this.hudRenderer.drawHUD(ctx, {
-            width: this.canvas.width,
-            height: this.hudBarHeight
-        });
+        if (introActive) {
+            ctx.save();
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, this.canvas.width, this.hudBarHeight);
+            ctx.restore();
+        } else {
+            this.hudRenderer.drawHUD(ctx, {
+                width: this.canvas.width,
+                height: this.hudBarHeight
+            });
+        }
 
         if (typeof this.gameState.isGameOver === 'function' && this.gameState.isGameOver()) {
             this.drawGameOverScreen();
@@ -143,6 +157,17 @@ class Renderer {
 
     drawTilePreviewAt(tileId, px, py, size, ctx) {
         this.canvasHelper.drawTilePreview(tileId, px, py, size, ctx);
+    }
+
+    setIntroData(data = {}) {
+        this.introData = {
+            title: data.title || 'Tiny RPG Maker',
+            author: data.author || ''
+        };
+    }
+
+    isIntroOverlayActive() {
+        return Boolean(this.gameEngine?.isIntroVisible?.());
     }
 
     captureGameplayFrame() {
@@ -372,6 +397,33 @@ class Renderer {
         if (typeof callback === 'function') {
             callback();
         }
+    }
+
+    drawIntroOverlay(ctx, gameplayCanvas) {
+        const title = this.introData?.title || 'Tiny RPG Maker';
+        const author = (this.introData?.author || '').trim();
+        const width = gameplayCanvas.width;
+        const height = gameplayCanvas.height;
+        ctx.save();
+        ctx.fillStyle = 'rgba(4, 6, 14, 0.78)';
+        ctx.fillRect(0, 0, width, height);
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const centerX = width / 2;
+        const centerY = height / 2;
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = `${Math.max(12, Math.floor(height / 12))}px monospace`;
+        ctx.fillText(title, centerX, centerY - height * 0.12);
+        if (author) {
+            ctx.fillStyle = 'rgba(255,255,255,0.8)';
+            ctx.font = `${Math.max(10, Math.floor(height / 18))}px monospace`;
+            ctx.fillText(`por ${author}`, centerX, centerY);
+        }
+        const blink = ((Date.now() / 500) % 2) > 1 ? 0.3 : 0.95;
+        ctx.fillStyle = `rgba(100, 181, 246, ${blink.toFixed(2)})`;
+        ctx.font = `${Math.max(9, Math.floor(height / 20))}px monospace`;
+        ctx.fillText('Iniciar aventura', centerX, centerY + height * 0.18);
+        ctx.restore();
     }
 
     flashEdge(direction, options = {}) {

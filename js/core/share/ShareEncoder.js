@@ -151,6 +151,10 @@ class ShareEncoder {
         if (title && title !== ShareConstants.DEFAULT_TITLE) {
             parts.push('n' + ShareTextCodec.encodeText(title.slice(0, 80)));
         }
+        const author = typeof gameData?.author === 'string' ? gameData.author.trim() : '';
+        if (author) {
+            parts.push('y' + ShareTextCodec.encodeText(author.slice(0, 60)));
+        }
 
         return parts.join('.');
     }
