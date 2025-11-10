@@ -24,6 +24,7 @@ class MovementManager {
         }
 
         const player = this.gameState.getPlayer();
+        const direction = this.getDirectionFromDelta(dx, dy);
         const roomIndex = player.roomIndex;
         const currentCoords = this.gameState.getRoomCoords(roomIndex);
         const limit = this.gameState.game.roomSize - 1;
@@ -72,10 +73,22 @@ class MovementManager {
             }
         }
 
-        const targetRoom = this.gameState.getGame().rooms?.[targetRoomIndex];
-        if (!targetRoom) return;
+        const enteringNewRoom = targetRoomIndex !== roomIndex;
 
-        if (targetRoom.walls?.[targetY]?.[targetX]) return;
+        const targetRoom = this.gameState.getGame().rooms?.[targetRoomIndex];
+        if (!targetRoom) {
+            if (enteringNewRoom) {
+                this.flashBlockedEdge(direction, { x: targetX, y: targetY });
+            }
+            return;
+        }
+
+        if (targetRoom.walls?.[targetY]?.[targetX]) {
+            if (enteringNewRoom) {
+                this.flashBlockedEdge(direction, { x: targetX, y: targetY });
+            }
+            return;
+        }
 
         const objectAtTarget = this.gameState.getObjectAt?.(targetRoomIndex, targetX, targetY) ?? null;
         if (objectAtTarget?.type === 'door-variable') {
@@ -116,7 +129,12 @@ class MovementManager {
         const candidateId = overlayId ?? groundId;
         if (candidateId !== null && candidateId !== undefined) {
             const tile = this.tileManager.getTile(candidateId);
-            if (tile?.collision) return;
+            if (tile?.collision) {
+                if (enteringNewRoom) {
+                    this.flashBlockedEdge(direction, { x: targetX, y: targetY });
+                }
+                return;
+            }
         }
 
         this.gameState.setPlayerPosition(targetX, targetY, targetRoomIndex !== roomIndex ? targetRoomIndex : null);
@@ -124,6 +142,29 @@ class MovementManager {
         const currentPlayer = this.gameState.getPlayer();
         this.enemyManager.checkCollisionAt(currentPlayer.x, currentPlayer.y);
         this.renderer.draw();
+    }
+
+    getDirectionFromDelta(dx, dy) {
+        if (dx < 0) return 'left';
+        if (dx > 0) return 'right';
+        if (dy < 0) return 'up';
+        if (dy > 0) return 'down';
+        return '';
+    }
+
+    flashBlockedEdge(direction, coords = null) {
+        if (!direction) return;
+        const fn = this.renderer?.flashEdge;
+        if (typeof fn === 'function') {
+            fn.call(this.renderer, direction, {
+                duration: 240,
+                tileX: coords?.x,
+                tileY: coords?.y
+            });
+            if (typeof this.renderer?.draw === 'function') {
+                this.renderer.draw();
+            }
+        }
     }
 }
 

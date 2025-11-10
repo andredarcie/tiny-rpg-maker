@@ -38,6 +38,13 @@ class Renderer {
         this.enemySprites = this.spriteFactory.getEnemySprites();
         this.enemySprite = this.spriteFactory.getEnemySprite();
         this.objectSprites = this.spriteFactory.getObjectSprites();
+        this.edgeFlash = {
+            direction: '',
+            expiresAt: 0,
+            color: 'rgba(255,255,255,0.35)',
+            tileX: null,
+            tileY: null
+        };
         this.combatIndicatorElement = typeof document !== 'undefined'
             ? document.getElementById('combat-indicator')
             : null;
@@ -73,6 +80,7 @@ class Renderer {
         this.tileRenderer.drawBackground(ctx, gameplayCanvas);
         this.tileRenderer.drawTiles(ctx, gameplayCanvas);
         this.tileRenderer.drawWalls(ctx);
+        this.drawEdgeFlash(ctx, gameplayCanvas);
 
         this.entityRenderer.drawObjects(ctx);
         this.entityRenderer.drawItems(ctx);
@@ -130,6 +138,74 @@ class Renderer {
 
     drawTilePreviewAt(tileId, px, py, size, ctx) {
         this.canvasHelper.drawTilePreview(tileId, px, py, size, ctx);
+    }
+
+    flashEdge(direction, options = {}) {
+        if (typeof direction !== 'string' || !direction.trim()) return;
+        const normalizedDirection = direction.trim().toLowerCase();
+        const duration = Number.isFinite(options.duration)
+            ? Math.max(32, options.duration)
+            : 220;
+        const color = typeof options.color === 'string' && options.color.trim()
+            ? options.color.trim()
+            : 'rgba(255,255,255,0.35)';
+        const clampIndex = (value) => {
+            if (!Number.isFinite(value)) return null;
+            const idx = Math.floor(value);
+            return Math.max(0, Math.min(7, idx));
+        };
+        const tileX = clampIndex(options.tileX);
+        const tileY = clampIndex(options.tileY);
+        this.edgeFlash = {
+            direction: normalizedDirection,
+            expiresAt: Date.now() + duration,
+            color,
+            tileX,
+            tileY
+        };
+    }
+
+    drawEdgeFlash(ctx, bounds) {
+        const state = this.edgeFlash;
+        if (!state?.direction) return;
+        const now = Date.now();
+        if (!Number.isFinite(state.expiresAt) || state.expiresAt <= now) {
+            this.edgeFlash.direction = '';
+            return;
+        }
+
+        const tileSize = Math.max(1, this.canvasHelper.getTilePixelSize());
+        const thickness = Math.max(2, Math.floor(tileSize / 4));
+        const highlightSize = tileSize;
+        const clampIndex = (value, fallback = 0) => {
+            if (!Number.isFinite(value)) return Math.max(0, Math.min(7, Math.floor(fallback)));
+            return Math.max(0, Math.min(7, Math.floor(value)));
+        };
+        const player = typeof this.gameState?.getPlayer === 'function'
+            ? this.gameState.getPlayer()
+            : { x: 0, y: 0 };
+        const tileX = clampIndex(state.tileX, player?.x ?? 0);
+        const tileY = clampIndex(state.tileY, player?.y ?? 0);
+        ctx.save();
+        ctx.fillStyle = state.color || 'rgba(255,255,255,0.35)';
+        switch (state.direction) {
+            case 'left':
+                ctx.fillRect(0, tileY * highlightSize, thickness, highlightSize);
+                break;
+            case 'right':
+                ctx.fillRect(bounds.width - thickness, tileY * highlightSize, thickness, highlightSize);
+                break;
+            case 'up':
+                ctx.fillRect(tileX * highlightSize, 0, highlightSize, thickness);
+                break;
+            case 'down':
+                ctx.fillRect(tileX * highlightSize, bounds.height - thickness, highlightSize, thickness);
+                break;
+            default:
+                ctx.fillRect(0, 0, bounds.width, thickness);
+                break;
+        }
+        ctx.restore();
     }
 
     startTileAnimationLoop() {
