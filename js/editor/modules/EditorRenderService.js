@@ -1,6 +1,13 @@
 class EditorRenderService {
     constructor(editorManager) {
         this.manager = editorManager;
+        this.handleTileAnimationFrame = () => {
+            this.renderEditor();
+            this.updateSelectedTilePreview();
+        };
+        if (typeof window !== 'undefined' && window.addEventListener) {
+            window.addEventListener('tile-animation-frame', this.handleTileAnimationFrame);
+        }
     }
 
     get dom() {
@@ -120,12 +127,15 @@ class EditorRenderService {
     }
 
     drawTile(ctx, tileId, px, py, size) {
-        const tile = this.manager.gameEngine.tileManager.getTile(tileId);
-        if (!tile || !Array.isArray(tile.pixels)) return;
+        const tileManager = this.manager.gameEngine.tileManager;
+        const tile = tileManager.getTile(tileId);
+        if (!tile) return;
+        const pixels = tileManager.getTilePixels(tile);
+        if (!Array.isArray(pixels)) return;
         const step = Math.max(1, Math.floor(size / 8));
         for (let y = 0; y < 8; y++) {
             for (let x = 0; x < 8; x++) {
-                const col = tile.pixels[y]?.[x];
+                const col = pixels[y]?.[x];
                 if (!col || col === 'transparent') continue;
                 ctx.fillStyle = col;
                 ctx.fillRect(px + x * step, py + y * step, step, step);

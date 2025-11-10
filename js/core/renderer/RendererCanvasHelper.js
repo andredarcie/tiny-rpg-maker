@@ -1,7 +1,8 @@
 class RendererCanvasHelper {
-    constructor(canvas, context) {
+    constructor(canvas, context, tileManager) {
         this.canvas = canvas;
         this.ctx = context;
+        this.tileManager = tileManager || null;
     }
 
     getTilePixelSize() {
@@ -21,14 +22,27 @@ class RendererCanvasHelper {
         }
     }
 
-    drawCustomTile(tileManager, tileId, px, py, size) {
-        const tile = tileManager.getTile(tileId);
-        if (!tile) return;
+    resolveTilePixels(tile, frameOverride = null) {
+        if (this.tileManager?.getTilePixels) {
+            return this.tileManager.getTilePixels(tile, frameOverride);
+        }
+        if (Array.isArray(tile?.frames) && tile.frames.length) {
+            return tile.frames[0];
+        }
+        return Array.isArray(tile?.pixels) ? tile.pixels : null;
+    }
 
-        const step = Math.floor(size / 8);
+    drawCustomTile(tileId, px, py, size, frameOverride = null) {
+        if (!this.tileManager) return;
+        const tile = this.tileManager.getTile(tileId);
+        if (!tile) return;
+        const pixels = this.resolveTilePixels(tile, frameOverride);
+        if (!pixels) return;
+
+        const step = Math.max(1, Math.floor(size / 8));
         for (let y = 0; y < 8; y++) {
             for (let x = 0; x < 8; x++) {
-                const col = tile.pixels[y][x];
+                const col = pixels[y]?.[x];
                 if (!col || col === 'transparent') continue;
                 this.ctx.fillStyle = col;
                 this.ctx.fillRect(px + x * step, py + y * step, step, step);
@@ -36,14 +50,17 @@ class RendererCanvasHelper {
         }
     }
 
-    drawTileOnCanvas(canvas, tile) {
+    drawTileOnCanvas(canvas, tile, frameOverride = null) {
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        const step = Math.floor(canvas.width / 8);
+        const pixels = this.resolveTilePixels(tile, frameOverride);
+        if (!pixels) return;
+
+        const step = Math.max(1, Math.floor(canvas.width / 8));
         for (let y = 0; y < 8; y++) {
             for (let x = 0; x < 8; x++) {
-                const col = tile.pixels[y][x];
+                const col = pixels[y]?.[x];
                 if (!col || col === 'transparent') continue;
                 ctx.fillStyle = col;
                 ctx.fillRect(x * step, y * step, step, step);
@@ -51,14 +68,17 @@ class RendererCanvasHelper {
         }
     }
 
-    drawTilePreview(tileManager, tileId, px, py, size, ctx = this.ctx) {
-        const tile = tileManager.getTile(tileId);
+    drawTilePreview(tileId, px, py, size, ctx = this.ctx, frameOverride = null) {
+        if (!this.tileManager) return;
+        const tile = this.tileManager.getTile(tileId);
         if (!tile) return;
+        const pixels = this.resolveTilePixels(tile, frameOverride);
+        if (!pixels) return;
 
-        const step = Math.floor(size / 8);
+        const step = Math.max(1, Math.floor(size / 8));
         for (let y = 0; y < 8; y++) {
             for (let x = 0; x < 8; x++) {
-                const col = tile.pixels[y][x];
+                const col = pixels[y]?.[x];
                 if (!col || col === 'transparent') continue;
                 ctx.fillStyle = col;
                 ctx.fillRect(px + x * step, py + y * step, step, step);
@@ -70,4 +90,3 @@ class RendererCanvasHelper {
 if (typeof window !== 'undefined') {
     window.RendererCanvasHelper = RendererCanvasHelper;
 }
-

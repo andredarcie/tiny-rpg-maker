@@ -21,8 +21,23 @@ class TileDefinitions {
         "#FFCCAA"
     ]);
 
-    static createTile(id, name, pixels, collision = false, category = 'Diversos') {
-        return { id, name, pixels, collision, category };
+    static createTile(id, name, layouts, collision = false, category = 'Diversos') {
+        const layoutList = Array.isArray(layouts) ? layouts.filter(Boolean) : [layouts];
+        const frames = (layoutList.length ? layoutList : [this.createEmptyLayout()])
+            .map((layout) => this.toPixels(layout));
+        return {
+            id,
+            name,
+            pixels: frames[0],
+            frames,
+            animated: frames.length > 1,
+            collision,
+            category
+        };
+    }
+
+    static createEmptyLayout() {
+        return Array.from({ length: 8 }, () => Array(8).fill(null));
     }
 
     static toPixels(layout) {
@@ -31,32 +46,45 @@ class TileDefinitions {
         );
     }
 
-    static tile(index, name, layout, collision = false, category = 'Diversos') {
-        return this.createTile(index, name, this.toPixels(layout), collision, category);
+    static tile(index, name, layout, collision = false, category = 'Diversos', alternateLayout = null) {
+        const layouts = [layout];
+        if (Array.isArray(alternateLayout)) {
+            layouts.push(alternateLayout);
+        }
+        return this.createTile(index, name, layouts, collision, category);
     }
 
     static TILE_PRESETS = [
         this.tile(0, 'Grama Vibrante', [
-            [ 3,  3,  3,  3,  3,  3,  3,  3],
-            [ 3,  3,  3,  3,  3,  3,  3,  3],
-            [ 3,  3,  3,  3,  3,  3,  3,  3],
-            [ 3,  3,  3,  3,  3,  3,  3,  3],
-            [ 3,  3,  3,  3,  3,  3,  3,  3],
-            [ 3,  3,  3,  3,  3,  3,  3,  3],
-            [ 3,  3,  3,  3,  3,  3,  3,  3],
-            [ 3,  3,  3,  3,  3,  3,  3,  3]
+            [  3,  3,  3,  3,  3,  3,  3,  3 ],
+            [  3,  3,  3,  3,  3,  3,  3,  3 ],
+            [  3,  3,  3,  3,  3,  3,  3,  3 ],
+            [  3,  3,  3,  3,  3,  3,  3,  3 ],
+            [  3,  3,  3,  3,  3,  3,  3,  3 ],
+            [  3,  3,  3,  3,  3,  3,  3,  3 ],
+            [  3,  3,  3,  3,  3,  3,  3,  3 ],
+            [  3,  3,  3,  3,  3,  3,  3,  3 ]
         ], false, 'Terreno'),
 
         this.tile(1, 'Grama Alta', [
-            [ 3,  3,  3,  3,  3,  3,  3,  3],
-            [ 3,  3,  3, 11,  3,  3,  3,  3],
-            [ 3,  3,  3, 11,  3,  3,  3,  3],
-            [ 3,  3,  3, 11,  3,  3,  3,  3],
-            [ 3,  3,  3,  3,  3,  11,  3,  3],
-            [ 3,  11,  3,  3,  3, 11,  3,  3],
-            [ 3,  11,  3,  3,  3,  3,  3,  3],
-            [ 3,  3,  3,  3,  3,  3,  3,  3]
-        ], false, 'Terreno'),
+            [  3,  3,  3,  3,  3,  3,  3,  3 ],
+            [  3,  3,  3,  3,  3,  3,  3,  3 ],
+            [  3,  3,  3,  3,  3, 11,  3,  3 ],
+            [  3,  3,  3,  3, 11,  3, 11,  3 ],
+            [  3, 11,  3,  3,  3,  3,  3,  3 ],
+            [ 11,  3, 11,  3,  3,  3,  3,  3 ],
+            [  3,  3,  3,  3,  3,  3,  3,  3 ],
+            [  3,  3,  3,  3,  3,  3,  3,  3 ]
+        ], false, 'Terreno', [
+            [  3,  3,  3,  3,  3,  3,  3,  3 ],
+            [  3,  3,  3,  3,  3,  3,  3,  3 ],
+            [  3,  3,  3,  3,  3,  3, 11,  3 ],
+            [  3,  3,  3,  3,  3, 11,  3, 11 ],
+            [  3,  3, 11,  3,  3,  3,  3,  3 ],
+            [  3, 11,  3, 11,  3,  3,  3,  3 ],
+            [  3,  3,  3,  3,  3,  3,  3,  3 ],
+            [  3,  3,  3,  3,  3,  3,  3,  3 ]
+        ]),
 
         this.tile(2, 'Trilha de Terra', [
             [  4,  4,  4,  4,  4,  4,  4,  4 ],
@@ -100,7 +128,16 @@ class TileDefinitions {
             [ 12, 12, 12, 12, 12, 12, 12, 12 ],
             [ 12, 12,  7, 12, 12, 12, 12, 12 ],
             [ 12, 12, 12, 12, 12, 12, 12, 12 ]
-        ], true, 'Agua'),
+        ], true, 'Agua', [
+            [ 12, 12, 12, 12, 12, 12, 12, 12 ],
+            [ 12, 12, 12, 12, 12,  7, 12, 12 ],
+            [ 12, 12, 12, 12,  7, 12, 12, 12 ],
+            [ 12, 12, 12, 12, 12, 12, 12, 12 ],
+            [ 12,  7, 12, 12, 12, 12, 12, 12 ],
+            [ 12, 12, 12, 12, 12, 12,  7, 12 ],
+            [ 12, 12, 12,  7, 12, 12, 12, 12 ],
+            [ 12, 12, 12, 12, 12,  7, 12, 12 ]
+        ]),
 
         this.tile(6, 'Lava Borbulhante', [
             [ 10, 10,  8,  8,  8,  8,  9,  8 ],
@@ -111,7 +148,16 @@ class TileDefinitions {
             [  8,  9, 10,  8,  8, 10,  9,  8 ],
             [  8, 10,  9, 10,  9, 10,  8,  8 ],
             [ 10,  8,  8,  8,  8,  8,  9,  8 ]
-        ], true, 'Perigo'),
+        ], true, 'Perigo', [
+            [  9, 10,  8,  8, 10,  8,  9,  8 ],
+            [  8,  9, 10,  9,  9, 10,  8,  8 ],
+            [  9, 10,  9, 10,  9, 10,  9,  8 ],
+            [  8,  8, 10,  8,  9,  9, 10,  8 ],
+            [  8,  8,  8,  8,  8,  9,  8,  8 ],
+            [  8, 10,  9,  8, 10,  8,  9,  8 ],
+            [ 10,  9, 10,  9, 10,  9,  8,  8 ],
+            [ 10,  8,  8,  9,  8,  8, 10,  8 ]
+        ]),
 
         this.tile(7, 'Pedra Grande', [
             [ null, null, null, null, null, null, null, null ],

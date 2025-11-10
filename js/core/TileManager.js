@@ -13,6 +13,8 @@ class TileManager {
     constructor(gameState) {
         this.gameState = gameState;
         this.presets = this.buildPresetTiles();
+        this.animationFrameIndex = 0;
+        this.maxAnimationFrames = 1;
     }
 
     generateTileId() {
@@ -23,21 +25,28 @@ class TileManager {
         return `tile-${Math.random().toString(36).slice(2, 10)}`;
     }
 
-    normalizeTile(tile, fallbackIndex = 0) {
-        const name = typeof tile.name === 'string' && tile.name.trim()
-            ? tile.name.trim()
-            : `Tile ${fallbackIndex + 1}`;
-        const collision = tile.collision;
-        const pixels = Array.from({ length: 8 }, (_, y) =>
+    normalizeFrame(frameSource) {
+        return Array.from({ length: 8 }, (_, y) =>
             Array.from({ length: 8 }, (_, x) => {
-                const row = Array.isArray(tile.pixels) ? tile.pixels : null;
-                const value = row?.[y]?.[x];
+                const value = frameSource?.[y]?.[x];
                 if (typeof value === 'string' && value.trim()) {
                     return value;
                 }
                 return 'transparent';
             })
         );
+    }
+
+    normalizeTile(tile, fallbackIndex = 0) {
+        const name = typeof tile.name === 'string' && tile.name.trim()
+            ? tile.name.trim()
+            : `Tile ${fallbackIndex + 1}`;
+        const collision = tile.collision;
+        const framesSource = Array.isArray(tile.frames) && tile.frames.length
+            ? tile.frames
+            : (tile.pixels ? [tile.pixels] : []);
+        const frames = (framesSource.length ? framesSource : [this.normalizeFrame(null)])
+            .map((frame) => this.normalizeFrame(frame));
         const category = typeof tile.category === 'string' && tile.category.trim()
             ? tile.category.trim()
             : 'Diversos';
@@ -51,7 +60,9 @@ class TileManager {
             id: stableId,
             name,
             collision,
-            pixels,
+            pixels: frames[0],
+            frames,
+            animated: frames.length > 1,
             category
         };
     }
@@ -71,13 +82,10 @@ class TileManager {
     }
 
     cloneTile(tile) {
-        return {
-            id: tile.id,
-            name: tile.name,
-            collision: tile.collision,
-            pixels: tile.pixels.map(row => row.slice()),
-            category: tile.category || 'Diversos'
-        };
+        const normalized = this.normalizeTile(tile);
+        normalized.frames = normalized.frames.map((frame) => frame.map((row) => row.slice()));
+        normalized.pixels = normalized.frames[0];
+        return normalized;
     }
 
     ensureDefaultTiles() {
@@ -116,6 +124,7 @@ class TileManager {
             };
         });
         tileset.map = tileset.maps[0];
+        this.refreshAnimationMetadata();
     }
 
     getPresetTileNames() {
@@ -142,10 +151,18 @@ class TileManager {
         if (typeof data.category === 'string' && data.category.trim()) {
             tile.category = data.category.trim();
         }
-        if (Array.isArray(data.pixels)) {
-            const normalized = this.normalizeTile({ ...tile, pixels: data.pixels });
+        if (Array.isArray(data.frames)) {
+            const normalized = this.normalizeTile({ ...tile, frames: data.frames });
+            tile.frames = normalized.frames;
             tile.pixels = normalized.pixels;
+            tile.animated = normalized.animated;
+        } else if (Array.isArray(data.pixels)) {
+            const normalized = this.normalizeTile({ ...tile, frames: [data.pixels] });
+            tile.frames = normalized.frames;
+            tile.pixels = normalized.pixels;
+            tile.animated = normalized.animated;
         }
+        this.refreshAnimationMetadata();
     }
 
     setMapTile(x, y, tileId, roomIndex = 0) {
@@ -176,6 +193,55 @@ class TileManager {
             return maps[roomIndex];
         }
         return this.gameState.game.tileset.map;
+    }
+
+    refreshAnimationMetadata() {
+        const tiles = this.getTiles() || [];
+        let maxFrames = 1;
+        for (const tile of tiles) {
+            const frameCount = Array.isArray(tile?.frames) && tile.frames.length ? tile.frames.length : 1;
+            if (frameCount > maxFrames) {
+                maxFrames = frameCount;
+            }
+        }
+        this.maxAnimationFrames = Math.max(1, maxFrames);
+    }
+
+    getAnimationFrameCount() {
+        return Math.max(1, this.maxAnimationFrames || 1);
+    }
+
+    getAnimationFrameIndex() {
+        return Math.max(0, this.animationFrameIndex || 0);
+    }
+
+    setAnimationFrameIndex(index = 0) {
+        if (!Number.isFinite(index)) return this.animationFrameIndex;
+        const total = this.getAnimationFrameCount();
+        const safe = ((Math.floor(index) % total) + total) % total;
+        this.animationFrameIndex = safe;
+        return this.animationFrameIndex;
+    }
+
+    advanceAnimationFrame() {
+        const total = this.getAnimationFrameCount();
+        if (total <= 1) return this.animationFrameIndex;
+        this.animationFrameIndex = (this.getAnimationFrameIndex() + 1) % total;
+        return this.animationFrameIndex;
+    }
+
+    getTilePixels(tileOrTileId, frameOverride = null) {
+        const tile = (typeof tileOrTileId === 'object' && tileOrTileId !== null)
+            ? tileOrTileId
+            : this.getTile(tileOrTileId);
+        if (!tile) return null;
+        const frames = Array.isArray(tile.frames) && tile.frames.length
+            ? tile.frames
+            : (tile.pixels ? [tile.pixels] : []);
+        if (!frames.length) return null;
+        const index = Number.isFinite(frameOverride) ? frameOverride : this.getAnimationFrameIndex();
+        const safeIndex = ((Math.floor(index) % frames.length) + frames.length) % frames.length;
+        return frames[safeIndex];
     }
 
 }

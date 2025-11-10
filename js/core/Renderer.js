@@ -25,7 +25,7 @@ class Renderer {
 
         this.paletteManager = new RendererPalette(gameState);
         this.spriteFactory = new RendererSpriteFactory(this.paletteManager);
-        this.canvasHelper = new RendererCanvasHelper(canvas, this.ctx);
+        this.canvasHelper = new RendererCanvasHelper(canvas, this.ctx, tileManager);
         this.tileRenderer = new RendererTileRenderer(gameState, tileManager, this.paletteManager, this.canvasHelper);
         this.entityRenderer = new RendererEntityRenderer(gameState, tileManager, this.spriteFactory, this.canvasHelper, this.paletteManager);
         this.entityRenderer.setViewportOffset(this.gameplayOffsetY);
@@ -55,6 +55,9 @@ class Renderer {
         }
         this.drawIconIdNextFrame = '';
         this.timeIconOverPlayer = 2000;
+        this.tileAnimationInterval = 320;
+        this.tileAnimationTimer = null;
+        this.startTileAnimationLoop();
     }
 
     draw() {
@@ -110,7 +113,7 @@ class Renderer {
     }
 
     drawCustomTile(tileId, px, py, size) {
-        this.canvasHelper.drawCustomTile(this.tileManager, tileId, px, py, size);
+        this.canvasHelper.drawCustomTile(tileId, px, py, size);
     }
 
     drawSprite(ctx, sprite, px, py, step) {
@@ -126,7 +129,40 @@ class Renderer {
     }
 
     drawTilePreviewAt(tileId, px, py, size, ctx) {
-        this.canvasHelper.drawTilePreview(this.tileManager, tileId, px, py, size, ctx);
+        this.canvasHelper.drawTilePreview(tileId, px, py, size, ctx);
+    }
+
+    startTileAnimationLoop() {
+        if (typeof setInterval !== 'function') {
+            return;
+        }
+        if (this.tileAnimationTimer) {
+            clearInterval(this.tileAnimationTimer);
+            this.tileAnimationTimer = null;
+        }
+        const interval = Math.max(60, this.tileAnimationInterval || 0);
+        this.tileAnimationTimer = setInterval(() => this.tickTileAnimation(), interval);
+    }
+
+    tickTileAnimation() {
+        const manager = this.tileManager;
+        const totalFrames = typeof manager.getAnimationFrameCount === 'function'
+            ? manager.getAnimationFrameCount()
+            : 1;
+        if (totalFrames <= 1) return;
+        const nextIndex = typeof manager.advanceAnimationFrame === 'function'
+            ? manager.advanceAnimationFrame()
+            : 0;
+        this.draw();
+        if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+            try {
+                window.dispatchEvent(new CustomEvent('tile-animation-frame', {
+                    detail: { frameIndex: nextIndex }
+                }));
+            } catch (err) {
+                window.dispatchEvent(new Event('tile-animation-frame'));
+            }
+        }
     }
 
     drawGameOverScreen() {

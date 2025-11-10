@@ -32,7 +32,7 @@ class RendererTileRenderer {
             for (let x = 0; x < 8; x++) {
                 const groundId = groundMap[y]?.[x];
                 if (groundId !== null && groundId !== undefined) {
-                    this.canvasHelper.drawCustomTile(this.tileManager, groundId, x * tileSize, y * tileSize, tileSize);
+                    this.canvasHelper.drawCustomTile(groundId, x * tileSize, y * tileSize, tileSize);
                 } else {
                     const colIdx = room.tiles[y][x];
                     ctx.fillStyle = this.paletteManager.getColor(colIdx);
@@ -41,7 +41,7 @@ class RendererTileRenderer {
 
                 const overlayId = overlayMap[y]?.[x];
                 if (overlayId !== null && overlayId !== undefined) {
-                    this.canvasHelper.drawCustomTile(this.tileManager, overlayId, x * tileSize, y * tileSize, tileSize);
+                    this.canvasHelper.drawCustomTile(overlayId, x * tileSize, y * tileSize, tileSize);
                 }
             }
         }
@@ -65,4 +65,3 @@ class RendererTileRenderer {
 if (typeof window !== 'undefined') {
     window.RendererTileRenderer = RendererTileRenderer;
 }
-
