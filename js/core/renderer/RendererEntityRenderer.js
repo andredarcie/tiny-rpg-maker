@@ -8,9 +8,6 @@ class RendererEntityRenderer {
         this.enemyLabelCache = new Map();
         this.enemyLabelNodes = new Map();
         this.enemyLabelRoot = null;
-        this.viewportOffsetY = 0;
-        this.healthIconDefinitions = {}
-        this.setupHealthIcons();
         this.setupEditorModeWatcher();
     }
 
@@ -137,36 +134,6 @@ class RendererEntityRenderer {
         this.canvasHelper.drawSprite(ctx, sprite, px, py, step);
     }
 
-    drawHealth(ctx, options = {}) {
-        if (!ctx || typeof this.gameState.getLives !== 'function' || typeof this.gameState.getMaxLives !== 'function') return;
-        const currentLives = this.gameState.getLives();
-        const maxLives = this.gameState.getMaxLives();
-
-        const offsetX = Number.isFinite(options.offsetX) ? options.offsetX : 0;
-        const offsetY = Number.isFinite(options.offsetY) ? options.offsetY : 0;
-        const gap = Number.isFinite(options.gap) ? Math.max(0, options.gap) : 0;
-        const heartsPerRow = Number.isFinite(options.heartsPerRow)
-            ? Math.max(1, Math.floor(options.heartsPerRow))
-            : 5;
-
-        let iconSize = Number.isFinite(options.heartSize) && options.heartSize > 0
-            ? options.heartSize
-            : this.canvasHelper.getTilePixelSize() / 2;
-        iconSize = Math.max(4, iconSize);
-        const step = iconSize / 8;
-
-        for (let i = 0; i < maxLives; i++) {
-            const sprite = i < currentLives
-                ? this.healthIconDefinitions.full
-                : this.healthIconDefinitions.empty;
-            const row = Math.floor(i / heartsPerRow);
-            const col = i % heartsPerRow;
-            const px = offsetX + col * (iconSize + gap);
-            const py = offsetY + row * (iconSize + gap);
-            this.canvasHelper.drawSprite(ctx, sprite, px, py, step);
-        }
-    }
-
     drawTileIconOnPlayer(ctx, tileId) {
         const objectSprites = this.spriteFactory.getObjectSprites();
         let tileSprite = objectSprites?.[tileId];
@@ -282,33 +249,6 @@ class RendererEntityRenderer {
         }
         document.addEventListener?.('editor-tab-activated', handleModeChange);
         handleModeChange();
-    }
-
-    setupHealthIcons() {
-        const white = this.paletteManager.getColor(7);
-        const red = this.paletteManager.getColor(8);
-        this.healthIconDefinitions = {
-            full: [
-                [ null, null, null, null, null, null, null, null ],
-                [ null, null, null, null, null, null, null, null ],
-                [ null, null,red,red, null,red,red, null ],
-                [ null,red,red,red,red,red,white,red ],
-                [ null,red,red,red,red,red,red,red ],
-                [ null, null,red,red,red,red,red, null ],
-                [ null, null, null,red,red,red, null, null ],
-                [ null, null, null, null,red, null, null, null ]
-            ],
-            empty: [
-                [ null, null, null, null, null, null, null, null ],
-                [ null, null, null, null, null, null, null, null ],
-                [ null, null,red,red, null,red,red, null ],
-                [ null,red,null,null,red,null,null,red ],
-                [ null,red,null,null,null,null,null,red ],
-                [ null, null,red,null,null,null,red, null ],
-                [ null, null, null,red,null,red, null, null ],
-                [ null, null, null, null,red, null, null, null ]
-            ]
-        }
     }
 }
 
