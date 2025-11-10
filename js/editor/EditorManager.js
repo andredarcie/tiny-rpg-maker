@@ -414,8 +414,8 @@ class EditorManager {
     // Game title & JSON sync
     updateGameMetadata() {
         const game = this.gameEngine.getGame();
-        const title = (this.dom.titleInput?.value || '').trim() || 'Tiny RPG Maker';
-        const author = (this.dom.authorInput?.value || '').trim();
+        const title = this.normalizeTitle(this.dom.titleInput?.value || '');
+        const author = this.normalizeAuthor(this.dom.authorInput?.value || '');
         game.title = title;
         game.author = author;
         if (typeof this.gameEngine.syncDocumentTitle === 'function') {
@@ -441,6 +441,16 @@ class EditorManager {
             this.dom.authorInput.value = game.author || '';
         }
         this.updateJSON();
+    }
+
+    normalizeTitle(raw) {
+        const text = String(raw || '').slice(0, 18).replace(/\s+/g, ' ').trim();
+        return text || 'Tiny RPG Maker';
+    }
+
+    normalizeAuthor(raw) {
+        const text = String(raw || '').slice(0, 18).replace(/\s+/g, ' ').trim();
+        return text;
     }
 
     // Restore & import logic

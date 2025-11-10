@@ -55,8 +55,8 @@ class ShareDecoder {
             ? SharePositionCodec.decodePositions(payload.a || '')
             : [];
         const variableStates = version >= ShareConstants.VARIABLES_VERSION ? ShareVariableCodec.decodeVariables(payload.b || '') : [];
-        const title = ShareTextCodec.decodeText(payload.n, ShareConstants.DEFAULT_TITLE) || ShareConstants.DEFAULT_TITLE;
-        const author = ShareTextCodec.decodeText(payload.y, '') || '';
+        const title = (ShareTextCodec.decodeText(payload.n, ShareConstants.DEFAULT_TITLE) || ShareConstants.DEFAULT_TITLE).slice(0, 18);
+        const author = (ShareTextCodec.decodeText(payload.y, '') || '').slice(0, 18);
         const buildNpcId = (index) => `npc-${index + 1}`;
 
         const defs = ShareConstants.NPC_DEFINITIONS;

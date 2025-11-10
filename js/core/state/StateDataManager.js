@@ -58,8 +58,8 @@ class StateDataManager {
         const normalizedVariables = this.variableManager.normalizeVariables(data.variables);
 
         Object.assign(this.game, {
-            title: data.title || "My Tiny RPG Game",
-            author: data.author || "",
+            title: typeof data.title === 'string' ? data.title.slice(0, 18) : "My Tiny RPG Game",
+            author: typeof data.author === 'string' ? data.author.slice(0, 18) : "",
             palette: Array.isArray(data.palette) && data.palette.length >= 3 ? data.palette.slice(0, 3) : ['#000000', '#1D2B53', '#FFF1E8'],
             roomSize: 8,
             world: { rows: worldRows, cols: worldCols },
