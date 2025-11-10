@@ -6,6 +6,10 @@ class RendererHudRenderer {
         this.padding = 4;
         this.gap = 6;
         this.backgroundColor = '#000000';
+        this.viewportOffsetY = 0;
+        this.canvasHelper = entityRenderer.canvasHelper;
+        this.healthIconDefinitions = {};
+        this.setupHealthIcons();
     }
 
     drawHUD(ctx, area = {}) {
@@ -39,12 +43,12 @@ class RendererHudRenderer {
         const rightReserved = miniMapSize + this.gap + labelWidth + labelGap;
         const availableWidth = Math.max(0, width - padding - rightReserved);
 
-        const heartBaseSize = this.entityRenderer?.canvasHelper?.getTilePixelSize?.() ?? 16;
+        const heartBaseSize = this.canvasHelper.getTilePixelSize?.() ?? 16;
         const heartSize = Math.max(6, Math.min(height - padding * 2, heartBaseSize / 2));
         const heartStride = heartSize + 2;
         const heartsPerRow = Math.max(1, Math.floor(availableWidth / Math.max(heartStride, 1)));
 
-        this.entityRenderer.drawHealth(ctx, {
+        this.drawHealth(ctx, {
             offsetX: padding,
             offsetY: padding + Math.max(0, (height - padding * 2 - heartSize) / 2),
             heartsPerRow,
@@ -59,8 +63,39 @@ class RendererHudRenderer {
         }
 
         this.drawMiniMap(ctx, miniMapX, miniMapY, mapCellSize, miniMapSize);
+        this.drawXpBar(ctx,miniMapX-30,miniMapY+miniMapSize)
 
         ctx.restore();
+    }
+
+    drawHealth(ctx, options = {}) {
+        if (!ctx || typeof this.gameState.getLives !== 'function' || typeof this.gameState.getMaxLives !== 'function') return;
+        const currentLives = this.gameState.getLives();
+        const maxLives = this.gameState.getMaxLives();
+
+        const offsetX = Number.isFinite(options.offsetX) ? options.offsetX : 0;
+        const offsetY = Number.isFinite(options.offsetY) ? options.offsetY : 0;
+        const gap = Number.isFinite(options.gap) ? Math.max(0, options.gap) : 0;
+        const heartsPerRow = Number.isFinite(options.heartsPerRow)
+            ? Math.max(1, Math.floor(options.heartsPerRow))
+            : 5;
+
+        let iconSize = Number.isFinite(options.heartSize) && options.heartSize > 0
+            ? options.heartSize
+            : this.canvasHelper.getTilePixelSize() / 2;
+        iconSize = Math.max(4, iconSize);
+        const step = iconSize / 8;
+
+        for (let i = 0; i < maxLives; i++) {
+            const sprite = i < currentLives
+                ? this.healthIconDefinitions.full
+                : this.healthIconDefinitions.empty;
+            const row = Math.floor(i / heartsPerRow);
+            const col = i % heartsPerRow;
+            const px = offsetX + col * (iconSize + gap);
+            const py = offsetY + row * (iconSize + gap);
+            this.canvasHelper.drawSprite(ctx, sprite, px, py, step);
+        }
     }
 
     getLevelLabel() {
@@ -110,6 +145,57 @@ class RendererHudRenderer {
         }
 
         ctx.restore();
+    }
+
+    drawXpBar(ctx,x,y) {
+        const totalBarSize = 24;
+        ctx.strokeStyle = 'rgba(204, 204, 204, 0.25)';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x+totalBarSize, y);
+        ctx.stroke();
+        
+        const currentXp = this.gameState.getExperience();
+        if (currentXp == 0) {return;}
+        const xpNeeded = this.gameState.getExperienceToNext();
+        const barSize = (currentXp * totalBarSize / xpNeeded);
+
+        ctx.strokeStyle = this.paletteManager.getColor(13);
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x+barSize, y);
+        ctx.stroke();
+    }
+
+    setupHealthIcons() {
+        const white = this.paletteManager.getColor(7);
+        const red = this.paletteManager.getColor(8);
+        this.healthIconDefinitions = {
+            full: [
+                [ null, null, null, null, null, null, null, null ],
+                [ null, null, null, null, null, null, null, null ],
+                [ null, null,red,red, null,red,red, null ],
+                [ null,red,red,red,red,red,white,red ],
+                [ null,red,red,red,red,red,red,red ],
+                [ null, null,red,red,red,red,red, null ],
+                [ null, null, null,red,red,red, null, null ],
+                [ null, null, null, null,red, null, null, null ]
+            ],
+            empty: [
+                [ null, null, null, null, null, null, null, null ],
+                [ null, null, null, null, null, null, null, null ],
+                [ null, null,red,red, null,red,red, null ],
+                [ null,red,null,null,red,null,null,red ],
+                [ null,red,null,null,null,null,null,red ],
+                [ null, null,red,null,null,null,red, null ],
+                [ null, null, null,red,null,red, null, null ],
+                [ null, null, null, null,red, null, null, null ]
+            ]
+        }
     }
 }
 
