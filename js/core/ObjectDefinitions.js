@@ -4,6 +4,21 @@
 class ObjectDefinitions {
     static OBJECT_DEFINITIONS = [
         {
+            type: 'player-start',
+            id: 'object-player-start',
+            name: 'Inicio do Jogador',
+            sprite: [
+                [ null, null, null, null, null, null, null, null ],
+                [ null,  1,  1,  1,  1,  1,  1, null ],
+                [ null,  1,  3,  3,  3,  3,  1, null ],
+                [ null,  1,  3,  3, 11,  3,  1, null ],
+                [ null,  1,  3, 11,  3,  3,  1, null ],
+                [ null,  1,  3,  3,  3,  3,  1, null ],
+                [ null,  1,  1,  1,  1,  1,  1, null ],
+                [ null, null, null, null, null, null, null, null ]
+            ]
+        },
+        {
             type: 'key',
             id: 'object-key',
             name: 'Chave',

@@ -130,6 +130,7 @@ class GameState {
         this.variableManager.resetRuntime();
         this.itemManager.resetItems();
         this.objectManager.resetRuntime();
+        this.objectManager.ensurePlayerStartObject();
         this.setGameOver(false);
         this.resumeGame('game-over');
     }

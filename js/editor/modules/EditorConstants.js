@@ -29,7 +29,7 @@ class EditorConstants {
     }
 
     static get OBJECT_TYPE_ORDER() {
-        return ['door', 'door-variable', 'key', 'life-potion', 'sword', 'xp-scroll'];
+        return ['player-start', 'door', 'door-variable', 'key', 'life-potion', 'sword', 'xp-scroll'];
     }
 }
 

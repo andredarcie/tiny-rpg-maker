@@ -25,6 +25,7 @@ class RendererEntityRenderer {
 
         for (const object of objects) {
             if (object.roomIndex !== player.roomIndex) continue;
+            if (object.type === 'player-start') continue;
             if (object.type === 'key' && object.collected) continue;
             if (object.type === 'life-potion' && object.collected) continue;
             if (object.type === 'xp-scroll' && object.collected) continue;

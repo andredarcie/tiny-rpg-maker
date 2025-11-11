@@ -616,13 +616,20 @@ class EditorRenderService {
                 body.appendChild(badge);
             }
 
-            const removeBtn = document.createElement('button');
-            removeBtn.type = 'button';
-            removeBtn.className = 'object-remove';
-            removeBtn.dataset.type = object.type;
-            removeBtn.dataset.roomIndex = String(object.roomIndex);
-            removeBtn.textContent = 'Remover';
-            body.appendChild(removeBtn);
+            if (object.type !== 'player-start') {
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'object-remove';
+                removeBtn.dataset.type = object.type;
+                removeBtn.dataset.roomIndex = String(object.roomIndex);
+                removeBtn.textContent = 'Remover';
+                body.appendChild(removeBtn);
+            } else {
+                const badge = document.createElement('div');
+                badge.className = 'object-status';
+                badge.textContent = 'Marcador inicial';
+                body.appendChild(badge);
+            }
 
             card.append(preview, body);
             container.appendChild(card);
