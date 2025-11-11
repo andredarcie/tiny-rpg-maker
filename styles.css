@@ -181,6 +181,10 @@ body.game-mode .tabs {
         gap: 8px;
         margin-top: 0;
     }
+
+    body.game-mode .game-screen {
+        margin-top: 8px;
+    }
 }
 
 .tab-button:focus-visible {
