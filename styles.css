@@ -85,6 +85,10 @@ main {
     margin: clamp(6px, 2vw, 14px) auto;
 }
 
+body.game-mode .tabs {
+    margin-bottom: 0;
+}
+
 .tabs-title {
     flex: 1 1 100%;
     margin: 0;
@@ -172,9 +176,10 @@ main {
 
     body.game-mode #game-container {
         justify-content: flex-start;
-        padding-top: 10px;
-        padding-bottom: 16px;
+        padding-top: 0;
+        padding-bottom: 10px;
         gap: 8px;
+        margin-top: -12px;
     }
 }
 
@@ -277,12 +282,13 @@ body.game-mode #game-container {
     width: 100%;
     height: 100%;
     min-height: 0;
-    padding: clamp(12px, 3vw, 32px);
+    padding: 0 clamp(12px, 3vw, 32px) clamp(12px, 3vw, 32px);
+    margin-top: -8px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
 }
 
 body.game-mode #tab-game .game-controls {
@@ -497,10 +503,6 @@ body.game-mode #tab-game .game-controls button {
         padding-bottom: clamp(140px, 30vw, 220px);
         justify-content: flex-start;
         gap: 8px;
-    }
-
-    #game-canvas {
-        margin-top: clamp(48px, 10vw, 72px);
     }
 }
 
