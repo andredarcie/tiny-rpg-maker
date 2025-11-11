@@ -616,6 +616,13 @@ class EditorRenderService {
                 body.appendChild(badge);
             }
 
+            if (object.type === 'player-end') {
+                const badge = document.createElement('div');
+                badge.className = 'object-status';
+                badge.textContent = 'Final do jogo';
+                body.appendChild(badge);
+            }
+
             if (object.type !== 'player-start') {
                 const removeBtn = document.createElement('button');
                 removeBtn.type = 'button';
@@ -641,6 +648,8 @@ class EditorRenderService {
         if (def?.name) return def.name;
         if (type === 'door') return 'Porta';
         if (type === 'door-variable') return 'Porta magica';
+        if (type === 'player-start') return 'Inicio do Jogador';
+        if (type === 'player-end') return 'Fim do Jogo';
         if (type === 'key') return 'Chave';
         if (type === 'life-potion') return 'Pocao de Vida';
         if (type === 'sword') return 'Espada';

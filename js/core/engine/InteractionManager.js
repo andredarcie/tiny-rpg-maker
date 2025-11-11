@@ -1,7 +1,8 @@
 class InteractionManager {
-    constructor(gameState, dialogManager) {
+    constructor(gameState, dialogManager, options = {}) {
         this.gameState = gameState;
         this.dialogManager = dialogManager;
+        this.options = options;
     }
 
     handlePlayerInteractions() {
@@ -67,6 +68,12 @@ class InteractionManager {
                     this.gameState.addDamageShield(1);
                 }
                 this.dialogManager.showDialog('Voce pegou uma espada! Ela bloqueia 1 dano do proximo ataque inimigo.');
+                break;
+            }
+            if (object.type === 'player-end') {
+                if (typeof this.options?.onPlayerVictory === 'function') {
+                    this.options.onPlayerVictory();
+                }
                 break;
             }
         }

@@ -50,7 +50,8 @@ class GameState {
             dialog: { active: false, text: "", page: 1, maxPages: 1, meta: null },
             enemies: [],
             variables: [],
-            gameOver: false
+            gameOver: false,
+            gameOverReason: null
         };
 
         this.worldManager = new StateWorldManager(this.game, roomSize);
@@ -394,7 +395,7 @@ class GameState {
         this.playing = !this.pauseReasons || this.pauseReasons.size === 0;
     }
 
-    setGameOver(active = true) {
+    setGameOver(active = true, reason = 'defeat') {
         if (this.state && typeof this.state === 'object') {
             const activeValue = Boolean(active);
             if (activeValue) {
@@ -404,11 +405,16 @@ class GameState {
                 }, this.timeToResetAfterGameOver);
             }
             this.state.gameOver = activeValue;
+            this.state.gameOverReason = activeValue ? (reason || 'defeat') : null;
         }
     }
 
     isGameOver() {
         return Boolean(this.state?.gameOver);
+    }
+
+    getGameOverReason() {
+        return this.state?.gameOverReason || 'defeat';
     }
 }
 

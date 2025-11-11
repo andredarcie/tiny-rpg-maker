@@ -12,7 +12,9 @@ class GameEngine {
         this.npcManager.ensureDefaultNPCs?.();
         this.renderer = new Renderer(canvas, this.gameState, this.tileManager, this.npcManager, this);
         this.dialogManager = new DialogManager(this.gameState, this.renderer);
-        this.interactionManager = new InteractionManager(this.gameState, this.dialogManager);
+        this.interactionManager = new InteractionManager(this.gameState, this.dialogManager, {
+            onPlayerVictory: () => this.handleGameCompletion()
+        });
         this.enemyManager = new EnemyManager(this.gameState, this.renderer, this.tileManager, {
             onPlayerDefeated: () => this.handlePlayerDefeat(),
             dialogManager: this.dialogManager
@@ -300,7 +302,16 @@ class GameEngine {
     handlePlayerDefeat() {
         this.enemyManager.stop();
         this.gameState.pauseGame?.('game-over');
-        this.gameState.setGameOver?.(true);
+        this.gameState.setGameOver?.(true, 'defeat');
+        this.awaitingRestart = true;
+        this.renderer.draw();
+    }
+
+    handleGameCompletion() {
+        if (this.isGameOver()) return;
+        this.enemyManager.stop();
+        this.gameState.pauseGame?.('game-over');
+        this.gameState.setGameOver?.(true, 'victory');
         this.awaitingRestart = true;
         this.renderer.draw();
     }

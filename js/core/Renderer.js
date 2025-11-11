@@ -538,12 +538,16 @@ class Renderer {
         this.entityRenderer.cleanupEnemyLabels();
         ctx.fillStyle = '#000000';
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        const reason = typeof this.gameState.getGameOverReason === 'function'
+            ? this.gameState.getGameOverReason()
+            : 'defeat';
+        const isVictory = reason === 'victory';
         ctx.fillStyle = '#FFFFFF';
         let fontSize = Math.max(8, Math.floor(this.canvas.height / 10));
         ctx.font = `${fontSize}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('Game Over', this.canvas.width / 2, this.canvas.height / 2);
+        ctx.fillText(isVictory ? 'The End' : 'Game Over', this.canvas.width / 2, this.canvas.height / 2);
 
         if (!this.gameState.canResetAfterGameOver) return;
         ctx.save();
@@ -553,7 +557,7 @@ class Renderer {
         ctx.font = `${fontSize}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('Try Again?', this.canvas.width / 2, this.canvas.height / 1.5);
+        ctx.fillText(isVictory ? 'Play Again?' : 'Try Again?', this.canvas.width / 2, this.canvas.height / 1.5);
         ctx.restore();
     }
 

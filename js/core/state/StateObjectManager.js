@@ -1,5 +1,6 @@
 const PLAYER_START_TYPE = 'player-start';
-const PLACEABLE_OBJECT_TYPES = ['door', 'door-variable', 'key', 'life-potion', 'xp-scroll', 'sword', PLAYER_START_TYPE];
+const PLAYER_END_TYPE = 'player-end';
+const PLACEABLE_OBJECT_TYPES = ['door', 'door-variable', 'key', 'life-potion', 'xp-scroll', 'sword', PLAYER_START_TYPE, PLAYER_END_TYPE];
 const COLLECTIBLE_OBJECT_TYPES = new Set(['key', 'life-potion', 'xp-scroll', 'sword']);
 
 class StateObjectManager {
@@ -27,6 +28,7 @@ class StateObjectManager {
         if (!Array.isArray(objects)) return [];
         const allowedTypes = new Set(PLACEABLE_OBJECT_TYPES);
         let playerStartIncluded = false;
+        let playerEndIncluded = false;
         return objects
             .map((object) => {
                 const sourceType = typeof object?.type === 'string' ? object.type : null;
@@ -35,6 +37,10 @@ class StateObjectManager {
                 if (type === PLAYER_START_TYPE) {
                     if (playerStartIncluded) return null;
                     playerStartIncluded = true;
+                }
+                if (type === PLAYER_END_TYPE) {
+                    if (playerEndIncluded) return null;
+                    playerEndIncluded = true;
                 }
                 const roomIndex = this.worldManager.clampRoomIndex(object?.roomIndex ?? 0);
                 const x = this.worldManager.clampCoordinate(object?.x ?? 0);
@@ -53,7 +59,7 @@ class StateObjectManager {
                     roomIndex,
                     x,
                     y,
-                    collected: (type === 'key' || type === 'life-potion' || type === 'xp-scroll' || type === 'sword') ? Boolean(object?.collected) : false,
+                    collected: COLLECTIBLE_OBJECT_TYPES.has(type) ? Boolean(object?.collected) : false,
                     opened: type === 'door' ? Boolean(object?.opened) : false,
                     variableId: normalizedVariable
                 };
@@ -113,8 +119,8 @@ class StateObjectManager {
         const cy = this.worldManager.clampCoordinate(y ?? 0);
         const objects = this.getObjects();
         let entry = null;
-        if (normalizedType === PLAYER_START_TYPE) {
-            entry = objects.find((object) => object.type === PLAYER_START_TYPE) || null;
+        if (normalizedType === PLAYER_START_TYPE || normalizedType === PLAYER_END_TYPE) {
+            entry = objects.find((object) => object.type === normalizedType) || null;
         } else {
             entry = objects.find((object) =>
                 object.type === normalizedType && object.roomIndex === targetRoom

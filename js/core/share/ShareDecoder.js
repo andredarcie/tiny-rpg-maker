@@ -54,6 +54,9 @@ class ShareDecoder {
         const swordPositions = version >= ShareConstants.SWORD_VERSION
             ? SharePositionCodec.decodePositions(payload.a || '')
             : [];
+        const playerEndPositions = version >= ShareConstants.PLAYER_END_VERSION
+            ? SharePositionCodec.decodePositions(payload.z || '')
+            : [];
         const variableStates = version >= ShareConstants.VARIABLES_VERSION ? ShareVariableCodec.decodeVariables(payload.b || '') : [];
         const title = (ShareTextCodec.decodeText(payload.n, ShareConstants.DEFAULT_TITLE) || ShareConstants.DEFAULT_TITLE).slice(0, 18);
         const author = (ShareTextCodec.decodeText(payload.y, '') || '').slice(0, 18);
@@ -142,7 +145,8 @@ class ShareDecoder {
             ...ShareDataNormalizer.buildObjectEntries(magicDoorPositions, 'door-variable', { variableNibbles: magicDoorVariableNibbles }),
             ...ShareDataNormalizer.buildObjectEntries(lifePotionPositions, 'life-potion'),
             ...ShareDataNormalizer.buildObjectEntries(xpScrollPositions, 'xp-scroll'),
-            ...ShareDataNormalizer.buildObjectEntries(swordPositions, 'sword')
+            ...ShareDataNormalizer.buildObjectEntries(swordPositions, 'sword'),
+            ...ShareDataNormalizer.buildObjectEntries(playerEndPositions, 'player-end')
         ];
 
         return {

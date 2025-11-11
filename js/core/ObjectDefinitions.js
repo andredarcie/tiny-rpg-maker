@@ -19,6 +19,21 @@ class ObjectDefinitions {
             ]
         },
         {
+            type: 'player-end',
+            id: 'object-player-end',
+            name: 'Fim do Jogo',
+            sprite: [
+                [ null, null, null, null, null, null, null, null ],
+                [ null,  1,  1,  1,  1,  1,  1, null ],
+                [ null,  1,  2,  2,  2,  2,  1, null ],
+                [ null,  1,  2,  2, 14,  2,  1, null ],
+                [ null,  1,  2, 14,  2,  2,  1, null ],
+                [ null,  1,  2,  2,  2,  2,  1, null ],
+                [ null,  1,  1,  1,  1,  1,  1, null ],
+                [ null, null, null, null, null, null, null, null ]
+            ]
+        },
+        {
             type: 'key',
             id: 'object-key',
             name: 'Chave',
