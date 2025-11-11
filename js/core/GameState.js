@@ -267,6 +267,7 @@ class GameState {
         let openedMagicDoor = false;
         if (success) {
             openedMagicDoor = this.objectManager.checkOpenedMagicDoor(variableId, value)
+            this.objectManager.syncSwitchState?.(variableId, value);
         }
         return [success, openedMagicDoor];
     }

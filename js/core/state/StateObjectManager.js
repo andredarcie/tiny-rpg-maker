@@ -196,6 +196,23 @@ class StateObjectManager {
         return entry.variableId;
     }
 
+    syncSwitchState(variableId, value) {
+        if (!variableId) return false;
+        let changed = false;
+        const normalized = this.variableManager?.normalizeVariableId?.(variableId) ?? null;
+        if (!normalized) return false;
+        const desired = Boolean(value);
+        this.getObjects().forEach((object) => {
+            if (object.type === SWITCH_TYPE && object.variableId === normalized) {
+                if (object.on !== desired) {
+                    object.on = desired;
+                    changed = true;
+                }
+            }
+        });
+        return changed;
+    }
+
     ensurePlayerStartObject() {
         if (!this.game || !this.worldManager) return null;
         const objects = this.getObjects();
