@@ -72,7 +72,7 @@ class TinyRPGApplication {
     }
 
     static setupTabs() {
-        const tabs = document.querySelectorAll('.tab-button');
+        const tabs = document.querySelectorAll('.tab-button[data-tab]');
         const tabContents = document.querySelectorAll('.tab-content');
 
         const applyLayoutMode = (tabName) => {
@@ -112,7 +112,7 @@ class TinyRPGApplication {
             });
         });
 
-        const initialTab = document.querySelector('.tab-button.active');
+        const initialTab = document.querySelector('.tab-button.active[data-tab]');
         if (initialTab) {
             applyLayoutMode(initialTab.dataset.tab);
             if (initialTab.dataset.tab === 'game') {

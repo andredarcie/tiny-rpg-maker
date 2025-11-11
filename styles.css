@@ -112,6 +112,11 @@ main {
     white-space: nowrap;
 }
 
+.tab-action-button {
+    flex: 0 0 auto;
+    display: none;
+}
+
 .tab-button:hover,
 .tab-button.active {
     background: var(--panel);
@@ -223,6 +228,12 @@ body.game-mode .tab-button {
     border-color: rgba(255, 255, 255, 0.12);
     background: rgba(18, 22, 35, 0.6);
     color: rgba(230, 231, 235, 0.85);
+}
+
+body.game-mode .tab-action-button {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
 }
 
 body.game-mode .tab-button:hover,

@@ -30,6 +30,7 @@
             <div class="tabs">
                 <button class="tab-button active" data-tab="game" aria-selected="true">Jogo</button>
                 <button class="tab-button" data-tab="editor" aria-selected="false">Editor</button>
+                <button id="btn-reset" class="tab-button tab-action-button" type="button">Reiniciar</button>
             </div>
 
             <div class="tab-content active" id="tab-game">
@@ -38,9 +39,6 @@
                     <div class="game-screen">
                         <canvas id="game-canvas" width="128" height="152"></canvas>
                         <div id="screen-flash" class="screen-flash" aria-hidden="true"></div>
-                    </div>
-                    <div class="game-controls">
-                        <button id="btn-reset">Reiniciar</button>
                     </div>
                     <div class="game-touch-pad" aria-hidden="true">
                         <button class="pad-button pad-up" data-direction="up" aria-label="Mover para cima"></button>
