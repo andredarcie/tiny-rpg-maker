@@ -34,6 +34,31 @@ class ObjectDefinitions {
             ]
         },
         {
+            type: 'switch',
+            id: 'object-switch',
+            name: 'Alavanca',
+            sprite: [
+                [ null, null, null, null, null, null, null, null ],
+                [  8, null, null, null, null, null, null, null ],
+                [ null,  6, null, null, null, null, null, null ],
+                [ null, null,  6, null, null, null, null, null ],
+                [ null, null, null,  6, null, null, null, null ],
+                [ null, null,  6,  1,  1,  6, null, null ],
+                [ null,  6,  6,  6,  6,  6,  6, null ],
+                [ null, null, null, null, null, null, null, null ]
+            ],
+            spriteOn: [
+                [ null, null, null, null, null, null, null, null ],
+                [ null, null, null, null, null, null, null, 12 ],
+                [ null, null, null, null, null, null,  6, null ],
+                [ null, null, null, null, null,  6, null, null ],
+                [ null, null, null, null,  6, null, null, null ],
+                [ null, null,  6,  1,  1,  6, null, null ],
+                [ null,  6,  6,  6,  6,  6,  6, null ],
+                [ null, null, null, null, null, null, null, null ]
+            ]
+        },
+        {
             type: 'key',
             id: 'object-key',
             name: 'Chave',

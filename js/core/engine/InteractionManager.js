@@ -70,6 +70,18 @@ class InteractionManager {
                 this.dialogManager.showDialog('Voce pegou uma espada! Ela bloqueia 1 dano do proximo ataque inimigo.');
                 break;
             }
+            if (object.type === 'switch') {
+                object.on = !object.on;
+                const variableId = this.gameState.normalizeVariableId?.(object.variableId) ?? null;
+                if (variableId) {
+                    this.gameState.setVariableValue?.(variableId, object.on);
+                }
+                const message = object.on
+                    ? 'Alavanca ligada.'
+                    : 'Alavanca desligada.';
+                this.dialogManager.showDialog(message);
+                break;
+            }
             if (object.type === 'player-end') {
                 if (typeof this.options?.onPlayerVictory === 'function') {
                     this.options.onPlayerVictory();

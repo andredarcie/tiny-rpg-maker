@@ -581,6 +581,34 @@ class EditorRenderService {
                 body.appendChild(config);
             }
 
+            if (object.type === 'switch') {
+                const config = document.createElement('div');
+                config.className = 'object-config';
+
+                const label = document.createElement('label');
+                label.className = 'object-config-label';
+
+                const select = document.createElement('select');
+                select.className = 'object-config-select';
+                this.manager.npcService.populateVariableSelect(select, object.variableId || '');
+                select.addEventListener('change', () => {
+                    this.gameEngine.setObjectVariable('switch', object.roomIndex, select.value);
+                    this.renderObjects();
+                    this.renderWorldGrid();
+                    this.manager.updateJSON();
+                    this.manager.history.pushCurrentState();
+                });
+                label.append('Variavel associada: ', select);
+                config.appendChild(label);
+
+                const status = document.createElement('div');
+                status.className = 'object-status';
+                status.textContent = `Estado atual: ${object.on ? 'ON' : 'OFF'}`;
+                config.appendChild(status);
+
+                body.appendChild(config);
+            }
+
             if (object.type === 'door' && object.opened) {
                 const badge = document.createElement('div');
                 badge.className = 'object-status';
@@ -650,6 +678,7 @@ class EditorRenderService {
         if (type === 'door-variable') return 'Porta magica';
         if (type === 'player-start') return 'Inicio do Jogador';
         if (type === 'player-end') return 'Fim do Jogo';
+        if (type === 'switch') return 'Alavanca';
         if (type === 'key') return 'Chave';
         if (type === 'life-potion') return 'Pocao de Vida';
         if (type === 'sword') return 'Espada';

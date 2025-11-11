@@ -1,6 +1,7 @@
 const PLAYER_START_TYPE = 'player-start';
 const PLAYER_END_TYPE = 'player-end';
-const PLACEABLE_OBJECT_TYPES = ['door', 'door-variable', 'key', 'life-potion', 'xp-scroll', 'sword', PLAYER_START_TYPE, PLAYER_END_TYPE];
+const SWITCH_TYPE = 'switch';
+const PLACEABLE_OBJECT_TYPES = ['door', 'door-variable', 'key', 'life-potion', 'xp-scroll', 'sword', PLAYER_START_TYPE, PLAYER_END_TYPE, SWITCH_TYPE];
 const COLLECTIBLE_OBJECT_TYPES = new Set(['key', 'life-potion', 'xp-scroll', 'sword']);
 
 class StateObjectManager {
@@ -49,11 +50,12 @@ class StateObjectManager {
                     ? object.id.trim()
                     : this.generateObjectId(type, roomIndex);
                 const fallbackVariableId = this.variableManager?.getFirstVariableId?.() ?? null;
-                const normalizedVariable = type === 'door-variable'
+                const needsVariable = type === 'door-variable' || type === SWITCH_TYPE;
+                const normalizedVariable = needsVariable
                     ? (this.variableManager?.normalizeVariableId?.(object?.variableId) ?? fallbackVariableId)
                     : null;
 
-                return {
+                const base = {
                     id,
                     type,
                     roomIndex,
@@ -63,6 +65,10 @@ class StateObjectManager {
                     opened: type === 'door' ? Boolean(object?.opened) : false,
                     variableId: normalizedVariable
                 };
+                if (type === SWITCH_TYPE) {
+                    base.on = Boolean(object?.on);
+                }
+                return base;
             })
             .filter(Boolean);
     }
@@ -75,6 +81,9 @@ class StateObjectManager {
             }
             if (object.type === 'door') {
                 object.opened = false;
+            }
+            if (object.type === SWITCH_TYPE) {
+                object.on = false;
             }
         });
         this.ensurePlayerStartObject();
@@ -134,6 +143,9 @@ class StateObjectManager {
                 x: cx,
                 y: cy
             };
+            if (normalizedType === SWITCH_TYPE) {
+                entry.on = false;
+            }
             objects.push(entry);
         } else {
             entry.roomIndex = targetRoom;
@@ -153,6 +165,11 @@ class StateObjectManager {
         if (normalizedType === PLAYER_START_TYPE) {
             this.syncPlayerStart(entry);
         }
+        if (normalizedType === SWITCH_TYPE) {
+            const fallbackVariableId = this.variableManager?.getFirstVariableId?.() ?? null;
+            entry.variableId = this.variableManager?.normalizeVariableId?.(entry.variableId) ?? fallbackVariableId;
+            entry.on = Boolean(entry.on);
+        }
         return entry;
     }
 
@@ -166,10 +183,10 @@ class StateObjectManager {
     }
 
     setObjectVariable(type, roomIndex, variableId) {
-        if (type !== 'door-variable') return null;
+        if (type !== 'door-variable' && type !== SWITCH_TYPE) return null;
         const targetRoom = this.worldManager.clampRoomIndex(roomIndex ?? 0);
         const entry = this.getObjects().find((object) =>
-            object.type === 'door-variable' &&
+            object.type === type &&
             object.roomIndex === targetRoom
         );
         if (!entry) return null;

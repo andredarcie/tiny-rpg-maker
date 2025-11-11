@@ -13,6 +13,7 @@ class ShareEncoder {
         const xpScrollPositions = ShareDataNormalizer.normalizeObjectPositions(objects, 'xp-scroll');
         const swordPositions = ShareDataNormalizer.normalizeObjectPositions(objects, 'sword');
         const playerEndPositions = ShareDataNormalizer.normalizeObjectPositions(objects, 'player-end');
+        const switchEntries = ShareDataNormalizer.normalizeSwitchObjects(objects);
         const magicDoorEntries = ShareDataNormalizer.normalizeVariableDoorObjects(objects);
         const magicDoorPositions = magicDoorEntries.map((entry) => ({
             x: entry.x,
@@ -148,6 +149,22 @@ class ShareEncoder {
             const endCode = SharePositionCodec.encodePositions(playerEndPositions);
             if (endCode) {
                 parts.push('z' + endCode);
+            }
+        }
+
+        if (switchEntries.length) {
+            const switchPositions = switchEntries.map((entry) => ({ x: entry.x, y: entry.y, roomIndex: entry.roomIndex }));
+            const switchPositionCode = SharePositionCodec.encodePositions(switchPositions);
+            if (switchPositionCode) {
+                parts.push('J' + switchPositionCode);
+                const switchVariableCode = ShareVariableCodec.encodeVariableNibbleArray(switchEntries.map((entry) => entry.variableNibble ?? 0));
+                const switchStateCode = ShareVariableCodec.encodeVariableNibbleArray(switchEntries.map((entry) => entry.stateNibble ?? 0));
+                if (switchVariableCode) {
+                    parts.push('K' + switchVariableCode);
+                }
+                if (switchStateCode) {
+                    parts.push('L' + switchStateCode);
+                }
             }
         }
 

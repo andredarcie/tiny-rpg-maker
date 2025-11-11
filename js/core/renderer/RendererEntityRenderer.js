@@ -37,7 +37,10 @@ class RendererEntityRenderer {
                     : false;
                 if (isOpen) continue;
             }
-            const sprite = objectSprites?.[object.type];
+            let sprite = objectSprites?.[object.type];
+            if (object.type === 'switch' && object.on) {
+                sprite = objectSprites?.[`${object.type}--on`] || sprite;
+            }
             if (!sprite) continue;
             const px = object.x * tileSize;
             const py = object.y * tileSize;

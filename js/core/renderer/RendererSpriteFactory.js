@@ -87,6 +87,9 @@ class RendererSpriteFactory {
         for (const def of RendererConstants.OBJECT_DEFINITIONS) {
             if (!Array.isArray(def.sprite)) continue;
             sprites[def.type] = this.mapPixels(def.sprite, picoPalette);
+            if (Array.isArray(def.spriteOn)) {
+                sprites[`${def.type}--on`] = this.mapPixels(def.spriteOn, picoPalette);
+            }
         }
         return sprites;
     }

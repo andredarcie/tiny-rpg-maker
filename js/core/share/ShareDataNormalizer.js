@@ -136,6 +136,30 @@ class ShareDataNormalizer {
         });
     }
 
+    static normalizeSwitchObjects(list) {
+        if (!Array.isArray(list)) return [];
+        const seenRooms = new Set();
+        const fallbackNibble = ShareVariableCodec.variableIdToNibble(ShareVariableCodec.getFirstVariableId()) || 1;
+        const result = [];
+        for (const entry of list) {
+            if (entry?.type !== 'switch') continue;
+            const x = ShareMath.clamp(Number(entry?.x), 0, ShareConstants.MATRIX_SIZE - 1, 0);
+            const y = ShareMath.clamp(Number(entry?.y), 0, ShareConstants.MATRIX_SIZE - 1, 0);
+            if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+            const roomIndex = ShareMath.clampRoomIndex(entry?.roomIndex);
+            if (seenRooms.has(roomIndex)) continue;
+            seenRooms.add(roomIndex);
+            const variableNibble = ShareVariableCodec.variableIdToNibble(typeof entry?.variableId === 'string' ? entry.variableId : null) || fallbackNibble;
+            const stateNibble = entry?.on ? 1 : 0;
+            result.push({ x, y, roomIndex, variableNibble, stateNibble });
+        }
+        return result.sort((a, b) => {
+            if (a.roomIndex !== b.roomIndex) return a.roomIndex - b.roomIndex;
+            if (a.y !== b.y) return a.y - b.y;
+            return a.x - b.x;
+        });
+    }
+
     static buildObjectEntries(positions, type, options = {}) {
         if (!Array.isArray(positions) || !positions.length) return [];
         const variableNibbles = Array.isArray(options.variableNibbles) ? options.variableNibbles : [];
@@ -169,6 +193,15 @@ class ShareDataNormalizer {
                 if (variableId) {
                     entry.variableId = variableId;
                 }
+            }
+            if (type === 'switch') {
+                const nibble = variableNibbles[index] ?? ShareVariableCodec.variableIdToNibble(fallbackVariableId);
+                const variableId = ShareVariableCodec.nibbleToVariableId(nibble) || fallbackVariableId;
+                if (variableId) {
+                    entry.variableId = variableId;
+                }
+                const state = Array.isArray(options.stateBits) ? options.stateBits[index] : null;
+                entry.on = Boolean(state);
             }
             return entry;
         });

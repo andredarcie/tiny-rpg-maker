@@ -58,6 +58,15 @@ class ShareDecoder {
             ? SharePositionCodec.decodePositions(payload.z || '')
             : [];
         const variableStates = version >= ShareConstants.VARIABLES_VERSION ? ShareVariableCodec.decodeVariables(payload.b || '') : [];
+        const switchPositions = version >= ShareConstants.SWITCH_VERSION
+            ? SharePositionCodec.decodePositions(payload.J || '')
+            : [];
+        const switchVariableNibbles = version >= ShareConstants.SWITCH_VERSION
+            ? ShareVariableCodec.decodeVariableNibbleArray(payload.K || '', switchPositions.length)
+            : [];
+        const switchStateNibbles = version >= ShareConstants.SWITCH_VERSION
+            ? ShareVariableCodec.decodeVariableNibbleArray(payload.L || '', switchPositions.length)
+            : [];
         const title = (ShareTextCodec.decodeText(payload.n, ShareConstants.DEFAULT_TITLE) || ShareConstants.DEFAULT_TITLE).slice(0, 18);
         const author = (ShareTextCodec.decodeText(payload.y, '') || '').slice(0, 18);
         const buildNpcId = (index) => `npc-${index + 1}`;
@@ -146,7 +155,8 @@ class ShareDecoder {
             ...ShareDataNormalizer.buildObjectEntries(lifePotionPositions, 'life-potion'),
             ...ShareDataNormalizer.buildObjectEntries(xpScrollPositions, 'xp-scroll'),
             ...ShareDataNormalizer.buildObjectEntries(swordPositions, 'sword'),
-            ...ShareDataNormalizer.buildObjectEntries(playerEndPositions, 'player-end')
+            ...ShareDataNormalizer.buildObjectEntries(playerEndPositions, 'player-end'),
+            ...ShareDataNormalizer.buildObjectEntries(switchPositions, 'switch', { variableNibbles: switchVariableNibbles, stateBits: switchStateNibbles })
         ];
 
         return {
