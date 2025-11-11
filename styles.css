@@ -169,6 +169,13 @@ main {
         padding: 6px 10px;
         font-size: 0.8rem;
     }
+
+    body.game-mode #game-container {
+        justify-content: flex-start;
+        padding-top: 10px;
+        padding-bottom: 16px;
+        gap: 8px;
+    }
 }
 
 .tab-button:focus-visible {
