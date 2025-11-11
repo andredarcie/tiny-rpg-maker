@@ -283,7 +283,6 @@ body.game-mode #game-container {
     height: 100%;
     min-height: 0;
     padding: 0 clamp(12px, 3vw, 32px) clamp(12px, 3vw, 32px);
-    margin-top: -4px;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -390,6 +389,7 @@ body.game-mode #tab-game .game-controls button {
     width: clamp(128px, 45vw, 384px);
     max-width: 100%;
     height: auto;
+    margin-top: 1em;
 }
 
 #editor-canvas {
