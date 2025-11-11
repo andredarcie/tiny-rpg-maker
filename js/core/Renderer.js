@@ -536,6 +536,7 @@ class Renderer {
         const ctx = this.ctx;
         if (!ctx) return;
         this.entityRenderer.cleanupEnemyLabels();
+        ctx.save();
         ctx.fillStyle = '#000000';
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         const reason = typeof this.gameState.getGameOverReason === 'function'
@@ -549,7 +550,10 @@ class Renderer {
         ctx.textBaseline = 'middle';
         ctx.fillText(isVictory ? 'The End' : 'Game Over', this.canvas.width / 2, this.canvas.height / 2);
 
-        if (!this.gameState.canResetAfterGameOver) return;
+        if (!this.gameState.canResetAfterGameOver) {
+            ctx.restore();
+            return;
+        }
         ctx.save();
         const blink = ((Date.now() / 500) % 2) > 1 ? 0.3 : 0.95;
         ctx.fillStyle = `rgba(100, 181, 246, ${blink.toFixed(2)})`;
@@ -558,6 +562,7 @@ class Renderer {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(isVictory ? 'Play Again?' : 'Try Again?', this.canvas.width / 2, this.canvas.height / 1.5);
+        ctx.restore();
         ctx.restore();
     }
 
