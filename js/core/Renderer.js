@@ -420,10 +420,14 @@ class Renderer {
             ctx.font = `${Math.max(10, Math.floor(height / 18))}px monospace`;
             ctx.fillText(`por ${author}`, centerX, centerY);
         }
-        const blink = ((Date.now() / 500) % 2) > 1 ? 0.3 : 0.95;
-        ctx.fillStyle = `rgba(100, 181, 246, ${blink.toFixed(2)})`;
-        ctx.font = `${Math.max(9, Math.floor(height / 20))}px monospace`;
-        ctx.fillText('Iniciar aventura', centerX, centerY + height * 0.18);
+
+        if (this.gameEngine?.canDismissIntroScreen) {
+            const blink = ((Date.now() / 500) % 2) > 1 ? 0.3 : 0.95;
+            ctx.fillStyle = `rgba(100, 181, 246, ${blink.toFixed(2)})`;
+            ctx.font = `${Math.max(9, Math.floor(height / 20))}px monospace`;
+            ctx.fillText('Iniciar aventura', centerX, centerY + height * 0.18);
+        }
+        
         ctx.restore();
     }
 

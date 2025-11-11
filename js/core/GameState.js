@@ -66,7 +66,7 @@ class GameState {
             objectManager: this.objectManager,
             variableManager: this.variableManager
         });
-        this.playing = true;
+        this.playing = false;
         this.canResetAfterGameOver = false;
         this.timeToResetAfterGameOver = 2000;
         this.pauseReasons = new Set();
