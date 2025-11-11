@@ -142,6 +142,35 @@ main {
     color: #fff;
 }
 
+@media (max-width: 640px) {
+    .tabs {
+        gap: 6px;
+        padding: 6px;
+        border-radius: 12px;
+        margin: 6px auto 10px;
+    }
+
+    .tabs-title {
+        font-size: 0.75rem;
+    }
+
+    .tabs-links {
+        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+        gap: 6px;
+    }
+
+    .tab-button {
+        min-height: 34px;
+        padding: 6px 10px;
+        font-size: 0.85rem;
+    }
+
+    .tab-action-button {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+    }
+}
+
 .tab-button:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
