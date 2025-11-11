@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tiny RPG Maker — Showcase</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #0e0f13;
+            --text: #e6e7eb;
+            --muted: #9aa0aa;
+            --accent: #64b5f6;
+            --border: #232734;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Inter", system-ui, sans-serif;
+            background: radial-gradient(1200px 600px at 50% -200px, #182036 0%, var(--bg) 60%);
+            color: var(--text);
+            line-height: 1.5;
+            letter-spacing: 0.04em;
+            position: relative;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(rgba(255,255,255,0.03) 50%, transparent 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            mix-blend-mode: screen;
+            opacity: 0.35;
+        }
+        header {
+            padding: 48px 24px 32px;
+            text-align: center;
+        }
+        header h1 {
+            margin: 0 0 12px;
+            font-size: clamp(2.4rem, 5vw, 3.6rem);
+        }
+        header p {
+            margin: 0 auto;
+            max-width: 520px;
+            color: var(--muted);
+            font-size: 1rem;
+            letter-spacing: 0.04em;
+        }
+        .cta-row {
+            margin: 20px 0 0;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .cta {
+            font-family: "Inter", sans-serif;
+            font-size: 0.95rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text);
+            text-decoration: none;
+            padding: 8px 18px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            transition: background 0.2s ease, color 0.2s ease;
+            background: rgba(15, 19, 32, 0.82);
+        }
+        .cta.primary {
+            background: var(--accent);
+            color: #050a16;
+            border-color: var(--accent);
+        }
+        .cta:hover {
+            background: rgba(100, 181, 246, 0.2);
+            color: var(--text);
+        }
+        main {
+            padding: 0 24px 56px;
+            max-width: 960px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        .stat-card {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            background: rgba(15, 19, 32, 0.82);
+        }
+        .stat-card span {
+            display: block;
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            color: var(--accent);
+            letter-spacing: 0.04em;
+        }
+        section h2 {
+            margin: 0 0 8px;
+            font-size: clamp(1.6rem, 3vw, 2.2rem);
+        }
+        section p {
+            margin: 0 0 20px;
+            color: var(--muted);
+        }
+        .item-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 10px;
+        }
+        .tiles-gallery,
+        .objects-gallery,
+        .enemies-gallery {
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        }
+        .item-card {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--panel);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .item-card strong {
+            font-size: 1rem;
+            letter-spacing: 0.04em;
+        }
+        .badge {
+            align-self: flex-start;
+            padding: 2px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(100, 181, 246, 0.4);
+            color: var(--accent);
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+        }
+        .sprite-preview {
+            width: 64px;
+            height: 64px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(15, 19, 32, 0.4);
+        }
+        footer {
+            padding: 28px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border);
+            margin-top: 32px;
+            letter-spacing: 0.1em;
+        }
+        @media (max-width: 640px) {
+            header { padding: 40px 16px 28px; }
+            main { padding: 0 16px 48px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Tiny RPG Maker Showcase</h1>
+        <p>
+            É uma engine pequena e deliberadamente limitada para estimular criatividade. Monte micro histórias
+            e mini RPGs em minutos e distribua tudo em uma única URL.
+        </p>
+        <div class="cta-row">
+            <a class="cta primary" href="index.html">Comece a criar sua aventura agora</a>
+        </div>
+    </header>
+    <main>
+        <section id="share-section">
+            <h2>URL em 1 Clique</h2>
+            <p>
+                Um código curto (ex.: <code>#v7.g...</code>) carrega tiles, mapas, NPCs e estados. Abrir a URL
+                equivale a importar o jogo completo.
+            </p>
+            <div class="item-card">
+                <div class="badge">URL-Ready</div>
+                <strong>Exportação Sem Servidor</strong>
+                <p>
+                    Determinístico e offline: copie o link e abra em qualquer lugar. A engine reconstrói tudo
+                    em segundos.
+                </p>
+            </div>
+        </section>
+
+        <section id="no-install-section">
+            <h2>Sem Instalação</h2>
+            <p>
+                Não precisa instalar ou baixar nada. Crie seu pequeno RPG direto no navegador.
+                Te desafio a montar um RPG em 1 minuto e compartilhar o link.
+            </p>
+        </section>
+
+        <section id="stats-section">
+            <h2>Pequena por Design</h2>
+            <p>
+                O escopo reduzido obriga a inventar com pouco. Tiles, objetos e NPCs cabem em poucos sprites
+                para acelerar experimentos.
+            </p>
+            <div class="stats-grid" id="stats-grid"></div>
+        </section>
+
+        <section id="tiles-section">
+            <h2>Tiles Essenciais</h2>
+            <p>Conjunto compacto para montar cenas e mapas em poucos minutos.</p>
+            <div class="item-grid tiles-gallery" id="tiles-grid"></div>
+        </section>
+
+        <section id="objects-section">
+            <h2>Objetos-Chave</h2>
+            <p>Chaves, alavancas ligadas a variáveis e marcadores focados em contar histórias curtas.</p>
+            <div class="item-grid objects-gallery" id="objects-grid"></div>
+        </section>
+
+        <section id="enemies-section">
+            <h2>Desafios Compactos</h2>
+            <p>Inimigos suficientes para gerar tensão sem desviar do escopo tiny.</p>
+            <div class="item-grid enemies-gallery" id="enemies-grid"></div>
+        </section>
+
+        <section id="oss-section">
+            <h2>Open Source & Comunitária</h2>
+            <p>
+                Totalmente free e open source, feita com carinho por André Darcie e Diego Penha.
+                Acesse o repositório no GitHub para clonar, estudar ou contribuir:
+                <a href="https://github.com/andredarcie/tiny-rpg-maker" target="_blank" rel="noopener">
+                    github.com/andredarcie/tiny-rpg-maker
+                </a>.
+            </p>
+        </section>
+    </main>
+    <footer>Feito com ❤️ e pixels. Tiny RPG Maker &copy; <span id="year"></span>.</footer>
+
+    <script src="js/core/TileDefinitions.js"></script>
+    <script src="js/core/ObjectDefinitions.js"></script>
+    <script src="js/core/NPCDefinitions.js"></script>
+    <script src="js/core/EnemyDefinitions.js"></script>
+    <script>
+        const tiles = window.TileDefinitions?.TILE_PRESETS || [];
+        const objects = window.ObjectDefinitions?.OBJECT_DEFINITIONS || [];
+        const npcs = window.NPCDefinitions?.NPC_DEFINITIONS || [];
+        const enemies = window.EnemyDefinitions?.ENEMY_DEFINITIONS || [];
+
+        const stats = [
+            { label: 'Tiles', value: tiles.length, detail: 'Prontos para pintar o mapa.' },
+            { label: 'Objetos', value: objects.length, detail: 'Interações, triggers e itens.' },
+            { label: 'NPCs', value: npcs.length, detail: 'Personagens com diálogos prontos.' },
+            { label: 'Inimigos', value: enemies.length, detail: 'Diversão garantida (para o jogador?).' },
+        ];
+
+        const DEFAULT_PALETTE = window.TileDefinitions?.PICO8_COLORS || [
+            "#000000","#1D2B53","#7E2553","#008751","#AB5236","#5F574F",
+            "#C2C3C7","#FFF1E8","#FF004D","#FFA300","#FFFF27","#00E756",
+            "#29ADFF","#83769C","#FF77A8","#FFCCAA"
+        ];
+
+        const toColorMatrix = (matrix) => {
+            if (!Array.isArray(matrix)) return null;
+            return matrix.map((row) =>
+                row.map((cell) => {
+                    if (cell === null || cell === undefined || cell === 'transparent') return null;
+                    if (typeof cell === 'string') return cell;
+                    if (typeof cell === 'number') return DEFAULT_PALETTE[cell] || null;
+                    return null;
+                })
+            );
+        };
+
+        const renderSprite = (canvas, matrix) => {
+            if (!canvas || !Array.isArray(matrix)) return;
+            const size = canvas.width;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, size, size);
+            const rows = matrix.length || 8;
+            const cols = matrix[0]?.length || 8;
+            const cell = size / rows;
+            matrix.forEach((row, y) => row?.forEach((color, x) => {
+                if (!color) return;
+                ctx.fillStyle = color;
+                ctx.fillRect(x * cell, y * cell, cell, cell);
+            }));
+        };
+
+        const statsGrid = document.getElementById('stats-grid');
+        stats.forEach(stat => {
+            const card = document.createElement('div');
+            card.className = 'stat-card';
+            card.innerHTML = `<span>${stat.value}</span><strong>${stat.label}</strong><p>${stat.detail}</p>`;
+            statsGrid.appendChild(card);
+        });
+
+        const tilesGrid = document.getElementById('tiles-grid');
+        tilesGrid.classList.add('tiles-gallery');
+        tiles.forEach((tile, index) => {
+            const canvas = document.createElement('canvas');
+            canvas.className = 'sprite-preview tile-only';
+            canvas.width = 72;
+            canvas.height = 72;
+            canvas.setAttribute('aria-label', tile.name || `Tile ${index}`);
+            const sprite = tile.frames?.[0] || tile.pixels;
+            renderSprite(canvas, sprite);
+            tilesGrid.appendChild(canvas);
+        });
+
+        const objectsGrid = document.getElementById('objects-grid');
+        objectsGrid.classList.add('objects-gallery');
+        objects.forEach((obj, index) => {
+            const canvas = document.createElement('canvas');
+            canvas.className = 'sprite-preview object-only';
+            canvas.width = 72;
+            canvas.height = 72;
+            canvas.setAttribute('aria-label', obj.name || obj.type || `Objeto ${index}`);
+            const spriteSource = obj.type === 'switch' ? obj.spriteOn : obj.sprite;
+            renderSprite(canvas, toColorMatrix(spriteSource));
+            objectsGrid.appendChild(canvas);
+        });
+
+        const enemiesGrid = document.getElementById('enemies-grid');
+        enemiesGrid.classList.add('enemies-gallery');
+        enemies.forEach((enemy, index) => {
+            const canvas = document.createElement('canvas');
+            canvas.className = 'sprite-preview enemy-only';
+            canvas.width = 72;
+            canvas.height = 72;
+            canvas.setAttribute('aria-label', enemy.name || enemy.type || `Inimigo ${index}`);
+            renderSprite(canvas, toColorMatrix(enemy.sprite));
+            enemiesGrid.appendChild(canvas);
+        });
+
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>
+            text-transform: uppercase;
