@@ -67,6 +67,8 @@ class GameState {
             variableManager: this.variableManager
         });
         this.playing = true;
+        this.canResetAfterGameOver = false;
+        this.timeToResetAfterGameOver = 2000;
         this.pauseReasons = new Set();
         this.ensureDefaultVariables();
         this.resetGame();
@@ -393,7 +395,14 @@ class GameState {
 
     setGameOver(active = true) {
         if (this.state && typeof this.state === 'object') {
-            this.state.gameOver = Boolean(active);
+            const activeValue = Boolean(active);
+            if (activeValue) {
+                this.canResetAfterGameOver = false;
+                setTimeout(() => {
+                    this.canResetAfterGameOver = true;
+                }, this.timeToResetAfterGameOver);
+            }
+            this.state.gameOver = activeValue;
         }
     }
 

@@ -306,7 +306,7 @@ class GameEngine {
     }
 
     handleGameOverInteraction() {
-        if (!this.isGameOver()) return;
+        if (!this.isGameOver() || !this.gameState.canResetAfterGameOver) return;
         this.resetGame();
     }
 }

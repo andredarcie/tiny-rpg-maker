@@ -89,7 +89,7 @@ class Renderer {
             this.tileRenderer.drawWalls(ctx);
             this.drawEdgeFlash(ctx, gameplayCanvas);
 
-            if (!introActive) {
+            if (!introActive && !this.gameState.isGameOver()) {
                 this.entityRenderer.drawObjects(ctx);
                 this.entityRenderer.drawItems(ctx);
                 this.entityRenderer.drawNPCs(ctx);
@@ -400,6 +400,7 @@ class Renderer {
     }
 
     drawIntroOverlay(ctx, gameplayCanvas) {
+        this.entityRenderer.cleanupEnemyLabels();
         const title = this.introData?.title || 'Tiny RPG Maker';
         const author = (this.introData?.author || '').trim();
         const width = gameplayCanvas.width;
@@ -530,15 +531,25 @@ class Renderer {
     drawGameOverScreen() {
         const ctx = this.ctx;
         if (!ctx) return;
-        ctx.save();
+        this.entityRenderer.cleanupEnemyLabels();
         ctx.fillStyle = '#000000';
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         ctx.fillStyle = '#FFFFFF';
-        const fontSize = Math.max(8, Math.floor(this.canvas.height / 10));
+        let fontSize = Math.max(8, Math.floor(this.canvas.height / 10));
         ctx.font = `${fontSize}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText('Game Over', this.canvas.width / 2, this.canvas.height / 2);
+
+        if (!this.gameState.canResetAfterGameOver) return;
+        ctx.save();
+        const blink = ((Date.now() / 500) % 2) > 1 ? 0.3 : 0.95;
+        ctx.fillStyle = `rgba(100, 181, 246, ${blink.toFixed(2)})`;
+        fontSize = Math.max(5, Math.floor(this.canvas.height / 15));
+        ctx.font = `${fontSize}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('Try Again?', this.canvas.width / 2, this.canvas.height / 1.5);
         ctx.restore();
     }
 
