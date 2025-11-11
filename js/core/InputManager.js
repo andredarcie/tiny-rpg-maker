@@ -10,7 +10,7 @@ class InputManager {
 
     setupEventListeners() {
         document.addEventListener("keydown", (ev) => this.handleKeyDown(ev));
-        document.addEventListener("touchstart", (ev) => this.handleTouchStart(ev), { passive: true });
+        document.addEventListener("touchstart", (ev) => this.handleTouchStart(ev));
         document.addEventListener("touchend", (ev) => this.handleTouchEnd(ev));
     }
 

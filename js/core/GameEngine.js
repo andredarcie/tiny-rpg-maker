@@ -30,6 +30,8 @@ class GameEngine {
         this.introVisible = false;
         this.introStartTime = 0;
         this.introData = { title: 'Tiny RPG Maker', author: '' };
+        this.canDismissIntroScreen = false;
+        this.timeToResetAfterIntro = 2000;
         this.setupIntroScreen();
 
         // Ensure there is at least a ground layer
@@ -119,6 +121,11 @@ class GameEngine {
     }
 
     showIntroScreen() {
+        this.canDismissIntroScreen = false;
+        setTimeout(() => {
+            this.canDismissIntroScreen = true;
+        }, this.timeToResetAfterIntro);
+
         this.refreshIntroScreen();
         this.introVisible = true;
         this.introStartTime = (typeof performance !== 'undefined' && performance.now)
@@ -129,7 +136,7 @@ class GameEngine {
     }
 
     dismissIntroScreen() {
-        if (!this.introVisible) return false;
+        if (!this.introVisible || !this.canDismissIntroScreen) return false;
         this.introVisible = false;
         this.gameState.resumeGame?.('intro-screen');
         this.renderer.draw();
