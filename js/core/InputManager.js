@@ -46,7 +46,17 @@ class InputManager {
             return;
         }
 
-        // Player movement via arrows and WASD
+        // Player movement via arrows and WASD (game tab only, avoid typing fields)
+        const targetTag = ev.target?.tagName?.toLowerCase?.() || '';
+        const isTypingTarget = targetTag === 'input' ||
+            targetTag === 'textarea' ||
+            targetTag === 'select' ||
+            ev.target?.isContentEditable;
+        const isGameTabActive = document?.body?.classList?.contains('game-mode');
+        if (!isGameTabActive || isTypingTarget) {
+            return;
+        }
+
         const movementKey = ev.key?.toLowerCase() || "";
         const movementMap = {
             arrowleft: [-1, 0],
