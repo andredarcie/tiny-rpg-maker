@@ -428,6 +428,30 @@ body.game-mode #tab-game .game-controls button {
     flex: 0 0 auto;
 }
 
+.touch-controls-toggle {
+    display: none;
+    margin-top: 12px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: linear-gradient(135deg, rgba(37, 47, 67, 0.9), rgba(21, 26, 40, 0.9));
+    color: #fff;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.touch-controls-toggle:active {
+    transform: scale(0.98);
+}
+
+.touch-controls-toggle[aria-expanded="true"] {
+    border-color: #64b5f6;
+}
+
 .game-touch-pad {
     display: none;
     z-index: 2;
@@ -482,7 +506,13 @@ body.game-mode #tab-game .game-controls button {
 }
 
 @media (max-width: 720px) {
-    .game-touch-pad {
+    .touch-controls-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    body.touch-controls-visible .game-touch-pad {
         position: absolute;
         bottom: clamp(24px, 12vw, 48px);
         left: 50%;
@@ -503,7 +533,7 @@ body.game-mode #tab-game .game-controls button {
         bottom: clamp(12px, 5vw, 24px);
     }
 
-    body.game-mode #game-container {
+    body.game-mode.touch-controls-visible #game-container {
         padding-bottom: clamp(140px, 30vw, 220px);
         justify-content: flex-start;
         gap: 8px;
