@@ -428,6 +428,120 @@ body.game-mode #tab-game .game-controls button {
     flex: 0 0 auto;
 }
 
+.touch-controls-toggle {
+    display: none;
+    margin-top: 8px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.02);
+    color: #fff;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.touch-controls-toggle[aria-expanded="true"] {
+    border-color: #64b5f6;
+}
+
+.game-touch-pad {
+    display: none;
+    z-index: 2;
+    gap: 6px;
+    align-items: center;
+}
+
+.game-touch-pad .pad-button {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    padding: 0;
+    touch-action: manipulation;
+}
+
+.game-touch-pad .pad-button:active {
+    transform: translateY(1px);
+}
+
+.game-touch-pad .pad-middle-row {
+    display: flex;
+    gap: 6px;
+}
+
+.game-touch-pad .pad-center {
+    opacity: 0;
+}
+
+.game-touch-pad .pad-up::before {
+    content: '▲';
+}
+
+.game-touch-pad .pad-down::before {
+    content: '▼';
+}
+
+.game-touch-pad .pad-left::before {
+    content: '◀';
+}
+
+.game-touch-pad .pad-right::before {
+    content: '▶';
+}
+
+.game-touch-pad .touch-controls-hide {
+    display: none;
+}
+
+@media (max-width: 720px) {
+    .touch-controls-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    body.touch-controls-visible .touch-controls-toggle {
+        display: none;
+    }
+
+    body.touch-controls-visible .game-touch-pad {
+        display: grid;
+        position: absolute;
+        bottom: clamp(18px, 10vw, 32px);
+        left: 50%;
+        transform: translateX(-50%);
+        justify-items: center;
+    }
+
+    body.touch-controls-visible .game-touch-pad .touch-controls-hide {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.05);
+        font-size: 0.65rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+        color: #fff;
+    }
+
+    body.game-mode.touch-controls-visible #game-container {
+        padding-bottom: clamp(120px, 26vw, 180px);
+    }
+}
+
 
 .editor-layout {
     display: grid;
