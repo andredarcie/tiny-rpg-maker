@@ -4,7 +4,10 @@ const STATE_VARIABLE_PRESETS = Object.freeze([
     { id: 'var-3', order: 3, name: '3 - Roxo', color: '#7E2553' },
     { id: 'var-4', order: 4, name: '4 - Verde', color: '#008751' },
     { id: 'var-5', order: 5, name: '5 - Marrom', color: '#AB5236' },
-    { id: 'var-6', order: 6, name: '6 - Cinza', color: '#5F574F' }
+    { id: 'var-6', order: 6, name: '6 - Cinza', color: '#5F574F' },
+    { id: 'var-7', order: 7, name: '7 - Azul Claro', color: '#C2C3C7' },
+    { id: 'var-8', order: 8, name: '8 - Rosa Choque', color: '#FF77A8' },
+    { id: 'var-9', order: 9, name: '9 - Amarelo', color: '#FFCCAA' }
 ]);
 
 class StateVariableManager {
@@ -119,4 +122,3 @@ class StateVariableManager {
 if (typeof window !== 'undefined') {
     window.StateVariableManager = StateVariableManager;
 }
-
