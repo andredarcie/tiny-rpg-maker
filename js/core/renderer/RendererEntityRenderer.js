@@ -5,10 +5,6 @@ class RendererEntityRenderer {
         this.spriteFactory = spriteFactory;
         this.canvasHelper = canvasHelper;
         this.paletteManager = paletteManager;
-        this.enemyLabelCache = new Map();
-        this.enemyLabelNodes = new Map();
-        this.enemyLabelRoot = null;
-        this.setupEditorModeWatcher();
     }
 
     setViewportOffset(offsetY = 0) {
@@ -85,26 +81,10 @@ class RendererEntityRenderer {
 
     drawEnemies(ctx) {
         const enemies = this.gameState.getEnemies?.() ?? [];
-        const canvas = this.canvasHelper?.canvas || null;
-        const rect = canvas?.getBoundingClientRect?.();
-        const isEditor = typeof document !== 'undefined' && document.body?.classList?.contains?.('editor-mode');
-        if (!enemies.length || !rect || !rect.width || !rect.height || isEditor || typeof document === 'undefined') {
-            this.cleanupEnemyLabels(new Set());
-            return;
-        }
+        if (!enemies.length) return;
         const player = this.gameState.getPlayer();
         const tileSize = this.canvasHelper.getTilePixelSize();
         const step = tileSize / 8;
-        let scaleX = 1;
-        let scaleY = 1;
-        const root = this.ensureEnemyLabelRoot();
-        if (!root) {
-            this.cleanupEnemyLabels(new Set());
-            return;
-        }
-        scaleX = rect.width / canvas.width;
-        scaleY = rect.height / canvas.height;
-        const activeLabels = new Set();
         enemies.forEach((enemy) => {
             if (enemy.roomIndex !== player.roomIndex) return;
             const baseSprite = this.spriteFactory.getEnemySprite(enemy.type);
@@ -115,16 +95,8 @@ class RendererEntityRenderer {
             this.canvasHelper.drawSprite(ctx, sprite, px, py, step);
 
             const damage = this.getEnemyDamage(enemy.type);
-            const label = this.getOrCreateEnemyLabelElement(enemy, damage);
-            if (label) {
-                const screenX = rect.left + (px + tileSize / 2) * scaleX;
-                const offsetY = this.viewportOffsetY || 0;
-                const screenY = rect.top + ((py + offsetY) - tileSize * 0.2) * scaleY;
-                this.positionEnemyLabel(label, screenX, screenY);
-                activeLabels.add(this.getEnemyLabelKey(enemy));
-            }
+            this.drawEnemyDamageMarkers(ctx, px, py, tileSize, damage);
         });
-        this.cleanupEnemyLabels(activeLabels);
     }
 
     drawPlayer(ctx) {
@@ -178,81 +150,28 @@ class RendererEntityRenderer {
         return 1;
     }
 
-    getEnemyLabelKey(enemy) {
-        return enemy?.id || `${enemy?.type || 'enemy'}-${enemy?.roomIndex ?? 0}-${enemy?.x ?? 0}-${enemy?.y ?? 0}`;
-    }
-
-    ensureEnemyLabelRoot() {
-        if (this.enemyLabelRoot && this.enemyLabelRoot.isConnected) {
-            return this.enemyLabelRoot;
-        }
-        if (typeof document === 'undefined') return null;
-        const root = document.createElement('div');
-        root.className = 'enemy-label-layer';
-        document.body.appendChild(root);
-        this.enemyLabelRoot = root;
-        return root;
-    }
-
-    getOrCreateEnemyLabelElement(enemy, damage) {
-        const key = this.getEnemyLabelKey(enemy);
-        if (!key) return null;
-        const root = this.ensureEnemyLabelRoot();
-        if (!root) return null;
-        let record = this.enemyLabelNodes.get(key);
-        const text = `Attack: ${damage}`;
-        if (!record) {
-            const element = document.createElement('div');
-            element.className = 'enemy-damage-label';
-            element.dataset.enemyId = key;
-            element.textContent = text;
-            root.appendChild(element);
-            record = { element, text };
-            this.enemyLabelNodes.set(key, record);
-        } else if (record.text !== text) {
-            record.element.textContent = text;
-            record.text = text;
-        }
-        return record.element;
-    }
-
-    positionEnemyLabel(element, screenX, screenY) {
-        if (!element) return;
-        element.style.left = `${screenX}px`;
-        element.style.top = `${screenY}px`;
-    }
-
-    cleanupEnemyLabels(activeKeys = new Set()) {
-        if (!this.enemyLabelNodes) return;
-        for (const [key, record] of Array.from(this.enemyLabelNodes.entries())) {
-            if (!activeKeys.has(key)) {
-                if (record.element?.parentNode) {
-                    record.element.parentNode.removeChild(record.element);
-                }
-                this.enemyLabelNodes.delete(key);
-            }
-        }
-        if (this.enemyLabelRoot && this.enemyLabelRoot.childElementCount === 0) {
-            this.enemyLabelRoot.remove();
-            this.enemyLabelRoot = null;
+    drawEnemyDamageMarkers(ctx, px, py, tileSize, damage) {
+        if (!ctx) return;
+        const markers = Math.max(1, Math.floor(damage));
+        const size = Math.max(2, Math.floor(tileSize / 8));
+        const gap = Math.max(1, Math.floor(size / 2));
+        const totalWidth = markers * size + (markers - 1) * gap;
+        const startX = Math.round(px + tileSize / 2 - totalWidth / 2);
+        const startY = Math.round(py - size - gap);
+        const fill = '#000000';
+        const stroke = this.paletteManager.getColor(6) || '#5F574F';
+        ctx.fillStyle = fill;
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = 1;
+        for (let i = 0; i < markers; i++) {
+            const mx = startX + i * (size + gap);
+            ctx.fillRect(mx, startY, size, size);
+            ctx.strokeRect(mx + 0.5, startY + 0.5, size - 1, size - 1);
         }
     }
 
-    setupEditorModeWatcher() {
-        if (typeof document === 'undefined') return;
-        const body = document.body;
-        if (!body) return;
-        const handleModeChange = () => {
-            if (body.classList.contains('editor-mode')) {
-                this.cleanupEnemyLabels(new Set());
-            }
-        };
-        if (typeof MutationObserver === 'function') {
-            this.editorModeObserver = new MutationObserver(() => handleModeChange());
-            this.editorModeObserver.observe(body, { attributes: true, attributeFilter: ['class'] });
-        }
-        document.addEventListener?.('editor-tab-activated', handleModeChange);
-        handleModeChange();
+    cleanupEnemyLabels() {
+        // Legacy no-op: labels are now rendered directly on the canvas.
     }
 }
 
