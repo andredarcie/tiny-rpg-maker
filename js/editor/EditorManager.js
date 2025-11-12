@@ -131,22 +131,6 @@ class EditorManager {
             this.renderService.updateNpcForm();
         });
 
-        enemyTypes?.addEventListener('click', (ev) => {
-            const card = ev.target.closest('.enemy-card');
-            if (!card) return;
-            const type = card.dataset.type || null;
-            if (!type) return;
-            this.enemyService.selectEnemyType(type);
-        });
-
-        objectTypes?.addEventListener('click', (ev) => {
-            const card = ev.target.closest('.object-type-card');
-            if (!card) return;
-            const type = card.dataset.type || null;
-            if (!type) return;
-            this.objectService.selectObjectType(type);
-        });
-
         btnGenerateUrl?.addEventListener('click', () => this.shareService.generateShareableUrl());
         btnUndo?.addEventListener('click', () => this.undo());
         btnRedo?.addEventListener('click', () => this.redo());
@@ -169,8 +153,9 @@ class EditorManager {
             if (this.state.placingObjectType) {
                 this.objectService.togglePlacement(this.state.placingObjectType, true);
             }
-            this.npcService.clearSelection();
-            this.enemyService.deactivatePlacement();
+
+            this.desselectAllAndRender();
+
             this.selectedTileId = tileId;
             this.renderService.updateSelectedTilePreview();
             this.renderService.renderTileList();
@@ -181,7 +166,21 @@ class EditorManager {
             if (!card) return;
             const type = card.dataset.type || null;
             const id = card.dataset.id || null;
+
+            this.desselectAllAndRender();
+
             this.npcService.updateNpcSelection(type, id);
+        });
+
+        objectTypes?.addEventListener('click', (ev) => {
+            const card = ev.target.closest('.object-type-card');
+            if (!card) return;
+            const type = card.dataset.type || null;
+            if (!type) return;
+            
+            this.desselectAllAndRender();
+
+            this.objectService.selectObjectType(type);
         });
 
         objectsList?.addEventListener('click', (ev) => {
@@ -195,6 +194,17 @@ class EditorManager {
             this.objectService.removeObject(type, room);
         });
 
+        enemyTypes?.addEventListener('click', (ev) => {
+            const card = ev.target.closest('.enemy-card');
+            if (!card) return;
+            const type = card.dataset.type || null;
+            if (!type) return;
+            
+            this.desselectAllAndRender();
+
+            this.enemyService.selectEnemyType(type);
+        });
+
         enemiesList?.addEventListener('click', (ev) => {
             const button = ev.target.closest('[data-remove-enemy]');
             if (!button) return;
@@ -202,6 +212,7 @@ class EditorManager {
             if (!enemyId) return;
             this.enemyService.removeEnemy(enemyId);
         });
+
         enemiesList?.addEventListener('change', (ev) => {
             const target = ev.target;
             if (!target || target.tagName !== 'SELECT') return;
@@ -244,25 +255,18 @@ class EditorManager {
         this.activeRoomIndex = Math.max(0, Math.min(totalRooms - 1, startRoomIndex));
         this.gameEngine.npcManager?.ensureDefaultNPCs?.();
 
-        const enemyDefinitions = EditorConstants.ENEMY_DEFINITIONS;
-        if (enemyDefinitions.length > 0) {
-            const hasCurrent = enemyDefinitions.some((entry) => entry.type === this.selectedEnemyType);
-            if (!hasCurrent) {
-                this.selectedEnemyType = enemyDefinitions[0].type;
-            }
-        }
-
-        const objectDefinitions = EditorConstants.OBJECT_DEFINITIONS;
-        if (objectDefinitions.length > 0) {
-            const hasObjectSelected = objectDefinitions.some((entry) => entry.type === this.selectedObjectType);
-            if (!hasObjectSelected) {
-                this.selectedObjectType = objectDefinitions[0].type;
-            }
-        }
-
         this.renderAll();
         this.handleCanvasResize(true);
         this.history.pushCurrentState();
+    }
+
+    desselectAllAndRender() {
+        this.npcService.clearSelection();
+        this.enemyService.deactivatePlacement();
+        this.state.selectedTileId = null;
+        this.state.selectedEnemyType = null;
+        this.state.selectedObjectType = null;
+        this.renderAll(); // this is not ideal, but will work for now
     }
 
     renderAll() {
