@@ -101,6 +101,17 @@ class EditorEnemyService {
         this.activatePlacement();
     }
 
+    clearSelection({ render = true } = {}) {
+        const hadSelection = Boolean(this.manager.selectedEnemyType || this.state.placingEnemy);
+        if (!hadSelection) return false;
+        this.manager.selectedEnemyType = null;
+        this.deactivatePlacement();
+        if (render) {
+            this.manager.renderEnemyCatalog();
+        }
+        return true;
+    }
+
     getEnemyDefinition(type = null) {
         const target = typeof type === 'string' && type.length > 0
             ? type

@@ -84,7 +84,11 @@ class EditorNpcService {
     }
 
     clearSelection({ render = true } = {}) {
-        const hadSelection = Boolean(this.state.selectedNpcId || this.state.selectedNpcType);
+        const hadSelection = Boolean(
+            this.state.selectedNpcId ||
+            this.state.selectedNpcType ||
+            this.state.placingNpc
+        );
         this.state.selectedNpcId = null;
         this.state.selectedNpcType = null;
         this.state.conditionalDialogueExpanded = false;
@@ -92,6 +96,7 @@ class EditorNpcService {
         if (render && hadSelection) {
             this.manager.renderService.renderNpcs();
         }
+        return hadSelection;
     }
 
     removeSelectedNpc() {

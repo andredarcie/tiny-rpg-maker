@@ -71,6 +71,17 @@ class EditorTileService {
         this.manager.gameEngine.draw();
     }
 
+    clearSelection({ render = true } = {}) {
+        const hadSelection = this.state.selectedTileId !== null && this.state.selectedTileId !== undefined;
+        if (!hadSelection) return false;
+        this.state.selectedTileId = null;
+        if (render) {
+            this.manager.renderService.renderTileList();
+            this.manager.renderService.updateSelectedTilePreview();
+        }
+        return true;
+    }
+
     getTileFromEvent(ev) {
         const canvas = this.dom.editorCanvas;
         if (!canvas) return null;

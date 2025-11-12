@@ -94,6 +94,20 @@ class EditorObjectService {
         this.manager.renderObjectCatalog();
     }
 
+    clearSelection({ render = true } = {}) {
+        const hadSelection = Boolean(this.manager.selectedObjectType || this.state.placingObjectType);
+        if (!hadSelection) return false;
+        this.state.placingObjectType = null;
+        this.manager.selectedObjectType = null;
+        if (!this.state.placingNpc && !this.state.placingEnemy && this.dom.editorCanvas) {
+            this.dom.editorCanvas.style.cursor = 'default';
+        }
+        if (render) {
+            this.manager.renderObjectCatalog();
+        }
+        return true;
+    }
+
     normalizeType(type) {
         if (typeof type !== 'string' || !type.length) return null;
         const definitions = EditorConstants.OBJECT_DEFINITIONS;

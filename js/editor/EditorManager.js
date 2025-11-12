@@ -261,12 +261,26 @@ class EditorManager {
     }
 
     desselectAllAndRender() {
-        this.npcService.clearSelection();
-        this.enemyService.deactivatePlacement();
-        this.state.selectedTileId = null;
-        this.state.selectedEnemyType = null;
-        this.state.selectedObjectType = null;
-        this.renderAll(); // this is not ideal, but will work for now
+        const tileCleared = Boolean(this.tileService?.clearSelection?.({ render: false }));
+        const npcCleared = Boolean(this.npcService?.clearSelection?.({ render: false }));
+        const enemyCleared = Boolean(this.enemyService?.clearSelection?.({ render: false }));
+        const objectCleared = Boolean(this.objectService?.clearSelection?.({ render: false }));
+
+        if (tileCleared) {
+            this.renderService.renderTileList();
+            this.renderService.updateSelectedTilePreview();
+        }
+        if (npcCleared) {
+            this.renderService.renderNpcs();
+        }
+        if (enemyCleared) {
+            this.renderService.renderEnemyCatalog();
+        }
+        if (objectCleared) {
+            this.renderService.renderObjectCatalog();
+        }
+
+        return tileCleared || npcCleared || enemyCleared || objectCleared;
     }
 
     renderAll() {
