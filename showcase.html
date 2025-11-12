@@ -404,12 +404,13 @@
         const carousel = document.getElementById('carousel');
 
         carousel.innerHTML += carousel.innerHTML; // temporário até termos mais jogos pra showcase
-        const imageWidth = 300 + 16;
+        const imageWidth = 256 + 16;
+        const totalImages = 200 * 3;
         let intervalId;
 
         function startAutoScroll() {
             intervalId = setInterval(() => {
-                if (carousel.scrollLeft >= carousel.scrollWidth / 2) {
+                if (carousel.scrollLeft >= totalImages) {
                     carousel.scrollLeft = 0;
                 } else {
                     carousel.scrollLeft += imageWidth;
