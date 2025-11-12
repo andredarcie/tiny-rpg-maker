@@ -39,7 +39,6 @@ class TinyRPGApplication {
 
         const editorManager = new EditorManager(gameEngine);
         this.bindResetButton(gameEngine);
-        this.bindTouchPad(gameEngine);
 
         console.log('Tiny RPG Maker engine initialized successfully.');
     }
@@ -48,58 +47,6 @@ class TinyRPGApplication {
         const resetButton = document.getElementById('btn-reset');
         if (!resetButton) return;
         resetButton.addEventListener('click', () => gameEngine.resetGame());
-    }
-
-    static bindTouchPad(gameEngine) {
-        const touchPad = document.querySelectorAll('.game-touch-pad .pad-button[data-direction]');
-        const touchPadContainer = document.getElementById('mobile-touch-pad');
-        const directionMap = {
-            left: [-1, 0],
-            right: [1, 0],
-            up: [0, -1],
-            down: [0, 1]
-        };
-        touchPad.forEach((btn) => {
-            btn.addEventListener('touchstart', (ev) => {
-                ev.preventDefault();
-                const dir = btn.dataset.direction;
-                if (!dir) return;
-                const delta = directionMap[dir];
-                if (delta) {
-                    gameEngine.tryMove(delta[0], delta[1]);
-                }
-            }, { passive: false });
-        });
-
-        const toggleButton = document.getElementById('touch-controls-toggle');
-        if (!toggleButton) {
-            return;
-        }
-
-        const updateToggleState = () => {
-            const isVisible = document.body.classList.contains('touch-controls-visible');
-            toggleButton.textContent = isVisible ? 'Ocultar controles' : 'Exibir controles';
-            toggleButton.setAttribute('aria-expanded', isVisible ? 'true' : 'false');
-            toggleButton.setAttribute('aria-pressed', isVisible ? 'true' : 'false');
-            if (touchPadContainer) {
-                touchPadContainer.setAttribute('aria-hidden', isVisible ? 'false' : 'true');
-            }
-        };
-
-        toggleButton.addEventListener('click', () => {
-            document.body.classList.toggle('touch-controls-visible');
-            updateToggleState();
-        });
-
-        const handleEditorTab = () => {
-            document.body.classList.remove('touch-controls-visible');
-            updateToggleState();
-        };
-
-        document.addEventListener('editor-tab-activated', handleEditorTab);
-        document.addEventListener('game-tab-activated', updateToggleState);
-
-        updateToggleState();
     }
 
     static setupTabs() {

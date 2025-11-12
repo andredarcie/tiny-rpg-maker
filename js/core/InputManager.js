@@ -45,24 +45,22 @@ class InputManager {
             return;
         }
 
-        // Player movement
-        switch (ev.key) {
-            case "ArrowLeft":
-                ev.preventDefault();
-                this.gameEngine.tryMove(-1, 0);
-                break;
-            case "ArrowRight":
-                ev.preventDefault();
-                this.gameEngine.tryMove(1, 0);
-                break;
-            case "ArrowUp":
-                ev.preventDefault();
-                this.gameEngine.tryMove(0, -1);
-                break;
-            case "ArrowDown":
-                ev.preventDefault();
-                this.gameEngine.tryMove(0, 1);
-                break;
+        // Player movement via arrows and WASD
+        const movementKey = ev.key?.toLowerCase() || "";
+        const movementMap = {
+            arrowleft: [-1, 0],
+            a: [-1, 0],
+            arrowright: [1, 0],
+            d: [1, 0],
+            arrowup: [0, -1],
+            w: [0, -1],
+            arrowdown: [0, 1],
+            s: [0, 1]
+        };
+        const delta = movementMap[movementKey];
+        if (delta) {
+            ev.preventDefault();
+            this.gameEngine.tryMove(delta[0], delta[1]);
         }
     }
 
