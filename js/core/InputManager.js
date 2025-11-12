@@ -11,6 +11,7 @@ class InputManager {
     setupEventListeners() {
         document.addEventListener("keydown", (ev) => this.handleKeyDown(ev));
         document.addEventListener("touchstart", (ev) => this.handleTouchStart(ev), { passive: false });
+        document.addEventListener("touchmove", (ev) => this.handleTouchMove(ev), { passive: false });
         document.addEventListener("touchend", (ev) => this.handleTouchEnd(ev), { passive: false });
     }
 
@@ -82,8 +83,28 @@ class InputManager {
         this.touchStart = {
             x: touch.clientX,
             y: touch.clientY,
-            time: Date.now()
+            time: Date.now(),
+            prevented: false
         };
+    }
+
+    handleTouchMove(ev) {
+        const start = this.touchStart;
+        if (!start) return;
+        const touch = ev.changedTouches?.[0];
+        if (!touch) return;
+
+        const dx = touch.clientX - start.x;
+        const dy = touch.clientY - start.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const MOVE_THRESHOLD = 12;
+
+        if (distance >= MOVE_THRESHOLD) {
+            ev.preventDefault();
+            start.prevented = true;
+        } else if (start.prevented) {
+            ev.preventDefault();
+        }
     }
 
     handleTouchEnd(ev) {
