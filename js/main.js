@@ -3,6 +3,14 @@
  */
 'use strict';
 
+const getTextResource = (key, fallback = '') => {
+    if (typeof TextResources !== 'undefined' && typeof TextResources.get === 'function') {
+        const value = TextResources.get(key, fallback);
+        return value || fallback || key || '';
+    }
+    return fallback || key || '';
+};
+
 class TinyRPGApplication {
     static boot() {
         document.addEventListener('DOMContentLoaded', () => {
@@ -40,8 +48,9 @@ class TinyRPGApplication {
         const editorManager = new EditorManager(gameEngine);
         this.bindResetButton(gameEngine);
         this.bindTouchPad(gameEngine);
+        this.bindLanguageSelector();
 
-        console.log('Tiny RPG Maker engine initialized successfully.');
+        console.log(getTextResource('log.engineReady'));
     }
 
     static bindResetButton(gameEngine) {
@@ -83,17 +92,18 @@ class TinyRPGApplication {
         const updateButtonState = () => {
             const isEditorMode = document.body.classList.contains('editor-mode');
             if (isEditorMode) {
-                resetButton.textContent = 'Novo jogo';
-                resetButton.setAttribute('aria-label', 'Criar um novo jogo do zero em outra aba');
+                resetButton.textContent = getTextResource('buttons.newGame');
+                resetButton.setAttribute('aria-label', getTextResource('aria.newGame'));
             } else {
-                resetButton.textContent = 'Reiniciar';
-                resetButton.setAttribute('aria-label', 'Reiniciar a partida atual');
+                resetButton.textContent = getTextResource('buttons.reset');
+                resetButton.setAttribute('aria-label', getTextResource('aria.reset'));
             }
         };
 
         resetButton.addEventListener('click', handleClick);
         document.addEventListener('game-tab-activated', updateButtonState);
         document.addEventListener('editor-tab-activated', updateButtonState);
+        document.addEventListener('language-changed', updateButtonState);
         updateButtonState();
     }
 
@@ -123,16 +133,34 @@ class TinyRPGApplication {
             }, { passive: false });
         });
 
+        let showControlsText = '';
+        let hideControlsText = '';
+
+        const syncTouchTexts = () => {
+            showControlsText = getTextResource('touchControls.show');
+            hideControlsText = getTextResource('touchControls.hide');
+            toggleButton.textContent = showControlsText;
+            if (hideButton) {
+                hideButton.textContent = hideControlsText;
+                hideButton.setAttribute('aria-label', hideControlsText);
+            }
+        };
+
+        syncTouchTexts();
+
         const updateToggleState = () => {
             const isVisible = document.body.classList.contains('touch-controls-visible');
             toggleButton.setAttribute('aria-expanded', isVisible ? 'true' : 'false');
             toggleButton.setAttribute('aria-pressed', isVisible ? 'true' : 'false');
             padContainer.setAttribute('aria-hidden', isVisible ? 'false' : 'true');
             if (!isVisible) {
-                toggleButton.textContent = 'Exibir controles';
+                toggleButton.textContent = showControlsText;
             }
             if (hideButton) {
                 hideButton.hidden = !isVisible;
+                if (isVisible) {
+                    hideButton.textContent = hideControlsText;
+                }
             }
         };
 
@@ -153,8 +181,37 @@ class TinyRPGApplication {
 
         document.addEventListener('editor-tab-activated', hideControls);
         document.addEventListener('game-tab-activated', updateToggleState);
+        document.addEventListener('language-changed', () => {
+            syncTouchTexts();
+            updateToggleState();
+        });
 
         updateToggleState();
+    }
+
+    static bindLanguageSelector() {
+        if (typeof TextResources === 'undefined') return;
+        const select = document.getElementById('language-select');
+        if (!select) return;
+
+        const syncSelect = () => {
+            if (typeof TextResources.getLocale === 'function') {
+                select.value = TextResources.getLocale();
+            }
+        };
+
+        syncSelect();
+
+        select.addEventListener('change', () => {
+            const locale = select.value;
+            if (!locale) return;
+            const changed = TextResources.setLocale?.(locale);
+            if (!changed) {
+                syncSelect();
+            }
+        });
+
+        document.addEventListener('language-changed', syncSelect);
     }
 
     static setupTabs() {

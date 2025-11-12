@@ -24,11 +24,11 @@
     <div class="app">
         <main>
             <div class="tabs">
-                <p class="tabs-title">Tiny RPG Maker</p>
+                <p class="tabs-title" data-text-key="app.title"></p>
                 <div class="tabs-links">
-                    <button class="tab-button active" data-tab="game" aria-selected="true">Jogo</button>
-                    <button class="tab-button" data-tab="editor" aria-selected="false">Editor</button>
-                    <button id="btn-reset" class="tab-action-button" type="button">Reiniciar</button>
+                    <button class="tab-button active" data-tab="game" aria-selected="true" data-text-key="tabs.game"></button>
+                    <button class="tab-button" data-tab="editor" aria-selected="false" data-text-key="tabs.editor"></button>
+                    <button id="btn-reset" class="tab-action-button" type="button" data-text-key="buttons.reset" data-aria-label-key="aria.reset"></button>
                 </div>
             </div>
 
@@ -45,25 +45,24 @@
                         type="button"
                         aria-controls="mobile-touch-pad"
                         aria-expanded="false"
-                    >
-                        Exibir controles
-                    </button>
+                        data-text-key="touchControls.show"
+                    ></button>
                     <div id="mobile-touch-pad" class="game-touch-pad" aria-hidden="true">
                         <button
                             id="touch-controls-hide"
                             class="touch-controls-hide"
                             type="button"
-                            aria-label="Ocultar controles"
-                        >
-                            Ocultar controles
-                        </button>
-                        <button class="pad-button pad-up" data-direction="up" aria-label="Mover para cima"></button>
+                            aria-label=""
+                            data-text-key="touchControls.hide"
+                            data-aria-label-key="touchControls.hide"
+                        ></button>
+                        <button class="pad-button pad-up" data-direction="up" aria-label="" data-aria-label-key="touchControls.upLabel"></button>
                         <div class="pad-middle-row">
-                            <button class="pad-button pad-left" data-direction="left" aria-label="Mover para a esquerda"></button>
+                            <button class="pad-button pad-left" data-direction="left" aria-label="" data-aria-label-key="touchControls.leftLabel"></button>
                             <button class="pad-button pad-center" tabindex="-1" aria-hidden="true"></button>
-                            <button class="pad-button pad-right" data-direction="right" aria-label="Mover para a direita"></button>
+                            <button class="pad-button pad-right" data-direction="right" aria-label="" data-aria-label-key="touchControls.rightLabel"></button>
                         </div>
-                        <button class="pad-button pad-down" data-direction="down" aria-label="Mover para baixo"></button>
+                        <button class="pad-button pad-down" data-direction="down" aria-label="" data-aria-label-key="touchControls.downLabel"></button>
                     </div>
                 </div>
             </div>
@@ -73,7 +72,7 @@
                     <div class="editor-left">
                         <div class="editor-section editor-section--tiles">
                             <details open>
-                                <summary>Tiles</summary>
+                                <summary data-text-key="sections.tiles"></summary>
                                 <div class="tiles-panel">
                                     <p id="tile-preset-summary" class="tile-preset-summary"></p>
                                     <div id="tile-list" class="tile-list"></div>
@@ -83,7 +82,7 @@
 
                         <div class="editor-section editor-section--world">
                             <details open>
-                                <summary>Mundo</summary>
+                                <summary data-text-key="sections.world"></summary>
                                 <div class="world-panel">
                                     <div id="world-grid" class="world-grid"></div>
                                 </div>
@@ -92,7 +91,7 @@
 
                         <div class="editor-section editor-section--objects">
                             <details open>
-                                <summary>Objetos</summary>
+                                <summary data-text-key="sections.objects"></summary>
                                 <div class="objects-panel">
                                     <div id="object-types" class="object-types"></div>
                                     <div id="objects-list" class="objects-list"></div>
@@ -112,32 +111,32 @@
                     <div class="editor-right">
                         <div class="editor-section editor-section--npcs">
                             <details open>
-                                <summary>NPCs</summary>
+                                <summary data-text-key="sections.npcs"></summary>
                                 <div class="npcs-panel">
                                     <div id="npcs-list" class="npcs-list"></div>
                                     <div class="npc-editor" hidden>
-                                        <label for="npc-text">Dialogo padrao:</label>
-                                        <textarea id="npc-text" placeholder="Digite o dialogo do NPC..."></textarea>
+                                        <label for="npc-text" data-text-key="npc.dialog.defaultLabel"></label>
+                                        <textarea id="npc-text" data-placeholder-key="npc.dialog.placeholder"></textarea>
                                         <div class="npc-reward-group">
-                                            <label for="npc-reward-variable">Ao concluir o dialogo padrao, ativar variavel:</label>
+                                            <label for="npc-reward-variable" data-text-key="npc.reward.defaultLabel"></label>
                                             <select id="npc-reward-variable"></select>
                                         </div>
                                         <div class="npc-conditional-toggle">
-                                            <button type="button" id="btn-toggle-npc-conditional" aria-expanded="false" aria-controls="npc-conditional-section">Criar dialogo alternativo</button>
+                                            <button type="button" id="btn-toggle-npc-conditional" aria-expanded="false" aria-controls="npc-conditional-section" data-text-key="npc.toggle.create"></button>
                                         </div>
                                         <div id="npc-conditional-section" class="npc-conditional-section" hidden>
                                             <div class="npc-conditional-group">
-                                                <label for="npc-conditional-variable">Variavel para dialogo alternativo:</label>
+                                                <label for="npc-conditional-variable" data-text-key="npc.conditional.variableLabel"></label>
                                                 <select id="npc-conditional-variable"></select>
-                                                <label for="npc-conditional-text">Texto alternativo:</label>
-                                                <textarea id="npc-conditional-text" placeholder="Mensagem exibida quando a variavel estiver ON."></textarea>
+                                                <label for="npc-conditional-text" data-text-key="npc.conditional.textLabel"></label>
+                                                <textarea id="npc-conditional-text" data-placeholder-key="npc.conditional.placeholder"></textarea>
                                             </div>
                                             <div class="npc-reward-group npc-conditional-reward">
-                                                <label for="npc-conditional-reward-variable">Ao concluir o dialogo alternativo, ativar variavel:</label>
+                                                <label for="npc-conditional-reward-variable" data-text-key="npc.conditional.rewardLabel"></label>
                                                 <select id="npc-conditional-reward-variable"></select>
                                             </div>
                                         </div>
-                                        <button id="npc-delete">Remover NPC</button>
+                                        <button id="npc-delete" data-text-key="npc.delete"></button>
                                     </div>
                                 </div>
                             </details>
@@ -145,7 +144,7 @@
 
                         <div class="editor-section editor-section--enemies">
                             <details open>
-                                <summary>Inimigos</summary>
+                                <summary data-text-key="sections.enemies"></summary>
                                 <div class="enemies-panel">
                                     <div id="enemy-types" class="enemy-types"></div>
                                     <div id="enemies-list" class="enemies-list"></div>
@@ -155,21 +154,28 @@
 
                         <div class="editor-section editor-section--project">
                             <details open>
-                                <summary>Projeto</summary>
+                                <summary data-text-key="sections.project"></summary>
                                 <div class="project-actions">
                                     <label class="project-field">
-                                        <span>Nome do jogo</span>
-                                        <input type="text" id="game-title" placeholder="Ex.: Lendas do Vale" maxlength="18">
+                                        <span data-text-key="project.titleLabel"></span>
+                                        <input type="text" id="game-title" data-placeholder-key="project.titlePlaceholder" maxlength="18">
                                     </label>
                                     <label class="project-field">
-                                        <span>Autor</span>
-                                        <input type="text" id="game-author" placeholder="Seu nome ou estúdio" maxlength="18">
+                                        <span data-text-key="project.authorLabel"></span>
+                                        <input type="text" id="game-author" data-placeholder-key="project.authorPlaceholder" maxlength="18">
                                     </label>
-                                    <button id="btn-generate-url">Gerar URL do jogo</button>
+                                    <label class="project-field project-field--language">
+                                        <span data-text-key="project.languageLabel"></span>
+                                        <select id="language-select">
+                                            <option value="pt-BR" data-text-key="language.option.ptBR"></option>
+                                            <option value="en-US" data-text-key="language.option.enUS"></option>
+                                        </select>
+                                    </label>
+                                    <button id="btn-generate-url" data-text-key="project.generateUrl"></button>
                                 </div>
                                 <div class="history-actions">
-                                    <button id="btn-undo">Desfazer</button>
-                                    <button id="btn-redo">Refazer</button>
+                                    <button id="btn-undo" data-text-key="history.undo"></button>
+                                    <button id="btn-redo" data-text-key="history.redo"></button>
                                 </div>
                             </details>
                         </div>
@@ -182,6 +188,7 @@
     <input type="file" id="file-input" accept=".json" style="display: none;">
 
     <!-- Carregar módulos na ordem correta -->
+    <script src="js/core/TextResources.js?v=20250208"></script>
     <script src="js/core/state/StateWorldManager.js?v=20250208"></script>
     <script src="js/core/state/StatePlayerManager.js?v=20250208"></script>
     <script src="js/core/state/StateDialogManager.js?v=20250208"></script>

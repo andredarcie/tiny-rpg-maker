@@ -10,6 +10,28 @@ class EditorRenderService {
         }
     }
 
+    get textResources() {
+        return typeof TextResources !== 'undefined' ? TextResources : null;
+    }
+
+    t(key, fallback = '') {
+        const resource = this.textResources;
+        const value = resource?.get?.(key, fallback);
+        if (value) return value;
+        if (fallback) return fallback;
+        return key || '';
+    }
+
+    tf(key, params = {}, fallback = '') {
+        const resource = this.textResources;
+        if (resource?.format) {
+            return resource.format(key, params, fallback);
+        }
+        const template = this.t(key, fallback);
+        if (!template) return '';
+        return template.replace(/\{(\w+)\}/g, (_, token) => (params[token] ?? ''));
+    }
+
     get dom() {
         return this.manager.domCache;
     }
@@ -247,9 +269,14 @@ class EditorRenderService {
                 const cols = game.world?.cols || 1;
                 const roomRow = Math.floor(npc.roomIndex / cols) + 1;
                 const roomCol = (npc.roomIndex % cols) + 1;
-                pos.textContent = `Mapa (${roomCol}, ${roomRow}) - (${npc.x}, ${npc.y})`;
+                pos.textContent = this.tf('npc.status.position', {
+                    col: roomCol,
+                    row: roomRow,
+                    x: npc.x,
+                    y: npc.y
+                }, `Mapa (${roomCol}, ${roomRow}) - (${npc.x}, ${npc.y})`);
             } else {
-                pos.textContent = 'Disponivel';
+                pos.textContent = this.t('npc.status.available');
             }
 
             meta.append(name, pos);
@@ -329,8 +356,8 @@ class EditorRenderService {
         }
         if (btnToggleNpcConditional) {
             btnToggleNpcConditional.textContent = expanded
-                ? 'Ocultar dialogo alternativo'
-                : 'Criar dialogo alternativo';
+                ? this.t('npc.toggle.hide')
+                : this.t('npc.toggle.create');
             btnToggleNpcConditional.setAttribute('aria-expanded', expanded ? 'true' : 'false');
         }
     }
@@ -363,13 +390,13 @@ class EditorRenderService {
             const label = document.createElement('span');
             const displayName = this.getEnemyDisplayName(definition, enemy.type);
             const damageInfo = Number.isFinite(definition?.damage)
-                ? ` - Dano: ${definition.damage}`
+                ? this.tf('enemies.damageInfo', { value: definition.damage })
                 : '';
             label.textContent = `${displayName} @ (${enemy.x}, ${enemy.y})${damageInfo}`;
 
             const variableWrapper = document.createElement('label');
             variableWrapper.className = 'enemy-variable-wrapper';
-            variableWrapper.textContent = 'Variável: ';
+            variableWrapper.textContent = `${this.t('enemies.variableLabel')} `;
 
             const variableSelect = document.createElement('select');
             variableSelect.className = 'enemy-variable-select';
@@ -384,7 +411,7 @@ class EditorRenderService {
             removeBtn.type = 'button';
             removeBtn.className = 'enemy-remove';
             removeBtn.dataset.removeEnemy = enemy.id;
-            removeBtn.textContent = 'Remover';
+            removeBtn.textContent = this.t('buttons.remove');
 
             const controls = document.createElement('div');
             controls.className = 'enemy-controls';
@@ -476,8 +503,8 @@ class EditorRenderService {
             const info = document.createElement('div');
             info.className = 'object-type-info';
             info.textContent = placedTypes.has(definition.type)
-                ? 'Ja no mapa (1 por cenario)'
-                : 'Disponivel (1 por cenario)';
+                ? this.t('objects.info.placed')
+                : this.t('objects.info.available');
 
             meta.append(name, info);
             card.append(preview, meta);
@@ -574,7 +601,7 @@ class EditorRenderService {
                     this.manager.updateJSON();
                     this.manager.history.pushCurrentState();
                 });
-                label.append('Variavel associada: ', select);
+                label.append(`${this.t('objects.switch.variableLabel')} `, select);
                 config.appendChild(label);
 
                 const status = document.createElement('div');
@@ -582,7 +609,9 @@ class EditorRenderService {
                 const valueId = select.value || object.variableId;
                 const isOn = Boolean(runtimeMap.get(valueId || ''));
                 status.classList.toggle('is-on', isOn);
-                status.textContent = `Estado atual: ${isOn ? 'ON' : 'OFF'}`;
+                status.textContent = this.tf('objects.switch.stateLabel', {
+                    state: isOn ? this.t('objects.state.on') : this.t('objects.state.off')
+                });
                 config.appendChild(status);
                 body.appendChild(config);
             }
@@ -604,12 +633,14 @@ class EditorRenderService {
                     this.manager.updateJSON();
                     this.manager.history.pushCurrentState();
                 });
-                label.append('Variavel associada: ', select);
+                label.append(`${this.t('objects.switch.variableLabel')} `, select);
                 config.appendChild(label);
 
                 const status = document.createElement('div');
                 status.className = 'object-status';
-                status.textContent = `Estado atual: ${object.on ? 'ON' : 'OFF'}`;
+                status.textContent = this.tf('objects.switch.stateLabel', {
+                    state: object.on ? this.t('objects.state.on') : this.t('objects.state.off')
+                });
                 config.appendChild(status);
 
                 body.appendChild(config);
@@ -618,42 +649,42 @@ class EditorRenderService {
             if (object.type === 'door' && object.opened) {
                 const badge = document.createElement('div');
                 badge.className = 'object-status';
-                badge.textContent = 'Porta aberta';
+                badge.textContent = this.t('objects.status.doorOpened');
                 body.appendChild(badge);
             }
 
             if (object.type === 'key' && object.collected) {
                 const badge = document.createElement('div');
                 badge.className = 'object-status';
-                badge.textContent = 'Chave coletada';
+                badge.textContent = this.t('objects.status.keyCollected');
                 body.appendChild(badge);
             }
 
             if (object.type === 'life-potion' && object.collected) {
                 const badge = document.createElement('div');
                 badge.className = 'object-status';
-                badge.textContent = 'Pocao coletada';
+                badge.textContent = this.t('objects.status.potionCollected');
                 body.appendChild(badge);
             }
 
             if (object.type === 'xp-scroll' && object.collected) {
                 const badge = document.createElement('div');
                 badge.className = 'object-status';
-                badge.textContent = 'Pergaminho usado';
+                badge.textContent = this.t('objects.status.scrollUsed');
                 body.appendChild(badge);
             }
 
             if (object.type === 'sword' && object.collected) {
                 const badge = document.createElement('div');
                 badge.className = 'object-status';
-                badge.textContent = 'Espada quebrada';
+                badge.textContent = this.t('objects.status.swordBroken');
                 body.appendChild(badge);
             }
 
             if (object.type === 'player-end') {
                 const badge = document.createElement('div');
                 badge.className = 'object-status';
-                badge.textContent = 'Final do jogo';
+                badge.textContent = this.t('objects.status.gameEnd');
                 body.appendChild(badge);
             }
 
@@ -663,33 +694,18 @@ class EditorRenderService {
                 removeBtn.className = 'object-remove';
                 removeBtn.dataset.type = object.type;
                 removeBtn.dataset.roomIndex = String(object.roomIndex);
-                removeBtn.textContent = 'Remover';
+                removeBtn.textContent = this.t('buttons.remove');
                 body.appendChild(removeBtn);
             } else {
                 const badge = document.createElement('div');
                 badge.className = 'object-status';
-                badge.textContent = 'Marcador inicial';
+                badge.textContent = this.t('objects.status.startMarker');
                 body.appendChild(badge);
             }
 
             card.append(preview, body);
             container.appendChild(card);
         });
-    }
-
-    getObjectLabel(type, definitions) {
-        const def = definitions.find((entry) => entry.type === type);
-        if (def?.name) return def.name;
-        if (type === 'door') return 'Porta';
-        if (type === 'door-variable') return 'Porta magica';
-        if (type === 'player-start') return 'Inicio do Jogador';
-        if (type === 'player-end') return 'Fim do Jogo';
-        if (type === 'switch') return 'Alavanca';
-        if (type === 'key') return 'Chave';
-        if (type === 'life-potion') return 'Pocao de Vida';
-        if (type === 'sword') return 'Espada';
-        if (type === 'xp-scroll') return 'Pergaminho de XP';
-        return type;
     }
 
     drawObjectPreview(canvas, type) {
@@ -745,7 +761,7 @@ class EditorRenderService {
                 if (index === startIndex) {
                     const badge = document.createElement('span');
                     badge.classList.add('world-cell-badge', 'badge-start');
-                    badge.textContent = 'Start';
+                    badge.textContent = this.t('world.badge.start');
                     badges.appendChild(badge);
                     cell.classList.add('start');
                 }
@@ -754,7 +770,7 @@ class EditorRenderService {
                     cell.appendChild(badges);
                 }
 
-                cell.title = `Mapa (${col + 1}, ${row + 1})`;
+                cell.title = this.tf('world.cell.title', { col: col + 1, row: row + 1 });
                 grid.appendChild(cell);
             }
         }
@@ -766,18 +782,46 @@ class EditorRenderService {
         if (!preview || !tile) return;
         this.gameEngine.renderer.drawTileOnCanvas(preview, tile);
         if (this.dom.tileSummary) {
-            this.dom.tileSummary.textContent = tile.name || `Tile ${tile.id}`;
+            this.dom.tileSummary.textContent = tile.name || this.tf('tiles.summaryFallback', { id: tile.id });
         }
     }
 
     getEnemyDisplayName(definition, fallback = '') {
-        const raw = definition?.name || fallback || '';
-        if (!raw) return 'Inimigo';
+        const defaultName = this.t('enemy.defaultName');
+        const raw = definition?.name || fallback || defaultName;
+        if (!raw) return defaultName;
         const cleaned = raw
             .replace(/[^\w\s\u00C0-\u024F'()-]/g, ' ')
             .replace(/\s+/g, ' ')
             .trim();
-        return cleaned || fallback || 'Inimigo';
+        return cleaned || fallback || defaultName;
+    }
+
+    getObjectLabel(type, definitions) {
+        const def = definitions.find((entry) => entry.type === type);
+        if (def?.name) return def.name;
+        switch (type) {
+            case 'door':
+                return this.t('objects.label.door');
+            case 'door-variable':
+                return this.t('objects.label.doorVariable');
+            case 'player-start':
+                return this.t('objects.label.playerStart');
+            case 'player-end':
+                return this.t('objects.label.playerEnd');
+            case 'switch':
+                return this.t('objects.label.switch');
+            case 'key':
+                return this.t('objects.label.key');
+            case 'life-potion':
+                return this.t('objects.label.lifePotion');
+            case 'sword':
+                return this.t('objects.label.sword');
+            case 'xp-scroll':
+                return this.t('objects.label.xpScroll');
+            default:
+                return type;
+        }
     }
 }
 

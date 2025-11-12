@@ -1,3 +1,19 @@
+const getMovementText = (key, fallback = '') => {
+    if (typeof TextResources !== 'undefined' && typeof TextResources.get === 'function') {
+        const value = TextResources.get(key, fallback);
+        return value || fallback || key || '';
+    }
+    return fallback || key || '';
+};
+
+const formatMovementText = (key, params = {}, fallback = '') => {
+    if (typeof TextResources !== 'undefined' && typeof TextResources.format === 'function') {
+        const value = TextResources.format(key, params, fallback);
+        return value || fallback || key || '';
+    }
+    return fallback || key || '';
+};
+
 class MovementManager {
     constructor({ gameState, tileManager, renderer, dialogManager, interactionManager, enemyManager }) {
         this.gameState = gameState;
@@ -106,10 +122,7 @@ class MovementManager {
             const variableId = objectAtTarget.variableId;
             const doorOpen = variableId ? this.gameState.isVariableOn(variableId) : false;
             if (!doorOpen) {
-                const variable = variableId ? this.gameState.getVariable?.(variableId) ?? null : null;
-                const variableLabel = variable?.name || variable?.id || variableId || 'uma variavel';
-                const message = "Não abre com chave.";
-                this.dialogManager.showDialog(message);
+                this.dialogManager.showDialog(getMovementText('doors.variableLocked'));
                 this.renderer.draw();
                 return;
             }
@@ -124,11 +137,11 @@ class MovementManager {
                     ? this.gameState.getKeys()
                     : null;
                 const message = Number.isFinite(remainingKeys)
-                    ? `Voce usou uma chave para abrir a porta. Restam: ${remainingKeys}.`
-                    : 'Voce usou uma chave para abrir a porta.';
+                    ? formatMovementText('doors.openedRemaining', { value: remainingKeys })
+                    : getMovementText('doors.opened');
                 this.dialogManager.showDialog(message);
             } else {
-                this.dialogManager.showDialog('Porta trancada. Precisa de uma chave.');
+                this.dialogManager.showDialog(getMovementText('doors.locked'));
                 this.renderer.draw();
                 return;
             }

@@ -1,13 +1,24 @@
+const getVariableText = (key, fallback = '') => {
+    if (typeof TextResources !== 'undefined' && typeof TextResources.get === 'function') {
+        const value = TextResources.get(key, fallback);
+        return value || fallback || key || '';
+    }
+    return fallback || key || '';
+};
+
+const createVariablePreset = (id, order, nameKey, fallbackName, color) =>
+    Object.freeze({ id, order, nameKey, fallbackName, color });
+
 const STATE_VARIABLE_PRESETS = Object.freeze([
-    { id: 'var-1', order: 1, name: '1 - Preto', color: '#000000' },
-    { id: 'var-2', order: 2, name: '2 - Azul Escuro', color: '#1D2B53' },
-    { id: 'var-3', order: 3, name: '3 - Roxo', color: '#7E2553' },
-    { id: 'var-4', order: 4, name: '4 - Verde', color: '#008751' },
-    { id: 'var-5', order: 5, name: '5 - Marrom', color: '#AB5236' },
-    { id: 'var-6', order: 6, name: '6 - Cinza', color: '#5F574F' },
-    { id: 'var-7', order: 7, name: '7 - Azul Claro', color: '#C2C3C7' },
-    { id: 'var-8', order: 8, name: '8 - Rosa Choque', color: '#FF77A8' },
-    { id: 'var-9', order: 9, name: '9 - Amarelo', color: '#FFCCAA' }
+    createVariablePreset('var-1', 1, 'variables.names.var1', '', '#000000'),
+    createVariablePreset('var-2', 2, 'variables.names.var2', '', '#1D2B53'),
+    createVariablePreset('var-3', 3, 'variables.names.var3', '', '#7E2553'),
+    createVariablePreset('var-4', 4, 'variables.names.var4', '', '#008751'),
+    createVariablePreset('var-5', 5, 'variables.names.var5', '', '#AB5236'),
+    createVariablePreset('var-6', 6, 'variables.names.var6', '', '#5F574F'),
+    createVariablePreset('var-7', 7, 'variables.names.var7', '', '#C2C3C7'),
+    createVariablePreset('var-8', 8, 'variables.names.var8', '', '#FF77A8'),
+    createVariablePreset('var-9', 9, 'variables.names.var9', '', '#FFCCAA')
 ]);
 
 class StateVariableManager {
@@ -55,7 +66,9 @@ class StateVariableManager {
             return {
                 id: preset.id,
                 order: preset.order,
-                name: typeof current.name === 'string' && current.name.trim() ? current.name.trim() : preset.name,
+                name: typeof current.name === 'string' && current.name.trim()
+                    ? current.name.trim()
+                    : this.getPresetDefaultName(preset),
                 color: typeof current.color === 'string' && current.color.trim() ? current.color.trim() : preset.color,
                 value: Boolean(current.value)
             };
@@ -112,6 +125,15 @@ class StateVariableManager {
 
     getFirstVariableId() {
         return this.getVariableDefinitions()?.[0]?.id ?? this.presets?.[0]?.id ?? null;
+    }
+
+    getPresetDefaultName(preset) {
+        if (!preset) return '';
+        const fallback = preset.fallbackName || preset.name || '';
+        if (preset.nameKey) {
+            return getVariableText(preset.nameKey, fallback);
+        }
+        return fallback;
     }
 
     static get PRESETS() {

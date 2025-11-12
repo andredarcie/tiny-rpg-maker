@@ -3,6 +3,18 @@ class EditorNpcService {
         this.manager = editorManager;
     }
 
+    get text() {
+        return typeof TextResources !== 'undefined' ? TextResources : null;
+    }
+
+    t(key, fallback = '') {
+        const resource = this.text;
+        const value = resource?.get?.(key, fallback);
+        if (value) return value;
+        if (fallback) return fallback;
+        return key || '';
+    }
+
     get gameEngine() {
         return this.manager.gameEngine;
     }
@@ -27,7 +39,7 @@ class EditorNpcService {
             .find((entry) => !entry.npc?.placed);
 
         if (!available) {
-            alert('Todos os NPCs ja estao no mapa.');
+            alert(this.t('alerts.npc.full'));
             return;
         }
 
@@ -35,7 +47,7 @@ class EditorNpcService {
         if (!npc) {
             const created = this.gameEngine.npcManager?.createNPC?.(available.def.type);
             if (!created) {
-                alert('Nao foi possivel criar o NPC.');
+                alert(this.t('alerts.npc.createError'));
                 return;
             }
             this.state.selectedNpcId = created.id;
@@ -56,7 +68,7 @@ class EditorNpcService {
 
     activatePlacement() {
         if (!this.state.selectedNpcId) {
-            alert('Selecione um NPC para colocar.');
+            alert(this.t('alerts.npc.selectFirst'));
             return;
         }
         if (this.state.placingNpc) return;
@@ -133,7 +145,7 @@ class EditorNpcService {
 
     placeNpcAt(coord) {
         if (!this.state.selectedNpcId) {
-            alert('Selecione um NPC para colocar.');
+            alert(this.t('alerts.npc.selectFirst'));
             this.deactivatePlacement();
             return;
         }
@@ -145,7 +157,7 @@ class EditorNpcService {
             roomIndex
         );
         if (!updated) {
-            alert('Nao foi possivel posicionar o NPC.');
+            alert(this.t('alerts.npc.placeError'));
             return;
         }
         this.manager.renderService.renderNpcs();
@@ -163,7 +175,7 @@ class EditorNpcService {
 
         const emptyOption = document.createElement('option');
         emptyOption.value = '';
-        emptyOption.textContent = 'Nenhuma';
+        emptyOption.textContent = this.t('variables.none');
         selectElement.appendChild(emptyOption);
 
         variables.forEach((variable) => {

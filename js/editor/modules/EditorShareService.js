@@ -3,13 +3,25 @@ class EditorShareService {
         this.manager = editorManager;
     }
 
+    get text() {
+        return typeof TextResources !== 'undefined' ? TextResources : null;
+    }
+
+    t(key, fallback = '') {
+        const resource = this.text;
+        const value = resource?.get?.(key, fallback);
+        if (value) return value;
+        if (fallback) return fallback;
+        return key || '';
+    }
+
     async generateShareableUrl() {
         try {
             const share = window.ShareUtils
                 ? window.ShareUtils
                 : (typeof window !== 'undefined' ? window.TinyRPGShare : null);
             if (!share?.buildShareUrl) {
-                alert('Funcao de compartilhar nao esta disponivel.');
+                alert(this.t('alerts.share.unavailable'));
                 return;
             }
             const gameData = this.manager.gameEngine.exportGameData();
@@ -22,13 +34,13 @@ class EditorShareService {
 
             if (navigator.clipboard?.writeText) {
                 await navigator.clipboard.writeText(url);
-                alert('URL do jogo copiada para a area de transferencia!');
+                alert(this.t('alerts.share.copied'));
             } else {
-                prompt('Copie a URL do seu jogo:', url);
+                prompt(this.t('alerts.share.copyPrompt'), url);
             }
         } catch (error) {
             console.error(error);
-            alert('Nao foi possivel gerar a URL do jogo.');
+            alert(this.t('alerts.share.generateError'));
         }
     }
 
@@ -57,7 +69,7 @@ class EditorShareService {
                 this.manager.restore(data, { skipHistory: true });
                 this.manager.history.pushCurrentState();
             } catch {
-                alert('Nao foi possivel carregar o arquivo.');
+                alert(this.t('alerts.share.loadError'));
             }
         };
         reader.readAsText(file);
