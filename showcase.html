@@ -166,6 +166,38 @@
             margin-top: 32px;
             letter-spacing: 0.1em;
         }
+        .carousel-container {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #232734;
+            border-radius: 12px;
+            background: rgba(15, 19, 32, 0.82);
+        }
+        .carousel {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            scroll-behavior: smooth;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+        }
+        .carousel::-webkit-scrollbar {
+            display: none;
+        }
+        .carousel img {
+            width: 256px;
+            height: 256px;
+            object-fit: cover;
+            border-radius: 10px;
+            cursor: pointer;
+            flex-shrink: 0;
+            scroll-snap-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .carousel img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(100, 181, 246, 0.4);
+        }
         @media (max-width: 640px) {
             header { padding: 40px 16px 28px; }
             main { padding: 0 16px 48px; }
@@ -251,6 +283,20 @@
                 <a href="https://github.com/andredarcie/tiny-rpg-maker" target="_blank" rel="noopener">
                     github.com/andredarcie/tiny-rpg-maker
                 </a>.
+            </p>
+        </section>
+
+        <section id="oss-section">
+            <h2>Jogue!</h2>
+            <p>
+                Experimente jogar alguns jogos feitos pela comunidade!
+                <div class="carousel-container">
+                    <div class="carousel" id="carousel">
+                        <img src="showcase_img/sword_quest.png" alt="Sword Quest" onclick="window.open('https://andredarcie.github.io/tiny-rpg-maker/index.html#vf.gxAAgUEEQCAkIERERERE,xSAEIAK968gEMRMSIdETEhESIRA,xAAAAAAD_g5UIiIiIhERERA,xAAAgIACIAAAERE,xBxAhDSITAQAERERERERERA,xAAEAQICChYEERERERE,xAABACiAQgAEEREREA,xAFpCQgBAIAAETEREzE,xEiAKUB9Jm4gExEzMSIhExEzMzM.oyqKiIKGDR3-AeIeIeHj4eIh3d3iIiA,y_w8f1tAUFfchVzMzIVchV7FXMy-tXhXhVd3cA,y_wgYTw8AQAAzMyIiMyMzMi-u4A,y_-Mvrwkhg_8jMzMiIzIiMzMi7u4iIiIiIiIiIA,yB0MGIAgAJAEiIiIiIiIgA,yC4MuDh5EBAQiIiIVVhVVVWFhVA,y7xcNAQUFD_4h3d3d4h3h3eHh4h3d3d3,yAQEFHT8fDAEiIiIiIiIiIiIiIg,yBAUEBAC8hgcWFVVqqqF-IU.sKA.p~4QAZAnUAnABbAA.tWyJVbSBhcnJlcGVuZGltZW50bz8gQW5vcyBhdHLDoXMgcXVhbmRvIGVyYSBqb3ZlbSBtZSBwZXJndW50YXJhbSBvIHF1ZSBmYXJpYSBzZSB1bSBkaXJldG9yIG1lIGNoYW1hc3NlIHBhcmEgZ3JhdmFyIGNvbSBhIE1pYSBLaGFsaWZhLiBFdSByZXNwb25kaSBxdWUgZGFyaWEgbyBjdSBwcm8gZGlyZXRvciBlIHNhaWEgY29ycmVuZG8uIElzc28gZGVzdHJ1aXUgbyBlcXVpbGlicmlvIGRvIG11bmRvLiBEZXNkZSBlbnTDo28gcHJvY3VybyB1bSBoZXLDs2kgcGFyYSBsdXRhciBjb250cmEgbyBtYWwuIFUgcXVlPyBWb2PDqiBxdWVyIGx1dGFyIGNvbnRyYSBvIG1hbD8gT3JhIGJvbGFzLiBFdSBuw6NvIHBvc3NvIGxoZSBhanVkYXIuIE1hcyBldSBkaXJpYSBxdWUgcHJpbWVpcm8gcHJlY2lzYSBkZSB1bWEgYXJtYS5cbiIsIk8gcXVlPyBWb2PDqiBxdWVyIG1hdGFyIG1vbnN0cm9zPyBFbmxvdXF1ZWNldT8gVmEgcHJhIGNhc2EgZSBzZSBlc2NvbmRlIGVtYmFpeG8gZGEgY2FtYSEgTWFzIHByYSB2b2PDqiB2b2x0YXIgcHJhIGNhc2EgdGVtIHF1ZSBmdWdpciBkbyBkcmFnw6NvLCBib2Egc29ydGUhIiwiTWV1IG1hcmlkbyBlc3TDoSBkb2VudGUgZSBuw6NvIHBvZGVtb3MgbHV0YXIgY29udHJhIG9zIG1vbnN0cm9z4oCmXG5Db21vIMOpPyBWb2PDqiBhY2VpdGEgbHV0YXIgY29tIGVsZXM_XG5MZXZlIGEgZXNwYWRhIGRlbGUgc2UgcHJlY2lzYXLigKYiLCJBIG1hbcOjZSBkaXNzZSBxdWUgdGVtIG1vbnN0cm9zIGxhIGZvcmEsIG8gcGFwYWkgZXN0YSBkb2VudGUgZSBuYW8gcG9kZSB1c2FyIHN1YSBlc3BhZGEgcHJhIGx1dGFyIiwiUGVyaWdvIVxuTW9uc3Ryb3MhIl0.uWyJFc3BhZGE_IEV1IHRlbmhvLCBtYXMgamFtYWlzIHZvdSBkZWl4YXIgdm9jw6ogcGVnYXIgYSBtaW5oYSEgVsOhIGNhw6dhciBzdWEgdHVybWEgZm9sZ2FkbyEgRSBwYXJlIGRlIGRlc2VqYXIgYXMgY29pc2FzIGRvcyBvdXRyb3MsIHZhaSB0cmFiYWxoYXIhIiwiVm9jw6ogYWluZGEgdMOhIGHDrT8gRXUgasOhIHRlcmlhIGlkbyBlbWJvcmEhIiwiUXVhbmRvIG1ldSBmaWxobyBwZWlkYSwgYWxnbyBhY29udGVjZSBlIG8gdmVsaG8gaGVyZW1pdGEgc2VtcHJlIHJlY2xhbWEuIiwiTWluaGEgbcOjZSBkaXogcXVlIHF1YW5kbyBldSBwZWlkbywgYWJybyBhIHBvcnRhIGRvIHZlbGhvIGhlcmVtaXRhLlxuT3BzLCBwZWlkZWkuIiwiIl0.cZSQA.rZSQA.hAAMA.e~3QGVAT0CFQJfAXQBSwE.fAAEEAwICAg.dZQ.m~3AAuAg.qMQ.kbQ.lig.x~ygCZAQ.akss.z~PwI.J~JQI.KEA.nU3dvcmQgUXVlc3Q.yUm9kcmlnbydzIFNvZnQ', '_blank')">
+                        <img src="showcase_img/tarde_praca.png" alt="Tarde na Praça" onclick="window.open('https://andredarcie.github.io/tiny-rpg-maker/#vf.gxB8dgMRkNAgMERETIiMUQ0QUQjI,xGQUWTCiQYGAMRISISMSEjISMA,,xAwIGKRXiSJcEiMhIxEhIiERETE,xYKiwdowXAAcITISMTEhMiMiMRMQ,,,,.oyFAGBzOTw_fgmJhVVVVVVVVYVVVVVVVQ,yJLjJocNDh48iYiJWZhZhViVWFVYVVWA,,y-PHhwgINt2gVVVYVVWVVYVZiImJmIiJ,yj0dHgWDo__gVVWFVYVVhYiJiJmYiIiZiZk,,,,.p~FQAWABsBEwFVAA.tWyJCb20gZGlhIGpvdmVtLCBhcXVpIG5hIHByYcOnYSDDqSBtdWl0byBib20gcHJhIHBlc2NhciIsIk5lc3NhIHBhcnRlIGRvIGxhZ28sIG7Ds3MgdmVsaG9zIGZpY2Ftb3MgcGVzY2FuZG8sIG8gw7puaWNvIHNvbSBxdWUgb3V2aW1vcyBzw6NvIGRhcyBjaWdhcnJhcyBlIGRvcyBww6Fzc2Fyb3MuIEEgdmlkYSDDqSB0cmFucXVpbGEuIiwiRmlsaG8sIGN1aWRhZG8gY29tIG9zIHBhdG9zISEiLCJPbGhhIHF1YW50b3MgcGF0b3MgbWFtw6NlLiIsIlBhcnF1ZSBkYSBMYWdvYSAtIEFsdGluw7Nwb2xpcy4iXQ.uWyJFc3NhIGNpZGFkZSB0ZW0gc8OzIDE2IG1pbCBoYWJpdGFudGVzIG1hcyDDqSBtdWl0byBsaW1wYSwgYm9uaXRhIGUgb3JnYW5pemFkYS4iLCJFbnTDo28gc3VhIG11bGhlciB2ZWlvIGZhemVyIGNvbmN1cnNvIHDDumJsaWNvIHBvaXMgdmFpIHNlIGZvcm1hcj8gUXVlIGJhY2FuYSEiLCJTZSBjaGVnYXIgcGVydG8gZWxlcyB2w6NvIGJpY2FyIHNldSBww6kgaWd1YWwgYmljYXJhbSBkbyByYXBheiBwYXNzYW5kby4iLCJNYXMgZXUgcXVlcm8gZmljYXIgcGVydG8gZG9zIHBhdG9zISEg8J-YrSIsIiJd.cUyEA.rUxAA.hAAIA.nVGFyZGUgbmEgUHJhw6dh.yRGlndWlmaQ', '_blank')">
+                        <img src="showcase_img/manifesto_capital.png" alt="Manfesto Capital" onclick="window.open('https://andredarcie.github.io/tiny-rpg-maker/#vd.gxAAAAAICEAAAPTA,xAD______AAARERERERERERERERERERERERERA,AAAAAABABABERERAREREREREREBERERARERNQEREREA,,,xAn5-fn5-OAAIhExEiMTEyETESIhExMhESI,,,.oy__EBj8-Lgf8qqqqqqiXeqzMervoert6mqqqqqA,y_8GAgACB__8VVVVVXVXd3qqqqqmZmZmYA,y_9uAgIDw0IUVVVVVVVVVV9czFu1mVA,,,y_YGBgYGBh_8iIiIiIiIiIiImYiIiIiA,,,.p~dgG-AGwAMQBSAA.tWyJWaSBnZXJhw6fDtWVzIGFjcmVkaXRhcmVtIHF1ZSBiYXN0YXZhIGRpdmlkaXIgbyBww6NvIHByYSBhY2FiYXIgY29tIGEgZm9tZS5cbk1hcyBlc3F1ZWNlcmFtIHF1ZSwgc2VtIGxpYmVyZGFkZSwgbmluZ3XDqW0gcXVlciBwbGFudGFyLlxuVW0gZ292ZXJubyBxdWUgcHJvbWV0ZSBvIHBhcmHDrXNvIGNvYnJhbmRvIHR1YSBhbG1hLFxuc8OzIHRlIGVudHJlZ2EgbyBpbmZlcm5vIGVtYnJ1bGhhZG8gZW0gc2xvZ2Fucy5cbkxlbWJyZS1zZSwgam92ZW06XG5hIGlndWFsZGFkZSBpbXBvc3RhIMOpIHPDsyB1bWEgbm92YSBmb3JtYSBkZSBjb3JyZW50ZSBwaW50YWRhIGRlIHZlcm1lbGhvIHByYSBwYXJlY2VyIGp1c3RhLiIsIkFudGVzIGV1IHRpbmhhIHVtIHBlcXVlbm8gbmVnw7NjaW8uIEFnb3JhIHRlbmhvIHVtIGdyYW5kZSBwcm9ibGVtYS5cbkRpemVtIHF1ZSBzb3UgbGl2cmUsIGRlc2RlIHF1ZSBldSBjb25jb3JkZSBjb20gdHVkby5cblNlIGV1IGZhbG8gbyBxdWUgcGVuc28sIHNvdSBpbmltaWdvLlxuU2UgZmljbyBjYWxhZG8sIHNvdSBjw7ptcGxpY2UuXG5FIG5vIGZpbSwgY29udGludW8gY29tIGZvbWUiLCJQcm9tZXRlcmFtIGlndWFsZGFkZS4uLiBlIGNvbnNlZ3VpcmFtLlxuQWdvcmEgc29tb3MgdG9kb3MgaWd1YWxtZW50ZSBtaXNlcsOhdmVpcy5cbkEgZmlsYSBkbyBww6NvIMOpIGxvbmdhLCBtYXMgYSBkbyBzaWzDqm5jaW8gw6kgbWFpb3IuXG5BcHJlbmRpIGEgc29ycmlyIGNvbSBvIGVzdMO0bWFnbyB2YXppbyDigJQgw6kgbyDDum5pY28gamVpdG8gZGUgbsOjbyBwYXJlY2VyIGluZ3JhdGEuIiwiTWFtw6NlIGRpc3NlIHF1ZSBhZ29yYSB0dWRvIMOpIGRlIHRvZG9zLi4uIG1hcyBldSBwZXJndW50ZWkgcXVlbSDDqSDigJh0b2Rvc-KAmSBlIGVsYSBmaWNvdSBicmF2YS5cblNlIHR1ZG8gw6kgZGUgdG9kb3MsIHBvciBxdWUgbyBndWFyZGEgbGV2b3UgbyBww6NvIHF1ZSBldSBhY2hlaSBuYSBydWE_XG5EaXNzZSBxdWUgZXJhIOKAmHBybyBiZW0gZG8gcG92b-KAmS5cbk1hcyBldSBzb3UgbyBwb3ZvIHRhbWLDqW0uLi4gbsOjbyBzb3U_IiwiQ3VpZGFkbyBhbyBmYWxhciBjb20gbXVpdGFzIHBlc3NvYXMgaW50ZWxlY3R1YWlzLCBlbSBtYWlvciBwYXJ0ZSDDqSBvbmRlIG1vcmEgYSBoaXBvY3Jpc2lhLiJd.uWyIiLCIiLCIiLCJTZXLDoSBxdWUgbWFtw6NlIGVzdGEgY2VydGE_IiwiIl0.rAyEA.mF2e5.qEhA.nTWFuaWZlc3RvIENhcGl0YWw.yTGVvIERpYXM', '_blank')">
+                    </div>
+                </div>
             </p>
         </section>
     </main>
@@ -353,6 +399,33 @@
         });
 
         document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+    <script>
+        const carousel = document.getElementById('carousel');
+
+        carousel.innerHTML += carousel.innerHTML; // temporário até termos mais jogos pra showcase
+        const imageWidth = 256 + 16;
+        const totalImages = 200 * 3;
+        let intervalId;
+
+        function startAutoScroll() {
+            intervalId = setInterval(() => {
+                if (carousel.scrollLeft >= totalImages) {
+                    carousel.scrollLeft = 0;
+                } else {
+                    carousel.scrollLeft += imageWidth;
+                }
+            }, 2500);
+        }
+
+        function stopAutoScroll() {
+            clearInterval(intervalId);
+        }
+
+        carousel.addEventListener('mouseenter', stopAutoScroll);
+        carousel.addEventListener('mouseleave', startAutoScroll);
+
+        startAutoScroll();
     </script>
 </body>
 </html>
