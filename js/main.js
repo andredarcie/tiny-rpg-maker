@@ -50,18 +50,34 @@ class TinyRPGApplication {
 
         const getBaseUrl = () => `${window.location.origin}${window.location.pathname}`;
 
+        const openNewGameTab = (url) => {
+            const popup = window.open(url, '_blank', 'noopener');
+            if (popup) {
+                return true;
+            }
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.target = '_blank';
+            anchor.rel = 'noopener noreferrer';
+            anchor.style.position = 'absolute';
+            anchor.style.left = '-9999px';
+            document.body.appendChild(anchor);
+            anchor.click();
+            requestAnimationFrame(() => anchor.remove());
+            return true;
+        };
+
         const handleClick = (ev) => {
             const isEditorMode = document.body.classList.contains('editor-mode');
             if (isEditorMode) {
                 ev.preventDefault();
+                ev.stopImmediatePropagation();
                 const targetUrl = getBaseUrl();
-                const newWindow = window.open(targetUrl, '_blank', 'noopener');
-                if (!newWindow) {
-                    window.location.href = targetUrl;
-                }
-                return;
+                openNewGameTab(targetUrl);
+                return false;
             }
             gameEngine.resetGame();
+            return false;
         };
 
         const updateButtonState = () => {
