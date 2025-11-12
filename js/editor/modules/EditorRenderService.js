@@ -282,8 +282,10 @@ class EditorRenderService {
     }
 
     updateNpcForm() {
-        const npc = this.gameEngine.getSprites().find((entry) => entry.id === this.manager.selectedNpcId);
+        const selectedNpcId = this.manager.selectedNpcId;
+        const npc = this.gameEngine.getSprites().find((entry) => entry.id === selectedNpcId);
         const {
+            npcEditor,
             npcText,
             npcConditionalText,
             npcConditionalVariable,
@@ -292,7 +294,11 @@ class EditorRenderService {
             btnToggleNpcConditional,
             npcConditionalSection
         } = this.dom;
+        const hasSelection = Boolean(selectedNpcId);
         const hasNpc = Boolean(npc);
+        if (npcEditor) {
+            npcEditor.hidden = !hasSelection;
+        }
 
         if (npcText) {
             npcText.disabled = !hasNpc;

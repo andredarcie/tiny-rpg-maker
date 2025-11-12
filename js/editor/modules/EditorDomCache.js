@@ -20,6 +20,7 @@ class EditorDomCache {
         this.objectTypes = root.getElementById('object-types');
         this.objectsList = root.getElementById('objects-list');
         this.btnNpcDelete = root.getElementById('npc-delete');
+        this.npcEditor = root.querySelector('.npc-editor');
         this.btnGenerateUrl = root.getElementById('btn-generate-url');
         this.btnUndo = root.getElementById('btn-undo');
         this.btnRedo = root.getElementById('btn-redo');

@@ -1370,6 +1370,10 @@ textarea {
     gap: 8px;
 }
 
+.npc-editor[hidden] {
+    display: none !important;
+}
+
 .npc-editor label {
     font-size: 0.85rem;
     color: var(--muted);
