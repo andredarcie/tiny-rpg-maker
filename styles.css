@@ -516,7 +516,7 @@ body.game-mode #tab-game .game-controls button {
     body.touch-controls-visible .game-touch-pad {
         display: grid;
         position: absolute;
-        bottom: clamp(18px, 10vw, 32px);
+        bottom: clamp(72px, 18vw, 128px);
         left: 50%;
         transform: translateX(-50%);
         justify-items: center;
@@ -538,7 +538,7 @@ body.game-mode #tab-game .game-controls button {
     }
 
     body.game-mode.touch-controls-visible #game-container {
-        padding-bottom: clamp(120px, 26vw, 180px);
+        padding-bottom: clamp(110px, 24vw, 160px);
     }
 }
 
