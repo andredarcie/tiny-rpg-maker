@@ -47,7 +47,38 @@ class TinyRPGApplication {
     static bindResetButton(gameEngine) {
         const resetButton = document.getElementById('btn-reset');
         if (!resetButton) return;
-        resetButton.addEventListener('click', () => gameEngine.resetGame());
+
+        const getBaseUrl = () => `${window.location.origin}${window.location.pathname}`;
+
+        const handleClick = (ev) => {
+            const isEditorMode = document.body.classList.contains('editor-mode');
+            if (isEditorMode) {
+                ev.preventDefault();
+                const targetUrl = getBaseUrl();
+                const newWindow = window.open(targetUrl, '_blank', 'noopener');
+                if (!newWindow) {
+                    window.location.href = targetUrl;
+                }
+                return;
+            }
+            gameEngine.resetGame();
+        };
+
+        const updateButtonState = () => {
+            const isEditorMode = document.body.classList.contains('editor-mode');
+            if (isEditorMode) {
+                resetButton.textContent = 'Novo jogo';
+                resetButton.setAttribute('aria-label', 'Criar um novo jogo do zero em outra aba');
+            } else {
+                resetButton.textContent = 'Reiniciar';
+                resetButton.setAttribute('aria-label', 'Reiniciar a partida atual');
+            }
+        };
+
+        resetButton.addEventListener('click', handleClick);
+        document.addEventListener('game-tab-activated', updateButtonState);
+        document.addEventListener('editor-tab-activated', updateButtonState);
+        updateButtonState();
     }
 
     static bindTouchPad(gameEngine) {

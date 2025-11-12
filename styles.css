@@ -100,18 +100,21 @@ body.game-mode .tabs {
 }
 
 .tabs-links {
-    flex: 1 1 280px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    flex: 1 1 auto;
+    display: flex;
     gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
 }
 
 .tab-button {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 42px;
-    padding: 10px 14px;
+    min-height: 34px;
+    padding: 8px 12px;
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(26, 32, 48, 0.9);
@@ -126,21 +129,25 @@ body.game-mode .tabs {
 
 .tab-action-button {
     flex: 0 0 auto;
-    align-self: center;
-    padding: 8px 14px;
-    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    padding: 8px 12px;
+    border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(30, 35, 55, 0.88);
     color: #fff;
     font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
-    display: none;
     white-space: nowrap;
+    transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
 }
 
 .tab-button:hover,
-.tab-button.active {
+.tab-button.active,
+.tab-action-button:hover {
     background: rgba(100, 181, 246, 0.2);
     border-color: rgba(100, 181, 246, 0.45);
     color: #fff;
@@ -159,12 +166,12 @@ body.game-mode .tabs {
     }
 
     .tabs-links {
-        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
         gap: 6px;
+        justify-content: center;
     }
 
     .tab-button {
-        min-height: 34px;
+        min-height: 32px;
         padding: 6px 10px;
         font-size: 0.85rem;
     }
@@ -1465,7 +1472,7 @@ textarea {
     }
 
     .tab-button {
-        flex: 1 1 45%;
+        flex: 0 0 auto;
     }
 
     .game-controls {
@@ -1506,8 +1513,8 @@ textarea {
     }
 
     .tab-button {
-        flex: 1 1 100%;
-        min-width: 0;
+        flex: 0 0 auto;
+        min-width: auto;
     }
 
     .npc-card {
