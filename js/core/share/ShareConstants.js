@@ -181,6 +181,8 @@ class ShareConstants {
                 ShareConstants.VERSION_13,
                 ShareConstants.VERSION_14,
                 ShareConstants.VERSION_15,
+                ShareConstants.VERSION_16,
+                ShareConstants.VERSION_17,
                 ShareConstants.VERSION
             ]);
         }
