@@ -55,6 +55,9 @@ class ShareDataNormalizer {
                 y,
                 roomIndex: ShareMath.clampRoomIndex(npc?.roomIndex),
                 text: typeof npc?.text === 'string' ? npc.text : (def.defaultText || ''),
+                textKey: typeof npc?.textKey === 'string' && npc.textKey.length
+                    ? npc.textKey
+                    : (def.defaultTextKey || null),
                 conditionVariableId: ShareConstants.VARIABLE_IDS.includes(conditionId) ? conditionId : null,
                 conditionText: typeof npc?.conditionText === 'string'
                     ? npc.conditionText

@@ -194,6 +194,7 @@ class EditorNpcService {
         if (!npc) return;
 
         npc.text = text;
+        npc.textKey = null;
         this.manager.renderService.renderNpcs();
         this.manager.updateJSON();
         this.scheduleNpcTextUpdate();

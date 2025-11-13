@@ -261,7 +261,7 @@ class EditorRenderService {
 
             const name = document.createElement('div');
             name.className = 'npc-name';
-            name.textContent = def.name;
+            name.textContent = this.getNpcName(def);
 
             const pos = document.createElement('div');
             pos.className = 'npc-position';
@@ -329,7 +329,7 @@ class EditorRenderService {
 
         if (npcText) {
             npcText.disabled = !hasNpc;
-            npcText.value = npc?.text || '';
+            npcText.value = this.getNpcDialogueText(npc);
         }
 
         if (npcConditionalText) {
@@ -498,7 +498,7 @@ class EditorRenderService {
 
             const name = document.createElement('div');
             name.className = 'object-type-name';
-            name.textContent = definition.name || definition.type;
+            name.textContent = this.getObjectLabel(definition.type, definitions);
 
             const info = document.createElement('div');
             info.className = 'object-type-info';
@@ -787,18 +787,40 @@ class EditorRenderService {
     }
 
     getEnemyDisplayName(definition, fallback = '') {
-        const defaultName = this.t('enemy.defaultName');
-        const raw = definition?.name || fallback || defaultName;
-        if (!raw) return defaultName;
-        const cleaned = raw
+        const defaultName = this.t('enemy.defaultName', 'Inimigo');
+        const fallbackName = definition?.name || fallback || defaultName;
+        const localized = definition?.nameKey
+            ? this.t(definition.nameKey, fallbackName)
+            : fallbackName;
+        const cleaned = localized
             .replace(/[^\w\s\u00C0-\u024F'()-]/g, ' ')
             .replace(/\s+/g, ' ')
             .trim();
         return cleaned || fallback || defaultName;
     }
 
+    getNpcName(definition) {
+        if (!definition) return this.t('npc.defaultName', 'NPC');
+        const fallback = definition.name || this.t('npc.defaultName', 'NPC');
+        if (definition.nameKey) {
+            return this.t(definition.nameKey, fallback);
+        }
+        return fallback;
+    }
+
+    getNpcDialogueText(npc) {
+        if (!npc) return '';
+        if (npc.textKey) {
+            return this.t(npc.textKey, npc.text || '');
+        }
+        return npc.text || '';
+    }
+
     getObjectLabel(type, definitions) {
         const def = definitions.find((entry) => entry.type === type);
+        if (def?.nameKey) {
+            return this.t(def.nameKey, def?.name || type);
+        }
         if (def?.name) return def.name;
         switch (type) {
             case 'door':

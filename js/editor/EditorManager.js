@@ -22,6 +22,9 @@ class EditorManager {
 
         this.bindEvents();
         this.initialize();
+        if (typeof document !== 'undefined') {
+            document.addEventListener('language-changed', () => this.handleLanguageChange());
+        }
     }
 
     // State accessors to keep compatibility with legacy references
@@ -528,6 +531,31 @@ class EditorManager {
         this.editorCanvas.width = size;
         this.editorCanvas.height = size;
         this.renderService.renderEditor();
+    }
+
+    handleLanguageChange() {
+        if (typeof TextResources?.apply === 'function') {
+            TextResources.apply();
+        }
+        this.refreshNpcLocalizedText();
+        this.renderAll();
+        this.updateJSON();
+    }
+
+    refreshNpcLocalizedText() {
+        const sprites = this.gameEngine?.getSprites?.();
+        if (!Array.isArray(sprites)) return;
+        const definitions = this.gameEngine?.npcManager?.getDefinitions?.() || [];
+        const byType = new Map(definitions.map((def) => [def.type, def]));
+        sprites.forEach((npc) => {
+            const def = npc?.type ? byType.get(npc.type) : null;
+            if (def?.nameKey) {
+                npc.name = TextResources.get?.(def.nameKey, def.name || npc.name || '') || npc.name || '';
+            }
+            if (npc?.textKey) {
+                npc.text = TextResources.get?.(npc.textKey, npc.text || '') || npc.text || '';
+            }
+        });
     }
 
     handleKey(ev) {

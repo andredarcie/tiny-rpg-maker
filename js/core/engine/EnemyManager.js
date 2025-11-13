@@ -1,3 +1,11 @@
+const getEnemyLocaleText = (key, fallback = '') => {
+    if (typeof TextResources !== 'undefined' && typeof TextResources.get === 'function') {
+        const value = TextResources.get(key, fallback);
+        return value || fallback || key || '';
+    }
+    return fallback || key || '';
+};
+
 class EnemyManager {
     constructor(gameState, renderer, tileManager, options = {}) {
         this.gameState = gameState;
@@ -347,6 +355,13 @@ class EnemyManager {
         let message = null;
         if (typeof baseConfig?.message === 'string' && baseConfig.message.trim().length) {
             message = baseConfig.message.trim();
+        } else if (baseConfig?.messageKey) {
+            message = getEnemyLocaleText(baseConfig.messageKey, baseConfig.message || '');
+        } else if (definition?.defeatActivationMessageKey) {
+            message = getEnemyLocaleText(
+                definition.defeatActivationMessageKey,
+                definition.defeatActivationMessage?.trim() || ''
+            );
         } else if (typeof definition?.defeatActivationMessage === 'string' && definition.defeatActivationMessage.trim().length) {
             message = definition.defeatActivationMessage.trim();
         }

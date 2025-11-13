@@ -35,6 +35,17 @@ const TEXT_BUNDLES = {
         'npc.conditional.placeholder': 'Mensagem exibida quando a variável estiver ON.',
         'npc.conditional.rewardLabel': 'Ao concluir o diálogo alternativo, ativar variável:',
         'npc.delete': 'Remover NPC',
+        'npc.defaultName': 'NPC',
+        'npcs.names.oldMage': 'Velho Mago',
+        'npcs.names.villagerMan': 'Homem comum',
+        'npcs.names.villagerWoman': 'Mulher comum',
+        'npcs.names.child': 'Criança curiosa',
+        'npcs.names.woodenSign': 'Placa de madeira',
+        'npcs.dialog.oldMage': 'Eu guardo segredos antigos.',
+        'npcs.dialog.villagerMan': 'Bom dia! Posso ajudar?',
+        'npcs.dialog.villagerWoman': 'Que dia lindo para explorar.',
+        'npcs.dialog.child': 'Vamos brincar de aventura!',
+        'npcs.dialog.woodenSign': 'Atenção aos perigos à frente.',
         'npc.status.available': 'Disponível',
         'npc.status.position': 'Mapa ({col}, {row}) - ({x}, {y})',
         'project.titleLabel': 'Nome do jogo',
@@ -58,6 +69,17 @@ const TEXT_BUNDLES = {
         'alerts.share.loadError': 'Não foi possível carregar o arquivo.',
         'enemies.damageInfo': ' - Dano: {value}',
         'enemies.variableLabel': 'Variável:',
+        'enemies.names.giantRat': '🐀 Rato Gigante',
+        'enemies.names.bandit': '🧔 Bandido',
+        'enemies.names.darkKnight': '⚔️ Cavaleiro Negro',
+        'enemies.names.necromancer': '🧙‍♂️ Necro',
+        'enemies.names.dragon': '🐉 Dragão',
+        'enemies.names.skeleton': '💀 Esqueleto',
+        'enemies.names.fallenKing': '👑 Rei Caído',
+        'enemies.names.ancientDemon': '😈 Demônio Ancião',
+        'enemies.defeat.dragon': 'Selo do Dragão ativado!',
+        'enemies.defeat.fallenKing': 'Selo Real despertou!',
+        'enemies.defeat.ancientDemon': 'Selo Demoníaco ativo!',
         'variables.none': 'Nenhuma',
         'objects.info.available': 'Disponível (1 por cenário)',
         'objects.info.placed': 'Já no mapa (1 por cenário)',
@@ -131,6 +153,17 @@ const TEXT_BUNDLES = {
         'npc.conditional.placeholder': 'Message displayed when the variable is ON.',
         'npc.conditional.rewardLabel': 'After the alternate dialogue, enable variable:',
         'npc.delete': 'Remove NPC',
+        'npc.defaultName': 'NPC',
+        'npcs.names.oldMage': 'Old Mage',
+        'npcs.names.villagerMan': 'Common man',
+        'npcs.names.villagerWoman': 'Common woman',
+        'npcs.names.child': 'Curious child',
+        'npcs.names.woodenSign': 'Wooden sign',
+        'npcs.dialog.oldMage': 'I guard old secrets.',
+        'npcs.dialog.villagerMan': 'Good morning! Can I help?',
+        'npcs.dialog.villagerWoman': 'What a lovely day to explore.',
+        'npcs.dialog.child': 'Let\'s play adventure!',
+        'npcs.dialog.woodenSign': 'Beware of the dangers ahead.',
         'npc.status.available': 'Available',
         'npc.status.position': 'Map ({col}, {row}) - ({x}, {y})',
         'project.titleLabel': 'Game name',
@@ -154,6 +187,17 @@ const TEXT_BUNDLES = {
         'alerts.share.loadError': 'Unable to load the file.',
         'enemies.damageInfo': ' - Damage: {value}',
         'enemies.variableLabel': 'Variable:',
+        'enemies.names.giantRat': '🐀 Giant Rat',
+        'enemies.names.bandit': '🧔 Bandit',
+        'enemies.names.darkKnight': '⚔️ Dark Knight',
+        'enemies.names.necromancer': '🧙‍♂️ Necromancer',
+        'enemies.names.dragon': '🐉 Dragon',
+        'enemies.names.skeleton': '💀 Skeleton',
+        'enemies.names.fallenKing': '👑 Fallen King',
+        'enemies.names.ancientDemon': '😈 Ancient Demon',
+        'enemies.defeat.dragon': 'Dragon Seal activated!',
+        'enemies.defeat.fallenKing': 'Royal Seal awakened!',
+        'enemies.defeat.ancientDemon': 'Demonic Seal is active!',
         'variables.none': 'None',
         'objects.info.available': 'Available (1 per scene)',
         'objects.info.placed': 'Already on the map (1 per scene)',
@@ -200,6 +244,26 @@ const TextResources = {
 
     getStrings(locale = this.locale) {
         return this.bundles[locale] || this.bundles[this.defaultLocale] || {};
+    },
+
+    detectBrowserLocale() {
+        if (typeof navigator === 'undefined') {
+            return this.defaultLocale;
+        }
+        const languages = Array.isArray(navigator.languages) && navigator.languages.length
+            ? navigator.languages
+            : [navigator.language || navigator.userLanguage || this.defaultLocale];
+        for (const lang of languages) {
+            if (lang && this.bundles[lang]) {
+                return lang;
+            }
+            const short = String(lang || '').split('-')[0];
+            const match = Object.keys(this.bundles).find((locale) => locale.startsWith(short));
+            if (match) {
+                return match;
+            }
+        }
+        return this.defaultLocale;
     },
 
     setLocale(locale, { silent = false, root } = {}) {
@@ -293,7 +357,11 @@ const TextResources = {
 
 if (typeof window !== 'undefined') {
     window.TextResources = TextResources;
-    document.addEventListener('DOMContentLoaded', () => TextResources.apply());
+    document.addEventListener('DOMContentLoaded', () => {
+        const detected = TextResources.detectBrowserLocale();
+        TextResources.setLocale(detected, { silent: true });
+        TextResources.apply();
+    });
 } else if (typeof globalThis !== 'undefined') {
     globalThis.TextResources = TextResources;
 }

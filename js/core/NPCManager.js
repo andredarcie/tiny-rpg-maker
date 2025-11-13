@@ -14,6 +14,30 @@ for (let i = 0; i < NPC_MANAGER_DEFINITIONS.length; i++) {
 }
 let nextNpcId = NPC_MANAGER_DEFINITIONS.length + 1;
 
+const getNpcLocaleText = (key, fallback = '') => {
+    if (typeof TextResources !== 'undefined' && typeof TextResources.get === 'function') {
+        const value = TextResources.get(key, fallback);
+        return value || fallback || key || '';
+    }
+    return fallback || key || '';
+};
+
+const resolveDefinitionName = (def) => {
+    if (!def) return getNpcLocaleText('npc.defaultName', 'NPC');
+    if (def.nameKey) {
+        return getNpcLocaleText(def.nameKey, def.name || 'NPC');
+    }
+    return def.name || getNpcLocaleText('npc.defaultName', 'NPC');
+};
+
+const resolveDefinitionText = (def) => {
+    if (!def) return '';
+    if (def.defaultTextKey) {
+        return getNpcLocaleText(def.defaultTextKey, def.defaultText || '');
+    }
+    return def.defaultText || '';
+};
+
 function clamp(value, min, max, fallback) {
     if (!Number.isFinite(value)) return fallback;
     return Math.max(min, Math.min(max, value));
@@ -100,8 +124,27 @@ class NPCManager {
             ensureCounterAbove(parsed);
         }
         const id = sequentialId || existingId || this.generateId();
-        const name = def?.name || npc.name || 'NPC';
-        const text = typeof npc.text === 'string' ? npc.text : (def?.defaultText || '');
+        const baseName = def ? resolveDefinitionName(def) : null;
+        const defaultText = resolveDefinitionText(def);
+        const defaultTextKey = def?.defaultTextKey || null;
+        const existingTextKey = typeof npc.textKey === 'string' && npc.textKey.trim().length ? npc.textKey.trim() : null;
+        const name = npc.name || baseName || getNpcLocaleText('npc.defaultName', 'NPC');
+        let textKey = existingTextKey || null;
+        let text = typeof npc.text === 'string' ? npc.text : null;
+
+        if (!textKey && defaultTextKey) {
+            const trimmed = (text || '').trim();
+            const fallback = (def?.defaultText || '').trim();
+            if (!trimmed || trimmed === fallback) {
+                textKey = defaultTextKey;
+            }
+        }
+
+        if (textKey) {
+            text = getNpcLocaleText(textKey, text || defaultText);
+        } else if (!text) {
+            text = defaultText;
+        }
         const maxRoomIndex = Math.max(0, (this.gameState?.game?.rooms?.length ?? 1) - 1);
         const roomIndex = clamp(Number(npc.roomIndex), 0, maxRoomIndex, 0);
         const x = clamp(Number(npc.x), 0, 7, 1);
@@ -121,6 +164,7 @@ class NPCManager {
             type: def?.type || npc.type || id,
             name,
             text,
+            textKey,
             roomIndex,
             x,
             y,
@@ -133,11 +177,13 @@ class NPCManager {
     }
 
     createFromDefinition(def) {
+        const textKey = def?.defaultTextKey || null;
         return {
             id: sequentialIdForType(def.type) || this.generateId(),
             type: def.type,
-            name: def.name,
-            text: def.defaultText || '',
+            name: resolveDefinitionName(def),
+            text: resolveDefinitionText(def),
+            textKey,
             roomIndex: 0,
             x: 1,
             y: 1,
@@ -164,8 +210,9 @@ class NPCManager {
         const npc = this.normalizeNPC({
             id: def.id,
             type: def.type,
-            name: def.name,
-            text: data?.text ?? def.defaultText ?? '',
+            name: resolveDefinitionName(def),
+            text: data?.text ?? resolveDefinitionText(def),
+            textKey: data?.text ? null : (def.defaultTextKey || null),
             x: data?.x ?? 1,
             y: data?.y ?? 1,
             roomIndex: data?.roomIndex ?? 0,
