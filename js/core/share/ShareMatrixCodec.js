@@ -1,12 +1,13 @@
 class ShareMatrixCodec {
     static normalizeGround(matrix) {
+        const totalTiles = TileDefinitions.TILE_PRESETS.length-1;
         const size = ShareConstants.MATRIX_SIZE;
         const rows = [];
         for (let y = 0; y < size; y++) {
             const row = [];
             for (let x = 0; x < size; x++) {
                 const value = Number.isFinite(matrix?.[y]?.[x]) ? matrix[y][x] : 0;
-                row.push(ShareMath.clamp(value, 0, 15, 0));
+                row.push(ShareMath.clamp(value, 0, totalTiles, 0));
             }
             rows.push(row);
         }
@@ -14,6 +15,7 @@ class ShareMatrixCodec {
     }
 
     static normalizeOverlay(matrix) {
+        const totalTiles = TileDefinitions.TILE_PRESETS.length-1;
         const size = ShareConstants.MATRIX_SIZE;
         const rows = [];
         for (let y = 0; y < size; y++) {
@@ -23,7 +25,7 @@ class ShareMatrixCodec {
                 if (raw === null || raw === undefined) {
                     row.push(null);
                 } else {
-                    row.push(ShareMath.clamp(Number(raw), 0, 15, 0));
+                    row.push(ShareMath.clamp(Number(raw), 0, totalTiles, 0));
                 }
             }
             rows.push(row);
@@ -98,6 +100,7 @@ class ShareMatrixCodec {
     }
 
     static decodeGround(text, version) {
+        const totalTiles = TileDefinitions.TILE_PRESETS.length-1;
         const tileCount = ShareConstants.TILE_COUNT;
         const size = ShareConstants.MATRIX_SIZE;
         const useLegacy = version === ShareConstants.LEGACY_VERSION ||
@@ -111,7 +114,7 @@ class ShareMatrixCodec {
                 for (let x = 0; x < size; x++) {
                     const char = text?.[index++] ?? '0';
                     const value = parseInt(char, 16);
-                    row.push(Number.isFinite(value) ? ShareMath.clamp(value, 0, 15, 0) : 0);
+                    row.push(Number.isFinite(value) ? ShareMath.clamp(value, 0, totalTiles, 0) : 0);
                 }
                 grid.push(row);
             }
@@ -137,7 +140,7 @@ class ShareMatrixCodec {
                     const bitPosition = bitIndex & 0x07;
                     const hasValue = (maskBytes[byteIndex] & (1 << bitPosition)) !== 0;
                     const tile = hasValue ? (values[valueIndex++] ?? 0) : 0;
-                    row.push(ShareMath.clamp(tile, 0, 15, 0));
+                    row.push(ShareMath.clamp(tile, 0, totalTiles, 0));
                     bitIndex++;
                 }
                 grid.push(row);
@@ -152,7 +155,7 @@ class ShareMatrixCodec {
             const row = [];
             for (let x = 0; x < size; x++) {
                 const value = values[valueIndex++] ?? 0;
-                row.push(ShareMath.clamp(value, 0, 15, 0));
+                row.push(ShareMath.clamp(value, 0, totalTiles, 0));
             }
             grid.push(row);
         }
@@ -198,6 +201,7 @@ class ShareMatrixCodec {
     }
 
     static decodeOverlay(text, version) {
+        const totalTiles = TileDefinitions.TILE_PRESETS.length-1;
         const size = ShareConstants.MATRIX_SIZE;
         const tileCount = ShareConstants.TILE_COUNT;
         const useBinaryEncoding = text?.[0] === ShareConstants.OVERLAY_BINARY_PREFIX &&
@@ -223,7 +227,7 @@ class ShareMatrixCodec {
                     const hasTile = (maskBytes[byteIndex] & (1 << bitPosition)) !== 0;
                     if (hasTile) {
                         const value = values[valueIndex++] ?? 0;
-                        row.push(ShareMath.clamp(value, 0, 15, 0));
+                        row.push(ShareMath.clamp(value, 0, totalTiles, 0));
                     } else {
                         row.push(null);
                     }
@@ -243,7 +247,7 @@ class ShareMatrixCodec {
                     row.push(null);
                 } else {
                     const value = parseInt(char, 16);
-                    row.push(Number.isFinite(value) ? ShareMath.clamp(value, 0, 15, 0) : null);
+                    row.push(Number.isFinite(value) ? ShareMath.clamp(value, 0, totalTiles, 0) : null);
                 }
             }
             grid.push(row);
