@@ -1,13 +1,13 @@
 class ShareMatrixCodec {
     static normalizeGround(matrix) {
-        const totalTiles = TileDefinitions.TILE_PRESETS.length-1;
         const size = ShareConstants.MATRIX_SIZE;
         const rows = [];
+        const maxTileValue = ShareConstants.TILE_VALUE_MAX;
         for (let y = 0; y < size; y++) {
             const row = [];
             for (let x = 0; x < size; x++) {
-                const value = Number.isFinite(matrix?.[y]?.[x]) ? matrix[y][x] : 0;
-                row.push(ShareMath.clamp(value, 0, totalTiles, 0));
+                const value = ShareMatrixCodec.coerceTileValue(matrix?.[y]?.[x], 0);
+                row.push(ShareMath.clamp(value, 0, maxTileValue, 0));
             }
             rows.push(row);
         }
@@ -15,9 +15,9 @@ class ShareMatrixCodec {
     }
 
     static normalizeOverlay(matrix) {
-        const totalTiles = TileDefinitions.TILE_PRESETS.length-1;
         const size = ShareConstants.MATRIX_SIZE;
         const rows = [];
+        const maxTileValue = ShareConstants.TILE_VALUE_MAX;
         for (let y = 0; y < size; y++) {
             const row = [];
             for (let x = 0; x < size; x++) {
@@ -25,7 +25,8 @@ class ShareMatrixCodec {
                 if (raw === null || raw === undefined) {
                     row.push(null);
                 } else {
-                    row.push(ShareMath.clamp(Number(raw), 0, totalTiles, 0));
+                    const value = ShareMatrixCodec.coerceTileValue(raw, 0);
+                    row.push(ShareMath.clamp(value, 0, maxTileValue, 0));
                 }
             }
             rows.push(row);
@@ -64,10 +65,11 @@ class ShareMatrixCodec {
         let hasNonZero = false;
         let bitIndex = 0;
         const size = ShareConstants.MATRIX_SIZE;
+        const useExtendedTiles = ShareMatrixCodec.shouldUseExtendedTileEncoding(normalized);
 
         for (let y = 0; y < size; y++) {
             for (let x = 0; x < size; x++) {
-                const value = normalized[y][x] & 0x0f;
+                const value = normalized[y][x] & 0xff;
                 if (!hasNonZero && value !== 0) {
                     hasNonZero = true;
                 }
@@ -86,12 +88,12 @@ class ShareMatrixCodec {
             return '';
         }
 
-        const dense = ShareBase64.toBase64Url(ShareVariableCodec.packNibbles(values));
+        const dense = ShareBase64.toBase64Url(ShareMatrixCodec.packTileValues(values, useExtendedTiles));
         if (!nonZeroValues.length) {
             return dense;
         }
         const encodedMask = ShareBase64.toBase64Url(maskBytes);
-        const encodedValues = ShareBase64.toBase64Url(ShareVariableCodec.packNibbles(nonZeroValues));
+        const encodedValues = ShareBase64.toBase64Url(ShareMatrixCodec.packTileValues(nonZeroValues, useExtendedTiles));
         const sparseLength = 1 + encodedMask.length + encodedValues.length;
         if (sparseLength < dense.length) {
             return `${ShareConstants.GROUND_SPARSE_PREFIX}${encodedMask}${encodedValues}`;
@@ -100,9 +102,10 @@ class ShareMatrixCodec {
     }
 
     static decodeGround(text, version) {
-        const totalTiles = TileDefinitions.TILE_PRESETS.length-1;
         const tileCount = ShareConstants.TILE_COUNT;
         const size = ShareConstants.MATRIX_SIZE;
+        const maxTileValue = ShareConstants.TILE_VALUE_MAX;
+        const useExtendedTiles = version >= ShareConstants.TILE_EXTENDED_VERSION;
         const useLegacy = version === ShareConstants.LEGACY_VERSION ||
             (text?.length === tileCount && /^[0-9a-f]+$/i.test(text));
         const grid = [];
@@ -114,7 +117,7 @@ class ShareMatrixCodec {
                 for (let x = 0; x < size; x++) {
                     const char = text?.[index++] ?? '0';
                     const value = parseInt(char, 16);
-                    row.push(Number.isFinite(value) ? ShareMath.clamp(value, 0, totalTiles, 0) : 0);
+                    row.push(Number.isFinite(value) ? ShareMath.clamp(value, 0, ShareConstants.TILE_LEGACY_MAX, 0) : 0);
                 }
                 grid.push(row);
             }
@@ -130,7 +133,7 @@ class ShareMatrixCodec {
             const maskBytes = ShareBase64.fromBase64Url(maskSlice);
             const nonZeroCount = ShareMatrixCodec.countSetBits(maskBytes);
             const valueBytes = valuesSlice ? ShareBase64.fromBase64Url(valuesSlice) : new Uint8Array(0);
-            const values = ShareVariableCodec.unpackNibbles(valueBytes, nonZeroCount);
+            const values = ShareMatrixCodec.unpackTileValues(valueBytes, nonZeroCount, useExtendedTiles);
             let valueIndex = 0;
             let bitIndex = 0;
             for (let y = 0; y < size; y++) {
@@ -140,7 +143,7 @@ class ShareMatrixCodec {
                     const bitPosition = bitIndex & 0x07;
                     const hasValue = (maskBytes[byteIndex] & (1 << bitPosition)) !== 0;
                     const tile = hasValue ? (values[valueIndex++] ?? 0) : 0;
-                    row.push(ShareMath.clamp(tile, 0, totalTiles, 0));
+                    row.push(ShareMath.clamp(tile, 0, maxTileValue, 0));
                     bitIndex++;
                 }
                 grid.push(row);
@@ -149,13 +152,13 @@ class ShareMatrixCodec {
         }
 
         const bytes = ShareBase64.fromBase64Url(text);
-        const values = ShareVariableCodec.unpackNibbles(bytes, tileCount);
+        const values = ShareMatrixCodec.unpackTileValues(bytes, tileCount, useExtendedTiles);
         let valueIndex = 0;
         for (let y = 0; y < size; y++) {
             const row = [];
             for (let x = 0; x < size; x++) {
                 const value = values[valueIndex++] ?? 0;
-                row.push(ShareMath.clamp(value, 0, totalTiles, 0));
+                row.push(ShareMath.clamp(value, 0, maxTileValue, 0));
             }
             grid.push(row);
         }
@@ -170,6 +173,7 @@ class ShareMatrixCodec {
         let hasData = false;
         let bitIndex = 0;
         const size = ShareConstants.MATRIX_SIZE;
+        const useExtendedTiles = ShareMatrixCodec.shouldUseExtendedTileEncoding(normalized);
 
         for (let y = 0; y < size; y++) {
             for (let x = 0; x < size; x++) {
@@ -182,7 +186,7 @@ class ShareMatrixCodec {
                 const byteIndex = currentIndex >> 3;
                 const bitPosition = currentIndex & 0x07;
                 maskBytes[byteIndex] |= (1 << bitPosition);
-                values.push(value & 0x0f);
+                values.push(value & 0xff);
             }
         }
 
@@ -192,7 +196,7 @@ class ShareMatrixCodec {
 
         const encodedMask = ShareBase64.toBase64Url(maskBytes);
         const encodedValues = values.length
-            ? ShareBase64.toBase64Url(ShareVariableCodec.packNibbles(values))
+            ? ShareBase64.toBase64Url(ShareMatrixCodec.packTileValues(values, useExtendedTiles))
             : '';
         return {
             text: `${ShareConstants.OVERLAY_BINARY_PREFIX}${encodedMask}${encodedValues}`,
@@ -201,11 +205,12 @@ class ShareMatrixCodec {
     }
 
     static decodeOverlay(text, version) {
-        const totalTiles = TileDefinitions.TILE_PRESETS.length-1;
         const size = ShareConstants.MATRIX_SIZE;
         const tileCount = ShareConstants.TILE_COUNT;
+        const maxTileValue = ShareConstants.TILE_VALUE_MAX;
         const useBinaryEncoding = text?.[0] === ShareConstants.OVERLAY_BINARY_PREFIX &&
             version !== ShareConstants.LEGACY_VERSION;
+        const useExtendedTiles = version >= ShareConstants.TILE_EXTENDED_VERSION;
         const grid = [];
 
         if (useBinaryEncoding) {
@@ -215,7 +220,7 @@ class ShareMatrixCodec {
             const maskBytes = ShareBase64.fromBase64Url(maskSlice);
             const nonNullCount = ShareMatrixCodec.countSetBits(maskBytes);
             const valueBytes = valuesSlice ? ShareBase64.fromBase64Url(valuesSlice) : new Uint8Array(0);
-            const values = ShareVariableCodec.unpackNibbles(valueBytes, nonNullCount);
+            const values = ShareMatrixCodec.unpackTileValues(valueBytes, nonNullCount, useExtendedTiles);
             let bitIndex = 0;
             let valueIndex = 0;
 
@@ -227,7 +232,7 @@ class ShareMatrixCodec {
                     const hasTile = (maskBytes[byteIndex] & (1 << bitPosition)) !== 0;
                     if (hasTile) {
                         const value = values[valueIndex++] ?? 0;
-                        row.push(ShareMath.clamp(value, 0, totalTiles, 0));
+                        row.push(ShareMath.clamp(value, 0, maxTileValue, 0));
                     } else {
                         row.push(null);
                     }
@@ -247,7 +252,7 @@ class ShareMatrixCodec {
                     row.push(null);
                 } else {
                     const value = parseInt(char, 16);
-                    row.push(Number.isFinite(value) ? ShareMath.clamp(value, 0, totalTiles, 0) : null);
+                    row.push(Number.isFinite(value) ? ShareMath.clamp(value, 0, ShareConstants.TILE_LEGACY_MAX, 0) : null);
                 }
             }
             grid.push(row);
@@ -279,6 +284,64 @@ class ShareMatrixCodec {
             return matrices;
         }
         return [ShareMatrixCodec.decodeOverlay(text || '', version)];
+    }
+
+    static coerceTileValue(value, fallback = 0) {
+        if (typeof value === 'number' && Number.isFinite(value)) {
+            return value;
+        }
+        if (typeof value === 'string' && value.trim() !== '') {
+            const parsed = Number(value);
+            if (Number.isFinite(parsed)) {
+                return parsed;
+            }
+        }
+        return fallback;
+    }
+
+    static shouldUseExtendedTileEncoding(matrix) {
+        if (ShareConstants.VERSION < ShareConstants.TILE_EXTENDED_VERSION) {
+            return ShareMatrixCodec.matrixHasExtendedTiles(matrix);
+        }
+        return true;
+    }
+
+    static matrixHasExtendedTiles(matrix) {
+        const legacyMax = ShareConstants.TILE_LEGACY_MAX;
+        const size = ShareConstants.MATRIX_SIZE;
+        for (let y = 0; y < size; y++) {
+            for (let x = 0; x < size; x++) {
+                const value = matrix?.[y]?.[x];
+                if (value === null || value === undefined) continue;
+                if (Number.isFinite(value) && value > legacyMax) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    static packTileValues(values, useExtended) {
+        if (useExtended) {
+            const bytes = new Uint8Array(values.length);
+            for (let i = 0; i < values.length; i++) {
+                const value = Number.isFinite(values[i]) ? values[i] : 0;
+                bytes[i] = value & 0xff;
+            }
+            return bytes;
+        }
+        return ShareVariableCodec.packNibbles(values.map((entry) => Number(entry) & 0x0f));
+    }
+
+    static unpackTileValues(bytes, expectedCount, useExtended) {
+        if (useExtended) {
+            const values = new Array(expectedCount);
+            for (let i = 0; i < expectedCount; i++) {
+                values[i] = bytes[i] ?? 0;
+            }
+            return values;
+        }
+        return ShareVariableCodec.unpackNibbles(bytes, expectedCount);
     }
 
     static countSetBits(bytes) {

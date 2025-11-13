@@ -87,6 +87,10 @@
             font-size: 0.95rem;
         }
 
+        .segments-table {
+            table-layout: fixed;
+        }
+
         th, td {
             border: 1px solid #374151;
             padding: 0.5rem;
@@ -103,11 +107,76 @@
             background: #111827;
             border-radius: 0.5rem;
             overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
         }
 
         .error {
             color: #f87171;
             font-weight: 600;
+        }
+
+        .muted {
+            color: #9ca3af;
+            font-style: italic;
+        }
+
+        .segments-table th:nth-child(1),
+        .segments-table td:nth-child(1) {
+            width: 60px;
+        }
+
+        .segments-table th:nth-child(2),
+        .segments-table td:nth-child(2) {
+            width: 140px;
+        }
+
+        .segments-table th:nth-child(5),
+        .segments-table th:nth-child(6) {
+            width: 24%;
+        }
+
+        .segments-table td code {
+            display: inline-block;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .collapsible {
+            max-height: 150px;
+            overflow: hidden;
+            position: relative;
+            transition: max-height 0.2s ease;
+        }
+
+        .collapsible::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 40px;
+            background: linear-gradient(180deg, rgba(17,24,39,0) 0%, rgba(17,24,39,0.95) 100%);
+            pointer-events: none;
+        }
+
+        .collapsible[data-collapsed="false"] {
+            max-height: none;
+        }
+
+        .collapsible[data-collapsed="false"]::after {
+            display: none;
+        }
+
+        .collapsible-toggle {
+            margin-top: 0.5rem;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.85rem;
+            border: 1px solid #4b5563;
+            border-radius: 999px;
+            background: transparent;
+            color: inherit;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -208,6 +277,38 @@
             }
         };
 
+        const escapeHtml = (value) => String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+
+        const stripHtml = (html) => html.replace(/<[^>]+>/g, '');
+
+        const shouldCollapseContent = (html) => stripHtml(html).length > 240;
+
+        const buildCollapsible = (content, id) => `
+            <div class="collapsible" id="${id}" data-collapsed="true">${content}</div>
+            <button type="button" class="collapsible-toggle" data-target="${id}" aria-expanded="false">Mostrar mais</button>
+        `;
+
+        const formatDecodedValue = (value) => {
+            if (value === undefined) {
+                return '<span class="muted">Not decoded</span>';
+            }
+            if (value === null) {
+                return '<code>null</code>';
+            }
+            if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+                return `<code>${escapeHtml(String(value))}</code>`;
+            }
+            if (Array.isArray(value) || typeof value === 'object') {
+                return `<pre>${escapeHtml(JSON.stringify(value, null, 2))}</pre>`;
+            }
+            return `<code>${escapeHtml(String(value))}</code>`;
+        };
+
         const extractFromInput = (raw) => {
             const value = (raw || '').trim();
             if (!value) return null;
@@ -244,37 +345,136 @@
             `;
         };
 
-        const renderSegments = (segments) => {
+        const renderSegments = (segments, context) => {
             if (!segments.length) {
                 segmentsOutput.innerHTML = '<p>No segments identified. Ensure there is content after the #.</p>';
                 return;
             }
 
-            const rows = segments.map(({ key, value }) => {
+            const rows = segments.map(({ key, value }, index) => {
                 const info = SEGMENT_INFO[key] || { label: 'Unknown', description: 'Undocumented prefix.' };
+                let encodedDisplay = `<code>${escapeHtml(value || '(vazio)')}</code>`;
+                if (shouldCollapseContent(encodedDisplay)) {
+                    encodedDisplay = buildCollapsible(encodedDisplay, `segment-encoded-${index}`);
+                }
+                let decodedSnippet = '<span class="muted">Version not supported</span>';
+                if (context && Number.isFinite(context.version)) {
+                    try {
+                        const decoded = decodeSegmentValue(key, value, context);
+                        decodedSnippet = formatDecodedValue(decoded);
+                    } catch (err) {
+                        decodedSnippet = `<span class="error">Error: ${escapeHtml(err.message)}</span>`;
+                    }
+                }
+                if (shouldCollapseContent(decodedSnippet)) {
+                    decodedSnippet = buildCollapsible(decodedSnippet, `segment-decoded-${index}`);
+                }
                 return `
                     <tr>
                         <td><code>${key}</code></td>
                         <td>${info.label}</td>
                         <td>${info.description}</td>
-                        <td><code>${value || '(vazio)'}</code></td>
+                        <td>${encodedDisplay}</td>
+                        <td>${decodedSnippet}</td>
                     </tr>
                 `;
             }).join('');
 
             segmentsOutput.innerHTML = `
-                <table>
+                <table class="segments-table">
                     <thead>
                         <tr>
                             <th>Prefix</th>
                             <th>Meaning</th>
                             <th>Description</th>
                             <th>Value (hex/base64)</th>
+                            <th>Decoded value</th>
                         </tr>
                     </thead>
                     <tbody>${rows}</tbody>
                 </table>
             `;
+        };
+
+        const buildSegmentContext = (payload) => {
+            const version = payload.v ? parseInt(payload.v, 36) : NaN;
+            if (!Number.isFinite(version)) {
+                return { version };
+            }
+            const roomCount = version >= ShareConstants.VERSION_3 ? ShareConstants.WORLD_ROOM_COUNT : 1;
+            const npcPositions = SharePositionCodec.decodePositions(payload.p || '');
+            const enemyPositions = SharePositionCodec.decodePositions(payload.e || '');
+            const magicDoorPositions = SharePositionCodec.decodePositions(payload.m || '');
+            const switchPositions = SharePositionCodec.decodePositions(payload.J || '');
+            return {
+                version,
+                roomCount,
+                npcPositions,
+                enemyPositions,
+                magicDoorPositions,
+                switchPositions
+            };
+        };
+
+        const decodeSegmentValue = (key, value, context) => {
+            const version = context.version;
+            const roomCount = context.roomCount;
+            switch (key) {
+                case 'v':
+                    return version;
+                case 'g':
+                    return ShareMatrixCodec.decodeWorldGround(value || '', version, roomCount);
+                case 'o':
+                    return ShareMatrixCodec.decodeWorldOverlay(value || '', version, roomCount);
+                case 's':
+                    return SharePositionCodec.decodePositions(value || '');
+                case 'p':
+                    return context.npcPositions;
+                case 'i':
+                    return SharePositionCodec.decodeNpcTypeIndexes(value || '');
+                case 't':
+                    return ShareTextCodec.decodeTextArray(value || '');
+                case 'u':
+                    return ShareTextCodec.decodeTextArray(value || '');
+                case 'c':
+                    return ShareVariableCodec.decodeVariableNibbleArray(value || '', context.npcPositions.length);
+                case 'r':
+                    return ShareVariableCodec.decodeVariableNibbleArray(value || '', context.npcPositions.length);
+                case 'h':
+                    return ShareVariableCodec.decodeVariableNibbleArray(value || '', context.npcPositions.length);
+                case 'e':
+                    return context.enemyPositions;
+                case 'f':
+                    return SharePositionCodec.decodeEnemyTypeIndexes(value || '', context.enemyPositions.length);
+                case 'w':
+                    return ShareVariableCodec.decodeVariableNibbleArray(value || '', context.enemyPositions.length);
+                case 'd':
+                    return SharePositionCodec.decodePositions(value || '');
+                case 'm':
+                    return context.magicDoorPositions;
+                case 'q':
+                    return ShareVariableCodec.decodeVariableNibbleArray(value || '', context.magicDoorPositions.length);
+                case 'k':
+                case 'l':
+                case 'x':
+                case 'a':
+                case 'z':
+                    return SharePositionCodec.decodePositions(value || '');
+                case 'J':
+                    return context.switchPositions;
+                case 'K':
+                    return ShareVariableCodec.decodeVariableNibbleArray(value || '', context.switchPositions.length);
+                case 'L':
+                    return ShareVariableCodec.decodeVariableNibbleArray(value || '', context.switchPositions.length);
+                case 'b':
+                    return ShareVariableCodec.decodeVariables(value || '');
+                case 'n':
+                    return ShareTextCodec.decodeText(value || '', ShareConstants.DEFAULT_TITLE);
+                case 'y':
+                    return ShareTextCodec.decodeText(value || '', '');
+                default:
+                    return undefined;
+            }
         };
 
         const renderDecoded = (code) => {
@@ -308,10 +508,27 @@
                 key: segment[0],
                 value: segment.slice(1)
             }));
+            const payload = parsedSegments.reduce((acc, { key, value }) => {
+                if (key) acc[key] = value;
+                return acc;
+            }, {});
+            const context = buildSegmentContext(payload);
 
             renderSummary(extracted, parsedSegments.length);
-            renderSegments(parsedSegments);
+            renderSegments(parsedSegments, context);
             renderDecoded(extracted.code);
+        });
+
+        segmentsOutput.addEventListener('click', (event) => {
+            const button = event.target.closest('.collapsible-toggle');
+            if (!button) return;
+            const targetId = button.dataset.target;
+            const block = document.getElementById(targetId);
+            if (!block) return;
+            const isCollapsed = block.getAttribute('data-collapsed') !== 'false';
+            block.setAttribute('data-collapsed', isCollapsed ? 'false' : 'true');
+            button.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
+            button.textContent = isCollapsed ? 'Mostrar menos' : 'Mostrar mais';
         });
     })();
 </script>

@@ -14,9 +14,10 @@ class ShareConstants {
     static get VERSION_13() { return 13; }
     static get VERSION_14() { return 14; }
     static get VERSION_15() { return 15; }
+    static get VERSION_16() { return 16; }
 
     static get VERSION() {
-        return ShareConstants.VERSION_15;
+        return ShareConstants.VERSION_16;
     }
 
     static get LEGACY_VERSION() {
@@ -75,6 +76,10 @@ class ShareConstants {
         return ShareConstants.VERSION_15;
     }
 
+    static get TILE_EXTENDED_VERSION() {
+        return ShareConstants.VERSION_16;
+    }
+
     static get MATRIX_SIZE() {
         return 8;
     }
@@ -101,6 +106,14 @@ class ShareConstants {
 
     static get NULL_CHAR() {
         return 'z';
+    }
+
+    static get TILE_LEGACY_MAX() {
+        return 15;
+    }
+
+    static get TILE_VALUE_MAX() {
+        return 255;
     }
 
     static get GROUND_SPARSE_PREFIX() {
@@ -157,6 +170,7 @@ class ShareConstants {
                 ShareConstants.VERSION_12,
                 ShareConstants.VERSION_13,
                 ShareConstants.VERSION_14,
+                ShareConstants.VERSION_15,
                 ShareConstants.VERSION
             ]);
         }
