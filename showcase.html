@@ -184,19 +184,55 @@
         .carousel::-webkit-scrollbar {
             display: none;
         }
-        .carousel img {
+        .cover-card {
             width: 256px;
             height: 256px;
-            object-fit: cover;
             border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: #050a16;
             cursor: pointer;
             flex-shrink: 0;
             scroll-snap-align: center;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+            position: relative;
+            padding: 0;
+            display: flex;
+            align-items: stretch;
+            justify-content: stretch;
+            font: inherit;
+            color: inherit;
+            appearance: none;
         }
-        .carousel img:hover {
+        .cover-card canvas,
+        .cover-card img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+        }
+        .cover-card__label {
+            position: absolute;
+            left: 12px;
+            right: 12px;
+            bottom: 12px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(5, 10, 22, 0.85);
+            color: #d9edff;
+            font-size: 0.8rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            text-align: center;
+            pointer-events: none;
+        }
+        .cover-card:hover {
             transform: scale(1.05);
             box-shadow: 0 4px 20px rgba(100, 181, 246, 0.4);
+        }
+        .cover-card:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 4px;
         }
         @media (max-width: 640px) {
             header { padding: 40px 16px 28px; }
@@ -288,16 +324,10 @@
 
         <section id="oss-section">
             <h2>Jogue!</h2>
-            <p>
-                Experimente jogar alguns jogos feitos pela comunidade!
-                <div class="carousel-container">
-                    <div class="carousel" id="carousel">
-                        <img src="showcase_img/sword_quest.png" alt="Sword Quest" onclick="window.open('https://andredarcie.github.io/tiny-rpg-maker/index.html#vf.gxAAgUEEQCAkIERERERE,xSAEIAK968gEMRMSIdETEhESIRA,xAAAAAAD_g5UIiIiIhERERA,xAAAgIACIAAAERE,xBxAhDSITAQAERERERERERA,xAAEAQICChYEERERERE,xAABACiAQgAEEREREA,xAFpCQgBAIAAETEREzE,xEiAKUB9Jm4gExEzMSIhExEzMzM.oyqKiIKGDR3-AeIeIeHj4eIh3d3iIiA,y_w8f1tAUFfchVzMzIVchV7FXMy-tXhXhVd3cA,y_wgYTw8AQAAzMyIiMyMzMi-u4A,y_-Mvrwkhg_8jMzMiIzIiMzMi7u4iIiIiIiIiIA,yB0MGIAgAJAEiIiIiIiIgA,yC4MuDh5EBAQiIiIVVhVVVWFhVA,y7xcNAQUFD_4h3d3d4h3h3eHh4h3d3d3,yAQEFHT8fDAEiIiIiIiIiIiIiIg,yBAUEBAC8hgcWFVVqqqF-IU.sKA.p~4QAZAnUAnABbAA.tWyJVbSBhcnJlcGVuZGltZW50bz8gQW5vcyBhdHLDoXMgcXVhbmRvIGVyYSBqb3ZlbSBtZSBwZXJndW50YXJhbSBvIHF1ZSBmYXJpYSBzZSB1bSBkaXJldG9yIG1lIGNoYW1hc3NlIHBhcmEgZ3JhdmFyIGNvbSBhIE1pYSBLaGFsaWZhLiBFdSByZXNwb25kaSBxdWUgZGFyaWEgbyBjdSBwcm8gZGlyZXRvciBlIHNhaWEgY29ycmVuZG8uIElzc28gZGVzdHJ1aXUgbyBlcXVpbGlicmlvIGRvIG11bmRvLiBEZXNkZSBlbnTDo28gcHJvY3VybyB1bSBoZXLDs2kgcGFyYSBsdXRhciBjb250cmEgbyBtYWwuIFUgcXVlPyBWb2PDqiBxdWVyIGx1dGFyIGNvbnRyYSBvIG1hbD8gT3JhIGJvbGFzLiBFdSBuw6NvIHBvc3NvIGxoZSBhanVkYXIuIE1hcyBldSBkaXJpYSBxdWUgcHJpbWVpcm8gcHJlY2lzYSBkZSB1bWEgYXJtYS5cbiIsIk8gcXVlPyBWb2PDqiBxdWVyIG1hdGFyIG1vbnN0cm9zPyBFbmxvdXF1ZWNldT8gVmEgcHJhIGNhc2EgZSBzZSBlc2NvbmRlIGVtYmFpeG8gZGEgY2FtYSEgTWFzIHByYSB2b2PDqiB2b2x0YXIgcHJhIGNhc2EgdGVtIHF1ZSBmdWdpciBkbyBkcmFnw6NvLCBib2Egc29ydGUhIiwiTWV1IG1hcmlkbyBlc3TDoSBkb2VudGUgZSBuw6NvIHBvZGVtb3MgbHV0YXIgY29udHJhIG9zIG1vbnN0cm9z4oCmXG5Db21vIMOpPyBWb2PDqiBhY2VpdGEgbHV0YXIgY29tIGVsZXM_XG5MZXZlIGEgZXNwYWRhIGRlbGUgc2UgcHJlY2lzYXLigKYiLCJBIG1hbcOjZSBkaXNzZSBxdWUgdGVtIG1vbnN0cm9zIGxhIGZvcmEsIG8gcGFwYWkgZXN0YSBkb2VudGUgZSBuYW8gcG9kZSB1c2FyIHN1YSBlc3BhZGEgcHJhIGx1dGFyIiwiUGVyaWdvIVxuTW9uc3Ryb3MhIl0.uWyJFc3BhZGE_IEV1IHRlbmhvLCBtYXMgamFtYWlzIHZvdSBkZWl4YXIgdm9jw6ogcGVnYXIgYSBtaW5oYSEgVsOhIGNhw6dhciBzdWEgdHVybWEgZm9sZ2FkbyEgRSBwYXJlIGRlIGRlc2VqYXIgYXMgY29pc2FzIGRvcyBvdXRyb3MsIHZhaSB0cmFiYWxoYXIhIiwiVm9jw6ogYWluZGEgdMOhIGHDrT8gRXUgasOhIHRlcmlhIGlkbyBlbWJvcmEhIiwiUXVhbmRvIG1ldSBmaWxobyBwZWlkYSwgYWxnbyBhY29udGVjZSBlIG8gdmVsaG8gaGVyZW1pdGEgc2VtcHJlIHJlY2xhbWEuIiwiTWluaGEgbcOjZSBkaXogcXVlIHF1YW5kbyBldSBwZWlkbywgYWJybyBhIHBvcnRhIGRvIHZlbGhvIGhlcmVtaXRhLlxuT3BzLCBwZWlkZWkuIiwiIl0.cZSQA.rZSQA.hAAMA.e~3QGVAT0CFQJfAXQBSwE.fAAEEAwICAg.dZQ.m~3AAuAg.qMQ.kbQ.lig.x~ygCZAQ.akss.z~PwI.J~JQI.KEA.nU3dvcmQgUXVlc3Q.yUm9kcmlnbydzIFNvZnQ', '_blank')">
-                        <img src="showcase_img/tarde_praca.png" alt="Tarde na Praça" onclick="window.open('https://andredarcie.github.io/tiny-rpg-maker/#vf.gxB8dgMRkNAgMERETIiMUQ0QUQjI,xGQUWTCiQYGAMRISISMSEjISMA,,xAwIGKRXiSJcEiMhIxEhIiERETE,xYKiwdowXAAcITISMTEhMiMiMRMQ,,,,.oyFAGBzOTw_fgmJhVVVVVVVVYVVVVVVVQ,yJLjJocNDh48iYiJWZhZhViVWFVYVVWA,,y-PHhwgINt2gVVVYVVWVVYVZiImJmIiJ,yj0dHgWDo__gVVWFVYVVhYiJiJmYiIiZiZk,,,,.p~FQAWABsBEwFVAA.tWyJCb20gZGlhIGpvdmVtLCBhcXVpIG5hIHByYcOnYSDDqSBtdWl0byBib20gcHJhIHBlc2NhciIsIk5lc3NhIHBhcnRlIGRvIGxhZ28sIG7Ds3MgdmVsaG9zIGZpY2Ftb3MgcGVzY2FuZG8sIG8gw7puaWNvIHNvbSBxdWUgb3V2aW1vcyBzw6NvIGRhcyBjaWdhcnJhcyBlIGRvcyBww6Fzc2Fyb3MuIEEgdmlkYSDDqSB0cmFucXVpbGEuIiwiRmlsaG8sIGN1aWRhZG8gY29tIG9zIHBhdG9zISEiLCJPbGhhIHF1YW50b3MgcGF0b3MgbWFtw6NlLiIsIlBhcnF1ZSBkYSBMYWdvYSAtIEFsdGluw7Nwb2xpcy4iXQ.uWyJFc3NhIGNpZGFkZSB0ZW0gc8OzIDE2IG1pbCBoYWJpdGFudGVzIG1hcyDDqSBtdWl0byBsaW1wYSwgYm9uaXRhIGUgb3JnYW5pemFkYS4iLCJFbnTDo28gc3VhIG11bGhlciB2ZWlvIGZhemVyIGNvbmN1cnNvIHDDumJsaWNvIHBvaXMgdmFpIHNlIGZvcm1hcj8gUXVlIGJhY2FuYSEiLCJTZSBjaGVnYXIgcGVydG8gZWxlcyB2w6NvIGJpY2FyIHNldSBww6kgaWd1YWwgYmljYXJhbSBkbyByYXBheiBwYXNzYW5kby4iLCJNYXMgZXUgcXVlcm8gZmljYXIgcGVydG8gZG9zIHBhdG9zISEg8J-YrSIsIiJd.cUyEA.rUxAA.hAAIA.nVGFyZGUgbmEgUHJhw6dh.yRGlndWlmaQ', '_blank')">
-                        <img src="showcase_img/manifesto_capital.png" alt="Manfesto Capital" onclick="window.open('https://andredarcie.github.io/tiny-rpg-maker/#vd.gxAAAAAICEAAAPTA,xAD______AAARERERERERERERERERERERERERA,AAAAAABABABERERAREREREREREBERERARERNQEREREA,,,xAn5-fn5-OAAIhExEiMTEyETESIhExMhESI,,,.oy__EBj8-Lgf8qqqqqqiXeqzMervoert6mqqqqqA,y_8GAgACB__8VVVVVXVXd3qqqqqmZmZmYA,y_9uAgIDw0IUVVVVVVVVVV9czFu1mVA,,,y_YGBgYGBh_8iIiIiIiIiIiImYiIiIiA,,,.p~dgG-AGwAMQBSAA.tWyJWaSBnZXJhw6fDtWVzIGFjcmVkaXRhcmVtIHF1ZSBiYXN0YXZhIGRpdmlkaXIgbyBww6NvIHByYSBhY2FiYXIgY29tIGEgZm9tZS5cbk1hcyBlc3F1ZWNlcmFtIHF1ZSwgc2VtIGxpYmVyZGFkZSwgbmluZ3XDqW0gcXVlciBwbGFudGFyLlxuVW0gZ292ZXJubyBxdWUgcHJvbWV0ZSBvIHBhcmHDrXNvIGNvYnJhbmRvIHR1YSBhbG1hLFxuc8OzIHRlIGVudHJlZ2EgbyBpbmZlcm5vIGVtYnJ1bGhhZG8gZW0gc2xvZ2Fucy5cbkxlbWJyZS1zZSwgam92ZW06XG5hIGlndWFsZGFkZSBpbXBvc3RhIMOpIHPDsyB1bWEgbm92YSBmb3JtYSBkZSBjb3JyZW50ZSBwaW50YWRhIGRlIHZlcm1lbGhvIHByYSBwYXJlY2VyIGp1c3RhLiIsIkFudGVzIGV1IHRpbmhhIHVtIHBlcXVlbm8gbmVnw7NjaW8uIEFnb3JhIHRlbmhvIHVtIGdyYW5kZSBwcm9ibGVtYS5cbkRpemVtIHF1ZSBzb3UgbGl2cmUsIGRlc2RlIHF1ZSBldSBjb25jb3JkZSBjb20gdHVkby5cblNlIGV1IGZhbG8gbyBxdWUgcGVuc28sIHNvdSBpbmltaWdvLlxuU2UgZmljbyBjYWxhZG8sIHNvdSBjw7ptcGxpY2UuXG5FIG5vIGZpbSwgY29udGludW8gY29tIGZvbWUiLCJQcm9tZXRlcmFtIGlndWFsZGFkZS4uLiBlIGNvbnNlZ3VpcmFtLlxuQWdvcmEgc29tb3MgdG9kb3MgaWd1YWxtZW50ZSBtaXNlcsOhdmVpcy5cbkEgZmlsYSBkbyBww6NvIMOpIGxvbmdhLCBtYXMgYSBkbyBzaWzDqm5jaW8gw6kgbWFpb3IuXG5BcHJlbmRpIGEgc29ycmlyIGNvbSBvIGVzdMO0bWFnbyB2YXppbyDigJQgw6kgbyDDum5pY28gamVpdG8gZGUgbsOjbyBwYXJlY2VyIGluZ3JhdGEuIiwiTWFtw6NlIGRpc3NlIHF1ZSBhZ29yYSB0dWRvIMOpIGRlIHRvZG9zLi4uIG1hcyBldSBwZXJndW50ZWkgcXVlbSDDqSDigJh0b2Rvc-KAmSBlIGVsYSBmaWNvdSBicmF2YS5cblNlIHR1ZG8gw6kgZGUgdG9kb3MsIHBvciBxdWUgbyBndWFyZGEgbGV2b3UgbyBww6NvIHF1ZSBldSBhY2hlaSBuYSBydWE_XG5EaXNzZSBxdWUgZXJhIOKAmHBybyBiZW0gZG8gcG92b-KAmS5cbk1hcyBldSBzb3UgbyBwb3ZvIHRhbWLDqW0uLi4gbsOjbyBzb3U_IiwiQ3VpZGFkbyBhbyBmYWxhciBjb20gbXVpdGFzIHBlc3NvYXMgaW50ZWxlY3R1YWlzLCBlbSBtYWlvciBwYXJ0ZSDDqSBvbmRlIG1vcmEgYSBoaXBvY3Jpc2lhLiJd.uWyIiLCIiLCIiLCJTZXLDoSBxdWUgbWFtw6NlIGVzdGEgY2VydGE_IiwiIl0.rAyEA.mF2e5.qEhA.nTWFuaWZlc3RvIENhcGl0YWw.yTGVvIERpYXM', '_blank')">
-                    </div>
-                </div>
-            </p>
+            <p>Experimente jogar alguns jogos feitos pela comunidade!</p>
+            <div class="carousel-container">
+                <div class="carousel" id="carousel"></div>
+            </div>
         </section>
     </main>
     <footer>Feito com ❤️ e pixels. Tiny RPG &copy; <span id="year"></span>.</footer>
@@ -306,6 +336,18 @@
     <script src="js/core/ObjectDefinitions.js"></script>
     <script src="js/core/NPCDefinitions.js"></script>
     <script src="js/core/EnemyDefinitions.js"></script>
+    <script src="js/core/share/ShareConstants.js"></script>
+    <script src="js/core/share/ShareMath.js"></script>
+    <script src="js/core/share/ShareBase64.js"></script>
+    <script src="js/core/share/ShareTextCodec.js"></script>
+    <script src="js/core/share/ShareVariableCodec.js"></script>
+    <script src="js/core/share/ShareMatrixCodec.js"></script>
+    <script src="js/core/share/SharePositionCodec.js"></script>
+    <script src="js/core/share/ShareDataNormalizer.js"></script>
+    <script src="js/core/share/ShareEncoder.js"></script>
+    <script src="js/core/share/ShareDecoder.js"></script>
+    <script src="js/core/share/ShareUrlHelper.js"></script>
+    <script src="js/showcase/ShareCoverPreview.js"></script>
     <script>
         const tiles = window.TileDefinitions?.TILE_PRESETS || [];
         const objects = window.ObjectDefinitions?.OBJECT_DEFINITIONS || [];
@@ -401,25 +443,89 @@
         document.getElementById('year').textContent = new Date().getFullYear();
     </script>
     <script>
-        const carousel = document.getElementById('carousel');
+        const communityGames = [
+            {
+                title: 'Sword Quest',
+                shareUrl: `https://andredarcie.github.io/tiny-rpg-maker/index.html#vf.gxAAgUEEQCAkIERERERE,xSAEIAK968gEMRMSIdETEhESIRA,xAAAAAAD_g5UIiIiIhERERA,xAAAgIACIAAAERE,xBxAhDSITAQAERERERERERA,xAAEAQICChYEERERERE,xAABACiAQgAEEREREA,xAFpCQgBAIAAETEREzE,xEiAKUB9Jm4gExEzMSIhExEzMzM.oyqKiIKGDR3-AeIeIeHj4eIh3d3iIiA,y_w8f1tAUFfchVzMzIVchV7FXMy-tXhXhVd3cA,y_wgYTw8AQAAzMyIiMyMzMi-u4A,y_-Mvrwkhg_8jMzMiIzIiMzMi7u4iIiIiIiIiIA,yB0MGIAgAJAEiIiIiIiIgA,yC4MuDh5EBAQiIiIVVhVVVWFhVA,y7xcNAQUFD_4h3d3d4h3h3eHh4h3d3d3,yAQEFHT8fDAEiIiIiIiIiIiIiIg,yBAUEBAC8hgcWFVVqqqF-IU.sKA.p~4QAZAnUAnABbAA.tWyJVbSBhcnJlcGVuZGltZW50bz8gQW5vcyBhdHLDoXMgcXVhbmRvIGVyYSBqb3ZlbSBtZSBwZXJndW50YXJhbSBvIHF1ZSBmYXJpYSBzZSB1bSBkaXJldG9yIG1lIGNoYW1hc3NlIHBhcmEgZ3JhdmFyIGNvbSBhIE1pYSBLaGFsaWZhLiBFdSByZXNwb25kaSBxdWUgZGFyaWEgbyBjdSBwcm8gZGlyZXRvciBlIHNhaWEgY29ycmVuZG8uIElzc28gZGVzdHJ1aXUgbyBlcXVpbGlicmlvIGRvIG11bmRvLiBEZXNkZSBlbnTDo28gcHJvY3VybyB1bSBoZXLDs2kgcGFyYSBsdXRhciBjb250cmEgbyBtYWwuIFUgcXVlPyBWb2PDqiBxdWVyIGx1dGFyIGNvbnRyYSBvIG1hbD8gT3JhIGJvbGFzLiBFdSBuw6NvIHBvc3NvIGxoZSBhanVkYXIuIE1hcyBldSBkaXJpYSBxdWUgcHJpbWVpcm8gcHJlY2lzYSBkZSB1bWEgYXJtYS5cbiIsIk8gcXVlPyBWb2PDqiBxdWVyIG1hdGFyIG1vbnN0cm9zPyBFbmxvdXF1ZWNldT8gVmEgcHJhIGNhc2EgZSBzZSBlc2NvbmRlIGVtYmFpeG8gZGEgY2FtYSEgTWFzIHByYSB2b2PDqiB2b2x0YXIgcHJhIGNhc2EgdGVtIHF1ZSBmdWdpciBkbyBkcmFnw6NvLCBib2Egc29ydGUhIiwiTWV1IG1hcmlkbyBlc3TDoSBkb2VudGUgZSBuw6NvIHBvZGVtb3MgbHV0YXIgY29udHJhIG9zIG1vbnN0cm9z4oCmXG5Db21vIMOpPyBWb2PDqiBhY2VpdGEgbHV0YXIgY29tIGVsZXM_XG5MZXZlIGEgZXNwYWRhIGRlbGUgc2UgcHJlY2lzYXLigKYiLCJBIG1hbcOjZSBkaXNzZSBxdWUgdGVtIG1vbnN0cm9zIGxhIGZvcmEsIG8gcGFwYWkgZXN0YSBkb2VudGUgZSBuYW8gcG9kZSB1c2FyIHN1YSBlc3BhZGEgcHJhIGx1dGFyIiwiUGVyaWdvIVxuTW9uc3Ryb3MhIl0.uWyJFc3BhZGE_IEV1IHRlbmhvLCBtYXMgamFtYWlzIHZvdSBkZWl4YXIgdm9jw6ogcGVnYXIgYSBtaW5oYSEgVsOhIGNhw6dhciBzdWEgdHVybWEgZm9sZ2FkbyEgRSBwYXJlIGRlIGRlc2VqYXIgYXMgY29pc2FzIGRvcyBvdXRyb3MsIHZhaSB0cmFiYWxoYXIhIiwiVm9jw6ogYWluZGEgdMOhIGHDrT8gRXUgasOhIHRlcmlhIGlkbyBlbWJvcmEhIiwiUXVhbmRvIG1ldSBmaWxobyBwZWlkYSwgYWxnbyBhY29udGVjZSBlIG8gdmVsaG8gaGVyZW1pdGEgc2VtcHJlIHJlY2xhbWEuIiwiTWluaGEgbcOjZSBkaXogcXVlIHF1YW5kbyBldSBwZWlkbywgYWJybyBhIHBvcnRhIGRvIHZlbGhvIGhlcmVtaXRhLlxuT3BzLCBwZWlkZWkuIiwiIl0.cZSQA.rZSQA.hAAMA.e~3QGVAT0CFQJfAXQBSwE.fAAEEAwICAg.dZQ.m~3AAuAg.qMQ.kbQ.lig.x~ygCZAQ.akss.z~PwI.J~JQI.KEA.nU3dvcmQgUXVlc3Q.yUm9kcmlnbydzIFNvZnQ`,
+                fallbackImage: 'showcase_img/sword_quest.png'
+            },
+            {
+                title: 'Tarde na Praça',
+                shareUrl: `https://andredarcie.github.io/tiny-rpg-maker/#vf.gxB8dgMRkNAgMERETIiMUQ0QUQjI,xGQUWTCiQYGAMRISISMSEjISMA,,xAwIGKRXiSJcEiMhIxEhIiERETE,xYKiwdowXAAcITISMTEhMiMiMRMQ,,,,.oyFAGBzOTw_fgmJhVVVVVVVVYVVVVVVVQ,yJLjJocNDh48iYiJWZhZhViVWFVYVVWA,,y-PHhwgINt2gVVVYVVWVVYVZiImJmIiJ,yj0dHgWDo__gVVWFVYVVhYiJiJmYiIiZiZk,,,,.p~FQAWABsBEwFVAA.tWyJCb20gZGlhIGpvdmVtLCBhcXVpIG5hIHByYcOnYSDDqSBtdWl0byBib20gcHJhIHBlc2NhciIsIk5lc3NhIHBhcnRlIGRvIGxhZ28sIG7Ds3MgdmVsaG9zIGZpY2Ftb3MgcGVzY2FuZG8sIG8gw7puaWNvIHNvbSBxdWUgb3V2aW1vcyBzw6NvIGRhcyBjaWdhcnJhcyBlIGRvcyBww6Fzc2Fyb3MuIEEgdmlkYSDDqSB0cmFucXVpbGEuIiwiRmlsaG8sIGN1aWRhZG8gY29tIG9zIHBhdG9zISEiLCJPbGhhIHF1YW50b3MgcGF0b3MgbWFtw6NlLiIsIlBhcnF1ZSBkYSBMYWdvYSAtIEFsdGluw7Nwb2xpcy4iXQ.uWyJFc3NhIGNpZGFkZSB0ZW0gc8OzIDE2IG1pbCBoYWJpdGFudGVzIG1hcyDDqSBtdWl0byBsaW1wYSwgYm9uaXRhIGUgb3JnYW5pemFkYS4iLCJFbnTDo28gc3VhIG11bGhlciB2ZWlvIGZhemVyIGNvbmN1cnNvIHDDumJsaWNvIHBvaXMgdmFpIHNlIGZvcm1hcj8gUXVlIGJhY2FuYSEiLCJTZSBjaGVnYXIgcGVydG8gZWxlcyB2w6NvIGJpY2FyIHNldSBww6kgaWd1YWwgYmljYXJhbSBkbyByYXBheiBwYXNzYW5kby4iLCJNYXMgZXUgcXVlcm8gZmljYXIgcGVydG8gZG9zIHBhdG9zISEg8J-YrSIsIiJd.cUyEA.rUxAA.hAAIA.nVGFyZGUgbmEgUHJhw6dh.yRGlndWlmaQ`,
+                fallbackImage: 'showcase_img/tarde_praca.png'
+            },
+            {
+                title: 'Manifesto Capital',
+                shareUrl: `https://andredarcie.github.io/tiny-rpg-maker/#vd.gxAAAAAICEAAAPTA,xAD______AAARERERERERERERERERERERERERA,AAAAAABABABERERAREREREREREBERERARERNQEREREA,,,xAn5-fn5-OAAIhExEiMTEyETESIhExMhESI,,,.oy__EBj8-Lgf8qqqqqqiXeqzMervoert6mqqqqqA,y_8GAgACB__8VVVVVXVXd3qqqqqmZmZmYA,y_9uAgIDw0IUVVVVVVVVVV9czFu1mVA,,,y_YGBgYGBh_8iIiIiIiIiIiImYiIiIiA,,,.p~dgG-AGwAMQBSAA.tWyJWaSBnZXJhw6fDtWVzIGFjcmVkaXRhcmVtIHF1ZSBiYXN0YXZhIGRpdmlkaXIgbyBww6NvIHByYSBhY2FiYXIgY29tIGEgZm9tZS5cbk1hcyBlc3F1ZWNlcmFtIHF1ZSwgc2VtIGxpYmVyZGFkZSwgbmluZ3XDqW0gcXVlciBwbGFudGFyLlxuVW0gZ292ZXJubyBxdWUgcHJvbWV0ZSBvIHBhcmHDrXNvIGNvYnJhbmRvIHR1YSBhbG1hLFxuc8OzIHRlIGVudHJlZ2EgbyBpbmZlcm5vIGVtYnJ1bGhhZG8gZW0gc2xvZ2Fucy5cbkxlbWJyZS1zZSwgam92ZW06XG5hIGlndWFsZGFkZSBpbXBvc3RhIMOpIHPDsyB1bWEgbm92YSBmb3JtYSBkZSBjb3JyZW50ZSBwaW50YWRhIGRlIHZlcm1lbGhvIHByYSBwYXJlY2VyIGp1c3RhLiIsIkFudGVzIGV1IHRpbmhhIHVtIHBlcXVlbm8gbmVnw7NjaW8uIEFnb3JhIHRlbmhvIHVtIGdyYW5kZSBwcm9ibGVtYS5cbkRpemVtIHF1ZSBzb3UgbGl2cmUsIGRlc2RlIHF1ZSBldSBjb25jb3JkZSBjb20gdHVkby5cblNlIGV1IGZhbG8gbyBxdWUgcGVuc28sIHNvdSBpbmltaWdvLlxuU2UgZmljbyBjYWxhZG8sIHNvdSBjw7ptcGxpY2UuXG5FIG5vIGZpbSwgY29udGludW8gY29tIGZvbWUiLCJQcm9tZXRlcmFtIGlndWFsZGFkZS4uLiBlIGNvbnNlZ3VpcmFtLlxuQWdvcmEgc29tb3MgdG9kb3MgaWd1YWxtZW50ZSBtaXNlcsOhdmVpcy5cbkEgZmlsYSBkbyBww6NvIMOpIGxvbmdhLCBtYXMgYSBkbyBzaWzDqm5jaW8gw6kgbWFpb3IuXG5BcHJlbmRpIGEgc29ycmlyIGNvbSBvIGVzdMO0bWFnbyB2YXppbyDigJQgw6kgbyDDum5pY28gamVpdG8gZGUgbsOjbyBwYXJlY2VyIGluZ3JhdGEuIiwiTWFtw6NlIGRpc3NlIHF1ZSBhZ29yYSB0dWRvIMOpIGRlIHRvZG9zLi4uIG1hcyBldSBwZXJndW50ZWkgcXVlbSDDqSDigJh0b2Rvc-KAmSBlIGVsYSBmaWNvdSBicmF2YS5cblNlIHR1ZG8gw6kgZGUgdG9kb3MsIHBvciBxdWUgbyBndWFyZGEgbGV2b3UgbyBww6NvIHF1ZSBldSBhY2hlaSBuYSBydWE_XG5EaXNzZSBxdWUgZXJhIOKAmHBybyBiZW0gZG8gcG92b-KAmS5cbk1hcyBldSBzb3UgbyBwb3ZvIHRhbWLDqW0uLi4gbsOjbyBzb3U_IiwiQ3VpZGFkbyBhbyBmYWxhciBjb20gbXVpdGFzIHBlc3NvYXMgaW50ZWxlY3R1YWlzLCBlbSBtYWlvciBwYXJ0ZSDDqSBvbmRlIG1vcmEgYSBoaXBvY3Jpc2lhLiJd.uWyIiLCIiLCIiLCJTZXLDoSBxdWUgbWFtw6NlIGVzdGEgY2VydGE_IiwiIl0.rAyEA.mF2e5.qEhA.nTWFuaWZlc3RvIENhcGl0YWw.yTGVvIERpYXM`,
+                fallbackImage: 'showcase_img/manifesto_capital.png'
+            },
+        ];
 
-        carousel.innerHTML += carousel.innerHTML; // temporário até termos mais jogos pra showcase
-        const imageWidth = 256 + 16;
-        const totalImages = 200 * 3;
-        let intervalId;
+
+        const carousel = document.getElementById('carousel');
+        const CARD_WIDTH = 256;
+        const CARD_GAP = 16;
+
+        const createFallbackImage = (game) => {
+            const img = document.createElement('img');
+            img.src = game.fallbackImage || '';
+            img.alt = game.title;
+            return img;
+        };
+
+        const openShare = (url) => window.open(url, '_blank', 'noopener');
+
+        communityGames.forEach((game) => {
+            const card = document.createElement('button');
+            card.type = 'button';
+            card.className = 'cover-card';
+            card.setAttribute('aria-label', `Jogar ${game.title}`);
+            card.addEventListener('click', () => openShare(game.shareUrl));
+
+            let hasPreview = false;
+            if (typeof ShareCoverPreview === 'function') {
+                try {
+                    const preview = new ShareCoverPreview({ width: CARD_WIDTH, height: CARD_WIDTH });
+                    card.appendChild(preview.renderFromUrl(game.shareUrl));
+                    hasPreview = true;
+                } catch (error) {
+                    console.warn('ShareCoverPreview failed to render cover:', error);
+                }
+            }
+
+            if (!hasPreview) {
+                card.appendChild(createFallbackImage(game));
+            }
+
+            const label = document.createElement('span');
+            label.className = 'cover-card__label';
+            label.textContent = game.title;
+            card.appendChild(label);
+
+            carousel.appendChild(card);
+        });
+
+        let intervalId = null;
+        const stepSize = CARD_WIDTH + CARD_GAP;
 
         function startAutoScroll() {
+            stopAutoScroll();
             intervalId = setInterval(() => {
-                if (carousel.scrollLeft >= totalImages) {
+                const maxScroll = Math.max(0, carousel.scrollWidth - carousel.clientWidth);
+                if (maxScroll <= 0) return;
+                if (carousel.scrollLeft >= maxScroll - 1) {
                     carousel.scrollLeft = 0;
                 } else {
-                    carousel.scrollLeft += imageWidth;
+                    carousel.scrollLeft += stepSize;
                 }
             }, 2500);
         }
 
         function stopAutoScroll() {
-            clearInterval(intervalId);
+            if (intervalId !== null) {
+                clearInterval(intervalId);
+                intervalId = null;
+            }
         }
 
         carousel.addEventListener('mouseenter', stopAutoScroll);

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiny RPG Share URL Analyzer</title>
+    <style>
+        :root {
+            color-scheme: light dark;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 2rem;
+            background: #111827;
+            color: #f3f4f6;
+        }
+
+        main {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.25rem;
+        }
+
+        p.description {
+            margin-top: 0;
+            color: #d1d5db;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        textarea, input {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #374151;
+            background: #1f2937;
+            color: inherit;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        button {
+            margin-top: 0.75rem;
+            padding: 0.75rem 1.25rem;
+            border: none;
+            border-radius: 0.5rem;
+            background: #2563eb;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        section {
+            margin-top: 2rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            background: #1f2937;
+            border: 1px solid #374151;
+        }
+
+        section h2 {
+            margin-top: 0;
+            font-size: 1.25rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            border: 1px solid #374151;
+            padding: 0.5rem;
+            vertical-align: top;
+        }
+
+        th {
+            background: #111827;
+        }
+
+        pre {
+            margin: 0;
+            padding: 0.75rem;
+            background: #111827;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+        }
+
+        .error {
+            color: #f87171;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+<main>
+    <header>
+        <h1>Share URL Analyzer</h1>
+        <p class="description">Paste the full share URL (or just the code after #) to see every part explained.</p>
+    </header>
+
+    <section aria-labelledby="input-section">
+        <h2 id="input-section">Input</h2>
+        <label for="share-url-input">Share URL or code</label>
+        <textarea id="share-url-input" placeholder="e.g. https://yourdomain/tiny-rpg-maker/#v3.g..."></textarea>
+        <button id="analyze-btn">Analyze</button>
+        <p id="error-message" class="error" role="alert" hidden></p>
+    </section>
+
+    <section aria-labelledby="summary-title">
+        <h2 id="summary-title">Summary</h2>
+        <div id="summary-output">
+            <p>No analysis has been executed yet.</p>
+        </div>
+    </section>
+
+    <section aria-labelledby="segments-title">
+        <h2 id="segments-title">Detected Segments</h2>
+        <div id="segments-output">
+            <p>Segments separated by a dot (.) will be listed here.</p>
+        </div>
+    </section>
+
+    <section aria-labelledby="decoded-title">
+        <h2 id="decoded-title">Decoded Data</h2>
+        <div id="decoded-output">
+            <p>When the code is valid, the decoded JSON appears here.</p>
+        </div>
+    </section>
+</main>
+
+<script src="js/core/share/ShareConstants.js"></script>
+<script src="js/core/share/ShareMath.js"></script>
+<script src="js/core/share/ShareBase64.js"></script>
+<script src="js/core/share/ShareTextCodec.js"></script>
+<script src="js/core/share/ShareVariableCodec.js"></script>
+<script src="js/core/share/ShareMatrixCodec.js"></script>
+<script src="js/core/share/SharePositionCodec.js"></script>
+<script src="js/core/share/ShareDataNormalizer.js"></script>
+<script src="js/core/share/ShareEncoder.js"></script>
+<script src="js/core/share/ShareDecoder.js"></script>
+<script src="js/core/share/ShareUrlHelper.js"></script>
+<script>
+    (function () {
+        const input = document.getElementById('share-url-input');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const errorMessage = document.getElementById('error-message');
+        const summaryOutput = document.getElementById('summary-output');
+        const segmentsOutput = document.getElementById('segments-output');
+        const decodedOutput = document.getElementById('decoded-output');
+
+        const SEGMENT_INFO = {
+            v: { label: 'Version', description: 'Share code version (base 36).' },
+            g: { label: 'Ground', description: 'Base tile maps (ground) per room.' },
+            o: { label: 'Overlay', description: 'Overlay layer (visual extras).' },
+            s: { label: 'Start', description: 'Player starting position.' },
+            p: { label: 'NPC Positions', description: 'List of NPC coordinates.' },
+            i: { label: 'NPC Types', description: 'Type index for each NPC position.' },
+            t: { label: 'NPC Texts', description: 'Custom NPC dialogue strings.' },
+            u: { label: 'NPC Conditional Texts', description: 'Dialogue shown when the variable is ON.' },
+            c: { label: 'NPC Condition Variables', description: 'Variables required for the alternate text.' },
+            r: { label: 'NPC Rewards', description: 'Variables toggled after the default dialogue.' },
+            h: { label: 'NPC Conditional Rewards', description: 'Variables toggled after the alternate dialogue.' },
+            e: { label: 'Enemy Positions', description: 'Enemy coordinates.' },
+            f: { label: 'Enemy Types', description: 'Type index for each enemy.' },
+            w: { label: 'Enemy Variables', description: 'Variables tied to each enemy.' },
+            d: { label: 'Doors', description: 'Positions of simple doors.' },
+            m: { label: 'Magic Doors', description: 'Positions of variable-based doors.' },
+            q: { label: 'Magic Door Variables', description: 'Variables linked to each magic door.' },
+            k: { label: 'Keys', description: 'Key spawn positions.' },
+            l: { label: 'Life Potions', description: 'Life potion spawn positions.' },
+            x: { label: 'XP Scrolls', description: 'XP scroll spawn positions.' },
+            a: { label: 'Swords', description: 'Sword spawn positions.' },
+            z: { label: 'Game End', description: 'Tiles that end the game.' },
+            J: { label: 'Switches', description: 'Switch coordinates.' },
+            K: { label: 'Switch Variables', description: 'Variables connected to each switch.' },
+            L: { label: 'Switch States', description: 'Initial state of each switch.' },
+            b: { label: 'Variables Snapshot', description: 'Initial state for custom variables.' },
+            n: { label: 'Title', description: 'Project title.' },
+            y: { label: 'Author', description: 'Author name.' }
+        };
+
+        const formatJson = (data) => {
+            if (!data) return 'No data.';
+            try {
+                return JSON.stringify(data, null, 2);
+            } catch (err) {
+                return 'Error formatting JSON: ' + err.message;
+            }
+        };
+
+        const extractFromInput = (raw) => {
+            const value = (raw || '').trim();
+            if (!value) return null;
+
+            if (value.includes('://')) {
+                try {
+                    const url = new URL(value);
+                    const hash = url.hash?.replace(/^#/, '') || '';
+                    return {
+                        base: `${url.origin}${url.pathname}`,
+                        code: hash,
+                        query: url.search
+                    };
+                } catch {
+                    // Fall through to treat as plain code
+                }
+            }
+
+            if (value.startsWith('#')) {
+                return { base: '', code: value.slice(1), query: '' };
+            }
+
+            return { base: '', code: value, query: '' };
+        };
+
+        const renderSummary = ({ base, code, query }, segmentCount) => {
+            summaryOutput.innerHTML = `
+                <ul>
+                    <li><strong>Base URL:</strong> ${base || '(only the code was provided)'}</li>
+                    <li><strong>Query string:</strong> ${query || '(none)'}</li>
+                    <li><strong>Raw code:</strong> ${code || '(empty)'}</li>
+                    <li><strong>Segments found:</strong> ${segmentCount}</li>
+                </ul>
+            `;
+        };
+
+        const renderSegments = (segments) => {
+            if (!segments.length) {
+                segmentsOutput.innerHTML = '<p>No segments identified. Ensure there is content after the #.</p>';
+                return;
+            }
+
+            const rows = segments.map(({ key, value }) => {
+                const info = SEGMENT_INFO[key] || { label: 'Unknown', description: 'Undocumented prefix.' };
+                return `
+                    <tr>
+                        <td><code>${key}</code></td>
+                        <td>${info.label}</td>
+                        <td>${info.description}</td>
+                        <td><code>${value || '(vazio)'}</code></td>
+                    </tr>
+                `;
+            }).join('');
+
+            segmentsOutput.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Prefix</th>
+                            <th>Meaning</th>
+                            <th>Description</th>
+                            <th>Value (hex/base64)</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            `;
+        };
+
+        const renderDecoded = (code) => {
+            if (!code) {
+                decodedOutput.innerHTML = '<p>No code to decode.</p>';
+                return;
+            }
+            if (typeof ShareDecoder === 'undefined') {
+                decodedOutput.innerHTML = '<p>ShareDecoder was not loaded.</p>';
+                return;
+            }
+            const data = ShareDecoder.decodeShareCode(code);
+            if (!data) {
+                decodedOutput.innerHTML = '<p>The code could not be decoded. Double-check that it is complete.</p>';
+                return;
+            }
+            decodedOutput.innerHTML = `<pre>${formatJson(data)}</pre>`;
+        };
+
+        analyzeBtn.addEventListener('click', () => {
+            errorMessage.hidden = true;
+            const extracted = extractFromInput(input.value);
+            if (!extracted || !extracted.code) {
+                errorMessage.hidden = false;
+                errorMessage.textContent = 'Provide at least the portion after #.';
+                return;
+            }
+
+            const rawSegments = extracted.code.split('.').filter(Boolean);
+            const parsedSegments = rawSegments.map((segment) => ({
+                key: segment[0],
+                value: segment.slice(1)
+            }));
+
+            renderSummary(extracted, parsedSegments.length);
+            renderSegments(parsedSegments);
+            renderDecoded(extracted.code);
+        });
+    })();
+</script>
+</body>
+</html>
