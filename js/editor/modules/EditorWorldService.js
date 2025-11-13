@@ -35,6 +35,38 @@ class EditorWorldService {
         this.manager.renderService.renderEditor();
         this.manager.renderService.renderEnemies();
     }
+
+    moveActiveRoom(direction) {
+        if (!direction) return;
+        const normalized = String(direction).toLowerCase();
+        const game = this.gameEngine.getGame();
+        const rows = Math.max(1, Number(game.world?.rows) || 1);
+        const cols = Math.max(1, Number(game.world?.cols) || 1);
+        const totalRooms = Math.max(1, game.rooms?.length || rows * cols);
+        if (!rows || !cols || !totalRooms) return;
+
+        const currentIndex = Math.max(0, Math.min(totalRooms - 1, this.state.activeRoomIndex ?? 0));
+        const currentRow = Math.floor(currentIndex / cols);
+        const currentCol = currentIndex % cols;
+        let targetRow = currentRow;
+        let targetCol = currentCol;
+
+        if (normalized === 'up') targetRow -= 1;
+        if (normalized === 'down') targetRow += 1;
+        if (normalized === 'left') targetCol -= 1;
+        if (normalized === 'right') targetCol += 1;
+
+        if (targetRow < 0 || targetRow >= rows || targetCol < 0 || targetCol >= cols) {
+            return;
+        }
+
+        const targetIndex = targetRow * cols + targetCol;
+        if (targetIndex < 0 || targetIndex >= totalRooms) {
+            return;
+        }
+
+        this.setActiveRoom(targetIndex);
+    }
 }
 
 if (typeof window !== 'undefined') {

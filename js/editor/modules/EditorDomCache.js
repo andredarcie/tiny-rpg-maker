@@ -2,6 +2,8 @@ class EditorDomCache {
     constructor(root = document) {
         this.root = root;
         this.editorCanvas = root.getElementById('editor-canvas');
+        this.mapPosition = root.getElementById('editor-map-position');
+        this.mapNavButtons = Array.from(root.querySelectorAll('.map-nav-button'));
         this.selectedTilePreview = root.getElementById('selected-tile-preview');
         this.tileSummary = root.getElementById('tile-preset-summary');
         this.tileList = root.getElementById('tile-list');

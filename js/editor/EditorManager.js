@@ -125,7 +125,8 @@ class EditorManager {
             tileList,
             npcsList,
             selectedTilePreview,
-            worldGrid
+            worldGrid,
+            mapNavButtons
         } = this.dom;
 
         btnNpcDelete?.addEventListener('click', () => this.npcService.removeSelectedNpc());
@@ -231,6 +232,16 @@ class EditorManager {
             const index = Number(cell.dataset.roomIndex);
             this.worldService.setActiveRoom(index);
         });
+
+        if (Array.isArray(mapNavButtons)) {
+            mapNavButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    const direction = button.dataset.direction;
+                    if (!direction) return;
+                    this.worldService.moveActiveRoom(direction);
+                });
+            });
+        }
 
         if (editorCanvas) {
             editorCanvas.addEventListener('pointerdown', (ev) => this.tileService.startPaint(ev));

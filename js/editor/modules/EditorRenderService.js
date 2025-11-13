@@ -101,6 +101,7 @@ class EditorRenderService {
         }
 
         this.drawEntities(tileSize);
+        this.renderMapNavigation();
     }
 
     drawEntities(tileSize) {
@@ -774,6 +775,70 @@ class EditorRenderService {
                 grid.appendChild(cell);
             }
         }
+
+        this.renderMapNavigation();
+    }
+
+    renderMapNavigation() {
+        const buttons = Array.isArray(this.dom.mapNavButtons) ? this.dom.mapNavButtons : [];
+        const game = this.gameEngine.getGame();
+        const rows = Math.max(1, Number(game.world?.rows) || 1);
+        const cols = Math.max(1, Number(game.world?.cols) || 1);
+        const totalRooms = Math.max(1, game.rooms?.length || rows * cols);
+        const maxIndex = totalRooms - 1;
+        const activeIndex = Math.max(0, Math.min(maxIndex, this.state.activeRoomIndex ?? 0));
+        const currentRow = Math.floor(activeIndex / cols);
+        const currentCol = activeIndex % cols;
+
+        this.updateMapPosition(currentCol + 1, currentRow + 1);
+
+        if (!buttons.length) {
+            return;
+        }
+
+        const canMove = (rowOffset, colOffset) => {
+            const nextRow = currentRow + rowOffset;
+            const nextCol = currentCol + colOffset;
+            if (nextRow < 0 || nextRow >= rows || nextCol < 0 || nextCol >= cols) {
+                return false;
+            }
+            const targetIndex = nextRow * cols + nextCol;
+            return targetIndex >= 0 && targetIndex <= maxIndex;
+        };
+
+        buttons.forEach((button) => {
+            const direction = button.dataset.direction;
+            let enabled = false;
+            switch (direction) {
+                case 'up':
+                    enabled = canMove(-1, 0);
+                    break;
+                case 'down':
+                    enabled = canMove(1, 0);
+                    break;
+                case 'left':
+                    enabled = canMove(0, -1);
+                    break;
+                case 'right':
+                    enabled = canMove(0, 1);
+                    break;
+                default:
+                    enabled = false;
+            }
+            button.disabled = !enabled;
+        });
+    }
+
+    updateMapPosition(col, row) {
+        const label = this.dom.mapPosition;
+        if (!label) return;
+        if (!Number.isFinite(col) || !Number.isFinite(row)) {
+            label.textContent = '';
+            label.hidden = true;
+            return;
+        }
+        label.hidden = false;
+        label.textContent = `(${col},${row})`;
     }
 
     updateSelectedTilePreview() {

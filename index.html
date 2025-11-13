@@ -103,8 +103,41 @@
 
                     <div class="editor-center">
                         <div class="editor-section editor-section--map">
-                            <h3>Mapa</h3>
-                            <canvas id="editor-canvas" width="128" height="128"></canvas>
+                            <h3 class="editor-map-title">
+                                <span data-text-key="editor.map.title"></span>
+                                <span id="editor-map-position" class="editor-map-position"></span>
+                            </h3>
+                            <div class="editor-map-wrapper">
+                                <button
+                                    type="button"
+                                    class="map-nav-button map-nav-button--up"
+                                    data-direction="up"
+                                    data-aria-label-key="editor.mapNav.up"
+                                    data-title-key="editor.mapNav.up"
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="map-nav-button map-nav-button--down"
+                                    data-direction="down"
+                                    data-aria-label-key="editor.mapNav.down"
+                                    data-title-key="editor.mapNav.down"
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="map-nav-button map-nav-button--left"
+                                    data-direction="left"
+                                    data-aria-label-key="editor.mapNav.left"
+                                    data-title-key="editor.mapNav.left"
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="map-nav-button map-nav-button--right"
+                                    data-direction="right"
+                                    data-aria-label-key="editor.mapNav.right"
+                                    data-title-key="editor.mapNav.right"
+                                ></button>
+                                <canvas id="editor-canvas" width="384" height="384"></canvas>
+                            </div>
                         </div>
                     </div>
 

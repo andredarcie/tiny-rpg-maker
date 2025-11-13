@@ -384,9 +384,121 @@ body.game-mode #tab-game .game-controls button {
 }
 
 #editor-canvas {
-    width: clamp(128px, 45vw, 512px);
+    width: clamp(220px, 90vw, 820px);
     max-width: 100%;
     height: auto;
+    flex: 0 1 auto;
+}
+
+.editor-map-wrapper {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    padding: 24px;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 900px;
+}
+
+.editor-map-title {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 1.05rem;
+    color: var(--text);
+}
+
+.editor-map-position {
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+.editor-map-wrapper canvas {
+    display: block;
+    width: 100%;
+}
+
+.map-nav-button {
+    --map-nav-arrow-color: rgba(255, 255, 255, 0.85);
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(10, 15, 25, 0.85);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+    z-index: 3;
+}
+
+.map-nav-button:hover:not(:disabled),
+.map-nav-button:focus-visible:not(:disabled) {
+    border-color: rgba(96, 165, 250, 0.9);
+    background: rgba(96, 165, 250, 0.35);
+    outline: none;
+}
+
+.map-nav-button:disabled {
+    opacity: 0.35;
+    cursor: default;
+    --map-nav-arrow-color: rgba(255, 255, 255, 0.35);
+}
+
+.map-nav-button::after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 0;
+    border-style: solid;
+}
+
+.map-nav-button--up {
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.map-nav-button--up::after {
+    border-width: 0 6px 8px 6px;
+    border-color: transparent transparent var(--map-nav-arrow-color) transparent;
+}
+
+.map-nav-button--down {
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.map-nav-button--down::after {
+    border-width: 8px 6px 0 6px;
+    border-color: var(--map-nav-arrow-color) transparent transparent transparent;
+}
+
+.map-nav-button--left {
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.map-nav-button--left::after {
+    border-width: 6px 8px 6px 0;
+    border-color: transparent var(--map-nav-arrow-color) transparent transparent;
+}
+
+.map-nav-button--right {
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.map-nav-button--right::after {
+    border-width: 6px 0 6px 8px;
+    border-color: transparent transparent transparent var(--map-nav-arrow-color);
 }
 
 #tile-canvas {

@@ -115,6 +115,11 @@ const TEXT_BUNDLES = {
         'enemy.defaultName': 'Inimigo',
         'world.badge.start': 'Start',
         'world.cell.title': 'Mapa ({col}, {row})',
+        'editor.map.title': 'Mapa',
+        'editor.mapNav.up': 'Ir para cena acima',
+        'editor.mapNav.down': 'Ir para cena abaixo',
+        'editor.mapNav.left': 'Ir para cena à esquerda',
+        'editor.mapNav.right': 'Ir para cena à direita',
         'tiles.summaryFallback': 'Tile {id}'
     },
     'en-US': {
@@ -233,6 +238,11 @@ const TEXT_BUNDLES = {
         'enemy.defaultName': 'Enemy',
         'world.badge.start': 'Start',
         'world.cell.title': 'Map ({col}, {row})',
+        'editor.map.title': 'Map',
+        'editor.mapNav.up': 'Go to scene above',
+        'editor.mapNav.down': 'Go to scene below',
+        'editor.mapNav.left': 'Go to scene on the left',
+        'editor.mapNav.right': 'Go to scene on the right',
         'tiles.summaryFallback': 'Tile {id}'
     }
 };
