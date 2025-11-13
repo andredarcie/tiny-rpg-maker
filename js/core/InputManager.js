@@ -8,6 +8,13 @@ class InputManager {
         this.setupEventListeners();
     }
 
+    isGameModeActive() {
+        if (typeof document === 'undefined') {
+            return false;
+        }
+        return document.body?.classList?.contains('game-mode');
+    }
+
     setupEventListeners() {
         document.addEventListener("keydown", (ev) => this.handleKeyDown(ev));
         document.addEventListener("touchstart", (ev) => this.handleTouchStart(ev), { passive: false });
@@ -52,7 +59,7 @@ class InputManager {
             targetTag === 'textarea' ||
             targetTag === 'select' ||
             ev.target?.isContentEditable;
-        const isGameTabActive = document?.body?.classList?.contains('game-mode');
+        const isGameTabActive = this.isGameModeActive();
         if (!isGameTabActive || isTypingTarget) {
             return;
         }
@@ -76,6 +83,10 @@ class InputManager {
     }
 
     handleTouchStart(ev) {
+        if (!this.isGameModeActive()) {
+            this.touchStart = null;
+            return;
+        }
         if (this.gameEngine.isGameOver?.()) {
             ev.preventDefault?.();
             this.gameEngine.handleGameOverInteraction?.();
@@ -99,6 +110,10 @@ class InputManager {
     }
 
     handleTouchMove(ev) {
+        if (!this.isGameModeActive()) {
+            this.touchStart = null;
+            return;
+        }
         const start = this.touchStart;
         if (!start) return;
         const touch = ev.changedTouches?.[0];
@@ -118,6 +133,10 @@ class InputManager {
     }
 
     handleTouchEnd(ev) {
+        if (!this.isGameModeActive()) {
+            this.touchStart = null;
+            return;
+        }
         if (this.gameEngine.isGameOver?.()) {
             ev.preventDefault?.();
             this.gameEngine.handleGameOverInteraction?.();
