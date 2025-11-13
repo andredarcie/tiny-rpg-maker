@@ -683,6 +683,38 @@ class EditorRenderService {
             }
 
             if (object.type === 'player-end') {
+                const config = document.createElement('div');
+                config.className = 'object-config';
+
+                const label = document.createElement('label');
+                label.className = 'object-config-label';
+                label.textContent = this.t('objects.end.textLabel');
+
+                const textarea = document.createElement('textarea');
+                textarea.className = 'object-config-textarea';
+                textarea.rows = 4;
+                const maxLength = typeof StateObjectManager?.PLAYER_END_TEXT_LIMIT === 'number'
+                    ? StateObjectManager.PLAYER_END_TEXT_LIMIT
+                    : 40;
+                textarea.maxLength = maxLength;
+                textarea.placeholder = this.t('objects.end.placeholder');
+                textarea.value = object.endingText || '';
+                textarea.addEventListener('input', () => {
+                    this.manager.objectService?.updatePlayerEndText?.(object.roomIndex, textarea.value);
+                });
+
+                label.appendChild(textarea);
+                config.appendChild(label);
+
+                const hint = document.createElement('div');
+                hint.className = 'object-config-hint';
+                hint.textContent = this.tf('objects.end.hint', { max: maxLength });
+                config.appendChild(hint);
+
+                body.appendChild(config);
+            }
+
+            if (object.type === 'player-end') {
                 const badge = document.createElement('div');
                 badge.className = 'object-status';
                 badge.textContent = this.t('objects.status.gameEnd');

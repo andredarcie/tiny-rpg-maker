@@ -51,7 +51,8 @@ class GameState {
             enemies: [],
             variables: [],
             gameOver: false,
-            gameOverReason: null
+            gameOverReason: null,
+            lastEndingText: ''
         };
 
         this.worldManager = new StateWorldManager(this.game, roomSize);
@@ -132,6 +133,7 @@ class GameState {
         this.itemManager.resetItems();
         this.objectManager.resetRuntime();
         this.objectManager.ensurePlayerStartObject();
+        this.setActiveEndingText('');
         this.setGameOver(false);
         this.resumeGame('game-over');
     }
@@ -192,6 +194,27 @@ class GameState {
 
     setObjectVariable(type, roomIndex, variableId) {
         return this.objectManager.setObjectVariable(type, roomIndex, variableId);
+    }
+
+    setPlayerEndText(roomIndex, text) {
+        return this.objectManager.setPlayerEndText(roomIndex, text);
+    }
+
+    getPlayerEndText(roomIndex = null) {
+        return this.objectManager.getPlayerEndText(roomIndex);
+    }
+
+    setActiveEndingText(text = '') {
+        if (!this.state) return '';
+        const normalized = this.objectManager?.normalizePlayerEndText?.(text) ?? '';
+        this.state.lastEndingText = normalized;
+        return normalized;
+    }
+
+    getActiveEndingText() {
+        return typeof this.state?.lastEndingText === 'string'
+            ? this.state.lastEndingText
+            : '';
     }
 
     addKeys(amount = 1) {

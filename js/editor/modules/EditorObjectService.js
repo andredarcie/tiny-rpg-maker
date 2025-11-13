@@ -108,6 +108,22 @@ class EditorObjectService {
         return true;
     }
 
+    updatePlayerEndText(roomIndex, text) {
+        if (typeof this.gameEngine?.setPlayerEndText !== 'function') return;
+        this.gameEngine.setPlayerEndText(roomIndex, text);
+        this.manager.updateJSON();
+        this.schedulePlayerEndTextHistory();
+    }
+
+    schedulePlayerEndTextHistory() {
+        if (this.state.playerEndTextUpdateTimer) {
+            clearTimeout(this.state.playerEndTextUpdateTimer);
+        }
+        this.state.playerEndTextUpdateTimer = setTimeout(() => {
+            this.manager.history.pushCurrentState();
+        }, 400);
+    }
+
     normalizeType(type) {
         if (typeof type !== 'string' || !type.length) return null;
         const definitions = EditorConstants.OBJECT_DEFINITIONS;

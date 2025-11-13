@@ -83,6 +83,10 @@ class InteractionManager {
                 break;
             }
             if (object.type === 'player-end') {
+                if (typeof this.gameState.getPlayerEndText === 'function') {
+                    const endingText = this.gameState.getPlayerEndText(object.roomIndex);
+                    this.gameState.setActiveEndingText?.(endingText || '');
+                }
                 if (typeof this.options?.onPlayerVictory === 'function') {
                     this.options.onPlayerVictory();
                 }

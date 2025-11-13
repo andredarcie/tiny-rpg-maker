@@ -13,6 +13,7 @@ class ShareEncoder {
         const xpScrollPositions = ShareDataNormalizer.normalizeObjectPositions(objects, 'xp-scroll');
         const swordPositions = ShareDataNormalizer.normalizeObjectPositions(objects, 'sword');
         const playerEndPositions = ShareDataNormalizer.normalizeObjectPositions(objects, 'player-end');
+        const playerEndMessages = ShareDataNormalizer.collectPlayerEndTexts(objects);
         const switchEntries = ShareDataNormalizer.normalizeSwitchObjects(objects);
         const magicDoorEntries = ShareDataNormalizer.normalizeVariableDoorObjects(objects);
         const magicDoorPositions = magicDoorEntries.map((entry) => ({
@@ -150,6 +151,13 @@ class ShareEncoder {
             if (endCode) {
                 parts.push('z' + endCode);
             }
+        }
+
+        const hasEndingMessages = Array.isArray(playerEndMessages)
+            ? playerEndMessages.some((message) => typeof message === 'string' && message.length)
+            : false;
+        if (hasEndingMessages) {
+            parts.push('E' + ShareTextCodec.encodeTextArray(playerEndMessages));
         }
 
         if (switchEntries.length) {

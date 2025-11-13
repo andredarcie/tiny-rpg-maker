@@ -57,6 +57,15 @@ class ShareDecoder {
         const playerEndPositions = version >= ShareConstants.PLAYER_END_VERSION
             ? SharePositionCodec.decodePositions(payload.z || '')
             : [];
+        let playerEndMessages = [];
+        if (version >= ShareConstants.PLAYER_END_TEXT_ARRAY_VERSION) {
+            playerEndMessages = ShareTextCodec.decodeTextArray(payload.E || '');
+        } else if (version >= ShareConstants.PLAYER_END_TEXT_VERSION) {
+            const legacyMessage = ShareTextCodec.decodeText(payload.E || '', '');
+            if (legacyMessage) {
+                playerEndMessages = [legacyMessage];
+            }
+        }
         const variableStates = version >= ShareConstants.VARIABLES_VERSION ? ShareVariableCodec.decodeVariables(payload.b || '') : [];
         const switchPositions = version >= ShareConstants.SWITCH_VERSION
             ? SharePositionCodec.decodePositions(payload.J || '')
@@ -148,6 +157,12 @@ class ShareDecoder {
             maps.push({ ground, overlay });
         }
 
+        const playerEndEntries = ShareDataNormalizer.buildObjectEntries(
+            playerEndPositions,
+            'player-end',
+            { endingTexts: playerEndMessages }
+        );
+
         const objects = [
             ...ShareDataNormalizer.buildObjectEntries(doorPositions, 'door'),
             ...ShareDataNormalizer.buildObjectEntries(keyPositions, 'key'),
@@ -155,7 +170,7 @@ class ShareDecoder {
             ...ShareDataNormalizer.buildObjectEntries(lifePotionPositions, 'life-potion'),
             ...ShareDataNormalizer.buildObjectEntries(xpScrollPositions, 'xp-scroll'),
             ...ShareDataNormalizer.buildObjectEntries(swordPositions, 'sword'),
-            ...ShareDataNormalizer.buildObjectEntries(playerEndPositions, 'player-end'),
+            ...playerEndEntries,
             ...ShareDataNormalizer.buildObjectEntries(switchPositions, 'switch', { variableNibbles: switchVariableNibbles, stateBits: switchStateNibbles })
         ];
 

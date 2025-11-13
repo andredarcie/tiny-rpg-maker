@@ -15,6 +15,7 @@ class EditorState {
         this.suppressNpcFormUpdates = false;
         this.conditionalDialogueExpanded = false;
         this.activeMobilePanel = 'tiles';
+        this.playerEndTextUpdateTimer = null;
     }
 }
 

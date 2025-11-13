@@ -221,6 +221,16 @@ class GameEngine {
         return updated;
     }
 
+    setPlayerEndText(roomIndex, text) {
+        const normalized = this.gameState.setPlayerEndText?.(roomIndex, text) ?? '';
+        this.renderer.draw();
+        return normalized;
+    }
+
+    getPlayerEndText(roomIndex = null) {
+        return this.gameState.getPlayerEndText?.(roomIndex) ?? '';
+    }
+
     removeObject(type, roomIndex) {
         this.gameState.removeObject(type, roomIndex);
         this.renderer.draw();

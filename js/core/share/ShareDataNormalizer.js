@@ -166,6 +166,7 @@ class ShareDataNormalizer {
     static buildObjectEntries(positions, type, options = {}) {
         if (!Array.isArray(positions) || !positions.length) return [];
         const variableNibbles = Array.isArray(options.variableNibbles) ? options.variableNibbles : [];
+        const endingTexts = Array.isArray(options.endingTexts) ? options.endingTexts : [];
         const fallbackVariableId = ShareVariableCodec.getFirstVariableId();
         return positions.map((pos, index) => {
             const roomIndex = ShareMath.clampRoomIndex(pos?.roomIndex);
@@ -206,8 +207,55 @@ class ShareDataNormalizer {
                 const state = Array.isArray(options.stateBits) ? options.stateBits[index] : null;
                 entry.on = Boolean(state);
             }
+            if (type === 'player-end') {
+                const endingText = ShareDataNormalizer.normalizeEndingTextValue(endingTexts[index] ?? '');
+                if (endingText) {
+                    entry.endingText = endingText;
+                }
+            }
             return entry;
         });
+    }
+
+    static getPlayerEndTextLimit() {
+        if (typeof StateObjectManager?.PLAYER_END_TEXT_LIMIT === 'number') {
+            return StateObjectManager.PLAYER_END_TEXT_LIMIT;
+        }
+        return 40;
+    }
+
+    static normalizeEndingTextValue(value) {
+        if (typeof value !== 'string') return '';
+        const normalized = value.replace(/\r\n/g, '\n');
+        const max = ShareDataNormalizer.getPlayerEndTextLimit();
+        return normalized.slice(0, max).trim();
+    }
+
+    static collectPlayerEndTexts(objects) {
+        if (!Array.isArray(objects)) return [];
+        const entries = [];
+        const seenRooms = new Set();
+        for (const object of objects) {
+            if (object?.type !== 'player-end') continue;
+            const roomIndex = ShareMath.clampRoomIndex(object?.roomIndex);
+            if (seenRooms.has(roomIndex)) continue;
+            seenRooms.add(roomIndex);
+            const x = ShareMath.clamp(Number(object?.x), 0, ShareConstants.MATRIX_SIZE - 1, 0);
+            const y = ShareMath.clamp(Number(object?.y), 0, ShareConstants.MATRIX_SIZE - 1, 0);
+            if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+            entries.push({
+                roomIndex,
+                x,
+                y,
+                text: ShareDataNormalizer.normalizeEndingTextValue(object?.endingText ?? '')
+            });
+        }
+        entries.sort((a, b) => {
+            if (a.roomIndex !== b.roomIndex) return a.roomIndex - b.roomIndex;
+            if (a.y !== b.y) return a.y - b.y;
+            return a.x - b.x;
+        });
+        return entries.map((entry) => entry.text);
     }
 
     static normalizeEnemyType(type) {
