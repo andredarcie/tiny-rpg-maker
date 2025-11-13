@@ -70,7 +70,7 @@
             <div class="tab-content" id="tab-editor">
                 <div class="editor-layout">
                     <div class="editor-left">
-                        <div class="editor-section editor-section--tiles">
+                        <div class="editor-section editor-section--tiles" data-mobile-panel="tiles">
                             <details open>
                                 <summary data-text-key="sections.tiles"></summary>
                                 <div class="tiles-panel">
@@ -80,7 +80,7 @@
                             </details>
                         </div>
 
-                        <div class="editor-section editor-section--world">
+                        <div class="editor-section editor-section--world" data-mobile-panel="world">
                             <details open>
                                 <summary data-text-key="sections.world"></summary>
                                 <div class="world-panel">
@@ -89,7 +89,7 @@
                             </details>
                         </div>
 
-                        <div class="editor-section editor-section--objects">
+                        <div class="editor-section editor-section--objects" data-mobile-panel="objects">
                             <details open>
                                 <summary data-text-key="sections.objects"></summary>
                                 <div class="objects-panel">
@@ -138,11 +138,19 @@
                                 ></button>
                                 <canvas id="editor-canvas" width="384" height="384"></canvas>
                             </div>
+                            <div class="editor-mobile-nav" aria-label="" data-aria-label-key="editor.mobileNav.label">
+                                <button type="button" class="editor-mobile-nav-button active" data-mobile-target="tiles" data-title-key="editor.mobileNav.tiles" data-aria-label-key="editor.mobileNav.tiles">🧱</button>
+                                <button type="button" class="editor-mobile-nav-button" data-mobile-target="world" data-title-key="editor.mobileNav.world" data-aria-label-key="editor.mobileNav.world">🗺️</button>
+                                <button type="button" class="editor-mobile-nav-button" data-mobile-target="objects" data-title-key="editor.mobileNav.objects" data-aria-label-key="editor.mobileNav.objects">🎒</button>
+                                <button type="button" class="editor-mobile-nav-button" data-mobile-target="npcs" data-title-key="editor.mobileNav.npcs" data-aria-label-key="editor.mobileNav.npcs">🧍</button>
+                                <button type="button" class="editor-mobile-nav-button" data-mobile-target="enemies" data-title-key="editor.mobileNav.enemies" data-aria-label-key="editor.mobileNav.enemies">👹</button>
+                                <button type="button" class="editor-mobile-nav-button" data-mobile-target="project" data-title-key="editor.mobileNav.project" data-aria-label-key="editor.mobileNav.project">📁</button>
+                            </div>
                         </div>
                     </div>
 
                     <div class="editor-right">
-                        <div class="editor-section editor-section--npcs">
+                        <div class="editor-section editor-section--npcs" data-mobile-panel="npcs">
                             <details open>
                                 <summary data-text-key="sections.npcs"></summary>
                                 <div class="npcs-panel">
@@ -175,7 +183,7 @@
                             </details>
                         </div>
 
-                        <div class="editor-section editor-section--enemies">
+                        <div class="editor-section editor-section--enemies" data-mobile-panel="enemies">
                             <details open>
                                 <summary data-text-key="sections.enemies"></summary>
                                 <div class="enemies-panel">
@@ -185,7 +193,7 @@
                             </details>
                         </div>
 
-                        <div class="editor-section editor-section--project">
+                        <div class="editor-section editor-section--project" data-mobile-panel="project">
                             <details open>
                                 <summary data-text-key="sections.project"></summary>
                                 <div class="project-actions">
@@ -204,11 +212,8 @@
                                             <option value="en-US" data-text-key="language.option.enUS"></option>
                                         </select>
                                     </label>
+                                    <p class="project-share-hint" data-text-key="project.shareHint"></p>
                                     <button id="btn-generate-url" data-text-key="project.generateUrl"></button>
-                                </div>
-                                <div class="history-actions">
-                                    <button id="btn-undo" data-text-key="history.undo"></button>
-                                    <button id="btn-redo" data-text-key="history.redo"></button>
                                 </div>
                             </details>
                         </div>

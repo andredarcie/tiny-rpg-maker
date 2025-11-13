@@ -4,6 +4,8 @@ class EditorDomCache {
         this.editorCanvas = root.getElementById('editor-canvas');
         this.mapPosition = root.getElementById('editor-map-position');
         this.mapNavButtons = Array.from(root.querySelectorAll('.map-nav-button'));
+        this.mobileNavButtons = Array.from(root.querySelectorAll('.editor-mobile-nav-button'));
+        this.mobilePanels = Array.from(root.querySelectorAll('.editor-section[data-mobile-panel]'));
         this.selectedTilePreview = root.getElementById('selected-tile-preview');
         this.tileSummary = root.getElementById('tile-preset-summary');
         this.tileList = root.getElementById('tile-list');

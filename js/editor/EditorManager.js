@@ -126,7 +126,9 @@ class EditorManager {
             npcsList,
             selectedTilePreview,
             worldGrid,
-            mapNavButtons
+            mapNavButtons,
+            mobileNavButtons,
+            mobilePanels
         } = this.dom;
 
         btnNpcDelete?.addEventListener('click', () => this.npcService.removeSelectedNpc());
@@ -247,12 +249,28 @@ class EditorManager {
             editorCanvas.addEventListener('pointerdown', (ev) => this.tileService.startPaint(ev));
             editorCanvas.addEventListener('pointermove', (ev) => this.tileService.continuePaint(ev));
         }
+        if (Array.isArray(mobileNavButtons)) {
+            mobileNavButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    const target = button.dataset.mobileTarget;
+                    if (!target) return;
+                    this.setActiveMobilePanel(target);
+                });
+            });
+        }
+
         window.addEventListener('pointerup', (ev) => this.tileService.finishPaint(ev));
 
         document.addEventListener('keydown', (ev) => this.handleKey(ev));
-        window.addEventListener('resize', (ev) => this.handleCanvasResize(ev));
+        window.addEventListener('resize', (ev) => {
+            this.handleCanvasResize(ev);
+            this.updateMobilePanels();
+        });
         document.addEventListener('editor-tab-activated', () =>
-            requestAnimationFrame(() => this.handleCanvasResize(true))
+            requestAnimationFrame(() => {
+                this.handleCanvasResize(true);
+                this.updateMobilePanels();
+            })
         );
     }
 
@@ -270,6 +288,7 @@ class EditorManager {
         this.gameEngine.npcManager?.ensureDefaultNPCs?.();
 
         this.renderAll();
+        this.updateMobilePanels();
         this.handleCanvasResize(true);
         this.history.pushCurrentState();
     }
@@ -344,6 +363,38 @@ class EditorManager {
 
     renderWorldGrid() {
         this.renderService.renderWorldGrid();
+    }
+
+    setActiveMobilePanel(panel) {
+        if (!panel) return;
+        if (this.state.activeMobilePanel === panel) {
+            this.updateMobilePanels();
+            return;
+        }
+        this.state.activeMobilePanel = panel;
+        this.updateMobilePanels();
+    }
+
+    updateMobilePanels() {
+        const current = this.state.activeMobilePanel || 'tiles';
+        const buttons = Array.isArray(this.dom.mobileNavButtons) ? this.dom.mobileNavButtons : [];
+        buttons.forEach((button) => {
+            const match = button.dataset.mobileTarget === current;
+            button.classList.toggle('active', match);
+        });
+        const panels = Array.isArray(this.dom.mobilePanels) ? this.dom.mobilePanels : [];
+        const isMobile = typeof window !== 'undefined'
+            ? window.matchMedia('(max-width: 920px)').matches
+            : false;
+        panels.forEach((section) => {
+            if (!section) return;
+            if (!isMobile) {
+                section.classList.remove('is-mobile-active');
+                return;
+            }
+            const match = section.dataset.mobilePanel === current;
+            section.classList.toggle('is-mobile-active', match);
+        });
     }
 
     // Tile painting delegation

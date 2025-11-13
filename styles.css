@@ -501,6 +501,40 @@ body.game-mode #tab-game .game-controls button {
     border-color: transparent transparent transparent var(--map-nav-arrow-color);
 }
 
+.editor-mobile-nav {
+    display: none;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+
+.editor-mobile-nav-button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(15, 23, 42, 0.8);
+    color: #fff;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.editor-mobile-nav-button.active {
+    border-color: rgba(96, 165, 250, 0.9);
+    background: rgba(96, 165, 250, 0.25);
+    transform: translateY(-1px);
+}
+
+.editor-mobile-nav-button:focus-visible {
+    outline: 2px solid rgba(147, 197, 253, 0.8);
+    outline-offset: 2px;
+}
+
 #tile-canvas {
     width: clamp(128px, 45vw, 384px);
     max-width: 100%;
@@ -1058,14 +1092,11 @@ textarea {
 }
 
 
-.project-actions,
-.history-actions {
+.project-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
 }
-
-.project-actions {
     align-items: stretch;
 }
 
@@ -1091,13 +1122,19 @@ textarea {
     font-size: 0.95rem;
 }
 
-.project-actions button,
-.history-actions button {
+.project-actions button {
     flex: 1 1 160px;
 }
 
 .project-actions button {
     flex-basis: 100%;
+}
+
+.project-share-hint {
+    flex: 1 1 100%;
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin: 4px 0;
 }
 
 .enemies-panel {
@@ -1558,6 +1595,25 @@ textarea {
     }
 }
 
+@media (max-width: 920px) {
+    .editor-mobile-nav {
+        display: flex;
+    }
+
+    .editor-section[data-mobile-panel] {
+        display: none;
+    }
+
+    .editor-section[data-mobile-panel].is-mobile-active {
+        display: block;
+    }
+
+    .editor-left,
+    .editor-right {
+        width: 100%;
+    }
+}
+
 @media (max-width: 700px) {
     header {
         justify-content: flex-start;
@@ -1622,8 +1678,7 @@ textarea {
         margin-bottom: 4px;
     }
 
-    .project-actions button,
-    .history-actions button {
+    .project-actions button {
         flex: 1 1 100%;
     }
 

@@ -54,6 +54,7 @@ const TEXT_BUNDLES = {
         'project.authorPlaceholder': 'Seu nome ou estúdio',
         'project.languageLabel': 'Idioma',
         'project.generateUrl': 'Gerar URL do jogo',
+        'project.shareHint': 'Gere uma URL e compartilhe com seus amigos!',
         'language.option.ptBR': 'Português (Brasil)',
         'language.option.enUS': 'English (US)',
         'history.undo': 'Desfazer',
@@ -120,6 +121,13 @@ const TEXT_BUNDLES = {
         'editor.mapNav.down': 'Ir para cena abaixo',
         'editor.mapNav.left': 'Ir para cena à esquerda',
         'editor.mapNav.right': 'Ir para cena à direita',
+        'editor.mobileNav.label': 'Selecionar seção do editor',
+        'editor.mobileNav.tiles': 'Mostrar tiles',
+        'editor.mobileNav.world': 'Mostrar mapa do mundo',
+        'editor.mobileNav.objects': 'Mostrar objetos',
+        'editor.mobileNav.npcs': 'Mostrar NPCs',
+        'editor.mobileNav.enemies': 'Mostrar inimigos',
+        'editor.mobileNav.project': 'Mostrar projeto',
         'tiles.summaryFallback': 'Tile {id}'
     },
     'en-US': {
@@ -177,6 +185,7 @@ const TEXT_BUNDLES = {
         'project.authorPlaceholder': 'Your name or studio',
         'project.languageLabel': 'Language',
         'project.generateUrl': 'Generate share URL',
+        'project.shareHint': 'Generate a URL and share it with friends!',
         'language.option.ptBR': 'Portuguese (Brazil)',
         'language.option.enUS': 'English (US)',
         'history.undo': 'Undo',
@@ -243,6 +252,13 @@ const TEXT_BUNDLES = {
         'editor.mapNav.down': 'Go to scene below',
         'editor.mapNav.left': 'Go to scene on the left',
         'editor.mapNav.right': 'Go to scene on the right',
+        'editor.mobileNav.label': 'Select editor section',
+        'editor.mobileNav.tiles': 'Show tiles',
+        'editor.mobileNav.world': 'Show world map',
+        'editor.mobileNav.objects': 'Show objects',
+        'editor.mobileNav.npcs': 'Show NPCs',
+        'editor.mobileNav.enemies': 'Show enemies',
+        'editor.mobileNav.project': 'Show project',
         'tiles.summaryFallback': 'Tile {id}'
     }
 };
