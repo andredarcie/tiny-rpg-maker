@@ -18,11 +18,17 @@ class ShareUrlHelper {
         const hash = location.hash || '';
         if (!hash || hash.length <= 1) return null;
         const code = hash.startsWith('#') ? hash.substring(1) : hash;
-        return ShareDecoder.decodeShareCode(code);
+        try {
+            return ShareDecoder.decodeShareCode(code);
+        } catch (error) {
+            if (typeof console !== 'undefined' && typeof console.warn === 'function') {
+                console.warn('[TinyRPG] Unable to decode shared game data.', error);
+            }
+            return null;
+        }
     }
 }
 
 if (typeof window !== 'undefined') {
     window.ShareUrlHelper = ShareUrlHelper;
 }
-
