@@ -121,6 +121,13 @@
             font-style: italic;
         }
 
+        .breakable {
+            display: inline-block;
+            max-width: 100%;
+            word-break: break-all;
+            white-space: pre-wrap;
+        }
+
         .segments-table th:nth-child(1),
         .segments-table td:nth-child(1) {
             width: 60px;
@@ -339,7 +346,7 @@
                 <ul>
                     <li><strong>Base URL:</strong> ${base || '(only the code was provided)'}</li>
                     <li><strong>Query string:</strong> ${query || '(none)'}</li>
-                    <li><strong>Raw code:</strong> ${code || '(empty)'}</li>
+                    <li><strong>Raw code:</strong> <code class="breakable">${escapeHtml(code || '(empty)')}</code></li>
                     <li><strong>Segments found:</strong> ${segmentCount}</li>
                 </ul>
             `;
