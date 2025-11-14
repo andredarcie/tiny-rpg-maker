@@ -32,6 +32,9 @@ class Renderer {
         this.entityRenderer.setViewportOffset(this.gameplayOffsetY);
         this.dialogRenderer = new RendererDialogRenderer(gameState, this.paletteManager);
         this.hudRenderer = new RendererHudRenderer(gameState, this.entityRenderer, this.paletteManager);
+        this.effectsManager = new RendererEffectsManager(this);
+        this.transitionManager = new RendererTransitionManager(this);
+        this.overlayRenderer = new RendererOverlayRenderer(this);
 
         // Compatibilidade com código existente que acessa sprites diretamente.
         this.playerSprite = this.spriteFactory.getPlayerSprite();
@@ -39,30 +42,6 @@ class Renderer {
         this.enemySprites = this.spriteFactory.getEnemySprites();
         this.enemySprite = this.spriteFactory.getEnemySprite();
         this.objectSprites = this.spriteFactory.getObjectSprites();
-        this.edgeFlash = {
-            direction: '',
-            expiresAt: 0,
-            color: 'rgba(255,255,255,0.35)',
-            tileX: null,
-            tileY: null
-        };
-        this.introData = { title: 'Tiny RPG Maker', author: '' };
-        this.combatIndicatorElement = typeof document !== 'undefined'
-            ? document.getElementById('combat-indicator')
-            : null;
-        this.combatIndicatorTimeout = null;
-        this.screenFlashElement = typeof document !== 'undefined'
-            ? document.getElementById('screen-flash')
-            : null;
-        this.screenFlashTimeout = null;
-        if (this.combatIndicatorElement) {
-            this.combatIndicatorElement.classList.remove('visible');
-            this.combatIndicatorElement.setAttribute('data-visible', 'false');
-        }
-        if (this.screenFlashElement) {
-            this.screenFlashElement.classList.remove('visible');
-        }
-        this.roomTransition = { active: false };
         this.drawIconIdNextFrame = '';
         this.timeIconOverPlayer = 2000;
         this.tileAnimationInterval = 320;
@@ -80,14 +59,14 @@ class Renderer {
         ctx.save();
         ctx.translate(0, this.gameplayOffsetY);
 
-        if (this.isRoomTransitionActive()) {
-            this.drawRoomTransitionFrame(ctx, gameplayCanvas);
+        if (this.transitionManager.isActive()) {
+            this.transitionManager.drawFrame(ctx, gameplayCanvas);
         } else {
             this.tileRenderer.clearCanvas(ctx, gameplayCanvas);
             this.tileRenderer.drawBackground(ctx, gameplayCanvas);
             this.tileRenderer.drawTiles(ctx, gameplayCanvas);
             this.tileRenderer.drawWalls(ctx);
-            this.drawEdgeFlash(ctx, gameplayCanvas);
+            this.effectsManager.drawEdgeFlash(ctx, gameplayCanvas);
 
             if (!introActive && !this.gameState.isGameOver()) {
                 this.entityRenderer.drawObjects(ctx);
@@ -102,7 +81,7 @@ class Renderer {
             }
         }
         if (introActive) {
-            this.drawIntroOverlay(ctx, gameplayCanvas);
+            this.overlayRenderer.drawIntroOverlay(ctx, gameplayCanvas);
         }
         ctx.restore();
 
@@ -119,7 +98,7 @@ class Renderer {
         }
 
         if (typeof this.gameState.isGameOver === 'function' && this.gameState.isGameOver()) {
-            this.drawGameOverScreen();
+            this.overlayRenderer.drawGameOverScreen();
         }
     }
 
@@ -160,10 +139,7 @@ class Renderer {
     }
 
     setIntroData(data = {}) {
-        this.introData = {
-            title: data.title || 'Tiny RPG Maker',
-            author: data.author || ''
-        };
+        this.overlayRenderer.setIntroData(data);
     }
 
     isIntroOverlayActive() {
@@ -196,308 +172,17 @@ class Renderer {
     }
 
     isRoomTransitionActive() {
-        return Boolean(this.roomTransition?.active);
+        return this.transitionManager.isActive();
     }
 
     startRoomTransition(options = {}) {
-        const fromFrame = options.fromFrame;
-        const toFrame = options.toFrame;
-        if (!fromFrame || !toFrame) {
-            if (typeof options.onComplete === 'function') {
-                options.onComplete();
-            }
-            return false;
-        }
-        const direction = options.direction || 'right';
-        const duration = Number.isFinite(options.duration)
-            ? Math.max(120, options.duration)
-            : 320;
-        const now = (typeof performance !== 'undefined' && typeof performance.now === 'function')
-            ? performance.now()
-            : Date.now();
-
-        if (this.roomTransition?.rafId && typeof window !== 'undefined' && typeof window.cancelAnimationFrame === 'function') {
-            window.cancelAnimationFrame(this.roomTransition.rafId);
-        }
-
-        this.removePlayerFromFrame(fromFrame, options.playerPath?.from);
-        this.removePlayerFromFrame(toFrame, options.playerPath?.to);
-
-        this.roomTransition = {
-            active: true,
-            direction,
-            fromFrame,
-            toFrame,
-            duration,
-            startTime: now,
-            playerPath: options.playerPath || null,
-            onComplete: typeof options.onComplete === 'function' ? options.onComplete : null,
-            rafId: null
-        };
-
-        if (typeof this.gameState?.pauseGame === 'function') {
-            this.gameState.pauseGame('room-transition');
-        }
-
-        this.draw();
-        this.scheduleRoomTransitionTick();
-        return true;
-    }
-
-    removePlayerFromFrame(frameCanvas, coords) {
-        if (!frameCanvas || !coords) return;
-        const ctx = frameCanvas.getContext('2d');
-        if (!ctx) return;
-        const tileSize = Math.max(1, Math.floor(frameCanvas.width / 8));
-        const tileX = Math.max(0, Math.min(7, Math.floor(coords.x ?? 0)));
-        const tileY = Math.max(0, Math.min(7, Math.floor(coords.y ?? 0)));
-        const roomIndex = Number.isFinite(coords.roomIndex)
-            ? coords.roomIndex
-            : (this.gameState.getPlayer()?.roomIndex ?? 0);
-        const room = this.gameState.getGame().rooms?.[roomIndex];
-        ctx.fillStyle = this.paletteManager.getColor(room?.bg ?? 0);
-        ctx.fillRect(tileX * tileSize, tileY * tileSize, tileSize, tileSize);
-        this.drawTileStackOnContext(ctx, roomIndex, tileX, tileY, tileSize);
-    }
-
-    scheduleRoomTransitionTick() {
-        if (typeof window === 'undefined' || typeof window.requestAnimationFrame !== 'function') {
-            return;
-        }
-        const tick = () => {
-            if (!this.isRoomTransitionActive()) {
-                return;
-            }
-            const progress = this.getRoomTransitionProgress();
-            if (progress >= 1) {
-                this.finishRoomTransition();
-                return;
-            }
-            this.draw();
-            this.roomTransition.rafId = window.requestAnimationFrame(tick);
-        };
-        this.roomTransition.rafId = window.requestAnimationFrame(tick);
-    }
-
-    getRoomTransitionProgress() {
-        if (!this.roomTransition?.active) {
-            return 1;
-        }
-        const now = (typeof performance !== 'undefined' && typeof performance.now === 'function')
-            ? performance.now()
-            : Date.now();
-        const elapsed = now - this.roomTransition.startTime;
-        return Math.max(0, Math.min(1, elapsed / this.roomTransition.duration));
-    }
-
-    drawRoomTransitionFrame(ctx, gameplayCanvas) {
-        const transition = this.roomTransition;
-        if (!transition?.active) return;
-        const width = gameplayCanvas.width;
-        const height = gameplayCanvas.height;
-        const progress = this.getRoomTransitionProgress();
-        const deltaX = progress * width;
-        const deltaY = progress * height;
-        let fromX = 0;
-        let fromY = 0;
-        let toX = 0;
-        let toY = 0;
-        switch (transition.direction) {
-            case 'left':
-                fromX = deltaX;
-                toX = deltaX - width;
-                break;
-            case 'right':
-                fromX = -deltaX;
-                toX = width - deltaX;
-                break;
-            case 'up':
-                fromY = deltaY;
-                toY = deltaY - height;
-                break;
-            case 'down':
-                fromY = -deltaY;
-                toY = height - deltaY;
-                break;
-            default:
-                fromX = -deltaX;
-                toX = width - deltaX;
-                break;
-        }
-        ctx.save();
-        ctx.fillStyle = this.paletteManager.getColor(this.gameState.getCurrentRoom()?.bg ?? 0);
-        ctx.fillRect(0, 0, width, height);
-        ctx.drawImage(transition.fromFrame, Math.round(fromX), Math.round(fromY));
-        ctx.drawImage(transition.toFrame, Math.round(toX), Math.round(toY));
-        this.drawTransitionPlayer(ctx, gameplayCanvas, progress);
-        ctx.restore();
-        if (progress >= 1) {
-            this.finishRoomTransition();
-        }
-    }
-
-    drawTransitionPlayer(ctx, gameplayCanvas, progress) {
-        const transition = this.roomTransition;
-        const path = transition?.playerPath;
-        if (!path?.from || !path?.to) return;
-        const tileSize = Math.max(1, Math.floor(gameplayCanvas.width / 8));
-        const step = tileSize / 8;
-        const x = path.from.x + (path.to.x - path.from.x) * progress;
-        const y = path.from.y + (path.to.y - path.from.y) * progress;
-        let sprite = this.spriteFactory.getPlayerSprite();
-        let facingLeft = path.facingLeft;
-        if (facingLeft === undefined) {
-            facingLeft = path.to.x < path.from.x;
-        }
-        if (facingLeft) {
-            sprite = this.spriteFactory.turnSpriteHorizontally(sprite);
-        }
-        this.canvasHelper.drawSprite(ctx, sprite, x * tileSize, y * tileSize, step);
-    }
-
-    drawTileStackOnContext(ctx, roomIndex, tileX, tileY, tileSize) {
-        const tileMap = this.tileManager.getTileMap(roomIndex);
-        if (!tileMap) return;
-        const px = tileX * tileSize;
-        const py = tileY * tileSize;
-        const groundId = tileMap.ground?.[tileY]?.[tileX] ?? null;
-        if (groundId !== null && groundId !== undefined) {
-            this.drawTilePixelsOnContext(ctx, groundId, px, py, tileSize);
-        }
-        const overlayId = tileMap.overlay?.[tileY]?.[tileX] ?? null;
-        if (overlayId !== null && overlayId !== undefined) {
-            this.drawTilePixelsOnContext(ctx, overlayId, px, py, tileSize);
-        }
-    }
-
-    drawTilePixelsOnContext(ctx, tileId, px, py, size) {
-        const pixels = this.tileManager.getTilePixels(tileId);
-        if (!pixels) return;
-        const step = Math.max(1, Math.floor(size / 8));
-        for (let y = 0; y < 8; y++) {
-            for (let x = 0; x < 8; x++) {
-                const col = pixels[y]?.[x];
-                if (!col || col === 'transparent') continue;
-                ctx.fillStyle = col;
-                ctx.fillRect(px + x * step, py + y * step, step, step);
-            }
-        }
-    }
-
-    finishRoomTransition() {
-        if (!this.roomTransition?.active) return;
-        if (typeof window !== 'undefined' && typeof window.cancelAnimationFrame === 'function' && this.roomTransition.rafId) {
-            window.cancelAnimationFrame(this.roomTransition.rafId);
-        }
-        const callback = this.roomTransition.onComplete;
-        this.roomTransition = { active: false };
-        if (typeof this.gameState?.resumeGame === 'function') {
-            this.gameState.resumeGame('room-transition');
-        }
-        if (typeof callback === 'function') {
-            callback();
-        }
-    }
-
-    drawIntroOverlay(ctx, gameplayCanvas) {
-        this.entityRenderer.cleanupEnemyLabels();
-        const title = this.introData?.title || 'Tiny RPG Maker';
-        const author = (this.introData?.author || '').trim();
-        const width = gameplayCanvas.width;
-        const height = gameplayCanvas.height;
-        ctx.save();
-        ctx.fillStyle = 'rgba(4, 6, 14, 0.78)';
-        ctx.fillRect(0, 0, width, height);
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        const centerX = width / 2;
-        const centerY = height / 2;
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = `${Math.max(12, Math.floor(height / 12))}px monospace`;
-        ctx.fillText(title, centerX, centerY - height * 0.12);
-        if (author) {
-            ctx.fillStyle = 'rgba(255,255,255,0.8)';
-            ctx.font = `${Math.max(10, Math.floor(height / 18))}px monospace`;
-            ctx.fillText(`por ${author}`, centerX, centerY);
-        }
-
-        if (this.gameEngine?.canDismissIntroScreen) {
-            const blink = ((Date.now() / 500) % 2) > 1 ? 0.3 : 0.95;
-            ctx.fillStyle = `rgba(100, 181, 246, ${blink.toFixed(2)})`;
-            ctx.font = `${Math.max(9, Math.floor(height / 20))}px monospace`;
-            ctx.fillText('Iniciar aventura', centerX, centerY + height * 0.18);
-        }
-        
-        ctx.restore();
+        return this.transitionManager.start(options);
     }
 
     flashEdge(direction, options = {}) {
-        if (typeof direction !== 'string' || !direction.trim()) return;
-        const normalizedDirection = direction.trim().toLowerCase();
-        const duration = Number.isFinite(options.duration)
-            ? Math.max(32, options.duration)
-            : 220;
-        const color = typeof options.color === 'string' && options.color.trim()
-            ? options.color.trim()
-            : 'rgba(255,255,255,0.35)';
-        const clampIndex = (value) => {
-            if (!Number.isFinite(value)) return null;
-            const idx = Math.floor(value);
-            return Math.max(0, Math.min(7, idx));
-        };
-        const tileX = clampIndex(options.tileX);
-        const tileY = clampIndex(options.tileY);
-        this.edgeFlash = {
-            direction: normalizedDirection,
-            expiresAt: Date.now() + duration,
-            color,
-            tileX,
-            tileY
-        };
+        this.effectsManager.flashEdge(direction, options);
     }
 
-    drawEdgeFlash(ctx, bounds) {
-        const state = this.edgeFlash;
-        if (!state?.direction) return;
-        const now = Date.now();
-        if (!Number.isFinite(state.expiresAt) || state.expiresAt <= now) {
-            this.edgeFlash.direction = '';
-            return;
-        }
-
-        const tileSize = Math.max(1, this.canvasHelper.getTilePixelSize());
-        const thickness = Math.max(2, Math.floor(tileSize / 4));
-        const highlightSize = tileSize;
-        const clampIndex = (value, fallback = 0) => {
-            if (!Number.isFinite(value)) return Math.max(0, Math.min(7, Math.floor(fallback)));
-            return Math.max(0, Math.min(7, Math.floor(value)));
-        };
-        const player = typeof this.gameState?.getPlayer === 'function'
-            ? this.gameState.getPlayer()
-            : { x: 0, y: 0 };
-        const tileX = clampIndex(state.tileX, player?.x ?? 0);
-        const tileY = clampIndex(state.tileY, player?.y ?? 0);
-        ctx.save();
-        ctx.fillStyle = state.color || 'rgba(255,255,255,0.35)';
-        switch (state.direction) {
-            case 'left':
-                ctx.fillRect(0, tileY * highlightSize, thickness, highlightSize);
-                break;
-            case 'right':
-                ctx.fillRect(bounds.width - thickness, tileY * highlightSize, thickness, highlightSize);
-                break;
-            case 'up':
-                ctx.fillRect(tileX * highlightSize, 0, highlightSize, thickness);
-                break;
-            case 'down':
-                ctx.fillRect(tileX * highlightSize, bounds.height - thickness, highlightSize, thickness);
-                break;
-            default:
-                ctx.fillRect(0, 0, bounds.width, thickness);
-                break;
-        }
-        ctx.restore();
-    }
 
     startTileAnimationLoop() {
         if (typeof setInterval !== 'function') {
@@ -532,166 +217,12 @@ class Renderer {
         }
     }
 
-    drawGameOverScreen() {
-        const ctx = this.ctx;
-        if (!ctx) return;
-        this.entityRenderer.cleanupEnemyLabels();
-        ctx.save();
-        ctx.fillStyle = '#000000';
-        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        const reason = typeof this.gameState.getGameOverReason === 'function'
-            ? this.gameState.getGameOverReason()
-            : 'defeat';
-        const isVictory = reason === 'victory';
-        const endingText = isVictory && typeof this.gameState.getActiveEndingText === 'function'
-            ? (this.gameState.getActiveEndingText() || '')
-            : '';
-        const hasEndingText = isVictory && endingText.trim().length > 0;
-
-        const centerX = Math.round(this.canvas.width / 2) + 0.5;
-        const centerY = Math.round(this.canvas.height / 2) + 0.5;
-        if (hasEndingText) {
-            ctx.save();
-            const padding = Math.floor(this.canvas.width * 0.08);
-            const availableWidth = Math.max(32, this.canvas.width - padding * 2);
-            const messageFontSize = Math.max(12, Math.floor(this.canvas.height / 14));
-            const lineHeight = Math.round(messageFontSize * 1.4);
-            const textFont = `bold ${messageFontSize}px "Press Start 2P", "VT323", monospace`;
-            ctx.font = textFont;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'top';
-            ctx.fillStyle = '#F8FAFC';
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.lineWidth = Math.max(1, Math.floor(messageFontSize / 10));
-
-            const wrapLines = (text) => {
-                const sections = text.replace(/\r\n/g, '\n').split(/\n+/).map((section) => section.trim()).filter(Boolean);
-                if (!sections.length) return [];
-                const lines = [];
-                sections.forEach((section, index) => {
-                    const words = section.split(/\s+/);
-                    let current = '';
-                    words.forEach((word) => {
-                        const next = current ? `${current} ${word}` : word;
-                        if (ctx.measureText(next).width > availableWidth && current) {
-                            lines.push(current);
-                            current = word;
-                        } else {
-                            current = next;
-                        }
-                    });
-                    if (current) {
-                        lines.push(current);
-                    }
-                    if (index < sections.length - 1) {
-                        lines.push('');
-                    }
-                });
-                return lines.length ? lines : [''];
-            };
-
-            const lines = wrapLines(endingText);
-            const totalHeight = lines.length * lineHeight;
-            const offset = Math.max(lineHeight, Math.floor(messageFontSize * 1.2));
-            let startY = Math.max(padding, Math.floor(centerY - totalHeight - offset));
-            if (!Number.isFinite(startY)) {
-                startY = padding;
-            }
-            let cursorY = startY;
-            lines.forEach((line) => {
-                if (line.trim().length) {
-                    const alignedY = Math.round(cursorY) + 0.5;
-                    ctx.strokeText(line, centerX, alignedY);
-                    ctx.fillText(line, centerX, alignedY);
-                }
-                cursorY += lineHeight;
-            });
-            ctx.restore();
-        }
-
-        ctx.fillStyle = '#FFFFFF';
-        let fontSize = Math.max(8, Math.floor(this.canvas.height / 10));
-        const endFont = `bold ${fontSize}px "Press Start 2P", monospace`;
-        ctx.font = endFont;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
-        ctx.lineWidth = Math.max(1, Math.floor(fontSize / 12));
-        ctx.strokeText(isVictory ? 'The End' : 'Game Over', centerX, centerY);
-        ctx.fillText(isVictory ? 'The End' : 'Game Over', centerX, centerY);
-
-        if (!this.gameState.canResetAfterGameOver) {
-            ctx.restore();
-            return;
-        }
-        ctx.save();
-        const blink = ((Date.now() / 500) % 2) > 1 ? 0.3 : 0.95;
-        ctx.fillStyle = `rgba(100, 181, 246, ${blink.toFixed(2)})`;
-        fontSize = Math.max(5, Math.floor(this.canvas.height / 15));
-        ctx.font = `bold ${fontSize}px "Press Start 2P", monospace`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        const retryY = Math.round(this.canvas.height / 1.5) + 0.5;
-        ctx.strokeText(isVictory ? 'Play Again?' : 'Try Again?', centerX, retryY);
-        ctx.fillText(isVictory ? 'Play Again?' : 'Try Again?', centerX, retryY);
-        ctx.restore();
-        ctx.restore();
-    }
-
     showCombatIndicator(text, options = {}) {
-        const element = this.combatIndicatorElement;
-        if (!element) return;
-        const duration = Number.isFinite(options.duration)
-            ? Math.max(0, options.duration)
-            : 600;
-
-        if (this.combatIndicatorTimeout) {
-            clearTimeout(this.combatIndicatorTimeout);
-            this.combatIndicatorTimeout = null;
-        }
-
-        element.classList.remove('visible');
-        element.setAttribute('data-visible', 'false');
-        element.textContent = '';
-        // Force layout so the transition can replay on subsequent calls.
-        void element.offsetWidth;
-
-        element.textContent = text ?? '';
-        element.classList.add('visible');
-        element.setAttribute('data-visible', 'true');
-
-        this.combatIndicatorTimeout = setTimeout(() => {
-            element.classList.remove('visible');
-            element.setAttribute('data-visible', 'false');
-            element.textContent = '';
-            this.combatIndicatorTimeout = null;
-        }, duration);
+        this.effectsManager.showCombatIndicator(text, options);
     }
 
     flashScreen(options = {}) {
-        const element = this.screenFlashElement;
-        if (!element) return;
-        const duration = Number.isFinite(options.duration)
-            ? Math.max(16, options.duration)
-            : 140;
-        if (typeof options.intensity === 'number' && Number.isFinite(options.intensity)) {
-            const clamped = Math.max(0, Math.min(1, options.intensity));
-            element.style.setProperty('--screen-flash-opacity', clamped.toString());
-        }
-        if (typeof options.color === 'string' && options.color.trim()) {
-            element.style.setProperty('--screen-flash-color', options.color.trim());
-        }
-        if (this.screenFlashTimeout) {
-            clearTimeout(this.screenFlashTimeout);
-            this.screenFlashTimeout = null;
-        }
-        element.classList.remove('visible');
-        void element.offsetWidth;
-        element.classList.add('visible');
-        this.screenFlashTimeout = setTimeout(() => {
-            element.classList.remove('visible');
-            this.screenFlashTimeout = null;
-        }, duration);
+        this.effectsManager.flashScreen(options);
     }
 
     drawObjectSprite(ctx, type, px, py, stepOverride) {
