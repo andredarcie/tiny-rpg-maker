@@ -38,6 +38,48 @@ const resolveDefinitionText = (def) => {
     return def.defaultText || '';
 };
 
+/**
+ * normalizeNpcText decides which text should be shown for an NPC.
+ * It prioritizes the explicit textKey, falls back to the definition's default textKey,
+ * and finally uses the custom text or the base definition text.
+ */
+const normalizeNpcText = (npc, def) => {
+    const defaultText = resolveDefinitionText(def);
+    const defaultTextKey = def && def.defaultTextKey ? def.defaultTextKey : null;
+
+    const hasCustomText = Object.prototype.hasOwnProperty.call(npc, 'text');
+    const customText = hasCustomText
+        ? (typeof npc.text === 'string' ? npc.text : String(npc.text || ''))
+        : '';
+
+    const storedTextKey = typeof npc.textKey === 'string' && npc.textKey.trim()
+        ? npc.textKey.trim()
+        : null;
+
+    // If the NPC already has a textKey, just reuse it.
+    if (storedTextKey) {
+        const fallback = customText || defaultText;
+        return {
+            textKey: storedTextKey,
+            text: getNpcLocaleText(storedTextKey, fallback)
+        };
+    }
+
+    // If there is no custom text and the definition has a default text key, reuse it.
+    if (!hasCustomText && defaultTextKey) {
+        return {
+            textKey: defaultTextKey,
+            text: getNpcLocaleText(defaultTextKey, defaultText)
+        };
+    }
+
+    // Fallback: use the custom text (even empty string) or the default definition text.
+    return {
+        textKey: null,
+        text: hasCustomText ? customText : defaultText
+    };
+};
+
 function clamp(value, min, max, fallback) {
     if (!Number.isFinite(value)) return fallback;
     return Math.max(min, Math.min(max, value));
@@ -125,26 +167,8 @@ class NPCManager {
         }
         const id = sequentialId || existingId || this.generateId();
         const baseName = def ? resolveDefinitionName(def) : null;
-        const defaultText = resolveDefinitionText(def);
-        const defaultTextKey = def?.defaultTextKey || null;
-        const existingTextKey = typeof npc.textKey === 'string' && npc.textKey.trim().length ? npc.textKey.trim() : null;
         const name = npc.name || baseName || getNpcLocaleText('npc.defaultName', 'NPC');
-        let textKey = existingTextKey || null;
-        let text = typeof npc.text === 'string' ? npc.text : null;
-
-        if (!textKey && defaultTextKey) {
-            const trimmed = (text || '').trim();
-            const fallback = (def?.defaultText || '').trim();
-            if (!trimmed || trimmed === fallback) {
-                textKey = defaultTextKey;
-            }
-        }
-
-        if (textKey) {
-            text = getNpcLocaleText(textKey, text || defaultText);
-        } else if (!text) {
-            text = defaultText;
-        }
+        const { text, textKey } = normalizeNpcText(npc, def);
         const maxRoomIndex = Math.max(0, (this.gameState?.game?.rooms?.length ?? 1) - 1);
         const roomIndex = clamp(Number(npc.roomIndex), 0, maxRoomIndex, 0);
         const x = clamp(Number(npc.x), 0, 7, 1);

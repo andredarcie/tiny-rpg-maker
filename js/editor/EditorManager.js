@@ -19,6 +19,9 @@ class EditorManager {
         this.objectService = new EditorObjectService(this);
         this.variableService = new EditorVariableService(this);
         this.worldService = new EditorWorldService(this);
+        this.uiController = new EditorUIController(this);
+        this.eventBinder = new EditorEventBinder(this);
+        this.interactionController = new EditorInteractionController(this);
 
         this.bindEvents();
         this.initialize();
@@ -103,175 +106,7 @@ class EditorManager {
     }
 
     bindEvents() {
-        const {
-            btnNpcDelete,
-            btnGenerateUrl,
-            btnUndo,
-            btnRedo,
-            titleInput,
-            authorInput,
-            npcText,
-            npcConditionalText,
-            npcConditionalVariable,
-            npcRewardVariable,
-            npcConditionalRewardVariable,
-            btnToggleNpcConditional,
-            fileInput,
-            editorCanvas,
-            enemyTypes,
-            enemiesList,
-            objectTypes,
-            objectsList,
-            tileList,
-            npcsList,
-            selectedTilePreview,
-            worldGrid,
-            mapNavButtons,
-            mobileNavButtons,
-            mobilePanels
-        } = this.dom;
-
-        btnNpcDelete?.addEventListener('click', () => this.npcService.removeSelectedNpc());
-        btnToggleNpcConditional?.addEventListener('click', () => {
-            this.state.conditionalDialogueExpanded = !this.state.conditionalDialogueExpanded;
-            this.renderService.updateNpcForm();
-        });
-
-        btnGenerateUrl?.addEventListener('click', () => this.shareService.generateShareableUrl());
-        btnUndo?.addEventListener('click', () => this.undo());
-        btnRedo?.addEventListener('click', () => this.redo());
-
-        titleInput?.addEventListener('input', () => this.updateGameMetadata());
-        authorInput?.addEventListener('input', () => this.updateGameMetadata());
-        npcText?.addEventListener('input', () => this.npcService.updateNpcText(npcText.value));
-        npcConditionalText?.addEventListener('input', () => this.npcService.updateNpcConditionalText(npcConditionalText.value));
-        npcConditionalVariable?.addEventListener('change', (ev) => this.npcService.handleConditionVariableChange(ev.target.value));
-        npcRewardVariable?.addEventListener('change', (ev) => this.npcService.handleRewardVariableChange(ev.target.value));
-        npcConditionalRewardVariable?.addEventListener('change', (ev) => this.npcService.handleConditionalRewardVariableChange(ev.target.value));
-
-        fileInput?.addEventListener('change', (ev) => this.shareService.loadGameFile(ev));
-
-        tileList?.addEventListener('click', (ev) => {
-            const button = ev.target.closest('[data-tile-id]');
-            if (!button) return;
-            const tileId = Number(button.dataset.tileId);
-            if (!Number.isFinite(tileId)) return;
-            if (this.state.placingObjectType) {
-                this.objectService.togglePlacement(this.state.placingObjectType, true);
-            }
-
-            this.desselectAllAndRender();
-
-            this.selectedTileId = tileId;
-            this.renderService.updateSelectedTilePreview();
-            this.renderService.renderTileList();
-        });
-
-        npcsList?.addEventListener('click', (ev) => {
-            const card = ev.target.closest('.npc-card');
-            if (!card) return;
-            const type = card.dataset.type || null;
-            const id = card.dataset.id || null;
-
-            this.desselectAllAndRender();
-
-            this.npcService.updateNpcSelection(type, id);
-        });
-
-        objectTypes?.addEventListener('click', (ev) => {
-            const card = ev.target.closest('.object-type-card');
-            if (!card) return;
-            const type = card.dataset.type || null;
-            if (!type) return;
-            
-            this.desselectAllAndRender();
-
-            this.objectService.selectObjectType(type);
-        });
-
-        objectsList?.addEventListener('click', (ev) => {
-            const button = ev.target.closest('.object-remove');
-            if (!button) return;
-            const card = button.closest('.object-card');
-            if (!card) return;
-            const type = card.dataset.type;
-            const room = Number(card.dataset.roomIndex);
-            if (!type || !Number.isFinite(room)) return;
-            this.objectService.removeObject(type, room);
-        });
-
-        enemyTypes?.addEventListener('click', (ev) => {
-            const card = ev.target.closest('.enemy-card');
-            if (!card) return;
-            const type = card.dataset.type || null;
-            if (!type) return;
-            
-            this.desselectAllAndRender();
-
-            this.enemyService.selectEnemyType(type);
-        });
-
-        enemiesList?.addEventListener('click', (ev) => {
-            const button = ev.target.closest('[data-remove-enemy]');
-            if (!button) return;
-            const enemyId = button.dataset.removeEnemy;
-            if (!enemyId) return;
-            this.enemyService.removeEnemy(enemyId);
-        });
-
-        enemiesList?.addEventListener('change', (ev) => {
-            const target = ev.target;
-            if (!target || target.tagName !== 'SELECT') return;
-            const enemyId = target.dataset.enemyVariable;
-            if (!enemyId) return;
-            const value = target.value || '';
-            this.enemyService.handleEnemyVariableChange(enemyId, value);
-        });
-
-        worldGrid?.addEventListener('click', (ev) => {
-            const cell = ev.target.closest('[data-room-index]');
-            if (!cell) return;
-            const index = Number(cell.dataset.roomIndex);
-            this.worldService.setActiveRoom(index);
-        });
-
-        if (Array.isArray(mapNavButtons)) {
-            mapNavButtons.forEach((button) => {
-                button.addEventListener('click', () => {
-                    const direction = button.dataset.direction;
-                    if (!direction) return;
-                    this.worldService.moveActiveRoom(direction);
-                });
-            });
-        }
-
-        if (editorCanvas) {
-            editorCanvas.addEventListener('pointerdown', (ev) => this.tileService.startPaint(ev));
-            editorCanvas.addEventListener('pointermove', (ev) => this.tileService.continuePaint(ev));
-        }
-        if (Array.isArray(mobileNavButtons)) {
-            mobileNavButtons.forEach((button) => {
-                button.addEventListener('click', () => {
-                    const target = button.dataset.mobileTarget;
-                    if (!target) return;
-                    this.setActiveMobilePanel(target);
-                });
-            });
-        }
-
-        window.addEventListener('pointerup', (ev) => this.tileService.finishPaint(ev));
-
-        document.addEventListener('keydown', (ev) => this.handleKey(ev));
-        window.addEventListener('resize', (ev) => {
-            this.handleCanvasResize(ev);
-            this.updateMobilePanels();
-        });
-        document.addEventListener('editor-tab-activated', () =>
-            requestAnimationFrame(() => {
-                this.handleCanvasResize(true);
-                this.updateMobilePanels();
-            })
-        );
+        this.eventBinder.bind();
     }
 
     initialize() {
@@ -366,35 +201,11 @@ class EditorManager {
     }
 
     setActiveMobilePanel(panel) {
-        if (!panel) return;
-        if (this.state.activeMobilePanel === panel) {
-            this.updateMobilePanels();
-            return;
-        }
-        this.state.activeMobilePanel = panel;
-        this.updateMobilePanels();
+        this.uiController.setActiveMobilePanel(panel);
     }
 
     updateMobilePanels() {
-        const current = this.state.activeMobilePanel || 'tiles';
-        const buttons = Array.isArray(this.dom.mobileNavButtons) ? this.dom.mobileNavButtons : [];
-        buttons.forEach((button) => {
-            const match = button.dataset.mobileTarget === current;
-            button.classList.toggle('active', match);
-        });
-        const panels = Array.isArray(this.dom.mobilePanels) ? this.dom.mobilePanels : [];
-        const isMobile = typeof window !== 'undefined'
-            ? window.matchMedia('(max-width: 920px)').matches
-            : false;
-        panels.forEach((section) => {
-            if (!section) return;
-            if (!isMobile) {
-                section.classList.remove('is-mobile-active');
-                return;
-            }
-            const match = section.dataset.mobilePanel === current;
-            section.classList.toggle('is-mobile-active', match);
-        });
+        this.uiController.updateMobilePanels();
     }
 
     // Tile painting delegation
@@ -496,44 +307,15 @@ class EditorManager {
 
     // Game title & JSON sync
     updateGameMetadata() {
-        const game = this.gameEngine.getGame();
-        const title = this.normalizeTitle(this.dom.titleInput?.value || '');
-        const author = this.normalizeAuthor(this.dom.authorInput?.value || '');
-        game.title = title;
-        game.author = author;
-        if (typeof this.gameEngine.syncDocumentTitle === 'function') {
-            this.gameEngine.syncDocumentTitle();
-        }
-        if (typeof this.gameEngine.refreshIntroScreen === 'function') {
-            this.gameEngine.refreshIntroScreen();
-        }
-        this.updateJSON();
+        this.uiController.updateGameMetadata();
     }
 
     updateJSON() {
-        if (!this.dom.jsonArea) return;
-        this.dom.jsonArea.value = JSON.stringify(this.gameEngine.exportGameData(), null, 2);
+        this.uiController.updateJSON();
     }
 
     syncUI() {
-        const game = this.gameEngine.getGame();
-        if (this.dom.titleInput) {
-            this.dom.titleInput.value = game.title || '';
-        }
-        if (this.dom.authorInput) {
-            this.dom.authorInput.value = game.author || '';
-        }
-        this.updateJSON();
-    }
-
-    normalizeTitle(raw) {
-        const text = String(raw || '').slice(0, 18).replace(/\s+/g, ' ').trim();
-        return text || 'Tiny RPG Maker';
-    }
-
-    normalizeAuthor(raw) {
-        const text = String(raw || '').slice(0, 18).replace(/\s+/g, ' ').trim();
-        return text;
+        this.uiController.syncUI();
     }
 
     // Restore & import logic
@@ -574,85 +356,19 @@ class EditorManager {
 
     // Canvas & keyboard handling
     handleCanvasResize(force = false) {
-        if (!this.editorCanvas) return;
-        const container = this.editorCanvas.parentElement;
-        if (!container) return;
-
-        const availableWidth = container.offsetWidth || container.clientWidth || 0;
-
-        const maxCanvasSize = 512;
-        let minCanvasSize = 128;
-        const highestDivisor = Math.floor((availableWidth + minCanvasSize - 1) / minCanvasSize) * minCanvasSize;
-
-        const size = Math.min(Math.max(highestDivisor, minCanvasSize), maxCanvasSize);
-        if (!force && Math.abs(this.editorCanvas.width - size) < 1) {
-            return;
-        }
-
-        this.editorCanvas.style.width = `${size}px`;
-        this.editorCanvas.width = size;
-        this.editorCanvas.height = size;
-        this.renderService.renderEditor();
+        this.interactionController.handleCanvasResize(force);
     }
 
     handleLanguageChange() {
-        if (typeof TextResources?.apply === 'function') {
-            TextResources.apply();
-        }
-        this.refreshNpcLocalizedText();
-        this.renderAll();
-        this.updateJSON();
+        this.uiController.handleLanguageChange();
     }
 
     refreshNpcLocalizedText() {
-        const sprites = this.gameEngine?.getSprites?.();
-        if (!Array.isArray(sprites)) return;
-        const definitions = this.gameEngine?.npcManager?.getDefinitions?.() || [];
-        const byType = new Map(definitions.map((def) => [def.type, def]));
-        sprites.forEach((npc) => {
-            const def = npc?.type ? byType.get(npc.type) : null;
-            if (def?.nameKey) {
-                npc.name = TextResources.get?.(def.nameKey, def.name || npc.name || '') || npc.name || '';
-            }
-            if (npc?.textKey) {
-                npc.text = TextResources.get?.(npc.textKey, npc.text || '') || npc.text || '';
-            }
-        });
+        this.uiController.refreshNpcLocalizedText();
     }
 
     handleKey(ev) {
-        if (ev.defaultPrevented) return;
-        if (ev.key === 'Escape') {
-            if (this.placingNpc || this.selectedNpcId || this.selectedNpcType) {
-                this.npcService.clearSelection();
-                ev.preventDefault();
-                return;
-            }
-            if (this.placingEnemy) {
-                this.enemyService.deactivatePlacement();
-                ev.preventDefault();
-                return;
-            }
-            if (this.placingObjectType) {
-                this.objectService.togglePlacement(this.placingObjectType, true);
-                ev.preventDefault();
-                return;
-            }
-        }
-
-        if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'z') {
-            ev.preventDefault();
-            if (ev.shiftKey) {
-                this.redo();
-            } else {
-                this.undo();
-            }
-        }
-
-        if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'y') {
-            ev.preventDefault();
-            this.redo();
-        }
+        this.interactionController.handleKey(ev);
     }
 
     createNewGame() {
