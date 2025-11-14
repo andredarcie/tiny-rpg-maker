@@ -51,8 +51,7 @@ class GameState {
             enemies: [],
             variables: [],
             gameOver: false,
-            gameOverReason: null,
-            lastEndingText: ''
+            gameOverReason: null
         };
 
         this.worldManager = new StateWorldManager(this.game, roomSize);
@@ -62,16 +61,18 @@ class GameState {
         this.playerManager = new StatePlayerManager(this.state, this.worldManager);
         this.dialogManager = new StateDialogManager(this.state);
         this.itemManager = new StateItemManager(this.game);
+        this.worldFacade = new GameStateWorldFacade(this, this.worldManager);
+        this.playerFacade = new GameStatePlayerFacade(this, this.playerManager);
+        this.screenManager = new GameStateScreenManager(this);
         this.dataManager = new StateDataManager({
             game: this.game,
             worldManager: this.worldManager,
             objectManager: this.objectManager,
             variableManager: this.variableManager
         });
+        this.dataFacade = new GameStateDataFacade(this, this.dataManager);
         this.playing = false;
-        this.canResetAfterGameOver = false;
-        this.timeToResetAfterGameOver = 2000;
-        this.pauseReasons = new Set();
+        this.lifecycle = new GameStateLifecycle(this, this.screenManager, { timeToResetAfterGameOver: 2000 });
         this.ensureDefaultVariables();
         this.resetGame();
 
@@ -80,15 +81,15 @@ class GameState {
     }
 
     createEmptyRoom(size, index = 0, cols = 1) {
-        return this.worldManager.createEmptyRoom(size, index, cols);
+        return this.worldFacade.createEmptyRoom(size, index, cols);
     }
 
     createWorldRooms(rows, cols, size) {
-        return this.worldManager.createWorldRooms(rows, cols, size);
+        return this.worldFacade.createWorldRooms(rows, cols, size);
     }
 
     createEmptyTileMap(size) {
-        return this.worldManager.createEmptyTileMap(size);
+        return this.worldFacade.createEmptyTileMap(size);
     }
 
     getGame() {
@@ -106,7 +107,7 @@ class GameState {
     }
 
     getPlayer() {
-        return this.playerManager.getPlayer();
+        return this.playerFacade.getPlayer();
     }
 
     getDialog() {
@@ -114,7 +115,7 @@ class GameState {
     }
 
     setPlayerPosition(x, y, roomIndex = null) {
-        this.playerManager.setPosition(x, y, roomIndex);
+        this.playerFacade.setPlayerPosition(x, y, roomIndex);
     }
 
     setDialog(active, text = "", meta = null) {
@@ -126,38 +127,32 @@ class GameState {
     }
 
     resetGame() {
-        this.playerManager.reset(this.game.start);
+        this.screenManager.reset();
+        this.playerFacade.resetPlayer();
         this.dialogManager.reset();
         this.enemyManager.resetRuntime();
         this.variableManager.resetRuntime();
         this.itemManager.resetItems();
         this.objectManager.resetRuntime();
         this.objectManager.ensurePlayerStartObject();
-        this.setActiveEndingText('');
         this.setGameOver(false);
         this.resumeGame('game-over');
     }
 
     exportGameData() {
-        return this.dataManager.exportGameData();
+        return this.dataFacade.exportGameData();
     }
 
     importGameData(data) {
-        this.dataManager.importGameData(data);
-        this.enemyManager.setGame(this.game);
-        this.itemManager.setGame(this.game);
-        this.objectManager.setGame(this.game);
-        this.variableManager.setGame(this.game);
-        this.ensureDefaultVariables();
-        this.resetGame();
+        this.dataFacade.importGameData(data);
     }
 
     normalizeRooms(rooms, totalRooms, cols) {
-        return this.worldManager.normalizeRooms(rooms, totalRooms, cols);
+        return this.worldFacade.normalizeRooms(rooms, totalRooms, cols);
     }
 
     normalizeTileMaps(source, totalRooms) {
-        return this.worldManager.normalizeTileMaps(source, totalRooms);
+        return this.worldFacade.normalizeTileMaps(source, totalRooms);
     }
 
     normalizeObjects(objects) {
@@ -205,52 +200,39 @@ class GameState {
     }
 
     setActiveEndingText(text = '') {
-        if (!this.state) return '';
-        const normalized = this.objectManager?.normalizePlayerEndText?.(text) ?? '';
-        this.state.lastEndingText = normalized;
-        return normalized;
+        return this.screenManager.setActiveEndingText(text);
     }
 
     getActiveEndingText() {
-        return typeof this.state?.lastEndingText === 'string'
-            ? this.state.lastEndingText
-            : '';
+        return this.screenManager.getActiveEndingText();
     }
 
     addKeys(amount = 1) {
-        return this.playerManager.addKeys(amount);
+        return this.playerFacade.addKeys(amount);
     }
 
     addLife(amount = 1) {
-        return typeof this.playerManager.gainLives === 'function'
-            ? this.playerManager.gainLives(amount)
-            : this.getLives();
+        return this.playerFacade.addLife(amount);
     }
 
     addDamageShield(amount = 1) {
-        return typeof this.playerManager.addDamageShield === 'function'
-            ? this.playerManager.addDamageShield(amount)
-            : 0;
+        return this.playerFacade.addDamageShield(amount);
     }
 
     getDamageShield() {
-        return typeof this.playerManager.getDamageShield === 'function'
-            ? this.playerManager.getDamageShield()
-            : 0;
+        return this.playerFacade.getDamageShield();
     }
 
     consumeKey() {
-        return this.playerManager.consumeKey();
+        return this.playerFacade.consumeKey();
     }
 
     getKeys() {
-        return this.playerManager.getKeys();
+        return this.playerFacade.getKeys();
     }
 
     consumeLastDamageReduction() {
-        return typeof this.playerManager.consumeLastDamageReduction === 'function'
-            ? this.playerManager.consumeLastDamageReduction()
-            : 0;
+        return this.playerFacade.consumeLastDamageReduction();
     }
 
     ensureDefaultVariables() {
@@ -345,100 +327,63 @@ class GameState {
     }
 
     damagePlayer(amount = 1) {
-        return this.playerManager.damage(amount);
+        return this.playerFacade.damage(amount);
     }
 
     getLives() {
-        return this.playerManager.getLives();
+        return this.playerFacade.getLives();
     }
 
     getMaxLives() {
-        return typeof this.playerManager.getMaxLives === 'function'
-            ? this.playerManager.getMaxLives()
-            : 0;
+        return this.playerFacade.getMaxLives();
     }
 
     getLevel() {
-        return typeof this.playerManager.getLevel === 'function'
-            ? this.playerManager.getLevel()
-            : 1;
+        return this.playerFacade.getLevel();
     }
 
     healPlayerToFull() {
-        return typeof this.playerManager.healToFull === 'function'
-            ? this.playerManager.healToFull()
-            : this.getLives();
+        return this.playerFacade.healPlayerToFull();
     }
 
     getExperience() {
-        return typeof this.playerManager.getExperience === 'function'
-            ? this.playerManager.getExperience()
-            : 0;
+        return this.playerFacade.getExperience();
     }
 
     getExperienceToNext() {
-        return typeof this.playerManager.getExperienceToNext === 'function'
-            ? this.playerManager.getExperienceToNext()
-            : 0;
+        return this.playerFacade.getExperienceToNext();
     }
 
     addExperience(amount = 0) {
-        return typeof this.playerManager.addExperience === 'function'
-            ? this.playerManager.addExperience(amount)
-            : { leveledUp: false, levelsGained: 0 };
+        return this.playerFacade.addExperience(amount);
     }
 
     handleEnemyDefeated(experienceReward = 0) {
-        return typeof this.playerManager.handleEnemyDefeated === 'function'
-            ? this.playerManager.handleEnemyDefeated(experienceReward)
-            : { leveledUp: false };
+        return this.playerFacade.handleEnemyDefeated(experienceReward);
     }
 
     pauseGame(reason = 'manual') {
-        if (!this.pauseReasons) {
-            this.pauseReasons = new Set();
-        }
-        const label = reason || 'manual';
-        this.pauseReasons.add(label);
-        this.updatePlayingLock();
+        this.lifecycle.pauseGame(reason);
     }
 
     resumeGame(reason = 'manual') {
-        if (!this.pauseReasons) {
-            this.pauseReasons = new Set();
-        }
-        if (reason === null || reason === undefined) {
-            this.pauseReasons.clear();
-        } else {
-            this.pauseReasons.delete(reason || 'manual');
-        }
-        this.updatePlayingLock();
-    }
-
-    updatePlayingLock() {
-        this.playing = !this.pauseReasons || this.pauseReasons.size === 0;
+        this.lifecycle.resumeGame(reason);
     }
 
     setGameOver(active = true, reason = 'defeat') {
-        if (this.state && typeof this.state === 'object') {
-            const activeValue = Boolean(active);
-            if (activeValue) {
-                this.canResetAfterGameOver = false;
-                setTimeout(() => {
-                    this.canResetAfterGameOver = true;
-                }, this.timeToResetAfterGameOver);
-            }
-            this.state.gameOver = activeValue;
-            this.state.gameOverReason = activeValue ? (reason || 'defeat') : null;
-        }
+        this.lifecycle.setGameOver(active, reason);
     }
 
     isGameOver() {
-        return Boolean(this.state?.gameOver);
+        return this.lifecycle.isGameOver();
     }
 
     getGameOverReason() {
-        return this.state?.gameOverReason || 'defeat';
+        return this.lifecycle.getGameOverReason();
+    }
+
+    get canResetAfterGameOver() {
+        return this.screenManager.canResetAfterGameOver;
     }
 }
 
