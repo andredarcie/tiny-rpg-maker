@@ -1,0 +1,294 @@
+class EditorObjectRenderer extends EditorRendererBase {
+    renderObjectCatalog() {
+        const container = this.dom.objectTypes;
+        if (!container) return;
+        container.innerHTML = '';
+
+        const definitions = EditorConstants.OBJECT_DEFINITIONS;
+        if (!Array.isArray(definitions) || !definitions.length) return;
+
+        const selectedType = this.manager.selectedObjectType;
+        const placedObjects = this.gameEngine.getObjectsForRoom(this.state.activeRoomIndex) || [];
+        const placedTypes = new Set(placedObjects.map((object) => object.type));
+
+        definitions.forEach((definition) => {
+            const card = document.createElement('div');
+            card.className = 'object-type-card';
+            card.dataset.type = definition.type;
+            if (definition.type === selectedType) {
+                card.classList.add('selected');
+            }
+            if (placedTypes.has(definition.type)) {
+                card.classList.add('placed');
+            }
+
+            const preview = document.createElement('canvas');
+            preview.width = 48;
+            preview.height = 48;
+            preview.className = 'object-type-preview';
+            this.drawObjectPreview(preview, definition.type);
+
+            const meta = document.createElement('div');
+            meta.className = 'object-type-meta';
+
+            const name = document.createElement('div');
+            name.className = 'object-type-name';
+            name.textContent = this.getObjectLabel(definition.type, definitions);
+
+            const info = document.createElement('div');
+            info.className = 'object-type-info';
+            info.textContent = placedTypes.has(definition.type)
+                ? this.t('objects.info.placed')
+                : this.t('objects.info.available');
+
+            meta.append(name, info);
+            card.append(preview, meta);
+            container.appendChild(card);
+        });
+    }
+
+    renderObjects() {
+        const container = this.dom.objectsList;
+        if (!container) return;
+        container.innerHTML = '';
+
+        const objects = this.gameEngine.getObjectsForRoom(this.state.activeRoomIndex);
+        const runtimeVariables = this.gameEngine.getRuntimeVariables?.() ?? [];
+        const runtimeMap = new Map(runtimeVariables.map((entry) => [entry.id, entry.value]));
+        const definitions = EditorConstants.OBJECT_DEFINITIONS;
+
+        objects.forEach((object) => {
+            const card = document.createElement('div');
+            card.className = 'object-card';
+            card.dataset.type = object.type;
+            card.dataset.roomIndex = String(object.roomIndex);
+
+            const preview = document.createElement('canvas');
+            preview.className = 'object-preview';
+            preview.width = 48;
+            preview.height = 48;
+            this.drawObjectPreview(preview, object.type);
+
+            const body = document.createElement('div');
+            body.className = 'object-body';
+
+            const header = document.createElement('div');
+            header.className = 'object-header';
+
+            const title = document.createElement('h4');
+            title.className = 'object-name';
+            title.textContent = this.getObjectLabel(object.type, definitions);
+            header.appendChild(title);
+
+            const position = document.createElement('span');
+            position.className = 'object-position';
+            position.textContent = `(${object.x}, ${object.y})`;
+            header.appendChild(position);
+
+            body.appendChild(header);
+
+            if (object.type === 'door-variable') {
+                const config = document.createElement('div');
+                config.className = 'object-config';
+
+                const label = document.createElement('label');
+                label.className = 'object-config-label';
+
+                const select = document.createElement('select');
+                select.className = 'object-config-select';
+                this.manager.npcService.populateVariableSelect(select, object.variableId || '');
+                select.addEventListener('change', () => {
+                    this.gameEngine.setObjectVariable('door-variable', object.roomIndex, select.value);
+                    this.renderObjects();
+                    this.service.worldRenderer.renderWorldGrid();
+                    this.manager.updateJSON();
+                    this.manager.history.pushCurrentState();
+                });
+                label.append(`${this.t('objects.switch.variableLabel')} `, select);
+                config.appendChild(label);
+
+                const status = document.createElement('div');
+                status.className = 'object-status';
+                const valueId = select.value || object.variableId;
+                const isOn = Boolean(runtimeMap.get(valueId || ''));
+                status.classList.toggle('is-on', isOn);
+                status.textContent = this.tf('objects.switch.stateLabel', {
+                    state: isOn ? this.t('objects.state.on') : this.t('objects.state.off')
+                });
+                config.appendChild(status);
+                body.appendChild(config);
+            }
+
+            if (object.type === 'switch') {
+                const config = document.createElement('div');
+                config.className = 'object-config';
+
+                const label = document.createElement('label');
+                label.className = 'object-config-label';
+
+                const select = document.createElement('select');
+                select.className = 'object-config-select';
+                this.manager.npcService.populateVariableSelect(select, object.variableId || '');
+                select.addEventListener('change', () => {
+                    this.gameEngine.setObjectVariable('switch', object.roomIndex, select.value);
+                    this.renderObjects();
+                    this.service.worldRenderer.renderWorldGrid();
+                    this.manager.updateJSON();
+                    this.manager.history.pushCurrentState();
+                });
+                label.append(`${this.t('objects.switch.variableLabel')} `, select);
+                config.appendChild(label);
+
+                const status = document.createElement('div');
+                status.className = 'object-status';
+                status.textContent = this.tf('objects.switch.stateLabel', {
+                    state: object.on ? this.t('objects.state.on') : this.t('objects.state.off')
+                });
+                config.appendChild(status);
+
+                body.appendChild(config);
+            }
+
+            if (object.type === 'door' && object.opened) {
+                const badge = document.createElement('div');
+                badge.className = 'object-status';
+                badge.textContent = this.t('objects.status.doorOpened');
+                body.appendChild(badge);
+            }
+
+            if (object.type === 'key' && object.collected) {
+                const badge = document.createElement('div');
+                badge.className = 'object-status';
+                badge.textContent = this.t('objects.status.keyCollected');
+                body.appendChild(badge);
+            }
+
+            if (object.type === 'life-potion' && object.collected) {
+                const badge = document.createElement('div');
+                badge.className = 'object-status';
+                badge.textContent = this.t('objects.status.potionCollected');
+                body.appendChild(badge);
+            }
+
+            if (object.type === 'xp-scroll' && object.collected) {
+                const badge = document.createElement('div');
+                badge.className = 'object-status';
+                badge.textContent = this.t('objects.status.scrollUsed');
+                body.appendChild(badge);
+            }
+
+            if (object.type === 'sword' && object.collected) {
+                const badge = document.createElement('div');
+                badge.className = 'object-status';
+                badge.textContent = this.t('objects.status.swordBroken');
+                body.appendChild(badge);
+            }
+
+            if (object.type === 'player-end') {
+                const config = document.createElement('div');
+                config.className = 'object-config';
+
+                const label = document.createElement('label');
+                label.className = 'object-config-label';
+                label.textContent = this.t('objects.end.textLabel');
+
+                const textarea = document.createElement('textarea');
+                textarea.className = 'object-config-textarea';
+                textarea.rows = 4;
+                const maxLength = typeof StateObjectManager?.PLAYER_END_TEXT_LIMIT === 'number'
+                    ? StateObjectManager.PLAYER_END_TEXT_LIMIT
+                    : 40;
+                textarea.maxLength = maxLength;
+                textarea.placeholder = this.t('objects.end.placeholder');
+                textarea.value = object.endingText || '';
+                textarea.addEventListener('input', () => {
+                    this.manager.objectService?.updatePlayerEndText?.(object.roomIndex, textarea.value);
+                });
+
+                label.appendChild(textarea);
+                config.appendChild(label);
+
+                const hint = document.createElement('div');
+                hint.className = 'object-config-hint';
+                hint.textContent = this.tf('objects.end.hint', { max: maxLength });
+                config.appendChild(hint);
+
+                body.appendChild(config);
+            }
+
+            if (object.type === 'player-end') {
+                const badge = document.createElement('div');
+                badge.className = 'object-status';
+                badge.textContent = this.t('objects.status.gameEnd');
+                body.appendChild(badge);
+            }
+
+            if (object.type !== 'player-start') {
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'object-remove';
+                removeBtn.dataset.type = object.type;
+                removeBtn.dataset.roomIndex = String(object.roomIndex);
+                removeBtn.textContent = this.t('buttons.remove');
+                body.appendChild(removeBtn);
+            } else {
+                const badge = document.createElement('div');
+                badge.className = 'object-status';
+                badge.textContent = this.t('objects.status.startMarker');
+                body.appendChild(badge);
+            }
+
+            card.append(preview, body);
+            container.appendChild(card);
+        });
+    }
+
+    drawObjectPreview(canvas, type) {
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.imageSmoothingEnabled = false;
+        ctx.fillStyle = '#111827';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const renderer = this.gameEngine.renderer;
+        if (!renderer?.drawObjectSprite) return;
+        const step = canvas.width / 8;
+        renderer.drawObjectSprite(ctx, type, 0, 0, step);
+    }
+
+    getObjectLabel(type, definitions) {
+        const def = definitions.find((entry) => entry.type === type);
+        if (def?.nameKey) {
+            return this.t(def.nameKey, def?.name || type);
+        }
+        if (def?.name) return def.name;
+        switch (type) {
+            case 'door':
+                return this.t('objects.label.door');
+            case 'door-variable':
+                return this.t('objects.label.doorVariable');
+            case 'player-start':
+                return this.t('objects.label.playerStart');
+            case 'player-end':
+                return this.t('objects.label.playerEnd');
+            case 'switch':
+                return this.t('objects.label.switch');
+            case 'key':
+                return this.t('objects.label.key');
+            case 'life-potion':
+                return this.t('objects.label.lifePotion');
+            case 'sword':
+                return this.t('objects.label.sword');
+            case 'xp-scroll':
+                return this.t('objects.label.xpScroll');
+            default:
+                return type;
+        }
+    }
+}
+
+if (typeof window !== 'undefined') {
+    window.EditorObjectRenderer = EditorObjectRenderer;
+}
