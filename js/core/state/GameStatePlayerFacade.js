@@ -46,6 +46,10 @@ class GameStatePlayerFacade {
         return this.playerManager.getKeys();
     }
 
+    getMaxKeys() {
+        return this.playerManager.getMaxKeys();
+    }
+
     consumeLastDamageReduction() {
         return typeof this.playerManager.consumeLastDamageReduction === 'function'
             ? this.playerManager.consumeLastDamageReduction()

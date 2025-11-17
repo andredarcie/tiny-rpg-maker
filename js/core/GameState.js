@@ -231,6 +231,10 @@ class GameState {
         return this.playerFacade.getKeys();
     }
 
+    getMaxKeys() {
+        return this.playerFacade.getMaxKeys();
+    }
+
     consumeLastDamageReduction() {
         return this.playerFacade.consumeLastDamageReduction();
     }

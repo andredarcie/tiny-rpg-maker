@@ -6,6 +6,7 @@ class StatePlayerManager {
         this.baseMaxLives = 3;
         this.experienceBase = 20;
         this.experienceGrowth = 1.5;
+        this.maxKeys = 9;
     }
 
     setState(state) {
@@ -54,7 +55,8 @@ class StatePlayerManager {
         const numeric = Number(amount);
         if (!Number.isFinite(numeric)) return this.player.keys;
         const delta = Math.floor(numeric);
-        this.player.keys = Math.max(0, this.player.keys + delta);
+        const nextKeys = Math.max(0, this.player.keys + delta);
+        this.player.keys = Math.min(this.maxKeys, nextKeys);
         return this.player.keys;
     }
 
@@ -67,6 +69,10 @@ class StatePlayerManager {
 
     getKeys() {
         return this.player?.keys ?? 0;
+    }
+
+    getMaxKeys() {
+        return this.maxKeys;
     }
 
     damage(amount = 1) {

@@ -5,15 +5,18 @@ class Renderer {
     constructor(canvas, gameState, tileManager, npcManager, gameEngine = null) {
         this.canvas = canvas;
         const tilePixelSize = Math.max(8, Math.floor(this.canvas.width / 8));
-        this.hudBarHeight = Math.max(24, Math.round(tilePixelSize * 1.5));
+        this.hudBarHeight = Math.max(28, Math.round(tilePixelSize * 1.75));
+        this.inventoryBarHeight = Math.max(40, Math.round(tilePixelSize * 2));
+        this.totalHudHeight = this.hudBarHeight + this.inventoryBarHeight;
         this.gameplayHeight = tilePixelSize * 8;
-        const desiredHeight = this.gameplayHeight + this.hudBarHeight;
+        const desiredHeight = this.gameplayHeight + this.totalHudHeight;
         if (this.canvas.height !== desiredHeight) {
             this.canvas.height = desiredHeight;
         }
         this.ctx = canvas.getContext("2d");
         this.ctx.imageSmoothingEnabled = false;
         this.gameplayOffsetY = this.hudBarHeight;
+        this.inventoryOffsetY = this.hudBarHeight + this.gameplayHeight;
         this.gameplayCanvasBounds = {
             width: this.canvas.width,
             height: this.gameplayHeight
@@ -85,16 +88,26 @@ class Renderer {
         }
         ctx.restore();
 
+        const topHudArea = {
+            width: this.canvas.width,
+            height: this.hudBarHeight
+        };
+        const bottomHudArea = {
+            x: 0,
+            y: this.inventoryOffsetY,
+            width: this.canvas.width,
+            height: this.inventoryBarHeight
+        };
+
         if (introActive) {
             ctx.save();
             ctx.fillStyle = '#000000';
-            ctx.fillRect(0, 0, this.canvas.width, this.hudBarHeight);
+            ctx.fillRect(0, 0, topHudArea.width, topHudArea.height);
+            ctx.fillRect(bottomHudArea.x, bottomHudArea.y, bottomHudArea.width, bottomHudArea.height);
             ctx.restore();
         } else {
-            this.hudRenderer.drawHUD(ctx, {
-                width: this.canvas.width,
-                height: this.hudBarHeight
-            });
+            this.hudRenderer.drawHUD(ctx, topHudArea);
+            this.hudRenderer.drawInventory(ctx, bottomHudArea);
         }
 
         if (typeof this.gameState.isGameOver === 'function' && this.gameState.isGameOver()) {

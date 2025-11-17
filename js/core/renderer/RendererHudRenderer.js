@@ -9,6 +9,7 @@ class RendererHudRenderer {
         this.viewportOffsetY = 0;
         this.canvasHelper = entityRenderer.canvasHelper;
         this.healthIconDefinitions = {};
+        this.objectSprites = this.entityRenderer?.spriteFactory?.getObjectSprites?.() || {};
         this.setupHealthIcons();
     }
 
@@ -64,6 +65,73 @@ class RendererHudRenderer {
 
         this.drawMiniMap(ctx, miniMapX, miniMapY, mapCellSize, miniMapSize);
         this.drawXpBar(ctx,miniMapX-30,miniMapY+miniMapSize)
+
+        ctx.restore();
+    }
+
+    drawInventory(ctx, area = {}) {
+        if (!ctx) return;
+        const width = area.width ?? ctx.canvas?.width ?? 128;
+        const height = area.height ?? 16;
+        const padding = area.padding ?? this.padding;
+        const offsetX = area.x ?? 0;
+        const offsetY = area.y ?? 0;
+        const gap = Number.isFinite(area.gap) ? Math.max(0, area.gap) : 2;
+        const maxSlots = Math.min(9, this.gameState.getMaxKeys());
+        let keys = typeof this.gameState.getKeys === 'function'
+            ? this.gameState.getKeys()
+            : 0;
+        keys = Math.max(0, Math.min(maxSlots, keys));
+        const hasSword = typeof this.gameState.getDamageShield === 'function'
+            ? this.gameState.getDamageShield() > 0
+            : false;
+
+        ctx.save();
+        ctx.translate(offsetX, offsetY);
+        ctx.fillStyle = this.backgroundColor;
+        ctx.fillRect(0, 0, width, height);
+
+        if (typeof this.gameState.isGameOver === 'function' && this.gameState.isGameOver()) {
+            ctx.restore();
+            return;
+        }
+
+        const baseSize = this.canvasHelper.getTilePixelSize?.() ?? 16;
+        const availableHeight = Math.max(0, height - padding * 2);
+        const maxIconSize = Math.max(6, Math.min(availableHeight, baseSize / 2));
+        const fittedIconSize = Math.min(
+            maxIconSize,
+            Math.floor((availableHeight + gap) / 3 - gap)
+        );
+        const iconSize = Math.max(6, fittedIconSize);
+        const iconsStride = iconSize + gap;
+        const iconsPerRow = 3;
+        const rows = 3;
+        const gridWidth = iconsPerRow * iconsStride - gap;
+        const gridHeight = rows * iconsStride - gap;
+        const startX = padding;
+        const startY = padding + Math.max(0, (height - padding * 2 - gridHeight) / 2);
+        const keySprite = this.objectSprites?.key || null;
+        if (keySprite && keys > 0) {
+            const totalKeys = Math.min(keys, maxSlots);
+            for (let i = 0; i < totalKeys; i++) {
+                const row = Math.floor(i / iconsPerRow);
+                const col = i % iconsPerRow;
+                const px = startX + col * iconsStride;
+                const py = startY + row * iconsStride;
+                const step = iconSize / 8;
+                this.canvasHelper.drawSprite(ctx, keySprite, px, py, step);
+            }
+        }
+
+        const swordSprite = this.objectSprites?.sword || null;
+        if (hasSword && swordSprite) {
+            const swordSize = Math.min(height - padding * 2, Math.max(iconSize, 8));
+            const swordX = width - padding - swordSize;
+            const swordY = Math.round(height / 2 - swordSize / 2);
+            const step = swordSize / 8;
+            this.canvasHelper.drawSprite(ctx, swordSprite, swordX, swordY, step);
+        }
 
         ctx.restore();
     }
