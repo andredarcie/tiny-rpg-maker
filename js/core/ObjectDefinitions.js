@@ -1,10 +1,24 @@
+const OBJECT_TYPES = {
+    PLAYER_START: 'player-start',
+    PLAYER_END: 'player-end',
+    SWITCH: 'switch',
+    DOOR: 'door',
+    DOOR_VARIABLE: 'door-variable',
+    KEY: 'key',
+    LIFE_POTION: 'life-potion',
+    XP_SCROLL: 'xp-scroll',
+    SWORD: 'sword',
+    SWORD_BRONZE: 'sword-bronze',
+    SWORD_WOOD: 'sword-wood'
+};
+
 /**
  * ObjectDefinitions encapsula os objetos interativos disponiveis no editor.
  */
 class ObjectDefinitions {
     static OBJECT_DEFINITIONS = [
         {
-            type: 'player-start',
+            type: OBJECT_TYPES.PLAYER_START,
             id: 'object-player-start',
             name: 'Inicio do Jogador',
             nameKey: 'objects.label.playerStart',
@@ -20,7 +34,7 @@ class ObjectDefinitions {
             ]
         },
         {
-            type: 'player-end',
+            type: OBJECT_TYPES.PLAYER_END,
             id: 'object-player-end',
             name: 'Fim do Jogo',
             nameKey: 'objects.label.playerEnd',
@@ -36,7 +50,7 @@ class ObjectDefinitions {
             ]
         },
         {
-            type: 'switch',
+            type: OBJECT_TYPES.SWITCH,
             id: 'object-switch',
             name: 'Alavanca',
             nameKey: 'objects.label.switch',
@@ -62,7 +76,7 @@ class ObjectDefinitions {
             ]
         },
         {
-            type: 'key',
+            type: OBJECT_TYPES.KEY,
             id: 'object-key',
             name: 'Chave',
             nameKey: 'objects.label.key',
@@ -78,7 +92,7 @@ class ObjectDefinitions {
             ]
         },
         {
-            type: 'door',
+            type: OBJECT_TYPES.DOOR,
             id: 'object-door',
             name: 'Porta',
             nameKey: 'objects.label.door',
@@ -94,7 +108,7 @@ class ObjectDefinitions {
             ]
         },
         {
-            type: 'door-variable',
+            type: OBJECT_TYPES.DOOR_VARIABLE,
             id: 'object-door-variable',
             name: 'Porta Magica',
             nameKey: 'objects.label.doorVariable',
@@ -110,7 +124,7 @@ class ObjectDefinitions {
             ]
         },
         {
-            type: 'life-potion',
+            type: OBJECT_TYPES.LIFE_POTION,
             id: 'object-life-potion',
             name: 'Pocao de Vida',
             nameKey: 'objects.label.lifePotion',
@@ -126,7 +140,7 @@ class ObjectDefinitions {
             ]
         },
         {
-            type: 'xp-scroll',
+            type: OBJECT_TYPES.XP_SCROLL,
             id: 'object-xp-scroll',
             name: 'Pergaminho de XP',
             nameKey: 'objects.label.xpScroll',
@@ -142,7 +156,7 @@ class ObjectDefinitions {
             ]
         },
         {
-            type: 'sword',
+            type: OBJECT_TYPES.SWORD,
             id: 'object-sword',
             name: 'Espada',
             nameKey: 'objects.label.sword',
@@ -156,11 +170,47 @@ class ObjectDefinitions {
                 [ null, null, null, null,  1,  1, null, null ],
                 [ null, null, null,  1,  1, null,  1, null ]
             ]
+        },
+        {
+            type: OBJECT_TYPES.SWORD_BRONZE,
+            id: 'object-sword-bronze',
+            name: 'Espada de Bronze',
+            nameKey: 'objects.label.swordBronze',
+            sprite: [
+                [ null, null, null, null, null, null, null, null ],
+                [  9,  9, null, null, null, null, null, null ],
+                [  9, 10,  9, null, null, null, null, null ],
+                [ null,  9,  9, 10, null, null, null, null ],
+                [ null, null,  9,  9, 10, null,  1, null ],
+                [ null, null, null,  9,  9,  1,  1, null ],
+                [ null, null, null, null,  1,  1, null, null ],
+                [ null, null, null,  1,  1, null,  1, null ]
+            ]
+        },
+        {
+            type: OBJECT_TYPES.SWORD_WOOD,
+            id: 'object-sword-wood',
+            name: 'Espada de Madeira',
+            nameKey: 'objects.label.swordWood',
+            sprite: [
+                [ null, null, null, null, null, null, null, null ],
+                [  4,  4, null, null, null, null, null, null ],
+                [  4,  5,  4, null, null, null, null, null ],
+                [ null,  4,  4,  5, null, null, null, null ],
+                [ null, null,  4,  4,  5, null,  1, null ],
+                [ null, null, null,  4,  9,  1,  1, null ],
+                [ null, null, null, null,  1,  1, null, null ],
+                [ null, null, null,  1,  1, null,  1, null ]
+            ]
         }
     ];
 
     static get definitions() {
         return this.OBJECT_DEFINITIONS;
+    }
+
+    static get TYPES() {
+        return OBJECT_TYPES;
     }
 
     static getObjectDefinition(type) {
@@ -169,3 +219,4 @@ class ObjectDefinitions {
 }
 
 window.ObjectDefinitions = ObjectDefinitions;
+window.ObjectTypes = window.ObjectTypes || OBJECT_TYPES;

@@ -109,7 +109,6 @@ class EditorObjectService {
     }
 
     updatePlayerEndText(roomIndex, text) {
-        if (typeof this.gameEngine?.setPlayerEndText !== 'function') return;
         this.gameEngine.setPlayerEndText(roomIndex, text);
         this.manager.updateJSON();
         this.schedulePlayerEndTextHistory();
@@ -131,7 +130,20 @@ class EditorObjectService {
             const normalized = definitions.find((entry) => entry.type === type)?.type || null;
             if (normalized) return normalized;
         }
-        const fallbackTypes = new Set(['player-start', 'player-end', 'switch', 'door', 'door-variable', 'key', 'life-potion', 'sword', 'xp-scroll']);
+        const OT = window.ObjectTypes;
+        const fallbackTypes = new Set([
+            OT.PLAYER_START,
+            OT.PLAYER_END,
+            OT.SWITCH,
+            OT.DOOR,
+            OT.DOOR_VARIABLE,
+            OT.KEY,
+            OT.LIFE_POTION,
+            OT.SWORD,
+            OT.SWORD_BRONZE,
+            OT.SWORD_WOOD,
+            OT.XP_SCROLL
+        ].filter(Boolean));
         return fallbackTypes.has(type) ? type : null;
     }
 }

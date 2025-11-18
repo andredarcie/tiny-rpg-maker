@@ -18,11 +18,12 @@ class DialogManager {
     }
 
     completeDialog() {
+        const OT = ObjectTypes;
         if (this.pendingDialogAction?.setVariableId &&
             this.pendingDialogAction.rewardAllowed !== false) {
             const [_, openedDoor] = this.gameState.setVariableValue?.(this.pendingDialogAction.setVariableId, true);
             if (openedDoor) {
-                this.renderer.setIconOverPlayer('door-variable');
+                this.renderer.setIconOverPlayer(OT.DOOR_VARIABLE);
             }
         }
         this.pendingDialogAction = null;

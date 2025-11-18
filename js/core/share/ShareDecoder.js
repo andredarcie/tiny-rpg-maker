@@ -1,5 +1,6 @@
 class ShareDecoder {
     static decodeShareCode(code) {
+        const OT = ObjectTypes;
         if (!code) return null;
         const segments = code.split('.');
         const payload = {};
@@ -53,6 +54,12 @@ class ShareDecoder {
             : [];
         const swordPositions = version >= ShareConstants.SWORD_VERSION
             ? SharePositionCodec.decodePositions(payload.a || '')
+            : [];
+        const swordBronzePositions = version >= ShareConstants.TIERED_SWORD_VERSION
+            ? SharePositionCodec.decodePositions(payload.B || '')
+            : [];
+        const swordWoodPositions = version >= ShareConstants.TIERED_SWORD_VERSION
+            ? SharePositionCodec.decodePositions(payload.W || '')
             : [];
         const playerEndPositions = version >= ShareConstants.PLAYER_END_VERSION
             ? SharePositionCodec.decodePositions(payload.z || '')
@@ -159,19 +166,21 @@ class ShareDecoder {
 
         const playerEndEntries = ShareDataNormalizer.buildObjectEntries(
             playerEndPositions,
-            'player-end',
+            OT.PLAYER_END,
             { endingTexts: playerEndMessages }
         );
 
         const objects = [
-            ...ShareDataNormalizer.buildObjectEntries(doorPositions, 'door'),
-            ...ShareDataNormalizer.buildObjectEntries(keyPositions, 'key'),
-            ...ShareDataNormalizer.buildObjectEntries(magicDoorPositions, 'door-variable', { variableNibbles: magicDoorVariableNibbles }),
-            ...ShareDataNormalizer.buildObjectEntries(lifePotionPositions, 'life-potion'),
-            ...ShareDataNormalizer.buildObjectEntries(xpScrollPositions, 'xp-scroll'),
-            ...ShareDataNormalizer.buildObjectEntries(swordPositions, 'sword'),
+            ...ShareDataNormalizer.buildObjectEntries(doorPositions, OT.DOOR),
+            ...ShareDataNormalizer.buildObjectEntries(keyPositions, OT.KEY),
+            ...ShareDataNormalizer.buildObjectEntries(magicDoorPositions, OT.DOOR_VARIABLE, { variableNibbles: magicDoorVariableNibbles }),
+            ...ShareDataNormalizer.buildObjectEntries(lifePotionPositions, OT.LIFE_POTION),
+            ...ShareDataNormalizer.buildObjectEntries(xpScrollPositions, OT.XP_SCROLL),
+            ...ShareDataNormalizer.buildObjectEntries(swordPositions, OT.SWORD),
+            ...ShareDataNormalizer.buildObjectEntries(swordBronzePositions, OT.SWORD_BRONZE),
+            ...ShareDataNormalizer.buildObjectEntries(swordWoodPositions, OT.SWORD_WOOD),
             ...playerEndEntries,
-            ...ShareDataNormalizer.buildObjectEntries(switchPositions, 'switch', { variableNibbles: switchVariableNibbles, stateBits: switchStateNibbles })
+            ...ShareDataNormalizer.buildObjectEntries(switchPositions, OT.SWITCH, { variableNibbles: switchVariableNibbles, stateBits: switchStateNibbles })
         ];
 
         return {

@@ -21,21 +21,23 @@ class GameStatePlayerFacade {
     }
 
     addLife(amount = 1) {
-        return typeof this.playerManager.gainLives === 'function'
-            ? this.playerManager.gainLives(amount)
-            : this.playerManager.getLives();
+        return this.playerManager.gainLives(amount);
     }
 
-    addDamageShield(amount = 1) {
-        return typeof this.playerManager.addDamageShield === 'function'
-            ? this.playerManager.addDamageShield(amount)
-            : 0;
+    addDamageShield(amount = 1, type = null) {
+        return this.playerManager.addDamageShield(amount, type);
     }
 
     getDamageShield() {
-        return typeof this.playerManager.getDamageShield === 'function'
-            ? this.playerManager.getDamageShield()
-            : 0;
+        return this.playerManager.getDamageShield();
+    }
+
+    getDamageShieldMax() {
+        return this.playerManager.getDamageShieldMax();
+    }
+
+    getSwordType() {
+        return this.playerManager.getSwordType();
     }
 
     consumeKey() {
@@ -51,9 +53,7 @@ class GameStatePlayerFacade {
     }
 
     consumeLastDamageReduction() {
-        return typeof this.playerManager.consumeLastDamageReduction === 'function'
-            ? this.playerManager.consumeLastDamageReduction()
-            : 0;
+        return this.playerManager.consumeLastDamageReduction();
     }
 
     damage(amount = 0) {
@@ -65,45 +65,31 @@ class GameStatePlayerFacade {
     }
 
     getMaxLives() {
-        return typeof this.playerManager.getMaxLives === 'function'
-            ? this.playerManager.getMaxLives()
-            : this.playerManager.getLives();
+        return this.playerManager.getMaxLives();
     }
 
     getLevel() {
-        return typeof this.playerManager.getLevel === 'function'
-            ? this.playerManager.getLevel()
-            : 1;
+        return this.playerManager.getLevel();
     }
 
     healPlayerToFull() {
-        return typeof this.playerManager.healToFull === 'function'
-            ? this.playerManager.healToFull()
-            : this.playerManager.getLives();
+        return this.playerManager.healToFull();
     }
 
     getExperience() {
-        return typeof this.playerManager.getExperience === 'function'
-            ? this.playerManager.getExperience()
-            : 0;
+        return this.playerManager.getExperience();
     }
 
     getExperienceToNext() {
-        return typeof this.playerManager.getExperienceToNext === 'function'
-            ? this.playerManager.getExperienceToNext()
-            : 0;
+        return this.playerManager.getExperienceToNext();
     }
 
     addExperience(amount = 0) {
-        return typeof this.playerManager.addExperience === 'function'
-            ? this.playerManager.addExperience(amount)
-            : { leveledUp: false, levelsGained: 0 };
+        return this.playerManager.addExperience(amount);
     }
 
     handleEnemyDefeated(experienceReward = 0) {
-        return typeof this.playerManager.handleEnemyDefeated === 'function'
-            ? this.playerManager.handleEnemyDefeated(experienceReward)
-            : { leveledUp: false };
+        return this.playerManager.handleEnemyDefeated(experienceReward);
     }
 }
 

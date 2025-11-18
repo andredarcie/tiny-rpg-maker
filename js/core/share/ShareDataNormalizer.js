@@ -1,4 +1,7 @@
 class ShareDataNormalizer {
+    static get Types() {
+        return typeof ObjectTypes !== 'undefined' ? ObjectTypes : {};
+    }
     static normalizeStart(start) {
         return {
             x: ShareMath.clamp(Number(start?.x), 0, ShareConstants.MATRIX_SIZE - 1, 1),
@@ -122,7 +125,7 @@ class ShareDataNormalizer {
         const fallbackNibble = ShareVariableCodec.variableIdToNibble(ShareVariableCodec.getFirstVariableId()) || 1;
         const result = [];
         for (const entry of list) {
-            if (entry?.type !== 'door-variable') continue;
+            if (entry?.type !== ShareDataNormalizer.Types.DOOR_VARIABLE) continue;
             const x = ShareMath.clamp(Number(entry?.x), 0, ShareConstants.MATRIX_SIZE - 1, 0);
             const y = ShareMath.clamp(Number(entry?.y), 0, ShareConstants.MATRIX_SIZE - 1, 0);
             if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
@@ -145,7 +148,7 @@ class ShareDataNormalizer {
         const fallbackNibble = ShareVariableCodec.variableIdToNibble(ShareVariableCodec.getFirstVariableId()) || 1;
         const result = [];
         for (const entry of list) {
-            if (entry?.type !== 'switch') continue;
+            if (entry?.type !== ShareDataNormalizer.Types.SWITCH) continue;
             const x = ShareMath.clamp(Number(entry?.x), 0, ShareConstants.MATRIX_SIZE - 1, 0);
             const y = ShareMath.clamp(Number(entry?.y), 0, ShareConstants.MATRIX_SIZE - 1, 0);
             if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
@@ -179,26 +182,29 @@ class ShareDataNormalizer {
                 x,
                 y
             };
-            if (type === 'key') {
+            if (type === ShareDataNormalizer.Types.KEY) {
                 entry.collected = false;
             }
-            if (type === 'life-potion') {
+            if (type === ShareDataNormalizer.Types.LIFE_POTION) {
                 entry.collected = false;
             }
-            if (type === 'xp-scroll') {
+            if (type === ShareDataNormalizer.Types.XP_SCROLL) {
                 entry.collected = false;
             }
-            if (type === 'door') {
+            if (type === ShareDataNormalizer.Types.SWORD || type === ShareDataNormalizer.Types.SWORD_BRONZE || type === ShareDataNormalizer.Types.SWORD_WOOD) {
+                entry.collected = false;
+            }
+            if (type === ShareDataNormalizer.Types.DOOR) {
                 entry.opened = false;
             }
-            if (type === 'door-variable') {
+            if (type === ShareDataNormalizer.Types.DOOR_VARIABLE) {
                 const nibble = variableNibbles[index] ?? ShareVariableCodec.variableIdToNibble(fallbackVariableId);
                 const variableId = ShareVariableCodec.nibbleToVariableId(nibble) || fallbackVariableId;
                 if (variableId) {
                     entry.variableId = variableId;
                 }
             }
-            if (type === 'switch') {
+            if (type === ShareDataNormalizer.Types.SWITCH) {
                 const nibble = variableNibbles[index] ?? ShareVariableCodec.variableIdToNibble(fallbackVariableId);
                 const variableId = ShareVariableCodec.nibbleToVariableId(nibble) || fallbackVariableId;
                 if (variableId) {
@@ -207,7 +213,7 @@ class ShareDataNormalizer {
                 const state = Array.isArray(options.stateBits) ? options.stateBits[index] : null;
                 entry.on = Boolean(state);
             }
-            if (type === 'player-end') {
+            if (type === ShareDataNormalizer.Types.PLAYER_END) {
                 const endingText = ShareDataNormalizer.normalizeEndingTextValue(endingTexts[index] ?? '');
                 if (endingText) {
                     entry.endingText = endingText;
@@ -236,7 +242,7 @@ class ShareDataNormalizer {
         const entries = [];
         const seenRooms = new Set();
         for (const object of objects) {
-            if (object?.type !== 'player-end') continue;
+            if (object?.type !== ShareDataNormalizer.Types.PLAYER_END) continue;
             const roomIndex = ShareMath.clampRoomIndex(object?.roomIndex);
             if (seenRooms.has(roomIndex)) continue;
             seenRooms.add(roomIndex);

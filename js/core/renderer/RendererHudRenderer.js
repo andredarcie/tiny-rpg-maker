@@ -82,9 +82,13 @@ class RendererHudRenderer {
             ? this.gameState.getKeys()
             : 0;
         keys = Math.max(0, Math.min(maxSlots, keys));
-        const hasSword = typeof this.gameState.getDamageShield === 'function'
-            ? this.gameState.getDamageShield() > 0
-            : false;
+        const swordShield = typeof this.gameState.getDamageShield === 'function'
+            ? Math.max(0, this.gameState.getDamageShield())
+            : 0;
+        const swordShieldMax = typeof this.gameState.getDamageShieldMax === 'function'
+            ? Math.max(0, this.gameState.getDamageShieldMax())
+            : swordShield;
+        const swordType = this.gameState.getSwordType?.() || null;
 
         ctx.save();
         ctx.translate(offsetX, offsetY);
@@ -111,7 +115,7 @@ class RendererHudRenderer {
         const gridHeight = rows * iconsStride - gap;
         const startX = padding;
         const startY = padding + Math.max(0, (height - padding * 2 - gridHeight) / 2);
-        const keySprite = this.objectSprites?.key || null;
+        const keySprite = this.objectSprites?.[ObjectTypes.KEY] || null;
         if (keySprite && keys > 0) {
             const totalKeys = Math.min(keys, maxSlots);
             for (let i = 0; i < totalKeys; i++) {
@@ -124,16 +128,29 @@ class RendererHudRenderer {
             }
         }
 
-        const swordSprite = this.objectSprites?.sword || null;
-        if (hasSword && swordSprite) {
-            const swordSize = Math.min(height - padding * 2, Math.max(iconSize, 8));
+        const swordSprite = this.getSwordHudSprite(swordType);
+        if (swordShield > 0 && swordSprite) {
+            const tileSize = this.canvasHelper.getTilePixelSize?.() ?? 16;
+            const swordSize = tileSize;
             const swordX = width - padding - swordSize;
-            const swordY = Math.round(height / 2 - swordSize / 2);
+            const swordY = padding + Math.max(0, Math.round((height - padding * 2 - swordSize) / 2));
             const step = swordSize / 8;
+            const alpha = swordShieldMax > 0 ? Math.max(0.25, Math.min(1, swordShield / swordShieldMax)) : 1;
+            ctx.save();
+            ctx.globalAlpha = alpha;
             this.canvasHelper.drawSprite(ctx, swordSprite, swordX, swordY, step);
+            ctx.restore();
         }
 
         ctx.restore();
+    }
+
+    getSwordHudSprite(swordType) {
+        const sprites = this.objectSprites || {};
+        if (swordType && sprites[swordType]) {
+            return sprites[swordType];
+        }
+        return null;
     }
 
     drawHealth(ctx, options = {}) {

@@ -1,17 +1,17 @@
 const getMovementText = (key, fallback = '') => {
     if (typeof TextResources !== 'undefined' && typeof TextResources.get === 'function') {
         const value = TextResources.get(key, fallback);
-        return value || fallback || key || '';
+        return value || fallback || '';
     }
-    return fallback || key || '';
+    return fallback || '';
 };
 
 const formatMovementText = (key, params = {}, fallback = '') => {
     if (typeof TextResources !== 'undefined' && typeof TextResources.format === 'function') {
         const value = TextResources.format(key, params, fallback);
-        return value || fallback || key || '';
+        return value || fallback || '';
     }
-    return fallback || key || '';
+    return fallback || '';
 };
 
 class MovementManager {
@@ -117,8 +117,9 @@ class MovementManager {
             return;
         }
 
+        const OT = ObjectTypes;
         const objectAtTarget = this.gameState.getObjectAt?.(targetRoomIndex, targetX, targetY) ?? null;
-        if (objectAtTarget?.type === 'door-variable') {
+        if (objectAtTarget?.type === OT.DOOR_VARIABLE) {
             const variableId = objectAtTarget.variableId;
             const doorOpen = variableId ? this.gameState.isVariableOn(variableId) : false;
             if (!doorOpen) {
@@ -127,7 +128,7 @@ class MovementManager {
                 return;
             }
         }
-        if (objectAtTarget?.type === 'door' && !objectAtTarget.opened) {
+        if (objectAtTarget?.type === OT.DOOR && !objectAtTarget.opened) {
             const consumeKey = typeof this.gameState.consumeKey === 'function'
                 ? this.gameState.consumeKey()
                 : false;

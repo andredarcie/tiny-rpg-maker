@@ -1,10 +1,19 @@
 const getEnemyLocaleText = (key, fallback = '') => {
     if (typeof TextResources !== 'undefined' && typeof TextResources.get === 'function') {
         const value = TextResources.get(key, fallback);
-        return value || fallback || key || '';
+        return value || fallback || '';
     }
-    return fallback || key || '';
+    return fallback || '';
 };
+
+const formatEnemyLocaleText = (key, params = {}, fallback = '') => {
+    if (typeof TextResources !== 'undefined' && typeof TextResources.format === 'function') {
+        const value = TextResources.format(key, params, fallback);
+        return value || fallback || '';
+    }
+    return fallback || '';
+};
+
 
 class EnemyManager {
     constructor(gameState, renderer, tileManager, options = {}) {
@@ -117,8 +126,8 @@ class EnemyManager {
             if (reduction > 0) {
                 const indicator = this.renderer?.showCombatIndicator;
                 const text = reduction >= damage
-                    ? 'Ataque bloqueado!'
-                    : `Bloqueado -${reduction}`;
+                    ? getEnemyLocaleText('combat.block.full', '')
+                    : formatEnemyLocaleText('combat.block.partial', { value: reduction }, '');
                 if (typeof indicator === 'function') {
                     indicator.call(this.renderer, text, { duration: 700 });
                 }
@@ -130,22 +139,20 @@ class EnemyManager {
         }
 
         const experienceReward = this.getExperienceReward(enemy.type);
-        const defeatResult = typeof this.gameState.handleEnemyDefeated === 'function'
-            ? this.gameState.handleEnemyDefeated(experienceReward)
-            : typeof this.gameState.addExperience === 'function'
-                ? this.gameState.addExperience(experienceReward)
-                : null;
-        if (defeatResult?.leveledUp) {
-            if (this.dialogManager?.showDialog) {
-                const finalLevel = Number.isFinite(defeatResult.level)
-                    ? Math.max(1, Math.floor(defeatResult.level))
-                    : null;
-                const message = finalLevel ? `Level Up! Nivel ${finalLevel}` : 'Level Up!';
-                this.dialogManager.showDialog(message, {
-                    pauseGame: true,
-                    resumePlayingOnClose: true,
-                    pauseReason: 'level-up'
-                });
+        const defeatResult = this.gameState.handleEnemyDefeated(experienceReward);
+            if (defeatResult?.leveledUp) {
+                if (this.dialogManager?.showDialog) {
+                    const finalLevel = Number.isFinite(defeatResult.level)
+                        ? Math.max(1, Math.floor(defeatResult.level))
+                        : null;
+                    const message = finalLevel
+                        ? formatEnemyLocaleText('player.levelUp.value', { value: finalLevel }, '')
+                        : getEnemyLocaleText('player.levelUp', '');
+                    this.dialogManager.showDialog(message, {
+                        pauseGame: true,
+                        resumePlayingOnClose: true,
+                        pauseReason: 'level-up'
+                    });
             }
         }
 
@@ -241,10 +248,11 @@ class EnemyManager {
     }
 
     hasBlockingObject(roomIndex, x, y) {
+        const OT = ObjectTypes;
         const blockingObject = this.gameState.getObjectAt?.(roomIndex, x, y) ?? null;
         if (!blockingObject) return false;
-        if (blockingObject.type === 'door' && !blockingObject.opened) return true;
-        if (blockingObject.type === 'door-variable') {
+        if (blockingObject.type === OT.DOOR && !blockingObject.opened) return true;
+        if (blockingObject.type === OT.DOOR_VARIABLE) {
             const isOpen = blockingObject.variableId
                 ? this.gameState.isVariableOn(blockingObject.variableId)
                 : false;

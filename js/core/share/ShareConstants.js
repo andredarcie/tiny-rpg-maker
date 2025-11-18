@@ -17,9 +17,10 @@ class ShareConstants {
     static get VERSION_16() { return 16; }
     static get VERSION_17() { return 17; }
     static get VERSION_18() { return 18; }
+    static get VERSION_19() { return 19; }
 
     static get VERSION() {
-        return ShareConstants.VERSION_18;
+        return ShareConstants.VERSION_19;
     }
 
     static get LEGACY_VERSION() {
@@ -88,6 +89,10 @@ class ShareConstants {
 
     static get PLAYER_END_TEXT_ARRAY_VERSION() {
         return ShareConstants.VERSION_18;
+    }
+
+    static get TIERED_SWORD_VERSION() {
+        return ShareConstants.VERSION_19;
     }
 
     static get MATRIX_SIZE() {
@@ -183,7 +188,8 @@ class ShareConstants {
                 ShareConstants.VERSION_15,
                 ShareConstants.VERSION_16,
                 ShareConstants.VERSION_17,
-                ShareConstants.VERSION
+                ShareConstants.VERSION_18,
+                ShareConstants.VERSION_19
             ]);
         }
         return this._supportedVersions;

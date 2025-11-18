@@ -18,23 +18,24 @@ class RendererEntityRenderer {
         const step = tileSize / 8;
         const objects = Array.isArray(game.objects) ? game.objects : [];
         const objectSprites = this.spriteFactory.getObjectSprites();
+        const OT = ObjectTypes;
 
         for (const object of objects) {
             if (object.roomIndex !== player.roomIndex) continue;
-            if (object.type === 'player-start') continue;
-            if (object.type === 'key' && object.collected) continue;
-            if (object.type === 'life-potion' && object.collected) continue;
-            if (object.type === 'xp-scroll' && object.collected) continue;
-            if (object.type === 'sword' && object.collected) continue;
-            if (object.type === 'door' && object.opened) continue;
-            if (object.type === 'door-variable') {
+            if (object.type === OT.PLAYER_START) continue;
+            if (object.type === OT.KEY && object.collected) continue;
+            if (object.type === OT.LIFE_POTION && object.collected) continue;
+            if (object.type === OT.XP_SCROLL && object.collected) continue;
+            if ((object.type === OT.SWORD || object.type === OT.SWORD_BRONZE || object.type === OT.SWORD_WOOD) && object.collected) continue;
+            if (object.type === OT.DOOR && object.opened) continue;
+            if (object.type === OT.DOOR_VARIABLE) {
                 const isOpen = object.variableId
                     ? this.gameState.isVariableOn?.(object.variableId)
                     : false;
                 if (isOpen) continue;
             }
             let sprite = objectSprites?.[object.type];
-            if (object.type === 'switch' && object.on) {
+            if (object.type === OT.SWITCH && object.on) {
                 sprite = objectSprites?.[`${object.type}--on`] || sprite;
             }
             if (!sprite) continue;

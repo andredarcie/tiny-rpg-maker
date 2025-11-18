@@ -2,6 +2,9 @@ class EditorConstants {
     static get OBJECT_DEFINITIONS() {
         if (!this._objectDefinitions) {
             if (typeof window !== 'undefined' && window.ObjectDefinitions) {
+                if (!window.ObjectTypes && window.ObjectDefinitions.TYPES) {
+                    window.ObjectTypes = window.ObjectDefinitions.TYPES;
+                }
                 this._objectDefinitions =
                     window.ObjectDefinitions.definitions ||
                     window.ObjectDefinitions.OBJECT_DEFINITIONS ||
@@ -29,7 +32,20 @@ class EditorConstants {
     }
 
     static get OBJECT_TYPE_ORDER() {
-        return ['player-start', 'player-end', 'switch', 'door', 'door-variable', 'key', 'life-potion', 'sword', 'xp-scroll'];
+        const OT = window.ObjectTypes;
+        return [
+            OT.PLAYER_START,
+            OT.PLAYER_END,
+            OT.SWITCH,
+            OT.DOOR,
+            OT.DOOR_VARIABLE,
+            OT.KEY,
+            OT.LIFE_POTION,
+            OT.SWORD,
+            OT.SWORD_BRONZE,
+            OT.SWORD_WOOD,
+            OT.XP_SCROLL
+        ].filter(Boolean);
     }
 }
 

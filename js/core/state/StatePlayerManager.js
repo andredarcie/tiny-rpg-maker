@@ -47,6 +47,8 @@ class StatePlayerManager {
         this.player.keys = 0;
         this.player.experience = 0;
         this.player.damageShield = 0;
+        this.player.damageShieldMax = 0;
+        this.player.swordType = null;
         this.player.lastDamageReduction = 0;
     }
 
@@ -83,24 +85,40 @@ class StatePlayerManager {
         const reduction = Math.min(shield, delta);
         const effective = Math.max(0, delta - reduction);
         this.player.damageShield = Math.max(0, shield - reduction);
+        if (this.player.damageShield === 0) {
+            this.player.damageShieldMax = 0;
+            this.player.swordType = null;
+        }
         this.player.lastDamageReduction = reduction;
         this.player.currentLives = Math.max(0, this.player.currentLives - effective);
         this.player.lives = this.player.currentLives;
         return this.player.currentLives;
     }
 
-    addDamageShield(amount = 1) {
+    addDamageShield(amount = 1, swordType = null) {
         if (!this.player) return 0;
         const numeric = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
         if (numeric <= 0) return this.player.damageShield ?? 0;
         this.ensurePlayerStats();
         const shield = Math.max(0, Number(this.player.damageShield) || 0) + numeric;
         this.player.damageShield = shield;
+        this.player.damageShieldMax = Math.max(shield, numeric, Number(this.player.damageShieldMax) || 0);
+        if (swordType) {
+            this.player.swordType = swordType;
+        }
         return shield;
     }
 
     getDamageShield() {
         return Math.max(0, Number(this.player?.damageShield) || 0);
+    }
+
+    getDamageShieldMax() {
+        return Math.max(0, Number(this.player?.damageShieldMax) || 0);
+    }
+
+    getSwordType() {
+        return typeof this.player?.swordType === 'string' ? this.player.swordType : null;
     }
 
     consumeLastDamageReduction() {
@@ -170,6 +188,17 @@ class StatePlayerManager {
             this.player.damageShield = 0;
         } else {
             this.player.damageShield = Math.max(0, Math.floor(this.player.damageShield));
+        }
+        if (!Number.isFinite(this.player.damageShieldMax)) {
+            this.player.damageShieldMax = 0;
+        } else {
+            this.player.damageShieldMax = Math.max(this.player.damageShield, Math.floor(this.player.damageShieldMax));
+        }
+        if (typeof this.player.swordType !== 'string') {
+            this.player.swordType = null;
+        }
+        if (this.player.damageShield <= 0) {
+            this.player.swordType = null;
         }
         if (!Number.isFinite(this.player.lastDamageReduction)) {
             this.player.lastDamageReduction = 0;

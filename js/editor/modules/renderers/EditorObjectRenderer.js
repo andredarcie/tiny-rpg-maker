@@ -1,3 +1,5 @@
+const EditorObjectTypes = window.ObjectTypes || {};
+
 class EditorObjectRenderer extends EditorRendererBase {
     renderObjectCatalog() {
         const container = this.dom.objectTypes;
@@ -87,7 +89,7 @@ class EditorObjectRenderer extends EditorRendererBase {
 
             body.appendChild(header);
 
-            if (object.type === 'door-variable') {
+            if (object.type === EditorObjectTypes.DOOR_VARIABLE) {
                 const config = document.createElement('div');
                 config.className = 'object-config';
 
@@ -98,7 +100,7 @@ class EditorObjectRenderer extends EditorRendererBase {
                 select.className = 'object-config-select';
                 this.manager.npcService.populateVariableSelect(select, object.variableId || '');
                 select.addEventListener('change', () => {
-                    this.gameEngine.setObjectVariable('door-variable', object.roomIndex, select.value);
+                    this.gameEngine.setObjectVariable(EditorObjectTypes.DOOR_VARIABLE, object.roomIndex, select.value);
                     this.renderObjects();
                     this.service.worldRenderer.renderWorldGrid();
                     this.manager.updateJSON();
@@ -119,7 +121,7 @@ class EditorObjectRenderer extends EditorRendererBase {
                 body.appendChild(config);
             }
 
-            if (object.type === 'switch') {
+            if (object.type === EditorObjectTypes.SWITCH) {
                 const config = document.createElement('div');
                 config.className = 'object-config';
 
@@ -130,7 +132,7 @@ class EditorObjectRenderer extends EditorRendererBase {
                 select.className = 'object-config-select';
                 this.manager.npcService.populateVariableSelect(select, object.variableId || '');
                 select.addEventListener('change', () => {
-                    this.gameEngine.setObjectVariable('switch', object.roomIndex, select.value);
+                    this.gameEngine.setObjectVariable(EditorObjectTypes.SWITCH, object.roomIndex, select.value);
                     this.renderObjects();
                     this.service.worldRenderer.renderWorldGrid();
                     this.manager.updateJSON();
@@ -149,42 +151,42 @@ class EditorObjectRenderer extends EditorRendererBase {
                 body.appendChild(config);
             }
 
-            if (object.type === 'door' && object.opened) {
+            if (object.type === EditorObjectTypes.DOOR && object.opened) {
                 const badge = document.createElement('div');
                 badge.className = 'object-status';
                 badge.textContent = this.t('objects.status.doorOpened');
                 body.appendChild(badge);
             }
 
-            if (object.type === 'key' && object.collected) {
+            if (object.type === EditorObjectTypes.KEY && object.collected) {
                 const badge = document.createElement('div');
                 badge.className = 'object-status';
                 badge.textContent = this.t('objects.status.keyCollected');
                 body.appendChild(badge);
             }
 
-            if (object.type === 'life-potion' && object.collected) {
+            if (object.type === EditorObjectTypes.LIFE_POTION && object.collected) {
                 const badge = document.createElement('div');
                 badge.className = 'object-status';
                 badge.textContent = this.t('objects.status.potionCollected');
                 body.appendChild(badge);
             }
 
-            if (object.type === 'xp-scroll' && object.collected) {
+            if (object.type === EditorObjectTypes.XP_SCROLL && object.collected) {
                 const badge = document.createElement('div');
                 badge.className = 'object-status';
                 badge.textContent = this.t('objects.status.scrollUsed');
                 body.appendChild(badge);
             }
 
-            if (object.type === 'sword' && object.collected) {
+            if ((object.type === EditorObjectTypes.SWORD || object.type === EditorObjectTypes.SWORD_BRONZE || object.type === EditorObjectTypes.SWORD_WOOD) && object.collected) {
                 const badge = document.createElement('div');
                 badge.className = 'object-status';
                 badge.textContent = this.t('objects.status.swordBroken');
                 body.appendChild(badge);
             }
 
-            if (object.type === 'player-end') {
+            if (object.type === EditorObjectTypes.PLAYER_END) {
                 const config = document.createElement('div');
                 config.className = 'object-config';
 
@@ -216,14 +218,14 @@ class EditorObjectRenderer extends EditorRendererBase {
                 body.appendChild(config);
             }
 
-            if (object.type === 'player-end') {
+            if (object.type === EditorObjectTypes.PLAYER_END) {
                 const badge = document.createElement('div');
                 badge.className = 'object-status';
                 badge.textContent = this.t('objects.status.gameEnd');
                 body.appendChild(badge);
             }
 
-            if (object.type !== 'player-start') {
+            if (object.type !== EditorObjectTypes.PLAYER_START) {
                 const removeBtn = document.createElement('button');
                 removeBtn.type = 'button';
                 removeBtn.className = 'object-remove';
@@ -265,23 +267,27 @@ class EditorObjectRenderer extends EditorRendererBase {
         }
         if (def?.name) return def.name;
         switch (type) {
-            case 'door':
+            case EditorObjectTypes.DOOR:
                 return this.t('objects.label.door');
-            case 'door-variable':
+            case EditorObjectTypes.DOOR_VARIABLE:
                 return this.t('objects.label.doorVariable');
-            case 'player-start':
+            case EditorObjectTypes.PLAYER_START:
                 return this.t('objects.label.playerStart');
-            case 'player-end':
+            case EditorObjectTypes.PLAYER_END:
                 return this.t('objects.label.playerEnd');
-            case 'switch':
+            case EditorObjectTypes.SWITCH:
                 return this.t('objects.label.switch');
-            case 'key':
+            case EditorObjectTypes.KEY:
                 return this.t('objects.label.key');
-            case 'life-potion':
+            case EditorObjectTypes.LIFE_POTION:
                 return this.t('objects.label.lifePotion');
-            case 'sword':
+            case EditorObjectTypes.SWORD:
                 return this.t('objects.label.sword');
-            case 'xp-scroll':
+            case EditorObjectTypes.SWORD_BRONZE:
+                return this.t('objects.label.swordBronze');
+            case EditorObjectTypes.SWORD_WOOD:
+                return this.t('objects.label.swordWood');
+            case EditorObjectTypes.XP_SCROLL:
                 return this.t('objects.label.xpScroll');
             default:
                 return type;

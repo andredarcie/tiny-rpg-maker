@@ -45,6 +45,8 @@ class GameState {
                 keys: 0,
                 experience: 0,
                 damageShield: 0,
+                damageShieldMax: 0,
+                swordType: null,
                 lastDamageReduction: 0
             },
             dialog: { active: false, text: "", page: 1, maxPages: 1, meta: null },
@@ -215,12 +217,20 @@ class GameState {
         return this.playerFacade.addLife(amount);
     }
 
-    addDamageShield(amount = 1) {
-        return this.playerFacade.addDamageShield(amount);
+    addDamageShield(amount = 1, type = null) {
+        return this.playerFacade.addDamageShield(amount, type);
     }
 
     getDamageShield() {
         return this.playerFacade.getDamageShield();
+    }
+
+    getDamageShieldMax() {
+        return this.playerFacade.getDamageShieldMax();
+    }
+
+    getSwordType() {
+        return this.playerFacade.getSwordType();
     }
 
     consumeKey() {

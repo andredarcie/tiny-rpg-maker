@@ -1,5 +1,6 @@
 class ShareEncoder {
     static buildShareCode(gameData) {
+        const OT = ObjectTypes;
         const roomCount = ShareConstants.WORLD_ROOM_COUNT;
         const groundMatrices = ShareMatrixCodec.collectGroundMatrices(gameData, roomCount);
         const overlayMatrices = ShareMatrixCodec.collectOverlayMatrices(gameData, roomCount);
@@ -7,12 +8,14 @@ class ShareEncoder {
         const sprites = ShareDataNormalizer.normalizeSprites(gameData?.sprites);
         const enemies = ShareDataNormalizer.normalizeEnemies(gameData?.enemies);
         const objects = Array.isArray(gameData?.objects) ? gameData.objects : [];
-        const doorPositions = ShareDataNormalizer.normalizeObjectPositions(objects, 'door');
-        const keyPositions = ShareDataNormalizer.normalizeObjectPositions(objects, 'key');
-        const lifePotionPositions = ShareDataNormalizer.normalizeObjectPositions(objects, 'life-potion');
-        const xpScrollPositions = ShareDataNormalizer.normalizeObjectPositions(objects, 'xp-scroll');
-        const swordPositions = ShareDataNormalizer.normalizeObjectPositions(objects, 'sword');
-        const playerEndPositions = ShareDataNormalizer.normalizeObjectPositions(objects, 'player-end');
+        const doorPositions = ShareDataNormalizer.normalizeObjectPositions(objects, OT.DOOR);
+        const keyPositions = ShareDataNormalizer.normalizeObjectPositions(objects, OT.KEY);
+        const lifePotionPositions = ShareDataNormalizer.normalizeObjectPositions(objects, OT.LIFE_POTION);
+        const xpScrollPositions = ShareDataNormalizer.normalizeObjectPositions(objects, OT.XP_SCROLL);
+        const swordPositions = ShareDataNormalizer.normalizeObjectPositions(objects, OT.SWORD);
+        const swordBronzePositions = ShareDataNormalizer.normalizeObjectPositions(objects, OT.SWORD_BRONZE);
+        const swordWoodPositions = ShareDataNormalizer.normalizeObjectPositions(objects, OT.SWORD_WOOD);
+        const playerEndPositions = ShareDataNormalizer.normalizeObjectPositions(objects, OT.PLAYER_END);
         const playerEndMessages = ShareDataNormalizer.collectPlayerEndTexts(objects);
         const switchEntries = ShareDataNormalizer.normalizeSwitchObjects(objects);
         const magicDoorEntries = ShareDataNormalizer.normalizeVariableDoorObjects(objects);
@@ -143,6 +146,18 @@ class ShareEncoder {
             const swordCode = SharePositionCodec.encodePositions(swordPositions);
             if (swordCode) {
                 parts.push('a' + swordCode);
+            }
+        }
+        if (swordBronzePositions.length) {
+            const bronzeCode = SharePositionCodec.encodePositions(swordBronzePositions);
+            if (bronzeCode) {
+                parts.push('B' + bronzeCode);
+            }
+        }
+        if (swordWoodPositions.length) {
+            const woodCode = SharePositionCodec.encodePositions(swordWoodPositions);
+            if (woodCode) {
+                parts.push('W' + woodCode);
             }
         }
 
