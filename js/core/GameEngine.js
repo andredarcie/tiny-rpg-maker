@@ -155,9 +155,7 @@ class GameEngine {
             title: game.title || 'Tiny RPG Maker',
             author: (game.author || '').trim()
         };
-        if (typeof this.renderer?.setIntroData === 'function') {
-            this.renderer.setIntroData(this.introData);
-        }
+        this.renderer.setIntroData(this.introData);
     }
 
     getIntroData() {
@@ -237,9 +235,7 @@ class GameEngine {
     }
 
     getKeyCount() {
-        return typeof this.gameState.getKeys === 'function'
-            ? this.gameState.getKeys()
-            : 0;
+        return this.gameState.getKeys();
     }
 
     getSprites() {
@@ -327,10 +323,7 @@ class GameEngine {
     }
 
     isGameOver() {
-        if (typeof this.gameState.isGameOver === 'function') {
-            return this.gameState.isGameOver();
-        }
-        return this.awaitingRestart;
+        return this.gameState.isGameOver();
     }
 
     handleGameOverInteraction() {

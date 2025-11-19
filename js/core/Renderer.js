@@ -110,7 +110,7 @@ class Renderer {
             this.hudRenderer.drawInventory(ctx, bottomHudArea);
         }
 
-        if (typeof this.gameState.isGameOver === 'function' && this.gameState.isGameOver()) {
+        if (this.gameState.isGameOver()) {
             this.overlayRenderer.drawGameOverScreen();
         }
     }
@@ -198,9 +198,6 @@ class Renderer {
 
 
     startTileAnimationLoop() {
-        if (typeof setInterval !== 'function') {
-            return;
-        }
         if (this.tileAnimationTimer) {
             clearInterval(this.tileAnimationTimer);
             this.tileAnimationTimer = null;
@@ -211,22 +208,16 @@ class Renderer {
 
     tickTileAnimation() {
         const manager = this.tileManager;
-        const totalFrames = typeof manager.getAnimationFrameCount === 'function'
-            ? manager.getAnimationFrameCount()
-            : 1;
+        const totalFrames = manager.getAnimationFrameCount();
         if (totalFrames <= 1) return;
-        const nextIndex = typeof manager.advanceAnimationFrame === 'function'
-            ? manager.advanceAnimationFrame()
-            : 0;
+        const nextIndex = manager.advanceAnimationFrame();
         this.draw();
-        if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
-            try {
-                window.dispatchEvent(new CustomEvent('tile-animation-frame', {
-                    detail: { frameIndex: nextIndex }
-                }));
-            } catch (err) {
-                window.dispatchEvent(new Event('tile-animation-frame'));
-            }
+        try {
+            window.dispatchEvent(new CustomEvent('tile-animation-frame', {
+                detail: { frameIndex: nextIndex }
+            }));
+        } catch (err) {
+            window.dispatchEvent(new Event('tile-animation-frame'));
         }
     }
 

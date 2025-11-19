@@ -130,20 +130,7 @@ class EditorObjectService {
             const normalized = definitions.find((entry) => entry.type === type)?.type || null;
             if (normalized) return normalized;
         }
-        const OT = window.ObjectTypes;
-        const fallbackTypes = new Set([
-            OT.PLAYER_START,
-            OT.PLAYER_END,
-            OT.SWITCH,
-            OT.DOOR,
-            OT.DOOR_VARIABLE,
-            OT.KEY,
-            OT.LIFE_POTION,
-            OT.SWORD,
-            OT.SWORD_BRONZE,
-            OT.SWORD_WOOD,
-            OT.XP_SCROLL
-        ].filter(Boolean));
+        const fallbackTypes = new Set(ObjectDefinitions.getPlaceableTypes());
         return fallbackTypes.has(type) ? type : null;
     }
 }

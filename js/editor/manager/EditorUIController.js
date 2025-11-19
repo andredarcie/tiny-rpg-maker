@@ -5,12 +5,8 @@ class EditorUIController extends EditorManagerModule {
         const author = this.normalizeAuthor(this.dom.authorInput?.value || '');
         game.title = title;
         game.author = author;
-        if (typeof this.gameEngine.syncDocumentTitle === 'function') {
-            this.gameEngine.syncDocumentTitle();
-        }
-        if (typeof this.gameEngine.refreshIntroScreen === 'function') {
-            this.gameEngine.refreshIntroScreen();
-        }
+        this.gameEngine.syncDocumentTitle();
+        this.gameEngine.refreshIntroScreen();
         this.updateJSON();
     }
 
@@ -63,9 +59,7 @@ class EditorUIController extends EditorManagerModule {
     }
 
     handleLanguageChange() {
-        if (typeof TextResources?.apply === 'function') {
-            TextResources.apply();
-        }
+        TextResources.apply();
         this.refreshNpcLocalizedText();
         this.manager.renderAll();
         this.updateJSON();

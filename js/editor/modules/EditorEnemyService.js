@@ -81,9 +81,7 @@ class EditorEnemyService {
         const normalizedId = typeof variableId === 'string' && variableId.trim().length
             ? variableId
             : null;
-        const changed = typeof this.gameEngine.setEnemyVariable === 'function'
-            ? this.gameEngine.setEnemyVariable(enemyId, normalizedId)
-            : false;
+        const changed = this.gameEngine.setEnemyVariable(enemyId, normalizedId);
         if (!changed) return;
         this.manager.renderService.renderEnemies();
         this.manager.renderService.renderWorldGrid();
@@ -116,11 +114,9 @@ class EditorEnemyService {
         const target = typeof type === 'string' && type.length > 0
             ? type
             : this.state.selectedEnemyType;
-        if (typeof EnemyDefinitions?.getEnemyDefinition === 'function') {
-            const definition = EnemyDefinitions.getEnemyDefinition(target);
-            if (definition) {
-                return definition;
-            }
+        const definition = EnemyDefinitions.getEnemyDefinition(target);
+        if (definition) {
+            return definition;
         }
         const definitions = EditorConstants.ENEMY_DEFINITIONS;
         return definitions.find((entry) => entry.type === target) ||

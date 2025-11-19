@@ -22,13 +22,13 @@ class RendererEntityRenderer {
 
         for (const object of objects) {
             if (object.roomIndex !== player.roomIndex) continue;
-            if (object.type === OT.PLAYER_START) continue;
-            if (object.type === OT.KEY && object.collected) continue;
-            if (object.type === OT.LIFE_POTION && object.collected) continue;
-            if (object.type === OT.XP_SCROLL && object.collected) continue;
-            if ((object.type === OT.SWORD || object.type === OT.SWORD_BRONZE || object.type === OT.SWORD_WOOD) && object.collected) continue;
-            if (object.type === OT.DOOR && object.opened) continue;
-            if (object.type === OT.DOOR_VARIABLE) {
+            if (object.hiddenInRuntime) continue;
+
+            if (object.hideWhenCollected && object.collected) continue;
+
+            if (object.hideWhenOpened && object.opened) continue;
+
+            if (object.hideWhenVariableOpen) {
                 const isOpen = object.variableId
                     ? this.gameState.isVariableOn?.(object.variableId)
                     : false;
@@ -133,20 +133,14 @@ class RendererEntityRenderer {
     }
 
     getEnemyDamage(type) {
-        if (typeof EnemyDefinitions?.getEnemyDefinition === 'function') {
-            const def = EnemyDefinitions.getEnemyDefinition(type);
-            if (def && Number.isFinite(def.damage)) {
-                return Math.max(1, def.damage);
-            }
+        const direct = EnemyDefinitions.getEnemyDefinition(type);
+        if (direct && Number.isFinite(direct.damage)) {
+            return Math.max(1, direct.damage);
         }
-        if (typeof EnemyDefinitions?.normalizeType === 'function') {
-            const normalized = EnemyDefinitions.normalizeType(type);
-            const def = typeof EnemyDefinitions?.getEnemyDefinition === 'function'
-                ? EnemyDefinitions.getEnemyDefinition(normalized)
-                : null;
-            if (def && Number.isFinite(def.damage)) {
-                return Math.max(1, def.damage);
-            }
+        const normalized = EnemyDefinitions.normalizeType(type);
+        const normalizedDef = EnemyDefinitions.getEnemyDefinition(normalized);
+        if (normalizedDef && Number.isFinite(normalizedDef.damage)) {
+            return Math.max(1, normalizedDef.damage);
         }
         return 1;
     }

@@ -8,7 +8,7 @@ class DialogManager {
     showDialog(text, options = {}) {
         const hasOptions = options && Object.keys(options).length > 0;
         const meta = hasOptions ? { ...options } : null;
-        if (meta?.pauseGame && typeof this.gameState.pauseGame === 'function') {
+        if (meta?.pauseGame) {
             const reason = meta.pauseReason || 'dialog';
             meta.pauseReason = reason;
             this.gameState.pauseGame(reason);
@@ -34,7 +34,7 @@ class DialogManager {
         const pendingMeta = this.pendingDialogAction;
         this.completeDialog();
         this.gameState.setDialog(false);
-        if (pendingMeta?.resumePlayingOnClose && typeof this.gameState.resumeGame === 'function') {
+        if (pendingMeta?.resumePlayingOnClose) {
             const reason = pendingMeta.pauseReason || 'dialog';
             this.gameState.resumeGame(reason);
         }
@@ -44,7 +44,7 @@ class DialogManager {
     reset() {
         const pendingMeta = this.pendingDialogAction;
         this.pendingDialogAction = null;
-        if (pendingMeta?.resumePlayingOnClose && typeof this.gameState.resumeGame === 'function') {
+        if (pendingMeta?.resumePlayingOnClose) {
             const reason = pendingMeta.pauseReason || 'dialog';
             this.gameState.resumeGame(reason);
         }

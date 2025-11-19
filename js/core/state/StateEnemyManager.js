@@ -99,10 +99,7 @@ class StateEnemyManager {
     }
 
     normalizeEnemyType(type) {
-        if (typeof EnemyDefinitions?.normalizeType === 'function') {
-            return EnemyDefinitions.normalizeType(type);
-        }
-        return type || 'giant-rat';
+        return EnemyDefinitions.normalizeType(type);
     }
 
     normalizeEnemyVariableId(variableId) {

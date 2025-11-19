@@ -21,9 +21,7 @@ class ShareUrlHelper {
         try {
             return ShareDecoder.decodeShareCode(code);
         } catch (error) {
-            if (typeof console !== 'undefined' && typeof console.warn === 'function') {
-                console.warn('[TinyRPG] Unable to decode shared game data.', error);
-            }
+            console.warn('[TinyRPG] Unable to decode shared game data.', error);
             return null;
         }
     }

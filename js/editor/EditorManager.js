@@ -337,9 +337,7 @@ class EditorManager {
         }
 
         const definitions = EditorConstants.ENEMY_DEFINITIONS;
-        const normalizedType = typeof EnemyDefinitions?.normalizeType === 'function'
-            ? EnemyDefinitions.normalizeType(this.selectedEnemyType)
-            : this.selectedEnemyType;
+        const normalizedType = EnemyDefinitions.normalizeType(this.selectedEnemyType);
         if (normalizedType !== this.selectedEnemyType) {
             this.selectedEnemyType = normalizedType;
         } else if (!definitions.some((entry) => entry.type === this.selectedEnemyType)) {

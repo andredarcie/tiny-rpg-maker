@@ -46,9 +46,7 @@ class ShareBase64 {
     }
 
     static logInvalidInput(input, error) {
-        if (typeof console !== 'undefined' && typeof console.warn === 'function') {
-            console.warn('[TinyRPG] Invalid base64 segment ignored.', { input, error });
-        }
+        console.warn('[TinyRPG] Invalid base64 segment ignored.', { input, error });
     }
 }
 

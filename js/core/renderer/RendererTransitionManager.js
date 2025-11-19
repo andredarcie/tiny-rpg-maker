@@ -12,20 +12,16 @@ class RendererTransitionManager extends RendererModuleBase {
         const fromFrame = options.fromFrame;
         const toFrame = options.toFrame;
         if (!fromFrame || !toFrame) {
-            if (typeof options.onComplete === 'function') {
-                options.onComplete();
-            }
+            options.onComplete?.();
             return false;
         }
         const direction = options.direction || 'right';
         const duration = Number.isFinite(options.duration)
             ? Math.max(120, options.duration)
             : 320;
-        const now = (typeof performance !== 'undefined' && typeof performance.now === 'function')
-            ? performance.now()
-            : Date.now();
+        const now = performance.now();
 
-        if (this.transition?.rafId && typeof window !== 'undefined' && typeof window.cancelAnimationFrame === 'function') {
+        if (this.transition?.rafId) {
             window.cancelAnimationFrame(this.transition.rafId);
         }
 
@@ -40,13 +36,11 @@ class RendererTransitionManager extends RendererModuleBase {
             duration,
             startTime: now,
             playerPath: options.playerPath || null,
-            onComplete: typeof options.onComplete === 'function' ? options.onComplete : null,
+            onComplete: options.onComplete ?? null,
             rafId: null
         };
 
-        if (typeof this.gameState?.pauseGame === 'function') {
-            this.gameState.pauseGame('room-transition');
-        }
+        this.gameState.pauseGame('room-transition');
 
         this.renderer.draw();
         this.scheduleTick();
@@ -54,9 +48,6 @@ class RendererTransitionManager extends RendererModuleBase {
     }
 
     scheduleTick() {
-        if (typeof window === 'undefined' || typeof window.requestAnimationFrame !== 'function') {
-            return;
-        }
         const tick = () => {
             if (!this.isActive()) {
                 return;
@@ -76,9 +67,7 @@ class RendererTransitionManager extends RendererModuleBase {
         if (!this.transition?.active) {
             return 1;
         }
-        const now = (typeof performance !== 'undefined' && typeof performance.now === 'function')
-            ? performance.now()
-            : Date.now();
+        const now = performance.now();
         const elapsed = now - this.transition.startTime;
         return Math.max(0, Math.min(1, elapsed / this.transition.duration));
     }
@@ -195,17 +184,13 @@ class RendererTransitionManager extends RendererModuleBase {
 
     finish() {
         if (!this.transition?.active) return;
-        if (typeof window !== 'undefined' && typeof window.cancelAnimationFrame === 'function' && this.transition.rafId) {
+        if (this.transition.rafId) {
             window.cancelAnimationFrame(this.transition.rafId);
         }
         const callback = this.transition.onComplete;
         this.transition = { active: false };
-        if (typeof this.gameState?.resumeGame === 'function') {
-            this.gameState.resumeGame('room-transition');
-        }
-        if (typeof callback === 'function') {
-            callback();
-        }
+        this.gameState.resumeGame('room-transition');
+        callback?.();
     }
 }
 

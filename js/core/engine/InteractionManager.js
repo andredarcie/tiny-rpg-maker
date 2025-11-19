@@ -127,10 +127,7 @@ class InteractionManager {
             ? 'objects.sword.pickup.single'
             : 'objects.sword.pickup.multi';
         const fallback = '';
-        if (typeof TextResources?.format === 'function') {
-            return TextResources.format(key, { name, value: durability }, fallback);
-        }
-        return '';
+        return TextResources.format(key, { name, value: durability }, fallback);
     }
 
     getSwordName(type) {
@@ -141,26 +138,18 @@ class InteractionManager {
             [OT.SWORD_WOOD]: { key: 'objects.label.swordWood', fallback: OT.SWORD_WOOD }
         };
         const entry = nameMap[type] || nameMap[OT.SWORD];
-        const name = typeof TextResources?.get === 'function'
-            ? TextResources.get(entry.key, entry.fallback)
-            : entry.fallback;
+        const name = TextResources.get(entry.key, entry.fallback);
         return { name };
     }
 
     getInteractionText(key, fallback = '') {
-        if (typeof TextResources?.get === 'function') {
-            const value = TextResources.get(key, fallback);
-            return value || fallback || '';
-        }
-        return fallback || '';
+        const value = TextResources.get(key, fallback);
+        return value || fallback || '';
     }
 
     formatInteractionText(key, params = {}, fallback = '') {
-        if (typeof TextResources?.format === 'function') {
-            const value = TextResources.format(key, params, fallback);
-            return value || fallback || '';
-        }
-        return fallback || '';
+        const value = TextResources.format(key, params, fallback);
+        return value || fallback || '';
     }
 
     handleSwitch(object) {
@@ -183,13 +172,9 @@ class InteractionManager {
     handlePlayerEnd(object) {
         const OT = this.types;
         if (object.type !== OT.PLAYER_END) return false;
-        if (typeof this.gameState.getPlayerEndText === 'function') {
-            const endingText = this.gameState.getPlayerEndText(object.roomIndex);
-            this.gameState.setActiveEndingText?.(endingText || '');
-        }
-        if (typeof this.options?.onPlayerVictory === 'function') {
-            this.options.onPlayerVictory();
-        }
+        const endingText = this.gameState.getPlayerEndText(object.roomIndex);
+        this.gameState.setActiveEndingText?.(endingText || '');
+        this.options?.onPlayerVictory?.();
         return true;
     }
 

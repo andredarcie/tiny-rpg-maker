@@ -121,9 +121,7 @@ class RendererEffectsManager extends RendererModuleBase {
             if (!Number.isFinite(value)) return Math.max(0, Math.min(7, Math.floor(fallback)));
             return Math.max(0, Math.min(7, Math.floor(value)));
         };
-        const player = typeof this.gameState?.getPlayer === 'function'
-            ? this.gameState.getPlayer()
-            : { x: 0, y: 0 };
+        const player = this.gameState.getPlayer();
         const tileX = clampIndex(state.tileX, player?.x ?? 0);
         const tileY = clampIndex(state.tileY, player?.y ?? 0);
         ctx.save();

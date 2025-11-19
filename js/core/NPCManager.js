@@ -1,12 +1,10 @@
 /**
  * NPCManager creates and mutates the fixed NPC roster.
  */
-const NPC_MANAGER_DEFINITIONS = (typeof window !== 'undefined' && window.NPCDefinitions)
+const NPC_MANAGER_DEFINITIONS = window.NPCDefinitions
     ? (window.NPCDefinitions.definitions || window.NPCDefinitions.NPC_DEFINITIONS || [])
     : [];
-const getNpcDefinition = (typeof window !== 'undefined' && window.NPCDefinitions && typeof window.NPCDefinitions.getNpcDefinition === 'function')
-    ? (type) => window.NPCDefinitions.getNpcDefinition(type)
-    : () => null;
+const getNpcDefinition = (type) => window.NPCDefinitions.getNpcDefinition(type);
 const NPC_ID_PREFIX = 'npc-';
 const TYPE_TO_INDEX = new Map();
 for (let i = 0; i < NPC_MANAGER_DEFINITIONS.length; i++) {
@@ -15,11 +13,8 @@ for (let i = 0; i < NPC_MANAGER_DEFINITIONS.length; i++) {
 let nextNpcId = NPC_MANAGER_DEFINITIONS.length + 1;
 
 const getNpcLocaleText = (key, fallback = '') => {
-    if (typeof TextResources !== 'undefined' && typeof TextResources.get === 'function') {
-        const value = TextResources.get(key, fallback);
-        return value || fallback || key || '';
-    }
-    return fallback || key || '';
+    const value = TextResources.get(key, fallback);
+    return value || fallback || key || '';
 };
 
 const resolveDefinitionName = (def) => {

@@ -337,9 +337,7 @@ const TextResources = {
         this.locale = locale;
         if (!silent) {
             this.apply(root);
-            if (typeof document !== 'undefined' && typeof document.dispatchEvent === 'function') {
-                document.dispatchEvent(new CustomEvent('language-changed', { detail: { locale: this.locale } }));
-            }
+            document.dispatchEvent(new CustomEvent('language-changed', { detail: { locale: this.locale } }));
         }
         return true;
     },

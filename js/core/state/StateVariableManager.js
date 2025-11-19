@@ -1,9 +1,6 @@
 const getVariableText = (key, fallback = '') => {
-    if (typeof TextResources !== 'undefined' && typeof TextResources.get === 'function') {
-        const value = TextResources.get(key, fallback);
-        return value || fallback || key || '';
-    }
-    return fallback || key || '';
+    const value = TextResources.get(key, fallback);
+    return value || fallback || key || '';
 };
 
 const createVariablePreset = (id, order, nameKey, fallbackName, color) =>

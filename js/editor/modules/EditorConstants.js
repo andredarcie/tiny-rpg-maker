@@ -32,20 +32,7 @@ class EditorConstants {
     }
 
     static get OBJECT_TYPE_ORDER() {
-        const OT = window.ObjectTypes;
-        return [
-            OT.PLAYER_START,
-            OT.PLAYER_END,
-            OT.SWITCH,
-            OT.DOOR,
-            OT.DOOR_VARIABLE,
-            OT.KEY,
-            OT.LIFE_POTION,
-            OT.SWORD,
-            OT.SWORD_BRONZE,
-            OT.SWORD_WOOD,
-            OT.XP_SCROLL
-        ].filter(Boolean);
+        return ObjectDefinitions.getEditorTypeOrder();
     }
 }
 

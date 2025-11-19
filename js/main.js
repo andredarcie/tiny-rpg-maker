@@ -4,11 +4,8 @@
 'use strict';
 
 const getTextResource = (key, fallback = '') => {
-    if (typeof TextResources !== 'undefined' && typeof TextResources.get === 'function') {
-        const value = TextResources.get(key, fallback);
-        return value || fallback || key || '';
-    }
-    return fallback || key || '';
+    const value = TextResources.get(key, fallback);
+    return value || fallback || key || '';
 };
 
 class TinyRPGApplication {
@@ -195,9 +192,7 @@ class TinyRPGApplication {
         if (!select) return;
 
         const syncSelect = () => {
-            if (typeof TextResources.getLocale === 'function') {
-                select.value = TextResources.getLocale();
-            }
+            select.value = TextResources.getLocale();
         };
 
         syncSelect();
@@ -205,7 +200,7 @@ class TinyRPGApplication {
         select.addEventListener('change', () => {
             const locale = select.value;
             if (!locale) return;
-            const changed = TextResources.setLocale?.(locale);
+            const changed = TextResources.setLocale(locale);
             if (!changed) {
                 syncSelect();
             }

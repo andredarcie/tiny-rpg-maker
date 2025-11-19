@@ -24,7 +24,7 @@ class RendererHudRenderer {
         ctx.fillStyle = this.backgroundColor;
         ctx.fillRect(0, 0, width, height);
 
-        if (typeof this.gameState.isGameOver === 'function' && this.gameState.isGameOver()) {
+        if (this.gameState.isGameOver()) {
             ctx.restore();
             return;
         }
@@ -78,16 +78,10 @@ class RendererHudRenderer {
         const offsetY = area.y ?? 0;
         const gap = Number.isFinite(area.gap) ? Math.max(0, area.gap) : 2;
         const maxSlots = Math.min(9, this.gameState.getMaxKeys());
-        let keys = typeof this.gameState.getKeys === 'function'
-            ? this.gameState.getKeys()
-            : 0;
+        let keys = this.gameState.getKeys();
         keys = Math.max(0, Math.min(maxSlots, keys));
-        const swordShield = typeof this.gameState.getDamageShield === 'function'
-            ? Math.max(0, this.gameState.getDamageShield())
-            : 0;
-        const swordShieldMax = typeof this.gameState.getDamageShieldMax === 'function'
-            ? Math.max(0, this.gameState.getDamageShieldMax())
-            : swordShield;
+        const swordShield = Math.max(0, this.gameState.getDamageShield());
+        const swordShieldMax = Math.max(0, this.gameState.getDamageShieldMax());
         const swordType = this.gameState.getSwordType?.() || null;
 
         ctx.save();
@@ -95,7 +89,7 @@ class RendererHudRenderer {
         ctx.fillStyle = this.backgroundColor;
         ctx.fillRect(0, 0, width, height);
 
-        if (typeof this.gameState.isGameOver === 'function' && this.gameState.isGameOver()) {
+        if (this.gameState.isGameOver()) {
             ctx.restore();
             return;
         }

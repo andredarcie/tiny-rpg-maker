@@ -23,7 +23,7 @@ class RendererSpriteFactory {
         if (type && sprites[type]) {
             return sprites[type];
         }
-        if (type && typeof EnemyDefinitions?.normalizeType === 'function') {
+        if (type) {
             const normalized = EnemyDefinitions.normalizeType(type);
             if (sprites[normalized]) {
                 return sprites[normalized];
@@ -59,14 +59,14 @@ class RendererSpriteFactory {
     buildPlayerSprite() {
         const picoPalette = this.paletteManager.getPicoPalette();
         const pixels = [
-            [ null, null, 15, 15, 15, 15, null, null ],
-            [  6, null, 15, 12, 15, 12, null, null ],
-            [ null,  1, 15, 15, 15, 15, null, null ],
-            [  1,  9,  4, 15, 15,  9,  9, null ],
-            [ null, 15,  9,  4,  4,  9, 15, null ],
-            [ null, null,  9,  9,  9,  4, null, null ],
-            [ null, null,  1,  1,  1,  1, null, null ],
-            [ null, null,  1, null, null,  1, null, null ]
+            [ null,  1,  1,  1,  1,  1,  1, null ],
+            [  1,  1, 15, 15, 15, 15,  1, null ],
+            [  1,  6, 15, 12, 15, 12,  1, null ],
+            [  1,  6, 15, 15, 15, 15,  1,  1 ],
+            [  1,  9,  9,  4,  4,  9,  9,  1 ],
+            [  1, 15,  9,  9,  9,  4, 15,  1 ],
+            [  1,  1,  5,  1,  1,  5,  1,  1 ],
+            [ null,  1,  1,  1,  1,  1,  1, null ]
         ];
         return this.mapPixels(pixels, picoPalette);
     }
@@ -152,7 +152,7 @@ class RendererSpriteFactory {
 
     mapPixels(pixels, palette, fallbackBuilder) {
         if (!Array.isArray(pixels)) {
-            return typeof fallbackBuilder === 'function'
+            return fallbackBuilder
                 ? fallbackBuilder()
                 : null;
         }

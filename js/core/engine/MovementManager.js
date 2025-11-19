@@ -1,17 +1,11 @@
 const getMovementText = (key, fallback = '') => {
-    if (typeof TextResources !== 'undefined' && typeof TextResources.get === 'function') {
-        const value = TextResources.get(key, fallback);
-        return value || fallback || '';
-    }
-    return fallback || '';
+    const value = TextResources.get(key, fallback);
+    return value || fallback || '';
 };
 
 const formatMovementText = (key, params = {}, fallback = '') => {
-    if (typeof TextResources !== 'undefined' && typeof TextResources.format === 'function') {
-        const value = TextResources.format(key, params, fallback);
-        return value || fallback || '';
-    }
-    return fallback || '';
+    const value = TextResources.format(key, params, fallback);
+    return value || fallback || '';
 };
 
 class MovementManager {
@@ -29,7 +23,7 @@ class MovementManager {
         if (this.transitioning) {
             return;
         }
-        if (typeof this.gameState.isGameOver === 'function' && this.gameState.isGameOver()) {
+        if (this.gameState.isGameOver()) {
             return;
         }
         const dialog = this.gameState.getDialog();
@@ -118,9 +112,10 @@ class MovementManager {
         }
 
         const OT = ObjectTypes;
-        const objectAtTarget = this.gameState.getObjectAt?.(targetRoomIndex, targetX, targetY) ?? null;
-        if (objectAtTarget?.type === OT.DOOR_VARIABLE) {
-            const variableId = objectAtTarget.variableId;
+        const objectAtTarget = this.gameState.getObjectAt(targetRoomIndex, targetX, targetY) ?? null;
+        const isVariableDoor = Boolean(objectAtTarget?.isVariableDoor);
+        if (isVariableDoor) {
+            const variableId = objectAtTarget?.variableId;
             const doorOpen = variableId ? this.gameState.isVariableOn(variableId) : false;
             if (!doorOpen) {
                 this.dialogManager.showDialog(getMovementText('doors.variableLocked'));
@@ -128,15 +123,14 @@ class MovementManager {
                 return;
             }
         }
-        if (objectAtTarget?.type === OT.DOOR && !objectAtTarget.opened) {
-            const consumeKey = typeof this.gameState.consumeKey === 'function'
-                ? this.gameState.consumeKey()
-                : false;
+        const isLockedDoor = Boolean(objectAtTarget?.isLockedDoor);
+        if (isLockedDoor && !objectAtTarget?.opened) {
+            const consumeKey = this.gameState.consumeKey();
             if (consumeKey) {
-                objectAtTarget.opened = true;
-                const remainingKeys = typeof this.gameState.getKeys === 'function'
-                    ? this.gameState.getKeys()
-                    : null;
+                if (objectAtTarget) {
+                    objectAtTarget.opened = true;
+                }
+                const remainingKeys = this.gameState.getKeys();
                 const message = Number.isFinite(remainingKeys)
                     ? formatMovementText('doors.openedRemaining', { value: remainingKeys })
                     : getMovementText('doors.opened');
@@ -162,9 +156,7 @@ class MovementManager {
             }
         }
 
-        const supportsTransition = enteringNewRoom
-            && typeof this.renderer?.captureGameplayFrame === 'function'
-            && typeof this.renderer?.startRoomTransition === 'function';
+        const supportsTransition = enteringNewRoom;
         const fromFrame = supportsTransition ? this.renderer.captureGameplayFrame() : null;
 
         this.gameState.setPlayerPosition(
@@ -228,17 +220,12 @@ class MovementManager {
 
     flashBlockedEdge(direction, coords = null) {
         if (!direction) return;
-        const fn = this.renderer?.flashEdge;
-        if (typeof fn === 'function') {
-            fn.call(this.renderer, direction, {
-                duration: 240,
-                tileX: coords?.x,
-                tileY: coords?.y
-            });
-            if (typeof this.renderer?.draw === 'function') {
-                this.renderer.draw();
-            }
-        }
+        this.renderer.flashEdge(direction, {
+            duration: 240,
+            tileX: coords?.x,
+            tileY: coords?.y
+        });
+        this.renderer.draw();
     }
 }
 

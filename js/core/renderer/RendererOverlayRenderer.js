@@ -50,11 +50,9 @@ class RendererOverlayRenderer extends RendererModuleBase {
         ctx.save();
         ctx.fillStyle = '#000000';
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        const reason = typeof this.gameState.getGameOverReason === 'function'
-            ? this.gameState.getGameOverReason()
-            : 'defeat';
+        const reason = this.gameState.getGameOverReason();
         const isVictory = reason === 'victory';
-        const endingText = isVictory && typeof this.gameState.getActiveEndingText === 'function'
+        const endingText = isVictory
             ? (this.gameState.getActiveEndingText() || '')
             : '';
         const hasEndingText = isVictory && endingText.trim().length > 0;

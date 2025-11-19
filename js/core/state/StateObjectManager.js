@@ -22,35 +22,34 @@ class StateObjectManager {
     }
 
     static get PLACEABLE_OBJECT_TYPES() {
-        const OT = this.TYPES;
-        return [
-            OT.DOOR,
-            OT.DOOR_VARIABLE,
-            OT.KEY,
-            OT.LIFE_POTION,
-            OT.XP_SCROLL,
-            OT.SWORD,
-            OT.SWORD_BRONZE,
-            OT.SWORD_WOOD,
-            OT.PLAYER_START,
-            OT.PLAYER_END,
-            OT.SWITCH
-        ].filter(Boolean);
+        return this.getPlaceableTypesArray();
     }
 
     static get COLLECTIBLE_OBJECT_TYPES() {
-        const OT = this.TYPES;
-        return new Set(
-            [OT.KEY, OT.LIFE_POTION, OT.XP_SCROLL, OT.SWORD, OT.SWORD_BRONZE, OT.SWORD_WOOD].filter(Boolean)
-        );
+        return this.getCollectibleTypeSet();
     }
 
     static get PLAYER_END_TEXT_LIMIT() {
         return PLAYER_END_TEXT_LIMIT;
     }
 
-    get types() {
-        return ObjectTypes;
+    static getPlaceableTypesArray() {
+        return ObjectDefinitions.getPlaceableTypes();
+    }
+
+    static getPlaceableTypeSet() {
+        return new Set(this.getPlaceableTypesArray());
+    }
+
+    static getCollectibleTypeSet() {
+        if (!this._collectibleSet) {
+            this._collectibleSet = new Set(ObjectDefinitions.getCollectibleTypes());
+        }
+        return this._collectibleSet;
+    }
+
+    static isCollectibleType(type) {
+        return ObjectDefinitions.isCollectible(type);
     }
 
     constructor(game, worldManager, variableManager) {
@@ -76,7 +75,7 @@ class StateObjectManager {
     normalizeObjects(objects) {
         if (!Array.isArray(objects)) return [];
         const OT = this.types;
-        const allowedTypes = new Set(StateObjectManager.PLACEABLE_OBJECT_TYPES);
+        const allowedTypes = StateObjectManager.getPlaceableTypeSet();
         let playerStartIncluded = false;
         const playerEndRooms = new Set();
         return objects
@@ -99,7 +98,7 @@ class StateObjectManager {
                     ? object.id.trim()
                     : this.generateObjectId(type, roomIndex);
                 const fallbackVariableId = this.variableManager?.getFirstVariableId?.() ?? null;
-                const needsVariable = type === OT.DOOR_VARIABLE || type === StateObjectManager.SWITCH_TYPE;
+                const needsVariable = ObjectDefinitions.requiresVariable(type);
                 const normalizedVariable = needsVariable
                     ? (this.variableManager?.normalizeVariableId?.(object?.variableId) ?? fallbackVariableId)
                     : null;
@@ -110,7 +109,7 @@ class StateObjectManager {
                     roomIndex,
                     x,
                     y,
-                    collected: StateObjectManager.COLLECTIBLE_OBJECT_TYPES.has(type) ? Boolean(object?.collected) : false,
+                    collected: StateObjectManager.isCollectibleType(type) ? Boolean(object?.collected) : false,
                     opened: type === OT.DOOR ? Boolean(object?.opened) : false,
                     variableId: normalizedVariable
                 };
@@ -120,7 +119,7 @@ class StateObjectManager {
                 if (type === StateObjectManager.PLAYER_END_TYPE) {
                     base.endingText = this.normalizePlayerEndText(object?.endingText);
                 }
-                return base;
+                return this.applyObjectBehavior(base);
             })
             .filter(Boolean);
     }
@@ -136,10 +135,11 @@ class StateObjectManager {
         const OT = this.types;
         const objects = this.getObjects();
         objects.forEach((object) => {
-            if (StateObjectManager.COLLECTIBLE_OBJECT_TYPES.has(object.type)) {
+            if (object.isCollectible) {
                 object.collected = false;
             }
-            if (object.type === OT.DOOR) {
+            const isLockedDoor = Boolean(object.isLockedDoor);
+            if (isLockedDoor) {
                 object.opened = false;
             }
             if (object.type === StateObjectManager.SWITCH_TYPE) {
@@ -161,6 +161,7 @@ class StateObjectManager {
         if (!Array.isArray(this.game.objects)) {
             this.game.objects = [];
         }
+        this.game.objects.forEach((object) => this.applyObjectBehavior(object));
         return this.game.objects;
     }
 
@@ -182,8 +183,8 @@ class StateObjectManager {
 
     setObjectPosition(type, roomIndex, x, y) {
         const OT = this.types;
-        const placeableTypes = StateObjectManager.PLACEABLE_OBJECT_TYPES;
-        const normalizedType = placeableTypes.includes(type) ? type : null;
+        const placeableTypes = StateObjectManager.getPlaceableTypeSet();
+        const normalizedType = placeableTypes.has(type) ? type : null;
         if (!normalizedType) return null;
         const targetRoom = this.worldManager.clampRoomIndex(roomIndex ?? 0);
         const cx = this.worldManager.clampCoordinate(x ?? 0);
@@ -217,13 +218,13 @@ class StateObjectManager {
             entry.x = cx;
             entry.y = cy;
         }
-        if (StateObjectManager.COLLECTIBLE_OBJECT_TYPES.has(normalizedType)) {
+        if (StateObjectManager.isCollectibleType(normalizedType)) {
             entry.collected = false;
         }
-        if (normalizedType === OT.DOOR) {
+        if (ObjectDefinitions.isLockedDoor(normalizedType)) {
             entry.opened = false;
         }
-        if (normalizedType === OT.DOOR_VARIABLE) {
+        if (ObjectDefinitions.isVariableDoor(normalizedType)) {
             const fallbackVariableId = this.variableManager?.getFirstVariableId?.() ?? null;
             entry.variableId = this.variableManager?.normalizeVariableId?.(entry.variableId) ?? fallbackVariableId;
         }
@@ -238,12 +239,12 @@ class StateObjectManager {
         if (normalizedType === StateObjectManager.PLAYER_END_TYPE) {
             entry.endingText = this.normalizePlayerEndText(entry.endingText ?? '');
         }
-        return entry;
+        return this.applyObjectBehavior(entry);
     }
 
     removeObject(type, roomIndex) {
-        const placeableTypes = StateObjectManager.PLACEABLE_OBJECT_TYPES;
-        const normalizedType = StateObjectManager.PLACEABLE_OBJECT_TYPES.includes(type) ? type : null;
+        const placeableTypes = StateObjectManager.getPlaceableTypeSet();
+        const normalizedType = placeableTypes.has(type) ? type : null;
         if (!normalizedType || normalizedType === StateObjectManager.PLAYER_START_TYPE) return;
         const targetRoom = this.worldManager.clampRoomIndex(roomIndex ?? 0);
         this.game.objects = this.getObjects().filter((object) =>
@@ -252,8 +253,8 @@ class StateObjectManager {
     }
 
     setObjectVariable(type, roomIndex, variableId) {
-        const OT = this.types;
-        if (type !== OT.DOOR_VARIABLE && type !== StateObjectManager.SWITCH_TYPE) return null;
+        const handledByDefinition = ObjectDefinitions.requiresVariable(type);
+        if (!handledByDefinition) return null;
         const targetRoom = this.worldManager.clampRoomIndex(roomIndex ?? 0);
         const entry = this.getObjects().find((object) =>
             object.type === type &&
@@ -305,7 +306,7 @@ class StateObjectManager {
             marker.x = x;
             marker.y = y;
         }
-        return marker;
+        return this.applyObjectBehavior(marker);
     }
 
     getPlayerEndObject(roomIndex = null) {
@@ -343,7 +344,24 @@ class StateObjectManager {
         entry.roomIndex = roomIndex;
     }
 
+    applyObjectBehavior(entry) {
+        if (!entry) return entry;
+        const type = entry.type;
+        const isCollectible = StateObjectManager.isCollectibleType(type);
+        entry.isCollectible = isCollectible;
+        entry.hideWhenCollected = ObjectDefinitions.shouldHideWhenCollected(type);
+        entry.hiddenInRuntime = ObjectDefinitions.isHiddenInRuntime(type);
+        entry.isLockedDoor = ObjectDefinitions.isLockedDoor(type);
+        entry.hideWhenOpened = ObjectDefinitions.shouldHideWhenOpened(type);
+        entry.isVariableDoor = ObjectDefinitions.isVariableDoor(type);
+        entry.hideWhenVariableOpen = ObjectDefinitions.shouldHideWhenVariableOpen(type);
+        entry.requiresVariable = ObjectDefinitions.requiresVariable(type);
+        entry.swordDurability = ObjectDefinitions.getSwordDurability(type);
+        return entry;
+    }
+
     checkOpenedMagicDoor(variableId, value) {
+        const OT = this.types;
         for (const object of this.getObjects()) {
             if (value && object.type == OT.DOOR_VARIABLE && object.variableId == variableId) {
                 return true;

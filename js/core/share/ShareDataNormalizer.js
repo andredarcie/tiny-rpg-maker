@@ -265,13 +265,7 @@ class ShareDataNormalizer {
     }
 
     static normalizeEnemyType(type) {
-        if (typeof EnemyDefinitions?.normalizeType === 'function') {
-            return EnemyDefinitions.normalizeType(type);
-        }
-        if (typeof type === 'string' && type) {
-            return type;
-        }
-        return 'giant-rat';
+        return EnemyDefinitions.normalizeType(type);
     }
 
     static normalizeEnemyVariable(variableId) {

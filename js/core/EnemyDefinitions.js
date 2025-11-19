@@ -53,14 +53,14 @@ class EnemyDefinitions {
             missChance: 0.18,
             experience: 28,
             sprite: [
-                [ null,  6,  5,  5,  5, null,  2, null ],
-                [ null,  5,  8,  5,  8, null,  2, null ],
-                [ null,  5,  5,  5,  5, null,  2, null ],
-                [  5,  5, 13,  5, 13,  5,  2, null ],
-                [ 13, 13,  5, 13,  5, 14, 14, 14 ],
-                [  5,  5, 13,  5, 13, null,  5, null ],
-                [ null,  5,  5,  5,  5, null, null, null ],
-                [ null,  5, null, null,  5, null, null, null ]
+                [  1,  1,  1,  1,  1,  1,  1,  1 ],
+                [  1,  5,  5,  5,  5,  1,  2,  1 ],
+                [  1,  5,  8,  5,  8,  1,  2,  1 ],
+                [  1,  5, 13,  5, 13,  5,  2,  1 ],
+                [  1, 13,  5, 13,  5, 14, 14,  1 ],
+                [  1,  5, 13,  5, 13,  1,  5,  1 ],
+                [  1,  5,  1,  1,  5,  1,  1,  1 ],
+                [  1,  1,  1,  1,  1,  1, null, null ]
             ]
         },
         {

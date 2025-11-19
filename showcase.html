@@ -484,14 +484,12 @@
             card.addEventListener('click', () => openShare(game.shareUrl));
 
             let hasPreview = false;
-            if (typeof ShareCoverPreview === 'function') {
-                try {
-                    const preview = new ShareCoverPreview({ width: CARD_WIDTH, height: CARD_WIDTH });
-                    card.appendChild(preview.renderFromUrl(game.shareUrl));
-                    hasPreview = true;
-                } catch (error) {
-                    console.warn('ShareCoverPreview failed to render cover:', error);
-                }
+            try {
+                const preview = new ShareCoverPreview({ width: CARD_WIDTH, height: CARD_WIDTH });
+                card.appendChild(preview.renderFromUrl(game.shareUrl));
+                hasPreview = true;
+            } catch (error) {
+                console.warn('ShareCoverPreview failed to render cover:', error);
             }
 
             if (!hasPreview) {

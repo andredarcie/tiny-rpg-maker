@@ -1,17 +1,11 @@
 const getEnemyLocaleText = (key, fallback = '') => {
-    if (typeof TextResources !== 'undefined' && typeof TextResources.get === 'function') {
-        const value = TextResources.get(key, fallback);
-        return value || fallback || '';
-    }
-    return fallback || '';
+    const value = TextResources.get(key, fallback);
+    return value || fallback || '';
 };
 
 const formatEnemyLocaleText = (key, params = {}, fallback = '') => {
-    if (typeof TextResources !== 'undefined' && typeof TextResources.format === 'function') {
-        const value = TextResources.format(key, params, fallback);
-        return value || fallback || '';
-    }
-    return fallback || '';
+    const value = TextResources.format(key, params, fallback);
+    return value || fallback || '';
 };
 
 
@@ -120,17 +114,12 @@ class EnemyManager {
         } else {
             const damage = this.getEnemyDamage(enemy.type);
             const lives = this.gameState.damagePlayer(damage);
-            const reduction = typeof this.gameState.consumeLastDamageReduction === 'function'
-                ? this.gameState.consumeLastDamageReduction()
-                : 0;
+            const reduction = this.gameState.consumeLastDamageReduction();
             if (reduction > 0) {
-                const indicator = this.renderer?.showCombatIndicator;
                 const text = reduction >= damage
                     ? getEnemyLocaleText('combat.block.full', '')
                     : formatEnemyLocaleText('combat.block.partial', { value: reduction }, '');
-                if (typeof indicator === 'function') {
-                    indicator.call(this.renderer, text, { duration: 700 });
-                }
+                this.renderer.showCombatIndicator(text, { duration: 700 });
             }
             if (lives <= 0) {
                 this.onPlayerDefeated();
@@ -157,10 +146,7 @@ class EnemyManager {
         }
 
         this.tryTriggerDefeatVariable(enemy);
-        const flashScreen = this.renderer?.flashScreen;
-        if (typeof flashScreen === 'function') {
-            flashScreen.call(this.renderer, { intensity: 0.8, duration: 160 });
-        }
+        this.renderer.flashScreen({ intensity: 0.8, duration: 160 });
 
         this.renderer.draw();
     }
@@ -280,17 +266,11 @@ class EnemyManager {
     }
 
     normalizeEnemyType(type) {
-        if (typeof EnemyDefinitions?.normalizeType === 'function') {
-            return EnemyDefinitions.normalizeType(type);
-        }
-        return type || 'giant-rat';
+        return EnemyDefinitions.normalizeType(type);
     }
 
     getEnemyDefinition(type) {
-        if (typeof EnemyDefinitions?.getEnemyDefinition === 'function') {
-            return EnemyDefinitions.getEnemyDefinition(type);
-        }
-        return null;
+        return EnemyDefinitions.getEnemyDefinition(type);
     }
 
     getEnemyDamage(type) {
@@ -302,23 +282,13 @@ class EnemyManager {
     }
 
     getExperienceReward(type) {
-        if (typeof EnemyDefinitions?.getExperienceReward === 'function') {
-            return EnemyDefinitions.getExperienceReward(type);
-        }
-        const definition = this.getEnemyDefinition(type);
-        const reward = Number(definition?.experience);
-        if (Number.isFinite(reward)) {
-            return Math.max(0, Math.floor(reward));
-        }
-        return 0;
+        return EnemyDefinitions.getExperienceReward(type);
     }
 
     getEnemyMissChance(type) {
-        if (typeof EnemyDefinitions?.getMissChance === 'function') {
-            const explicit = EnemyDefinitions.getMissChance(type);
-            if (explicit !== null && explicit !== undefined) {
-                return this.normalizeMissChance(explicit);
-            }
+        const explicit = EnemyDefinitions.getMissChance(type);
+        if (explicit !== null && explicit !== undefined) {
+            return this.normalizeMissChance(explicit);
         }
         return this.fallbackMissChance;
     }
@@ -355,9 +325,7 @@ class EnemyManager {
             const fallbackId = typeof baseConfig?.variableId === 'string' ? baseConfig.variableId : null;
             variableId = fallbackId;
         }
-        if (typeof this.gameState?.normalizeVariableId === 'function') {
-            variableId = this.gameState.normalizeVariableId(variableId);
-        }
+        variableId = this.gameState.normalizeVariableId(variableId);
         if (!variableId) return null;
         const persist = baseConfig?.persist !== undefined ? Boolean(baseConfig.persist) : true;
         let message = null;
@@ -379,32 +347,20 @@ class EnemyManager {
     tryTriggerDefeatVariable(enemy) {
         const config = this.getDefeatVariableConfig(enemy);
         if (!config) return false;
-        const setter = this.gameState?.setVariableValue;
-        if (typeof setter !== 'function') return false;
-        const updated = setter.call(this.gameState, config.variableId, true, config.persist);
-        const isActive = typeof this.gameState?.isVariableOn === 'function'
-            ? this.gameState.isVariableOn(config.variableId)
-            : updated;
+        const updated = this.gameState.setVariableValue(config.variableId, true, config.persist);
+        const isActive = this.gameState.isVariableOn(config.variableId);
         if (!updated && !isActive) {
             return false;
         }
 
         if (config.message) {
-            const indicator = this.renderer?.showCombatIndicator;
-            if (typeof indicator === 'function') {
-                indicator.call(this.renderer, config.message, { duration: 900 });
-            } else if (typeof console !== 'undefined' && typeof console.info === 'function') {
-                console.info('[EnemyManager]', config.message);
-            }
+            this.renderer.showCombatIndicator(config.message, { duration: 900 });
         }
         return true;
     }
 
     showMissFeedback() {
-        const fn = this.renderer?.showCombatIndicator;
-        if (typeof fn === 'function') {
-            fn.call(this.renderer, 'Miss', { duration: 500 });
-        }
+        this.renderer.showCombatIndicator('Miss', { duration: 500 });
     }
 }
 
