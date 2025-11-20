@@ -58,16 +58,7 @@ class RendererSpriteFactory {
 
     buildPlayerSprite() {
         const picoPalette = this.paletteManager.getPicoPalette();
-        const pixels = [
-            [ null,  1,  1,  1,  1,  1,  1, null ],
-            [  1,  1, 15, 15, 15, 15,  1, null ],
-            [  1,  6, 15, 12, 15, 12,  1, null ],
-            [  1,  6, 15, 15, 15, 15,  1,  1 ],
-            [  1,  9,  9,  4,  4,  9,  9,  1 ],
-            [  1, 15,  9,  9,  9,  4, 15,  1 ],
-            [  1,  1,  5,  1,  1,  5,  1,  1 ],
-            [ null,  1,  1,  1,  1,  1,  1, null ]
-        ];
+        const pixels = SpriteMatrixRegistry.get('player');
         return this.mapPixels(pixels, picoPalette);
     }
 
@@ -115,16 +106,7 @@ class RendererSpriteFactory {
     }
 
     buildDefaultNpcSprite(picoPalette) {
-        const pixels = [
-            [ null, null, null,  5,  5,  5, null, null ],
-            [ null, null,  5,  5,  5,  5,  5, null ],
-            [ null, null,  7,  1,  7,  1,  7, null ],
-            [  5, null,  7,  7,  7,  7,  7, null ],
-            [  5, null,  5,  5,  5,  5,  5, null ],
-            [  5,  7,  6,  5,  5,  5,  6, null ],
-            [  5, null,  6,  6,  5,  6,  6, null ],
-            [  5, null,  6,  6,  6,  6,  6, null ]
-        ];
+        const pixels = SpriteMatrixRegistry.get('npc');
         return this.mapPixels(pixels, picoPalette);
     }
 
@@ -137,16 +119,7 @@ class RendererSpriteFactory {
 
     buildDefaultEnemySprite(palette) {
         const picoPalette = palette || this.paletteManager.getPicoPalette();
-        const pixels = [
-            [ null, null,  6, null, null, null,  6, null ],
-            [ null, null,  6,  6,  6,  6,  6, null ],
-            [ null, null,  6,  6,  8,  6,  8, null ],
-            [ null, null,  6,  6,  6,  6,  6, null ],
-            [ null, null,  1,  1,  6,  1,  1, null ],
-            [ null, null,  6,  1,  1,  1,  6, null ],
-            [ null, null, null,  1,  1,  1, null, null ],
-            [ null, null, null,  6, null,  6, null, null ]
-        ];
+        const pixels = SpriteMatrixRegistry.get('enemy');
         return this.mapPixels(pixels, picoPalette);
     }
 

@@ -67,6 +67,16 @@ class GameEngine {
         this.dialogManager.closeDialog();
     }
 
+    isPickupOverlayActive() {
+        return this.gameState.isPickupOverlayActive?.();
+    }
+
+    dismissPickupOverlay() {
+        if (!this.gameState.isPickupOverlayActive?.()) return;
+        this.gameState.hidePickupOverlay?.();
+        this.renderer.draw();
+    }
+
     resetGame() {
         this.awaitingRestart = false;
         this.gameState.setGameOver?.(false);

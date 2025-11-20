@@ -33,6 +33,11 @@ class InputManager {
             this.gameEngine.dismissIntroScreen?.();
             return;
         }
+        if (this.gameEngine.isPickupOverlayActive?.()) {
+            ev.preventDefault();
+            this.gameEngine.dismissPickupOverlay?.();
+            return;
+        }
         const dialog = this.gameEngine.gameState.getDialog();
 
         // When a dialog is open, only allow confirmation keys to handle it
@@ -99,6 +104,12 @@ class InputManager {
             this.touchStart = null;
             return;
         }
+        if (this.gameEngine.isPickupOverlayActive?.()) {
+            ev.preventDefault?.();
+            this.gameEngine.dismissPickupOverlay?.();
+            this.touchStart = null;
+            return;
+        }
         const touch = ev.changedTouches?.[0];
         if (!touch) return;
         this.touchStart = {
@@ -146,6 +157,12 @@ class InputManager {
         if (this.gameEngine.isIntroVisible?.()) {
             ev.preventDefault?.();
             this.gameEngine.dismissIntroScreen?.();
+            this.touchStart = null;
+            return;
+        }
+        if (this.gameEngine.isPickupOverlayActive?.()) {
+            ev.preventDefault?.();
+            this.gameEngine.dismissPickupOverlay?.();
             this.touchStart = null;
             return;
         }

@@ -59,6 +59,7 @@ class Renderer {
 
         const gameplayCanvas = this.gameplayCanvasBounds;
         const introActive = this.isIntroOverlayActive();
+        const pickupOverlayActive = this.gameState.isPickupOverlayActive?.();
         ctx.save();
         ctx.translate(0, this.gameplayOffsetY);
 
@@ -80,11 +81,15 @@ class Renderer {
                 if (this.drawIconIdNextFrame) {
                     this.drawTileIconOnPlayer(ctx, this.drawIconIdNextFrame);
                 }
-                this.dialogRenderer.drawDialog(ctx, gameplayCanvas);
+                if (!pickupOverlayActive) {
+                    this.dialogRenderer.drawDialog(ctx, gameplayCanvas);
+                }
             }
         }
         if (introActive) {
             this.overlayRenderer.drawIntroOverlay(ctx, gameplayCanvas);
+        } else if (pickupOverlayActive) {
+            this.overlayRenderer.drawPickupOverlay(ctx, gameplayCanvas);
         }
         ctx.restore();
 

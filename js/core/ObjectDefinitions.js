@@ -26,16 +26,7 @@ class ObjectDefinitions {
                 order: 10,
                 tags: ['placeable', 'player-start', 'global-unique', 'hidden-in-runtime']
             },
-            sprite: [
-                [ null, null, null, null, null, null, null, null ],
-                [ null,  1,  1,  1,  1,  1,  1, null ],
-                [ null,  1,  3,  3,  3,  3,  1, null ],
-                [ null,  1,  3,  3, 11,  3,  1, null ],
-                [ null,  1,  3, 11,  3,  3,  1, null ],
-                [ null,  1,  3,  3,  3,  3,  1, null ],
-                [ null,  1,  1,  1,  1,  1,  1, null ],
-                [ null, null, null, null, null, null, null, null ]
-            ]
+            sprite: SpriteMatrixRegistry.get('object', 'player-start')
         },
         {
             type: OBJECT_TYPES.PLAYER_END,
@@ -46,16 +37,7 @@ class ObjectDefinitions {
                 order: 20,
                 tags: ['placeable', 'player-end', 'per-room-unique']
             },
-            sprite: [
-                [ null, null, null, null, null, null, null, null ],
-                [ null,  1,  1,  1,  1,  1,  1, null ],
-                [ null,  1,  2,  2,  2,  2,  1, null ],
-                [ null,  1,  2,  2, 14,  2,  1, null ],
-                [ null,  1,  2, 14,  2,  2,  1, null ],
-                [ null,  1,  2,  2,  2,  2,  1, null ],
-                [ null,  1,  1,  1,  1,  1,  1, null ],
-                [ null, null, null, null, null, null, null, null ]
-            ]
+            sprite: SpriteMatrixRegistry.get('object', 'player-end')
         },
         {
             type: OBJECT_TYPES.SWITCH,
@@ -66,26 +48,8 @@ class ObjectDefinitions {
                 order: 30,
                 tags: ['placeable', 'switch', 'requires-variable']
             },
-            sprite: [
-                [ null, null, null, null, null, null, null, null ],
-                [  8, null, null, null, null, null, null, null ],
-                [ null,  6, null, null, null, null, null, null ],
-                [ null, null,  6, null, null, null, null, null ],
-                [ null, null, null,  6, null, null, null, null ],
-                [ null, null,  6,  1,  1,  6, null, null ],
-                [ null,  6,  6,  6,  6,  6,  6, null ],
-                [ null, null, null, null, null, null, null, null ]
-            ],
-            spriteOn: [
-                [ null, null, null, null, null, null, null, null ],
-                [ null, null, null, null, null, null, null, 12 ],
-                [ null, null, null, null, null, null,  6, null ],
-                [ null, null, null, null, null,  6, null, null ],
-                [ null, null, null, null,  6, null, null, null ],
-                [ null, null,  6,  1,  1,  6, null, null ],
-                [ null,  6,  6,  6,  6,  6,  6, null ],
-                [ null, null, null, null, null, null, null, null ]
-            ]
+            sprite: SpriteMatrixRegistry.get('object', 'switch'),
+            spriteOn: SpriteMatrixRegistry.get('object', 'switch--on')
         },
         {
             type: OBJECT_TYPES.KEY,
@@ -96,16 +60,7 @@ class ObjectDefinitions {
                 order: 60,
                 tags: ['placeable', 'collectible', 'hide-when-collected']
             },
-            sprite: [
-                [ null, null, null, null, null, null, null, null ],
-                [ null, null, null, null, null, null, null, null ],
-                [ null, null, null, null, null, null, null, null ],
-                [ 10, 10,  7, null, null, null, null, null ],
-                [ 10, null, 10, 10, 10, 10, 10, 10 ],
-                [  9,  9,  9, null, null,  9, null,  9 ],
-                [ null, null, null, null, null, null, null, null ],
-                [ null, null, null, null, null, null, null, null ]
-            ]
+            sprite: SpriteMatrixRegistry.get('object', 'key')
         },
         {
             type: OBJECT_TYPES.DOOR,
@@ -116,16 +71,7 @@ class ObjectDefinitions {
                 order: 40,
                 tags: ['placeable', 'door', 'locked-door', 'hide-when-opened']
             },
-            sprite: [
-                [ null,  4,  4,  4,  4,  4,  4, null ],
-                [  4,  9,  9,  9,  9,  9,  9,  4 ],
-                [  4,  9,  9,  9,  9,  9,  9,  4 ],
-                [  4,  9,  9,  9,  0,  0,  9,  4 ],
-                [  4,  9,  9,  9,  0,  0,  9,  4 ],
-                [  4,  9,  9,  9,  9,  0,  9,  4 ],
-                [  4,  9,  9,  9,  9,  9,  9,  4 ],
-                [  4,  9,  9,  9,  9,  9,  9,  4 ]
-            ]
+            sprite: SpriteMatrixRegistry.get('object', 'door')
         },
         {
             type: OBJECT_TYPES.DOOR_VARIABLE,
@@ -136,16 +82,7 @@ class ObjectDefinitions {
                 order: 50,
                 tags: ['placeable', 'door', 'requires-variable', 'variable-door', 'hide-when-variable-open']
             },
-            sprite: [
-                [ null,  7, null,  7, null,  7, null,  7 ],
-                [ null,  6,  6,  6,  6,  6,  6,  6 ],
-                [ null,  6, 13,  6, 13,  6, 13,  6 ],
-                [ null,  6, null,  6, null,  6, null,  6 ],
-                [ null,  6, null,  6, null,  6, null,  5 ],
-                [ null,  6,  6,  6,  6,  6,  6,  6 ],
-                [ null,  6, 13,  6, 13,  6, 13,  6 ],
-                [ null,  6, null,  6, null,  6, null,  6 ]
-            ]
+            sprite: SpriteMatrixRegistry.get('object', 'door-variable')
         },
         {
             type: OBJECT_TYPES.LIFE_POTION,
@@ -156,16 +93,7 @@ class ObjectDefinitions {
                 order: 70,
                 tags: ['placeable', 'collectible', 'hide-when-collected']
             },
-            sprite: [
-                [ null, null,  1,  1,  1,  1, null, null ],
-                [ null,  1,  1,  1,  1,  1,  1, null ],
-                [ null, null,  6, null, null,  6, null, null ],
-                [ null, null,  6,  8,  8,  6, null, null ],
-                [ null,  6,  8,  8,  8,  8,  6, null ],
-                [  6,  8,  8,  8,  6,  8,  8,  6 ],
-                [ null,  6,  8,  6,  8,  8,  6, null ],
-                [ null, null,  6,  6,  6,  6, null, null ]
-            ]
+            sprite: SpriteMatrixRegistry.get('object', 'life-potion')
         },
         {
             type: OBJECT_TYPES.XP_SCROLL,
@@ -176,16 +104,7 @@ class ObjectDefinitions {
                 order: 110,
                 tags: ['placeable', 'collectible', 'hide-when-collected']
             },
-            sprite: [
-                [ null, null, null, null, null, null, null, null ],
-                [ null, null,  6,  6,  6,  6,  6,  6 ],
-                [ null, null,  6,  1,  1,  1,  6,  0 ],
-                [ null, null,  6,  6,  6,  6,  6, null ],
-                [ null, null,  6,  1,  1,  1,  6, null ],
-                [ null, null,  6,  6,  6,  6,  6, null ],
-                [ null,  0,  6,  1,  1,  6,  6, null ],
-                [ null,  6,  6,  6,  6,  6,  6, null ]
-            ]
+            sprite: SpriteMatrixRegistry.get('object', 'xp-scroll')
         },
         {
             type: OBJECT_TYPES.SWORD,
@@ -197,16 +116,7 @@ class ObjectDefinitions {
                 swordDurability: 3,
                 tags: ['placeable', 'collectible', 'sword', 'hide-when-collected']
             },
-            sprite: [
-                [ null, null, null, null, null, null, null, null ],
-                [  6,  6, null, null, null, null, null, null ],
-                [  6,  6,  6, null, null, null, null, null ],
-                [ null,  6,  6,  6, null, null, null, null ],
-                [ null, null,  6,  6,  6, null,  1, null ],
-                [ null, null, null,  6,  8,  1,  1, null ],
-                [ null, null, null, null,  1,  1, null, null ],
-                [ null, null, null,  1,  1, null,  1, null ]
-            ]
+            sprite: SpriteMatrixRegistry.get('object', 'sword')
         },
         {
             type: OBJECT_TYPES.SWORD_BRONZE,
@@ -218,16 +128,7 @@ class ObjectDefinitions {
                 swordDurability: 2,
                 tags: ['placeable', 'collectible', 'sword', 'hide-when-collected']
             },
-            sprite: [
-                [ null, null, null, null, null, null, null, null ],
-                [  9,  9, null, null, null, null, null, null ],
-                [  9, 10,  9, null, null, null, null, null ],
-                [ null,  9,  9, 10, null, null, null, null ],
-                [ null, null,  9,  9, 10, null,  1, null ],
-                [ null, null, null,  9,  9,  1,  1, null ],
-                [ null, null, null, null,  1,  1, null, null ],
-                [ null, null, null,  1,  1, null,  1, null ]
-            ]
+            sprite: SpriteMatrixRegistry.get('object', 'sword-bronze')
         },
         {
             type: OBJECT_TYPES.SWORD_WOOD,
@@ -239,16 +140,7 @@ class ObjectDefinitions {
                 swordDurability: 1,
                 tags: ['placeable', 'collectible', 'sword', 'hide-when-collected']
             },
-            sprite: [
-                [ null, null, null, null, null, null, null, null ],
-                [  4,  4, null, null, null, null, null, null ],
-                [  4,  5,  4, null, null, null, null, null ],
-                [ null,  4,  4,  5, null, null, null, null ],
-                [ null, null,  4,  4,  5, null,  1, null ],
-                [ null, null, null,  4,  9,  1,  1, null ],
-                [ null, null, null, null,  1,  1, null, null ],
-                [ null, null, null,  1,  1, null,  1, null ]
-            ]
+            sprite: SpriteMatrixRegistry.get('object', 'sword-wood')
         }
     ];
 

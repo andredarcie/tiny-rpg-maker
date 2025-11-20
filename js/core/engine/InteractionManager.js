@@ -58,38 +58,23 @@ class InteractionManager {
         switch (object.type) {
             case OT.KEY: {
                 object.collected = true;
-                const totalKeys = this.gameState.addKeys?.(1);
-                const message = Number.isFinite(totalKeys)
-                    ? this.formatInteractionText('objects.key.pickup.count', { value: totalKeys }, '')
-                    : this.getInteractionText('objects.key.pickup.single', '');
-                if (message) {
-                    this.dialogManager.showDialog(message);
-                }
+                this.showPickupOverlay(object.type, () => {
+                    this.gameState.addKeys?.(1);
+                });
                 return true;
             }
             case OT.LIFE_POTION: {
                 object.collected = true;
-                this.gameState.addLife?.(1);
-                const message = this.getInteractionText('objects.potion.used', '');
-                if (message) {
-                    this.dialogManager.showDialog(message);
-                }
+                this.showPickupOverlay(object.type, () => {
+                    this.gameState.addLife?.(1);
+                });
                 return true;
             }
             case OT.XP_SCROLL: {
                 object.collected = true;
-                const result = this.gameState.addExperience?.(30);
-                let message = this.formatInteractionText('objects.xpScroll.read', { value: 30 }, '');
-                if (result?.leveledUp) {
-                    const gained = Number.isFinite(result.levelsGained) && result.levelsGained > 0
-                        ? result.levelsGained
-                        : 1;
-                    const levelText = this.formatInteractionText('objects.xpScroll.levelUp', { value: gained }, '');
-                    message = [message, levelText].filter(Boolean).join(' ').trim();
-                }
-                if (message) {
-                    this.dialogManager.showDialog(message);
-                }
+                this.showPickupOverlay(object.type, () => {
+                    this.gameState.addExperience?.(30);
+                });
                 return true;
             }
             case OT.SWORD:
@@ -97,9 +82,9 @@ class InteractionManager {
             case OT.SWORD_WOOD: {
                 const durability = this.getSwordDurability(object.type);
                 object.collected = true;
-                this.gameState.addDamageShield?.(durability, object.type);
-                const message = this.buildSwordDialog(object.type, durability);
-                this.dialogManager.showDialog(message);
+                this.showPickupOverlay(object.type, () => {
+                    this.gameState.addDamageShield?.(durability, object.type);
+                });
                 return true;
             }
             default:
@@ -120,26 +105,27 @@ class InteractionManager {
         }
     }
 
-    buildSwordDialog(type, durability) {
-        const OT = this.types;
-        const { name } = this.getSwordName(type);
-        const key = durability === 1
-            ? 'objects.sword.pickup.single'
-            : 'objects.sword.pickup.multi';
-        const fallback = '';
-        return TextResources.format(key, { name, value: durability }, fallback);
+    showPickupOverlay(type, effect = null) {
+        const overlayName = this.getObjectDisplayName(type);
+        this.gameState.showPickupOverlay?.({
+            name: overlayName,
+            spriteGroup: 'object',
+            spriteType: type,
+            effect
+        });
     }
 
-    getSwordName(type) {
-        const OT = this.types;
-        const nameMap = {
-            [OT.SWORD]: { key: 'objects.label.sword', fallback: OT.SWORD },
-            [OT.SWORD_BRONZE]: { key: 'objects.label.swordBronze', fallback: OT.SWORD_BRONZE },
-            [OT.SWORD_WOOD]: { key: 'objects.label.swordWood', fallback: OT.SWORD_WOOD }
-        };
-        const entry = nameMap[type] || nameMap[OT.SWORD];
-        const name = TextResources.get(entry.key, entry.fallback);
-        return { name };
+    getObjectDisplayName(type) {
+        const definition = ObjectDefinitions.getObjectDefinition(type);
+        if (!definition) {
+            return type || '';
+        }
+        if (definition.nameKey) {
+            const localized = TextResources.get(definition.nameKey, definition.name || type || '');
+            if (localized) return localized;
+        }
+        if (definition.name) return definition.name;
+        return type || '';
     }
 
     getInteractionText(key, fallback = '') {

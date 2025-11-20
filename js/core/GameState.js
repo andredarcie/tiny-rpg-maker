@@ -53,7 +53,14 @@ class GameState {
             enemies: [],
             variables: [],
             gameOver: false,
-            gameOverReason: null
+            gameOverReason: null,
+            pickupOverlay: {
+                active: false,
+                name: '',
+                spriteGroup: null,
+                spriteType: null,
+                effect: null
+            }
         };
 
         this.worldManager = new StateWorldManager(this.game, roomSize);
@@ -138,6 +145,7 @@ class GameState {
         this.objectManager.resetRuntime();
         this.objectManager.ensurePlayerStartObject();
         this.setGameOver(false);
+        this.hidePickupOverlay();
         this.resumeGame('game-over');
     }
 
@@ -374,6 +382,52 @@ class GameState {
 
     handleEnemyDefeated(experienceReward = 0) {
         return this.playerFacade.handleEnemyDefeated(experienceReward);
+    }
+
+    getPickupOverlay() {
+        if (!this.state.pickupOverlay) {
+            this.state.pickupOverlay = {
+                active: false,
+                name: '',
+                spriteGroup: null,
+                spriteType: null,
+                effect: null
+            };
+        }
+        return this.state.pickupOverlay;
+    }
+
+    showPickupOverlay(options = {}) {
+        const overlay = this.getPickupOverlay();
+        overlay.active = true;
+        overlay.name = options.name || options.title || '';
+        overlay.spriteGroup = options.spriteGroup || null;
+        overlay.spriteType = options.spriteType || null;
+        overlay.effect = typeof options.effect === 'function' ? options.effect : null;
+        this.pauseGame('pickup-overlay');
+    }
+
+    hidePickupOverlay() {
+        const overlay = this.getPickupOverlay();
+        if (!overlay.active) return;
+        overlay.active = false;
+        const effect = overlay.effect;
+        overlay.effect = null;
+        overlay.name = '';
+        overlay.spriteGroup = null;
+        overlay.spriteType = null;
+        if (typeof effect === 'function') {
+            try {
+                effect();
+            } catch (err) {
+                console.error('Pickup overlay effect error:', err);
+            }
+        }
+        this.resumeGame('pickup-overlay');
+    }
+
+    isPickupOverlayActive() {
+        return Boolean(this.getPickupOverlay().active);
     }
 
     pauseGame(reason = 'manual') {

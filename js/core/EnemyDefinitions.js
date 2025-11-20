@@ -12,16 +12,7 @@ class EnemyDefinitions {
             damage: 1,
             missChance: 0.35,
             experience: 8,
-            sprite: [
-                [ null, null, null, 15, 15, null, 15, 15 ],
-                [ 15, null, null, 15, 15, null, 15, 15 ],
-                [ 15, null, null, 13, 13, 13, 13, 13 ],
-                [ 15, null,  1, 13,  8, 13,  8, 13 ],
-                [ null,  1,  1,  1, 13, 13, 13, null ],
-                [ null,  1,  1,  1,  1, 15, null, null ],
-                [ null,  1,  1,  1,  1, null, null, null ],
-                [ null, 15, null, null, 15, null, null, null ]
-            ]
+            sprite: SpriteMatrixRegistry.get('enemy', 'giant-rat')
         },
         {
             type: 'bandit',
@@ -32,16 +23,7 @@ class EnemyDefinitions {
             damage: 2,
             missChance: 0.25,
             experience: 14,
-            sprite: [
-                [ null, 15, 15, 15, 15, null,  6, null ],
-                [ null, 15,  8, 15,  8, null,  7, null ],
-                [ null,  1,  1,  1,  1, null,  7, null ],
-                [  5,  5,  1,  1,  1,  5,  6, null ],
-                [  5,  5,  5,  1,  5, 13, 13, 13 ],
-                [  1,  5,  5,  5,  5, null,  1, null ],
-                [ null, 13, 13, 13, 13, null, null, null ],
-                [ null, 13, null, null, 13, null, null, null ]
-            ]
+            sprite: SpriteMatrixRegistry.get('enemy', 'bandit')
         },
         {
             type: 'dark-knight',
@@ -52,16 +34,7 @@ class EnemyDefinitions {
             damage: 3,
             missChance: 0.18,
             experience: 28,
-            sprite: [
-                [  1,  1,  1,  1,  1,  1,  1,  1 ],
-                [  1,  5,  5,  5,  5,  1,  2,  1 ],
-                [  1,  5,  8,  5,  8,  1,  2,  1 ],
-                [  1,  5, 13,  5, 13,  5,  2,  1 ],
-                [  1, 13,  5, 13,  5, 14, 14,  1 ],
-                [  1,  5, 13,  5, 13,  1,  5,  1 ],
-                [  1,  5,  1,  1,  5,  1,  1,  1 ],
-                [  1,  1,  1,  1,  1,  1, null, null ]
-            ]
+            sprite: SpriteMatrixRegistry.get('enemy', 'dark-knight')
         },
         {
             type: 'necromancer',
@@ -72,16 +45,7 @@ class EnemyDefinitions {
             damage: 4,
             missChance: 0.12,
             experience: 45,
-            sprite: [
-                [ null, null, 15, 15, 15, 15, null,  8 ],
-                [ null, null, 15,  8, 15,  8, null,  4 ],
-                [ null, null, 15, 15, 15, 15, null,  4 ],
-                [ null, null,  2,  2,  2,  2,  2,  2 ],
-                [ null, null,  2,  2,  2,  2,  2,  4 ],
-                [ null, null,  2,  2,  2,  2, null,  4 ],
-                [ null,  2,  2,  2,  2,  2,  2,  4 ],
-                [  2,  2,  2,  2,  2,  2,  2,  2 ]
-            ]
+            sprite: SpriteMatrixRegistry.get('enemy', 'necromancer')
         },
         {
             type: 'dragon',
@@ -94,16 +58,7 @@ class EnemyDefinitions {
             defeatActivationMessage: 'Selo do Dragão ativado!',
             defeatActivationMessageKey: 'enemies.defeat.dragon',
             experience: 70,
-            sprite: [
-                [ null, null,  3, 11, 11, 11, 11, 11 ],
-                [ null,  3, 11, 11, 11,  8, 11,  8 ],
-                [ null,  3,  3, 11, 11, 11, 11, 11 ],
-                [ null, null,  3,  3,  3,  7, null,  7 ],
-                [ 11, null, null,  3, 11, null, null, null ],
-                [ 11, null, 11, 11, 11,  3, null, null ],
-                [ 11,  3,  3,  3, null,  3, null, null ],
-                [ 11, 11, null, 11, null, null, null, null ]
-            ]
+            sprite: SpriteMatrixRegistry.get('enemy', 'dragon')
         },
         {
             type: 'skeleton',
@@ -115,16 +70,7 @@ class EnemyDefinitions {
             missChance: 0.25,
             experience: 16,
             aliases: ['skull'],
-            sprite: [
-                [ null, null,  7,  7,  7,  7, null, null ],
-                [ null, null,  7,  8,  7,  8, null, null ],
-                [ null, null,  7,  7,  7,  7, null, null ],
-                [ null,  7, null,  7,  7, null,  7, null ],
-                [ null,  7,  7,  7,  7,  7,  7, null ],
-                [ null,  7, null,  7, null, null,  7, null ],
-                [ null, null,  7,  7,  7,  7, null, null ],
-                [ null, null,  7, null, null,  7, null, null ]
-            ]
+            sprite: SpriteMatrixRegistry.get('enemy', 'skeleton')
         },
         {
             type: 'fallen-king',
@@ -137,16 +83,7 @@ class EnemyDefinitions {
             defeatActivationMessage: 'Selo Real despertou!',
             defeatActivationMessageKey: 'enemies.defeat.fallenKing',
             experience: 90,
-            sprite: [
-                [ null, 10, null, 10, null, 10, null, null ],
-                [ null,  9,  9,  9,  9,  9, null, 10 ],
-                [ null,  5, 15,  8, 15,  8, null,  9 ],
-                [ null,  5,  5, 15, 15,  5, null,  9 ],
-                [ null,  2,  7,  5,  5,  7, null,  9 ],
-                [ null,  2,  2,  7,  2,  2,  2, 15 ],
-                [  2,  2,  2,  7,  2,  2, null,  9 ],
-                [  7,  7,  7,  7,  7,  7, null,  9 ]
-            ]
+            sprite: SpriteMatrixRegistry.get('enemy', 'fallen-king')
         },
         {
             type: 'ancient-demon',
@@ -160,16 +97,7 @@ class EnemyDefinitions {
             defeatActivationMessageKey: 'enemies.defeat.ancientDemon',
             aliases: ['boss'],
             experience: 125,
-            sprite: [
-                [ null, null,  8, null, null,  8, null, null ],
-                [ null, null,  8,  8,  8,  8, null, null ],
-                [ null, null,  8,  0,  8,  0, null, null ],
-                [ null,  8,  8,  8,  8,  8,  8, null ],
-                [  8,  8,  8,  8,  8,  8,  8,  8 ],
-                [  8, null,  8,  8,  8,  8, null,  8 ],
-                [ null, null,  8,  8,  8,  8, null, null ],
-                [ null, null,  8, null, null,  8, null, null ]
-            ]
+            sprite: SpriteMatrixRegistry.get('enemy', 'ancient-demon')
         }
     ];
 

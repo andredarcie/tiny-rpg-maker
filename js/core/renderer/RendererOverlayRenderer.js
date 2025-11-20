@@ -43,6 +43,46 @@ class RendererOverlayRenderer extends RendererModuleBase {
         ctx.restore();
     }
 
+    drawPickupOverlay(ctx, gameplayCanvas) {
+        if (!ctx || !gameplayCanvas) return;
+        const overlay = this.gameState.getPickupOverlay?.();
+        if (!overlay?.active) return;
+        const width = gameplayCanvas.width;
+        const height = gameplayCanvas.height;
+        const size = Math.floor(Math.min(width, height) * 0.6);
+        const offsetX = Math.round((width - size) / 2);
+        const offsetY = Math.round((height - size) / 2);
+        ctx.save();
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(offsetX, offsetY, size, size);
+
+        const sprite = this.getPickupSprite(overlay);
+        if (sprite) {
+            const spriteArea = Math.floor(size * 0.45);
+            const step = Math.max(2, Math.floor(spriteArea / 8));
+            const spriteSize = step * 8;
+            const spriteX = Math.round(offsetX + (size - spriteSize) / 2);
+            const spriteY = Math.round(offsetY + (size - spriteSize) / 2);
+            this.canvasHelper.drawSprite(ctx, sprite, spriteX, spriteY, step);
+        }
+
+        ctx.restore();
+    }
+
+    getPickupSprite(overlay = null) {
+        if (!overlay?.spriteGroup) return null;
+        const factory = this.spriteFactory;
+        if (!factory) return null;
+        switch (overlay.spriteGroup) {
+            case 'object': {
+                const sprites = factory.getObjectSprites();
+                return sprites?.[overlay.spriteType] || null;
+            }
+            default:
+                return null;
+        }
+    }
+
     drawGameOverScreen() {
         const ctx = this.ctx;
         if (!ctx) return;

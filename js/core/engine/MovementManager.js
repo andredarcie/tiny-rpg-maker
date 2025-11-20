@@ -26,6 +26,9 @@ class MovementManager {
         if (this.gameState.isGameOver()) {
             return;
         }
+        if (this.gameState.isPickupOverlayActive?.()) {
+            return;
+        }
         const dialog = this.gameState.getDialog();
         if (dialog.active) {
             if (dialog.page >= dialog.maxPages) {
