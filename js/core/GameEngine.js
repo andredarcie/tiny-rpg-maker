@@ -133,11 +133,7 @@ class GameEngine {
     }
 
     showIntroScreen() {
-        this.canDismissIntroScreen = false;
-        setTimeout(() => {
-            this.canDismissIntroScreen = true;
-        }, this.timeToResetAfterIntro);
-
+        this.canDismissIntroScreen = true;
         this.refreshIntroScreen();
         this.introVisible = true;
         this.introStartTime = (typeof performance !== 'undefined' && performance.now)

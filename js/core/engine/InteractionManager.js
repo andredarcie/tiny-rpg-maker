@@ -64,6 +64,11 @@ class InteractionManager {
                 return true;
             }
             case OT.LIFE_POTION: {
+                const currentLives = this.gameState.getLives?.();
+                const maxLives = this.gameState.getMaxLives?.();
+                if (Number.isFinite(currentLives) && Number.isFinite(maxLives) && currentLives >= maxLives) {
+                    return false;
+                }
                 object.collected = true;
                 this.showPickupOverlay(object.type, () => {
                     this.gameState.addLife?.(1);
@@ -80,6 +85,9 @@ class InteractionManager {
             case OT.SWORD:
             case OT.SWORD_BRONZE:
             case OT.SWORD_WOOD: {
+                if (!this.shouldPickupSword(object.type)) {
+                    return false;
+                }
                 const durability = this.getSwordDurability(object.type);
                 object.collected = true;
                 this.showPickupOverlay(object.type, () => {
@@ -103,6 +111,23 @@ class InteractionManager {
             default:
                 return 3;
         }
+    }
+
+    getSwordPriority(type) {
+        const OT = this.types;
+        const priorityMap = {
+            [OT.SWORD_WOOD]: 1,
+            [OT.SWORD_BRONZE]: 2,
+            [OT.SWORD]: 3
+        };
+        return priorityMap[type] || 0;
+    }
+
+    shouldPickupSword(type) {
+        const currentType = this.gameState.getSwordType?.() || null;
+        const currentPriority = this.getSwordPriority(currentType);
+        const newPriority = this.getSwordPriority(type);
+        return newPriority > currentPriority;
     }
 
     showPickupOverlay(type, effect = null) {
