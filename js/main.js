@@ -25,6 +25,15 @@ class TinyRPGApplication {
         const gameEngine = new GameEngine(gameCanvas);
         this.loadSharedGameIfAvailable(gameEngine);
 
+        document.addEventListener('game-tab-activated', (ev) => {
+            if (ev?.detail?.initial) return;
+            gameEngine.resetGame();
+        });
+        document.addEventListener('editor-tab-activated', (ev) => {
+            if (ev?.detail?.initial) return;
+            gameEngine.resetGame();
+        });
+
         window.TinyRPGMaker = {
             exportGameData: () => gameEngine.exportGameData(),
             importGameData: (data) => gameEngine.importGameData(data),

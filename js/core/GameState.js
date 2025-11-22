@@ -93,8 +93,13 @@ class GameState {
         this.ensureDefaultVariables();
         this.resetGame();
 
-        document.addEventListener('game-tab-activated', () => this.resumeGame('tab'));
-        document.addEventListener('editor-tab-activated', () => this.pauseGame('tab'));
+        this.editorMode = false;
+        document.addEventListener('game-tab-activated', () => {
+            this.setEditorMode(false);
+        });
+        document.addEventListener('editor-tab-activated', () => {
+            this.setEditorMode(true);
+        });
     }
 
     createEmptyRoom(size, index = 0, cols = 1) {
@@ -204,6 +209,14 @@ class GameState {
 
     setDialogPage(page) {
         this.dialogManager.setPage(page);
+    }
+
+    setEditorMode(active = false) {
+        this.editorMode = Boolean(active);
+    }
+
+    isEditorModeActive() {
+        return Boolean(this.editorMode);
     }
 
     resetGame() {

@@ -77,6 +77,7 @@ class EnemyManager {
 
     tick() {
         if (!this.gameState.playing) return;
+        if (this.gameState.isEditorModeActive?.()) return;
         
         const enemies = this.gameState.getEnemies();
         if (!this.hasMovableEnemies(enemies)) return;
