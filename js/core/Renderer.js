@@ -60,6 +60,7 @@ class Renderer {
         const gameplayCanvas = this.gameplayCanvasBounds;
         const introActive = this.isIntroOverlayActive();
         const pickupOverlayActive = this.gameState.isPickupOverlayActive?.();
+        const levelUpOverlayActive = this.gameState.isLevelUpOverlayActive?.();
         ctx.save();
         ctx.translate(0, this.gameplayOffsetY);
 
@@ -81,7 +82,7 @@ class Renderer {
                 if (this.drawIconIdNextFrame) {
                     this.drawTileIconOnPlayer(ctx, this.drawIconIdNextFrame);
                 }
-                if (!pickupOverlayActive) {
+                if (!pickupOverlayActive && !levelUpOverlayActive) {
                     this.dialogRenderer.drawDialog(ctx, gameplayCanvas);
                 }
             }
@@ -110,13 +111,18 @@ class Renderer {
             ctx.fillRect(0, 0, topHudArea.width, topHudArea.height);
             ctx.fillRect(bottomHudArea.x, bottomHudArea.y, bottomHudArea.width, bottomHudArea.height);
             ctx.restore();
-        } else {
+        } else if (!levelUpOverlayActive) {
             this.hudRenderer.drawHUD(ctx, topHudArea);
             this.hudRenderer.drawInventory(ctx, bottomHudArea);
         }
 
         if (this.gameState.isGameOver()) {
             this.overlayRenderer.drawGameOverScreen();
+            return;
+        }
+
+        if (levelUpOverlayActive) {
+            this.overlayRenderer.drawLevelUpOverlayFull(ctx);
         }
     }
 

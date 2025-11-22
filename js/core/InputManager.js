@@ -20,6 +20,7 @@ class InputManager {
         document.addEventListener("touchstart", (ev) => this.handleTouchStart(ev), { passive: false });
         document.addEventListener("touchmove", (ev) => this.handleTouchMove(ev), { passive: false });
         document.addEventListener("touchend", (ev) => this.handleTouchEnd(ev), { passive: false });
+        document.addEventListener("click", (ev) => this.handleClick(ev));
     }
 
     handleKeyDown(ev) {
@@ -31,6 +32,11 @@ class InputManager {
         if (this.gameEngine.isIntroVisible?.()) {
             ev.preventDefault();
             this.gameEngine.dismissIntroScreen?.();
+            return;
+        }
+        if (this.gameEngine.isLevelUpOverlayActive?.()) {
+            ev.preventDefault();
+            this.handleLevelUpKey(ev);
             return;
         }
         if (this.gameEngine.isPickupOverlayActive?.()) {
@@ -104,6 +110,15 @@ class InputManager {
             this.touchStart = null;
             return;
         }
+        if (this.gameEngine.isLevelUpOverlayActive?.()) {
+            ev.preventDefault?.();
+            const touch = ev.changedTouches?.[0];
+            if (touch) {
+                this.chooseLevelUpByPointer(touch.clientX);
+            }
+            this.touchStart = null;
+            return;
+        }
         if (this.gameEngine.isPickupOverlayActive?.()) {
             ev.preventDefault?.();
             this.gameEngine.dismissPickupOverlay?.();
@@ -160,6 +175,15 @@ class InputManager {
             this.touchStart = null;
             return;
         }
+        if (this.gameEngine.isLevelUpOverlayActive?.()) {
+            ev.preventDefault?.();
+            const touch = ev.changedTouches?.[0];
+            if (touch) {
+                this.chooseLevelUpByPointer(touch.clientX);
+            }
+            this.touchStart = null;
+            return;
+        }
         if (this.gameEngine.isPickupOverlayActive?.()) {
             ev.preventDefault?.();
             this.gameEngine.dismissPickupOverlay?.();
@@ -205,6 +229,45 @@ class InputManager {
                 this.gameEngine.tryMove(0, -1);
             }
         }
+    }
+
+    handleClick(ev) {
+        if (!this.isGameModeActive()) return;
+        if (this.gameEngine.isLevelUpOverlayActive?.()) {
+            ev.preventDefault?.();
+            this.chooseLevelUpByPointer(ev.clientX);
+        }
+    }
+
+    handleLevelUpKey(ev) {
+        const key = ev.key?.toLowerCase?.() || '';
+        if (key === '1') {
+            this.gameEngine.chooseLevelUpSkill?.(0);
+            return;
+        }
+        if (key === '2') {
+            this.gameEngine.chooseLevelUpSkill?.(1);
+            return;
+        }
+        if (key === 'arrowup' || key === 'w') {
+            this.gameEngine.moveLevelUpCursor?.(-1);
+            this.gameEngine.draw?.();
+            return;
+        }
+        if (key === 'arrowdown' || key === 's') {
+            this.gameEngine.moveLevelUpCursor?.(1);
+            this.gameEngine.draw?.();
+            return;
+        }
+        if (key === 'enter' || key === ' ' || key === 'z') {
+            this.gameEngine.confirmLevelUpSelection?.();
+        }
+    }
+
+    chooseLevelUpByPointer(clientX) {
+        const index = this.gameEngine.pickLevelUpChoiceFromPointer?.(clientX);
+        if (index === null || index === undefined) return;
+        this.gameEngine.chooseLevelUpSkill?.(index);
     }
 
     // Map editor canvas interactions

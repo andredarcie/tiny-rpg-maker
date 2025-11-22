@@ -104,6 +104,13 @@ class EnemyManager {
         const enemy = enemies[enemyIndex];
         if (!enemy) return;
         enemy.type = this.normalizeEnemyType(enemy.type);
+        if (this.canAssassinate(enemy)) {
+            this.assassinateEnemy(enemyIndex);
+            return;
+        }
+        if (this.shouldIgnoreEnemyCollision(enemy)) {
+            return;
+        }
         const missChance = this.getEnemyMissChance(enemy.type);
         const attackMissed = this.attackMissed(missChance);
 
@@ -115,6 +122,10 @@ class EnemyManager {
             const damage = this.getEnemyDamage(enemy.type);
             const lives = this.gameState.damagePlayer(damage);
             const reduction = this.gameState.consumeLastDamageReduction();
+            const revived = this.gameState.consumeRecentReviveFlag?.() || false;
+            if (revived) {
+                this.renderer.showCombatIndicator(getEnemyLocaleText('skills.necromancer.revive', ''), { duration: 900 });
+            }
             if (reduction > 0) {
                 const text = reduction >= damage
                     ? getEnemyLocaleText('combat.block.full', '')
@@ -129,20 +140,8 @@ class EnemyManager {
 
         const experienceReward = this.getExperienceReward(enemy.type);
         const defeatResult = this.gameState.handleEnemyDefeated(experienceReward);
-            if (defeatResult?.leveledUp) {
-                if (this.dialogManager?.showDialog) {
-                    const finalLevel = Number.isFinite(defeatResult.level)
-                        ? Math.max(1, Math.floor(defeatResult.level))
-                        : null;
-                    const message = finalLevel
-                        ? formatEnemyLocaleText('player.levelUp.value', { value: finalLevel }, '')
-                        : getEnemyLocaleText('player.levelUp', '');
-                    this.dialogManager.showDialog(message, {
-                        pauseGame: true,
-                        resumePlayingOnClose: true,
-                        pauseReason: 'level-up'
-                    });
-            }
+        if (defeatResult?.leveledUp && this.shouldStartLevelOverlay()) {
+            this.gameState.startLevelUpSelectionIfNeeded?.();
         }
 
         this.tryTriggerDefeatVariable(enemy);
@@ -160,6 +159,11 @@ class EnemyManager {
             enemy.y === y
         );
         if (index !== -1) {
+            const enemy = enemies[index];
+            if (this.canAssassinate(enemy)) {
+                this.assassinateEnemy(index);
+                return;
+            }
             this.handleEnemyCollision(index);
         }
     }
@@ -259,6 +263,11 @@ class EnemyManager {
     resolvePostMove(roomIndex, x, y, enemyIndex) {
         const player = this.gameState.getPlayer();
         if (player.roomIndex === roomIndex && player.x === x && player.y === y) {
+            const enemy = this.gameState.getEnemies()?.[enemyIndex] || null;
+            if (this.canAssassinate(enemy)) {
+                this.assassinateEnemy(enemyIndex);
+                return true;
+            }
             this.handleEnemyCollision(enemyIndex);
             return true;
         }
@@ -271,6 +280,54 @@ class EnemyManager {
 
     getEnemyDefinition(type) {
         return EnemyDefinitions.getEnemyDefinition(type);
+    }
+
+    enemyHasEyes(enemy) {
+        if (!enemy) return true;
+        const definition = this.getEnemyDefinition(enemy.type);
+        if (!definition) return true;
+        if (definition.hasEyes === false) return false;
+        return true;
+    }
+
+    shouldIgnoreEnemyCollision(_enemy) {
+        // Stealth is handled directly in collision flows.
+        return false;
+    }
+
+    canAssassinate(enemy) {
+        const stealth = this.gameState.hasSkill?.('stealth');
+        if (!stealth || !enemy) return false;
+        const damage = this.getEnemyDamage(enemy.type);
+        return damage <= 3;
+    }
+
+    assassinateEnemy(enemyIndex) {
+        const enemies = this.gameState.getEnemies();
+        const enemy = enemies?.[enemyIndex];
+        if (!enemy) return;
+        const type = this.normalizeEnemyType(enemy.type);
+        enemies.splice(enemyIndex, 1);
+
+        const experienceReward = this.getExperienceReward(type);
+        const defeatResult = this.gameState.handleEnemyDefeated(experienceReward);
+        if (defeatResult?.leveledUp && this.shouldStartLevelOverlay()) {
+            this.gameState.startLevelUpSelectionIfNeeded?.();
+        }
+        this.tryTriggerDefeatVariable({ ...enemy, type });
+        this.showStealthKillFeedback();
+        this.renderer.flashScreen({ intensity: 0.4, duration: 120 });
+        this.renderer.draw();
+    }
+
+    showStealthKillFeedback() {
+        const text = getEnemyLocaleText('combat.stealthKill', '');
+        if (!text) return;
+        this.renderer.showCombatIndicator?.(text, { duration: 800 });
+    }
+
+    shouldStartLevelOverlay() {
+        return Boolean(this.gameState?.getPendingLevelUpChoices?.() > 0);
     }
 
     getEnemyDamage(type) {

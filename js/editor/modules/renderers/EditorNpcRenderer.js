@@ -111,7 +111,7 @@ class EditorNpcRenderer extends EditorRendererBase {
             npcConditionalText.value = npc?.conditionText || '';
         }
 
-        this.manager.npcService.populateVariableSelect(npcConditionalVariable, npc?.conditionVariableId || '');
+        this.manager.npcService.populateVariableSelect(npcConditionalVariable, npc?.conditionVariableId || '', { includeBardSkill: true });
         this.manager.npcService.populateVariableSelect(npcRewardVariable, npc?.rewardVariableId || '');
         this.manager.npcService.populateVariableSelect(npcConditionalRewardVariable, npc?.conditionalRewardVariableId || '');
 

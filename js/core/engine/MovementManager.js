@@ -26,6 +26,9 @@ class MovementManager {
         if (this.gameState.isGameOver()) {
             return;
         }
+        if (this.gameState.isLevelUpOverlayActive?.()) {
+            return;
+        }
         if (this.gameState.isPickupOverlayActive?.()) {
             return;
         }
@@ -128,16 +131,27 @@ class MovementManager {
         }
         const isLockedDoor = Boolean(objectAtTarget?.isLockedDoor);
         if (isLockedDoor && !objectAtTarget?.opened) {
-            const consumeKey = this.gameState.consumeKey();
-            if (consumeKey) {
+            const hasSkill = this.gameState.hasSkill?.('keyless-doors');
+            let openedWithSkill = false;
+            let consumeKey = false;
+            if (hasSkill) {
+                openedWithSkill = true;
+            } else {
+                consumeKey = this.gameState.consumeKey();
+            }
+            if (openedWithSkill || consumeKey) {
                 if (objectAtTarget) {
                     objectAtTarget.opened = true;
                 }
                 const remainingKeys = this.gameState.getKeys();
-                const message = Number.isFinite(remainingKeys)
-                    ? formatMovementText('doors.openedRemaining', { value: remainingKeys })
-                    : getMovementText('doors.opened');
-                this.dialogManager.showDialog(message);
+                const message = openedWithSkill
+                    ? getMovementText('doors.unlockedSkill', getMovementText('doors.opened', ''))
+                    : Number.isFinite(remainingKeys)
+                        ? formatMovementText('doors.openedRemaining', { value: remainingKeys })
+                        : getMovementText('doors.opened');
+                if (message) {
+                    this.dialogManager.showDialog(message);
+                }
             } else {
                 this.dialogManager.showDialog(getMovementText('doors.locked'));
                 this.renderer.draw();
@@ -151,7 +165,7 @@ class MovementManager {
         const candidateId = overlayId ?? groundId;
         if (candidateId !== null && candidateId !== undefined) {
             const tile = this.tileManager.getTile(candidateId);
-            if (tile?.collision) {
+            if (tile?.collision && !this.canTraverseCollisionTile(tile)) {
                 if (enteringNewRoom) {
                     this.flashBlockedEdge(direction, { x: targetX, y: targetY });
                 }
@@ -219,6 +233,21 @@ class MovementManager {
         if (dy < 0) return 'up';
         if (dy > 0) return 'down';
         return '';
+    }
+
+    canTraverseCollisionTile(tile = null) {
+        if (!tile?.collision) return true;
+        const category = (tile.category || '').toString().toLowerCase();
+        const name = (tile.name || '').toString().toLowerCase();
+        const isWater = category.includes('água') || name.includes('água');
+        const isLava = category.includes('perigo') || name.includes('lava');
+        if (isWater && this.gameState.hasSkill?.('water-walker')) {
+            return true;
+        }
+        if (isLava && this.gameState.hasSkill?.('lava-walker')) {
+            return true;
+        }
+        return false;
     }
 
     flashBlockedEdge(direction, coords = null) {

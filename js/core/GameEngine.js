@@ -77,6 +77,61 @@ class GameEngine {
         this.renderer.draw();
     }
 
+    isLevelUpOverlayActive() {
+        return this.gameState.isLevelUpOverlayActive?.();
+    }
+
+    moveLevelUpCursor(delta = 0) {
+        if (!this.isLevelUpOverlayActive()) return;
+        this.gameState.moveLevelUpCursor?.(delta);
+        this.renderer.draw();
+    }
+
+    confirmLevelUpSelection() {
+        if (!this.isLevelUpOverlayActive()) return;
+        const overlay = this.gameState.getLevelUpOverlay?.();
+        const selection = Number.isFinite(overlay?.cursor) ? overlay.cursor : 0;
+        this.chooseLevelUpSkill(selection);
+    }
+
+    chooseLevelUpSkill(index = null) {
+        if (!this.isLevelUpOverlayActive()) return;
+        const choice = this.gameState.selectLevelUpSkill?.(index);
+        if (choice) {
+            const name = this.getSkillDisplayName(choice);
+            const message = TextResources.format('skills.pickupMessage', { name }, '') || `Você aprendeu ${name}`;
+            this.dialogManager.showDialog?.(message);
+        }
+        this.renderer.draw();
+    }
+
+    getSkillDisplayName(choice = null) {
+        if (!choice) return 'skill';
+        if (choice.nameKey) {
+            const localized = TextResources.get(choice.nameKey, choice.id || 'skill');
+            if (localized) return localized;
+        }
+        if (choice.id) return choice.id;
+        return 'skill';
+    }
+
+    pickLevelUpChoiceFromPointer(clientX) {
+        const overlay = this.gameState.getLevelUpOverlay?.();
+        if (!overlay?.active) return null;
+        const choices = Array.isArray(overlay.choices) ? overlay.choices : [];
+        if (!choices.length) return null;
+        const rect = this.canvas?.getBoundingClientRect?.();
+        if (!rect || !Number.isFinite(clientX)) {
+            return Number.isFinite(overlay.cursor) ? overlay.cursor : 0;
+        }
+        const width = rect.width || 1;
+        const normalizedX = this.clamp(clientX - rect.left, 0, width);
+        const slotWidth = width / choices.length;
+        if (slotWidth <= 0) return Number.isFinite(overlay.cursor) ? overlay.cursor : 0;
+        const index = Math.floor(normalizedX / slotWidth);
+        return this.clamp(index, 0, choices.length - 1);
+    }
+
     resetGame() {
         this.awaitingRestart = false;
         this.gameState.setGameOver?.(false);

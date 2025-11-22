@@ -1,11 +1,12 @@
 class StatePlayerManager {
-    constructor(state, worldManager) {
+    constructor(state, worldManager, skillManager = null) {
         this.state = state;
         this.worldManager = worldManager;
+        this.skillManager = skillManager;
         this.maxLevel = 9;
         this.baseMaxLives = 3;
-        this.experienceBase = 20;
-        this.experienceGrowth = 1.5;
+        this.experienceBase = 40;
+        this.experienceGrowth = 1.8;
         this.maxKeys = 9;
     }
 
@@ -15,6 +16,10 @@ class StatePlayerManager {
 
     setWorldManager(worldManager) {
         this.worldManager = worldManager;
+    }
+
+    setSkillManager(skillManager) {
+        this.skillManager = skillManager;
     }
 
     get player() {
@@ -80,7 +85,10 @@ class StatePlayerManager {
     damage(amount = 1) {
         if (!this.player) return 0;
         this.ensurePlayerStats();
-        const delta = Number.isFinite(amount) ? Math.max(0, amount) : 1;
+        let delta = Number.isFinite(amount) ? Math.max(0, amount) : 1;
+        if (this.skillManager?.hasSkill?.('iron-body')) {
+            delta = Math.max(0, delta - 1);
+        }
         const shield = Math.max(0, Number(this.player.damageShield) || 0);
         const reduction = Math.min(shield, delta);
         const effective = Math.max(0, delta - reduction);
@@ -91,6 +99,9 @@ class StatePlayerManager {
         }
         this.player.lastDamageReduction = reduction;
         this.player.currentLives = Math.max(0, this.player.currentLives - effective);
+        if (this.player.currentLives <= 0) {
+            this.skillManager?.attemptRevive?.(this.player);
+        }
         this.player.lives = this.player.currentLives;
         return this.player.currentLives;
     }
@@ -156,7 +167,8 @@ class StatePlayerManager {
 
     calculateMaxLives(level) {
         const numericLevel = Number.isFinite(level) ? Math.floor(level) : 1;
-        return this.baseMaxLives + Math.max(0, numericLevel - 1);
+        const bonus = this.skillManager?.getBonusMaxLives?.() || 0;
+        return this.baseMaxLives + Math.max(0, numericLevel - 1) + bonus;
     }
 
     clampLevel(level) {

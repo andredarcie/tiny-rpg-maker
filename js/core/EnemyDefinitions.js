@@ -12,6 +12,7 @@ class EnemyDefinitions {
             damage: 1,
             missChance: 0.35,
             experience: 8,
+            hasEyes: true,
             sprite: SpriteMatrixRegistry.get('enemy', 'giant-rat')
         },
         {
@@ -23,6 +24,7 @@ class EnemyDefinitions {
             damage: 2,
             missChance: 0.25,
             experience: 14,
+            hasEyes: true,
             sprite: SpriteMatrixRegistry.get('enemy', 'bandit')
         },
         {
@@ -34,6 +36,7 @@ class EnemyDefinitions {
             damage: 3,
             missChance: 0.18,
             experience: 28,
+            hasEyes: true,
             sprite: SpriteMatrixRegistry.get('enemy', 'dark-knight')
         },
         {
@@ -45,6 +48,7 @@ class EnemyDefinitions {
             damage: 4,
             missChance: 0.12,
             experience: 45,
+            hasEyes: true,
             sprite: SpriteMatrixRegistry.get('enemy', 'necromancer')
         },
         {
@@ -58,6 +62,7 @@ class EnemyDefinitions {
             defeatActivationMessage: 'Selo do Dragão ativado!',
             defeatActivationMessageKey: 'enemies.defeat.dragon',
             experience: 70,
+            hasEyes: true,
             sprite: SpriteMatrixRegistry.get('enemy', 'dragon')
         },
         {
@@ -70,6 +75,7 @@ class EnemyDefinitions {
             missChance: 0.25,
             experience: 16,
             aliases: ['skull'],
+            hasEyes: false,
             sprite: SpriteMatrixRegistry.get('enemy', 'skeleton')
         },
         {
@@ -83,6 +89,7 @@ class EnemyDefinitions {
             defeatActivationMessage: 'Selo Real despertou!',
             defeatActivationMessageKey: 'enemies.defeat.fallenKing',
             experience: 90,
+            hasEyes: true,
             sprite: SpriteMatrixRegistry.get('enemy', 'fallen-king')
         },
         {
@@ -97,6 +104,7 @@ class EnemyDefinitions {
             defeatActivationMessageKey: 'enemies.defeat.ancientDemon',
             aliases: ['boss'],
             experience: 125,
+            hasEyes: false,
             sprite: SpriteMatrixRegistry.get('enemy', 'ancient-demon')
         }
     ];

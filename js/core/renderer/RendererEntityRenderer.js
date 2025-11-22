@@ -108,7 +108,11 @@ class RendererEntityRenderer {
         const py = player.y * tileSize;
         let sprite = this.spriteFactory.getPlayerSprite()
         sprite = this.adjustSpriteHorizontally(player.x, player.lastX, sprite);
+        const fadeStealth = this.shouldFadePlayerForStealth();
+        if (fadeStealth) ctx.save();
+        if (fadeStealth) ctx.globalAlpha = 0.45;
         this.canvasHelper.drawSprite(ctx, sprite, px, py, step);
+        if (fadeStealth) ctx.restore();
     }
 
     drawTileIconOnPlayer(ctx, tileId) {
@@ -143,6 +147,13 @@ class RendererEntityRenderer {
             return Math.max(1, normalizedDef.damage);
         }
         return 1;
+    }
+
+    shouldFadePlayerForStealth() {
+        if (!this.gameState.hasSkill?.('stealth')) return false;
+        const enemies = this.gameState.getEnemies?.() || [];
+        const playerRoom = this.gameState.getPlayer?.()?.roomIndex ?? -1;
+        return enemies.some((enemy) => enemy.roomIndex === playerRoom && this.getEnemyDamage(enemy.type) <= 3);
     }
 
     drawEnemyDamageMarkers(ctx, px, py, tileSize, damage) {

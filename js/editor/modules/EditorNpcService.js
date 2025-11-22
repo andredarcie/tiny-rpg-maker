@@ -168,15 +168,23 @@ class EditorNpcService {
         this.manager.history.pushCurrentState();
     }
 
-    populateVariableSelect(selectElement, selectedId = '') {
+    populateVariableSelect(selectElement, selectedId = '', options = {}) {
         if (!selectElement) return;
         const variables = this.gameEngine.getVariableDefinitions();
+        const includeBardSkill = Boolean(options.includeBardSkill);
         selectElement.innerHTML = '';
 
         const emptyOption = document.createElement('option');
         emptyOption.value = '';
         emptyOption.textContent = this.t('variables.none');
         selectElement.appendChild(emptyOption);
+
+        if (includeBardSkill) {
+            const bardOption = document.createElement('option');
+            bardOption.value = 'skill:bard';
+            bardOption.textContent = this.t('variables.skill.bard');
+            selectElement.appendChild(bardOption);
+        }
 
         variables.forEach((variable) => {
             const option = document.createElement('option');

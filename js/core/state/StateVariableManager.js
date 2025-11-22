@@ -82,6 +82,9 @@ class StateVariableManager {
 
     normalizeVariableId(variableId) {
         if (typeof variableId !== 'string') return null;
+        // Allow special skill-based conditions (e.g., bard dialogue)
+        const allowedSpecials = new Set(['skill:bard']);
+        if (allowedSpecials.has(variableId)) return variableId;
         return this.getVariableDefinitions().some((variable) => variable.id === variableId) ? variableId : null;
     }
 

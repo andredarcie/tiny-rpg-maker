@@ -60,14 +60,22 @@ class GameState {
                 spriteGroup: null,
                 spriteType: null,
                 effect: null
-            }
+            },
+            levelUpOverlay: {
+                active: false,
+                choices: [],
+                cursor: 0
+            },
+            skillRuntime: null
         };
 
         this.worldManager = new StateWorldManager(this.game, roomSize);
         this.variableManager = new StateVariableManager(this.game, this.state);
         this.objectManager = new StateObjectManager(this.game, this.worldManager, this.variableManager);
         this.enemyManager = new StateEnemyManager(this.game, this.state, this.worldManager);
-        this.playerManager = new StatePlayerManager(this.state, this.worldManager);
+        this.skillManager = new StateSkillManager(this.state);
+        this.playerManager = new StatePlayerManager(this.state, this.worldManager, this.skillManager);
+        this.playerManager.setSkillManager?.(this.skillManager);
         this.dialogManager = new StateDialogManager(this.state);
         this.itemManager = new StateItemManager(this.game);
         this.worldFacade = new GameStateWorldFacade(this, this.worldManager);
@@ -119,6 +127,69 @@ class GameState {
         return this.playerFacade.getPlayer();
     }
 
+    getSkills() {
+        return this.skillManager.getOwnedSkills();
+    }
+
+    hasSkill(skillId) {
+        return this.skillManager.hasSkill(skillId);
+    }
+
+    getPendingLevelUpChoices() {
+        return this.skillManager.getPendingSelections();
+    }
+
+    isLevelUpOverlayActive() {
+        return this.skillManager.isOverlayActive();
+    }
+
+    getLevelUpOverlay() {
+        return this.skillManager.getOverlay();
+    }
+
+    startLevelUpSelectionIfNeeded() {
+        if (this.skillManager.hasPendingSelections() && !this.skillManager.isOverlayActive()) {
+            const started = this.skillManager.startLevelSelection();
+            if (started) {
+                this.pauseGame('level-up');
+            }
+        }
+    }
+
+    queueLevelUpChoices(count = 1, latestLevel = null) {
+        this.skillManager.queueLevelUps(count, latestLevel);
+        this.startLevelUpSelectionIfNeeded();
+        return this.skillManager.getPendingSelections();
+    }
+
+    moveLevelUpCursor(delta = 0) {
+        const cursor = this.skillManager.moveCursor(delta);
+        return cursor;
+    }
+
+    selectLevelUpSkill(index = null) {
+        if (!this.skillManager.isOverlayActive()) {
+            return null;
+        }
+        const choice = this.skillManager.completeSelection(index);
+        if (choice?.id === 'max-life') {
+            this.playerManager.healToFull();
+        }
+        if (this.skillManager.hasPendingSelections()) {
+            const started = this.skillManager.startLevelSelection();
+            if (started) {
+                this.pauseGame('level-up');
+            }
+        } else {
+            this.resumeGame('level-up');
+        }
+        return choice;
+    }
+
+    consumeRecentReviveFlag() {
+        return this.skillManager.consumeRecentReviveFlag();
+    }
+
     getDialog() {
         return this.dialogManager.getDialog();
     }
@@ -137,6 +208,7 @@ class GameState {
 
     resetGame() {
         this.screenManager.reset();
+        this.skillManager.resetRuntime();
         this.playerFacade.resetPlayer();
         this.dialogManager.reset();
         this.enemyManager.resetRuntime();
@@ -377,11 +449,23 @@ class GameState {
     }
 
     addExperience(amount = 0) {
-        return this.playerFacade.addExperience(amount);
+        const result = this.playerFacade.addExperience(amount);
+        return this.processLevelUpResult(result);
     }
 
     handleEnemyDefeated(experienceReward = 0) {
-        return this.playerFacade.handleEnemyDefeated(experienceReward);
+        const result = this.playerFacade.handleEnemyDefeated(experienceReward);
+        return this.processLevelUpResult(result);
+    }
+
+    processLevelUpResult(result = null) {
+        if (result?.leveledUp) {
+            const levels = Number.isFinite(result.levelsGained)
+                ? Math.max(1, Math.floor(result.levelsGained))
+                : 1;
+            this.queueLevelUpChoices(levels, result.level);
+        }
+        return result;
     }
 
     getPickupOverlay() {

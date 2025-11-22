@@ -1,3 +1,13 @@
+const getOverlayText = (key, fallback = '') => {
+    const value = TextResources.get(key, fallback);
+    return value || fallback || '';
+};
+
+const formatOverlayText = (key, params = {}, fallback = '') => {
+    const value = TextResources.format(key, params, fallback);
+    return value || fallback || '';
+};
+
 class RendererOverlayRenderer extends RendererModuleBase {
     constructor(renderer) {
         super(renderer);
@@ -43,6 +53,171 @@ class RendererOverlayRenderer extends RendererModuleBase {
         }
 
         ctx.restore();
+    }
+
+    drawLevelUpOverlay(ctx, gameplayCanvas) {
+        if (!ctx || !gameplayCanvas) return;
+        const overlay = this.gameState.getLevelUpOverlay?.();
+        if (!overlay?.active) return;
+        this.entityRenderer.cleanupEnemyLabels();
+        const choices = Array.isArray(overlay.choices) ? overlay.choices : [];
+        const width = gameplayCanvas.width;
+        const height = gameplayCanvas.height;
+        const centerX = width / 2;
+        const title = getOverlayText('skills.levelUpTitle', 'Level Up!');
+        const pending = Math.max(0, this.gameState.getPendingLevelUpChoices?.() || 0);
+        const accent = this.paletteManager.getColor(7) || '#FFF1E8';
+        const accentStrong = this.paletteManager.getColor(13) || accent;
+
+        ctx.save();
+        ctx.fillStyle = 'rgba(5, 7, 12, 0.88)';
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = accent;
+        const titleFont = Math.max(8, Math.floor(height / 34));
+        const topPadding = Math.floor(height * 0.05);
+        ctx.font = `${titleFont}px "Press Start 2P", "VT323", monospace`;
+        const titleY = topPadding;
+        ctx.fillText(title, centerX, titleY);
+
+        let nextY = titleY + titleFont + Math.floor(height * 0.02);
+        if (pending > 0) {
+            const pendingText = formatOverlayText('skills.pendingLabel', { value: pending }, '');
+            if (pendingText) {
+                const pendingFont = Math.max(6, Math.floor(height / 58));
+                ctx.font = `${pendingFont}px monospace`;
+                ctx.fillStyle = accentStrong;
+                ctx.fillText(pendingText, centerX, nextY);
+                nextY += pendingFont + Math.floor(height * 0.02);
+            }
+        }
+        nextY += Math.floor(height * 0.06);
+
+        const cardCount = Math.max(1, choices.length || 1);
+        const perRow = cardCount === 2 ? 1 : cardCount;
+        const rows = Math.max(1, Math.ceil(cardCount / perRow));
+        const marginX = Math.max(4, Math.floor(width * 0.025));
+        const gapX = Math.max(5, Math.floor(width * 0.02));
+        const gapY = Math.max(6, Math.floor(height * 0.018));
+        const usableWidth = Math.max(70, width - marginX * 2);
+        const cardWidth = Math.max(105, Math.min(Math.floor(usableWidth / perRow), Math.floor(width * 0.9)));
+        const totalCardsWidth = cardWidth * perRow + gapX * Math.max(0, perRow - 1);
+        const startX = Math.round((width - totalCardsWidth) / 2);
+        const cardYStart = Math.round(Math.max(nextY + Math.floor(height * 0.01), height * 0.18));
+        const maxCardHeight = Math.max(100, Math.floor((height - cardYStart - gapY * (rows - 1)) / rows));
+        const cardHeight = Math.min(Math.max(100, maxCardHeight), Math.floor(height * 0.36));
+
+        if (!choices.length) {
+            const allText = getOverlayText('skills.allUnlocked', '');
+            if (allText) {
+                ctx.font = `${Math.max(12, Math.floor(height / 16))}px monospace`;
+                ctx.fillStyle = accentStrong;
+                ctx.fillText(allText, centerX, cardYStart + cardHeight / 2);
+            }
+            ctx.restore();
+            return;
+        }
+
+        choices.forEach((choice, index) => {
+            const row = Math.floor(index / perRow);
+            const col = index % perRow;
+            const px = Math.round(startX + col * (cardWidth + gapX));
+            const py = Math.round(cardYStart + row * (cardHeight + gapY));
+            this.drawLevelUpCard(ctx, {
+                x: px,
+                y: py,
+                width: cardWidth,
+                height: cardHeight,
+                active: overlay.cursor === index,
+                data: choice
+            });
+        });
+
+        ctx.restore();
+    }
+
+    drawLevelUpCard(ctx, { x, y, width, height, active = false, data = null }) {
+        ctx.save();
+        const accent = active ? (this.paletteManager.getColor(13) || '#64b5f6') : (this.paletteManager.getColor(6) || '#C2C3C7');
+        ctx.fillStyle = active ? 'rgba(100, 181, 246, 0.16)' : 'rgba(0, 0, 0, 0.55)';
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = Math.max(2, Math.floor(width * 0.015));
+        ctx.shadowColor = active ? 'rgba(100, 181, 246, 0.4)' : 'rgba(0,0,0,0.35)';
+        ctx.shadowBlur = active ? Math.max(8, Math.floor(width * 0.05)) : Math.max(4, Math.floor(width * 0.02));
+        ctx.fillRect(x, y, width, height);
+        ctx.strokeRect(x + 0.5, y + 0.5, width - 1, height - 1);
+
+        const padding = Math.max(6, Math.floor(width * 0.05));
+        const name = data?.nameKey
+            ? getOverlayText(data.nameKey, data.id || '')
+            : (data?.id || '');
+        const description = data?.descriptionKey
+            ? getOverlayText(data.descriptionKey, '')
+            : '';
+
+        ctx.shadowColor = 'transparent';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        const nameFont = Math.max(9, Math.floor(height / 12));
+        ctx.font = `${nameFont}px "Press Start 2P", "VT323", monospace`;
+        ctx.fillText(name, x + padding, y + padding);
+
+        if (data?.icon) {
+            ctx.font = `${Math.max(9, Math.floor(height / 11))}px monospace`;
+            ctx.textAlign = 'right';
+            ctx.fillText(data.icon, x + width - padding, y + padding + Math.max(0, Math.floor(height * 0.02)));
+            ctx.textAlign = 'left';
+        }
+
+        ctx.font = `${Math.max(8, Math.floor(height / 18))}px monospace`;
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        const descTopGap = Math.max(6, Math.floor(height * 0.08));
+        const textY = y + padding + nameFont + descTopGap;
+        const lineHeight = Math.max(9, Math.floor(height / 16));
+        this.drawWrappedText(ctx, description, x + padding, textY, width - padding * 2, lineHeight, 2);
+
+        ctx.restore();
+    }
+
+    drawWrappedText(ctx, text, x, y, maxWidth, lineHeight, maxLines = null) {
+        if (!ctx || !text) return;
+        const words = text.split(/\s+/).filter(Boolean);
+        let line = '';
+        let offsetY = y;
+        let linesDrawn = 0;
+        for (let i = 0; i < words.length; i++) {
+            const word = words[i];
+            const candidate = line ? `${line} ${word}` : word;
+            const metrics = ctx.measureText(candidate);
+            const wouldOverflow = metrics.width > maxWidth && line;
+            const hitMaxLines = maxLines && linesDrawn >= maxLines - 1;
+            if (wouldOverflow || hitMaxLines) {
+                ctx.fillText(line, x, offsetY);
+                line = word;
+                offsetY += lineHeight;
+                linesDrawn += 1;
+                if (maxLines && linesDrawn >= maxLines) {
+                    const remaining = words.slice(i).join(' ');
+                    const truncated = `${remaining}`.slice(0, 32).trim();
+                    const suffix = truncated ? `${truncated}...` : '...';
+                    ctx.fillText(suffix, x, offsetY);
+                    return;
+                }
+            } else {
+                line = candidate;
+            }
+        }
+        if (line) {
+            ctx.fillText(line, x, offsetY);
+        }
+    }
+
+    drawLevelUpOverlayFull(ctx) {
+        if (!ctx?.canvas) return;
+        this.drawLevelUpOverlay(ctx, { width: ctx.canvas.width, height: ctx.canvas.height });
     }
 
     drawPickupOverlay(ctx, gameplayCanvas) {
@@ -321,6 +496,11 @@ class RendererOverlayRenderer extends RendererModuleBase {
         ctx.fillText(isVictory ? 'Play Again?' : 'Try Again?', centerX, retryY);
         ctx.restore();
         ctx.restore();
+    }
+
+    drawLevelUpOverlayFull(ctx) {
+        if (!ctx?.canvas) return;
+        this.drawLevelUpOverlay(ctx, { width: ctx.canvas.width, height: ctx.canvas.height });
     }
 }
 
