@@ -83,7 +83,7 @@ class InteractionManager {
             case OT.XP_SCROLL: {
                 object.collected = true;
                 this.showPickupOverlay(object.type, () => {
-                    this.gameState.addExperience?.(30);
+                    this.gameState.addExperience?.(60);
                 });
                 return true;
             }

@@ -63,6 +63,7 @@ class EnemyDefinitions {
             defeatActivationMessageKey: 'enemies.defeat.dragon',
             experience: 70,
             hasEyes: true,
+            boss: true,
             sprite: SpriteMatrixRegistry.get('enemy', 'dragon')
         },
         {
@@ -90,6 +91,7 @@ class EnemyDefinitions {
             defeatActivationMessageKey: 'enemies.defeat.fallenKing',
             experience: 90,
             hasEyes: true,
+            boss: true,
             sprite: SpriteMatrixRegistry.get('enemy', 'fallen-king')
         },
         {
@@ -105,6 +107,7 @@ class EnemyDefinitions {
             aliases: ['boss'],
             experience: 125,
             hasEyes: false,
+            boss: true,
             sprite: SpriteMatrixRegistry.get('enemy', 'ancient-demon')
         }
     ];

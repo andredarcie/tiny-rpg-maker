@@ -340,7 +340,12 @@ class EnemyManager {
     }
 
     getExperienceReward(type) {
-        return EnemyDefinitions.getExperienceReward(type);
+        const base = EnemyDefinitions.getExperienceReward(type);
+        const definition = this.getEnemyDefinition(type);
+        const isBoss = Boolean(definition?.boss);
+        const multiplier = isBoss ? 2.1 : 1.5;
+        const boosted = Math.max(0, Math.floor(base * multiplier));
+        return boosted;
     }
 
     getEnemyMissChance(type) {
