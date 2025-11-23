@@ -556,8 +556,11 @@ class RendererOverlayRenderer extends RendererModuleBase {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         const retryY = Math.round(this.canvas.height / 1.5) + 0.5;
-        ctx.strokeText(isVictory ? 'Play Again?' : 'Try Again?', centerX, retryY);
-        ctx.fillText(isVictory ? 'Play Again?' : 'Try Again?', centerX, retryY);
+        const reviveLabel = this.gameState.hasNecromancerReviveReady?.()
+            ? getOverlayText('skills.necromancer.revivePrompt', '')
+            : getOverlayText(isVictory ? 'gameOver.retryVictory' : 'gameOver.retryDefeat', '');
+        ctx.strokeText(reviveLabel, centerX, retryY);
+        ctx.fillText(reviveLabel, centerX, retryY);
         ctx.restore();
         ctx.restore();
     }

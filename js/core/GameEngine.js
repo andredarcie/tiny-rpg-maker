@@ -377,6 +377,7 @@ class GameEngine {
     }
 
     handlePlayerDefeat() {
+        const necroReady = this.gameState.prepareNecromancerRevive?.();
         this.enemyManager.stop();
         this.gameState.pauseGame?.('game-over');
         this.gameState.setGameOver?.(true, 'defeat');
@@ -399,6 +400,15 @@ class GameEngine {
 
     handleGameOverInteraction() {
         if (!this.isGameOver() || !this.gameState.canResetAfterGameOver) return;
+        if (this.gameState.hasNecromancerReviveReady?.()) {
+            const revived = this.gameState.reviveFromNecromancer?.();
+            if (revived) {
+                this.awaitingRestart = false;
+                this.enemyManager.start();
+                this.renderer.draw();
+                return;
+            }
+        }
         this.resetGame();
     }
 }

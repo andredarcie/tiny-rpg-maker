@@ -17,6 +17,7 @@ class StateSkillManager {
                 bonusMaxLives: 0,
                 pendingSelections: 0,
                 necromancerCharges: 0,
+                pendingManualRevive: false,
                 recentRevive: false,
                 carryoverSkills: [],
                 currentChoicePool: [],
@@ -39,6 +40,7 @@ class StateSkillManager {
         runtime.necromancerCharges = Number.isFinite(runtime.necromancerCharges)
             ? Math.max(0, Math.floor(runtime.necromancerCharges))
             : 0;
+        runtime.pendingManualRevive = Boolean(runtime.pendingManualRevive);
         runtime.recentRevive = Boolean(runtime.recentRevive);
         runtime.carryoverSkills = Array.isArray(runtime.carryoverSkills)
             ? Array.from(new Set(runtime.carryoverSkills.filter((id) => typeof id === 'string' && id)))
@@ -75,6 +77,7 @@ class StateSkillManager {
         runtime.bonusMaxLives = 0;
         runtime.pendingSelections = 0;
         runtime.necromancerCharges = 0;
+        runtime.pendingManualRevive = false;
         runtime.recentRevive = false;
         runtime.carryoverSkills = [];
         runtime.currentChoicePool = [];
@@ -265,18 +268,36 @@ class StateSkillManager {
         if (!player || !this.hasSkill('necromancer')) return false;
         const runtime = this.ensureRuntime();
         if (runtime.necromancerCharges <= 0) return false;
-        runtime.necromancerCharges = 0;
-        player.currentLives = Math.max(1, player.maxLives);
-        player.lives = player.currentLives;
-        runtime.recentRevive = true;
-        return true;
+        runtime.pendingManualRevive = true;
+        runtime.recentRevive = false;
+        return false;
     }
 
     consumeRecentReviveFlag() {
         const runtime = this.ensureRuntime();
-        const flag = Boolean(runtime.recentRevive);
         runtime.recentRevive = false;
-        return flag;
+        return false;
+    }
+
+    hasPendingManualRevive() {
+        const runtime = this.ensureRuntime();
+        return this.hasSkill('necromancer') && runtime.necromancerCharges > 0 && runtime.pendingManualRevive;
+    }
+
+    consumeManualRevive() {
+        const runtime = this.ensureRuntime();
+        if (!this.hasPendingManualRevive()) {
+            return false;
+        }
+        runtime.necromancerCharges = Math.max(0, runtime.necromancerCharges - 1);
+        runtime.pendingManualRevive = false;
+        runtime.recentRevive = false;
+        return true;
+    }
+
+    clearManualReviveFlag() {
+        const runtime = this.ensureRuntime();
+        runtime.pendingManualRevive = false;
     }
 }
 

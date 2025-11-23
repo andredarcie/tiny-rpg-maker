@@ -99,6 +99,7 @@ class GameState {
         this.lifecycle = new GameStateLifecycle(this, this.screenManager, { timeToResetAfterGameOver: 2000 });
         this.ensureDefaultVariables();
         this.resetGame();
+        this.reviveSnapshot = null;
 
         this.editorMode = false;
         document.addEventListener('game-tab-activated', () => {
@@ -241,6 +242,7 @@ class GameState {
         this.objectManager.ensurePlayerStartObject();
         this.setGameOver(false);
         this.hidePickupOverlay();
+        this.clearNecromancerRevive();
         this.hideLevelUpCelebration({ skipResume: true });
         this.resumeGame('game-over');
     }
@@ -596,6 +598,96 @@ class GameState {
             return performance.now();
         }
         return Date.now();
+    }
+
+    enableGameOverInteraction() {
+        this.screenManager.clearGameOverCooldown?.();
+        this.screenManager.canResetAfterGameOver = true;
+    }
+
+    prepareNecromancerRevive() {
+        if (!this.skillManager.hasPendingManualRevive?.()) {
+            return false;
+        }
+        this.reviveSnapshot = this.captureReviveSnapshot();
+        return Boolean(this.reviveSnapshot);
+    }
+
+    hasNecromancerReviveReady() {
+        return Boolean(this.skillManager.hasPendingManualRevive?.() && this.reviveSnapshot);
+    }
+
+    reviveFromNecromancer() {
+        if (!this.hasNecromancerReviveReady()) return false;
+        const restored = this.restoreReviveSnapshot(this.reviveSnapshot);
+        this.reviveSnapshot = null;
+        if (!restored) {
+            return false;
+        }
+        const consumed = this.skillManager.consumeManualRevive?.();
+        if (!consumed) {
+            return false;
+        }
+        if (this.state?.player) {
+            const maxLives = Number.isFinite(this.state.player.maxLives)
+                ? Math.max(1, Math.floor(this.state.player.maxLives))
+                : 1;
+            this.state.player.currentLives = maxLives;
+            this.state.player.lives = maxLives;
+        }
+        this.lifecycle.setGameOver(false, null);
+        this.lifecycle.resumeGame('game-over');
+        this.screenManager.clearGameOverCooldown?.();
+        return true;
+    }
+
+    clearNecromancerRevive() {
+        this.reviveSnapshot = null;
+        this.skillManager.clearManualReviveFlag?.();
+    }
+
+    captureReviveSnapshot() {
+        try {
+            const gameCopy = this.safeClone(this.game);
+            const stateCopy = this.safeClone(this.state);
+            return { game: gameCopy, state: stateCopy };
+        } catch (err) {
+            console.error('Failed to capture revive snapshot', err);
+            return null;
+        }
+    }
+
+    restoreReviveSnapshot(snapshot = null) {
+        if (!snapshot?.game || !snapshot?.state) return false;
+        try {
+            this.assignData(this.game, snapshot.game);
+            this.assignData(this.state, snapshot.state);
+            this.worldManager.setGame?.(this.game);
+            this.objectManager.setGame?.(this.game);
+            this.variableManager.setGame?.(this.game);
+            this.itemManager.setGame?.(this.game);
+            return true;
+        } catch (err) {
+            console.error('Failed to restore revive snapshot', err);
+            return false;
+        }
+    }
+
+    assignData(target, source) {
+        if (!target || !source) return;
+        Object.keys(target).forEach((key) => {
+            delete target[key];
+        });
+        Object.keys(source).forEach((key) => {
+            target[key] = this.safeClone(source[key]);
+        });
+    }
+
+    safeClone(value) {
+        if (typeof structuredClone === 'function') {
+            return structuredClone(value);
+        }
+        return JSON.parse(JSON.stringify(value));
     }
 
     pauseGame(reason = 'manual') {
