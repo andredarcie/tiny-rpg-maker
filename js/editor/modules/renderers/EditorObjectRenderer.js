@@ -1,5 +1,6 @@
 const EditorObjectTypes = window.ObjectTypes || (window.ObjectDefinitions?.TYPES) || {};
 const PLAYER_END_TYPE = EditorObjectTypes.PLAYER_END || 'player-end';
+const DOOR_VARIABLE_TYPE = EditorObjectTypes.DOOR_VARIABLE || 'door-variable';
 
 class EditorObjectRenderer extends EditorRendererBase {
     renderObjectCatalog() {
@@ -122,7 +123,7 @@ class EditorObjectRenderer extends EditorRendererBase {
                 body.appendChild(config);
             }
 
-            if (object.type === EditorObjectTypes.SWITCH) {
+            if (object.type === EditorObjectTypes.SWITCH || object.type === DOOR_VARIABLE_TYPE) {
                 const config = document.createElement('div');
                 config.className = 'object-config';
 
@@ -133,7 +134,7 @@ class EditorObjectRenderer extends EditorRendererBase {
                 select.className = 'object-config-select';
                 this.manager.npcService.populateVariableSelect(select, object.variableId || '');
                 select.addEventListener('change', () => {
-                    this.gameEngine.setObjectVariable(EditorObjectTypes.SWITCH, object.roomIndex, select.value);
+                    this.gameEngine.setObjectVariable(object.type, object.roomIndex, select.value);
                     this.renderObjects();
                     this.service.worldRenderer.renderWorldGrid();
                     this.manager.updateJSON();
@@ -144,8 +145,11 @@ class EditorObjectRenderer extends EditorRendererBase {
 
                 const status = document.createElement('div');
                 status.className = 'object-status';
+                const isOn = object.type === EditorObjectTypes.SWITCH
+                    ? Boolean(object.on)
+                    : Boolean(this.gameEngine.isVariableOn?.(object.variableId));
                 status.textContent = this.tf('objects.switch.stateLabel', {
-                    state: object.on ? this.t('objects.state.on') : this.t('objects.state.off')
+                    state: isOn ? this.t('objects.state.on') : this.t('objects.state.off')
                 });
                 config.appendChild(status);
 
