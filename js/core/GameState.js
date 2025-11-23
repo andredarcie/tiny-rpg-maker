@@ -450,6 +450,10 @@ class GameState {
         return this.playerFacade.damage(amount);
     }
 
+    isPlayerOnDamageCooldown() {
+        return this.playerFacade.isOnDamageCooldown();
+    }
+
     getLives() {
         return this.playerFacade.getLives();
     }

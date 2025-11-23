@@ -60,6 +60,10 @@ class GameStatePlayerFacade {
         return this.playerManager.damage(amount);
     }
 
+    isOnDamageCooldown() {
+        return this.playerManager.isOnDamageCooldown();
+    }
+
     getLives() {
         return this.playerManager.getLives();
     }

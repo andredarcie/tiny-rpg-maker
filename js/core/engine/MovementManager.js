@@ -192,6 +192,7 @@ class MovementManager {
                 } else if (previousPosition.lastX !== undefined) {
                     updatedPlayer.lastX = previousPosition.lastX;
                 }
+                updatedPlayer.lastRoomChangeTime = Date.now();
             }
         }
         this.interactionManager.handlePlayerInteractions();

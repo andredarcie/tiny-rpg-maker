@@ -104,15 +104,14 @@ class EnemyManager {
     }
 
     handleEnemyCollision(enemyIndex) {
+        if (this.gameState.isPlayerOnDamageCooldown()) return;
+
         const enemies = this.gameState.getEnemies();
         const enemy = enemies[enemyIndex];
         if (!enemy) return;
         enemy.type = this.normalizeEnemyType(enemy.type);
         if (this.canAssassinate(enemy)) {
             this.assassinateEnemy(enemyIndex);
-            return;
-        }
-        if (this.shouldIgnoreEnemyCollision(enemy)) {
             return;
         }
         const missChance = this.getEnemyMissChance(enemy.type);
@@ -292,11 +291,6 @@ class EnemyManager {
         if (!definition) return true;
         if (definition.hasEyes === false) return false;
         return true;
-    }
-
-    shouldIgnoreEnemyCollision(_enemy) {
-        // Stealth is handled directly in collision flows.
-        return false;
     }
 
     canAssassinate(enemy) {

@@ -8,6 +8,7 @@ class StatePlayerManager {
         this.experienceBase = 40;
         this.experienceGrowth = 1.8;
         this.maxKeys = 9;
+        this.roomChangeDamageCooldown = 1000;
     }
 
     setState(state) {
@@ -104,6 +105,11 @@ class StatePlayerManager {
         }
         this.player.lives = this.player.currentLives;
         return this.player.currentLives;
+    }
+
+    isOnDamageCooldown() {
+        const now = Date.now();
+        return this.player.lastRoomChangeTime && now - this.player.lastRoomChangeTime < this.roomChangeDamageCooldown;
     }
 
     addDamageShield(amount = 1, swordType = null) {
