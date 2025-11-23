@@ -53,12 +53,15 @@ class EditorEnemyService {
         const definition = this.getEnemyDefinition(this.state.selectedEnemyType);
         const fallback = EditorConstants.ENEMY_DEFINITIONS[0]?.type || 'giant-rat';
         const type = definition?.type || fallback;
-        this.gameEngine.addEnemy({
+        const id = this.gameEngine.addEnemy({
             x: coord.x,
             y: coord.y,
             roomIndex,
             type
         });
+        if (!id) {
+            return;
+        }
         this.manager.renderService.renderEnemies();
         this.manager.renderService.renderWorldGrid();
         this.manager.renderService.renderEditor();

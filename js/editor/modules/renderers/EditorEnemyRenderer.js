@@ -73,6 +73,9 @@ class EditorEnemyRenderer extends EditorRendererBase {
             const card = document.createElement('div');
             card.className = 'enemy-card';
             card.dataset.type = definition.type;
+            if (definition.boss) {
+                card.classList.add('boss');
+            }
             if (definition.type === selectedType) {
                 card.classList.add('selected');
             }
@@ -94,6 +97,13 @@ class EditorEnemyRenderer extends EditorRendererBase {
             damage.className = 'enemy-damage';
             const damageValue = Number.isFinite(definition.damage) ? definition.damage : '?';
             damage.textContent = `Dano: ${damageValue}`;
+
+            if (definition.boss) {
+                const badge = document.createElement('span');
+                badge.className = 'enemy-boss-badge';
+                badge.textContent = 'Boss';
+                meta.appendChild(badge);
+            }
 
             meta.append(name, damage);
             card.append(preview, meta);

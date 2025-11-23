@@ -1191,6 +1191,11 @@ textarea {
     transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
+.enemy-card.boss {
+    border-color: rgba(255, 193, 7, 0.55);
+    background: linear-gradient(135deg, rgba(43, 32, 12, 0.6), rgba(24, 18, 10, 0.6));
+}
+
 .enemy-card:hover {
     border-color: rgba(100, 181, 246, 0.6);
     transform: translateY(-1px);
@@ -1214,6 +1219,20 @@ textarea {
     display: grid;
     gap: 4px;
     flex: 1;
+}
+
+.enemy-boss-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #1f1302;
+    background: linear-gradient(135deg, #fbc02d, #ffeb3b);
+    border-radius: 12px;
+    width: fit-content;
 }
 
 .enemy-name {

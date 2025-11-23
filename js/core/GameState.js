@@ -430,7 +430,7 @@ class GameState {
     }
 
     addEnemy(enemy) {
-        this.enemyManager.addEnemy(enemy);
+        return this.enemyManager.addEnemy(enemy);
     }
 
     removeEnemy(enemyId) {

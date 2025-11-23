@@ -35,7 +35,7 @@ class EnemyManager {
     addEnemy(enemy) {
         const id = enemy.id || this.generateEnemyId();
         const type = this.normalizeEnemyType(enemy.type);
-        this.gameState.addEnemy({
+        const addedId = this.gameState.addEnemy({
             id,
             type,
             roomIndex: enemy.roomIndex ?? 0,
@@ -44,8 +44,11 @@ class EnemyManager {
             lastX: enemy.x ?? 0,
             defeatVariableId: enemy.defeatVariableId ?? null
         });
+        if (!addedId) {
+            return null;
+        }
         this.renderer.draw();
-        return id;
+        return addedId;
     }
 
     removeEnemy(enemyId) {
