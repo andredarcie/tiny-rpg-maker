@@ -1,6 +1,6 @@
-const EditorObjectTypes = window.ObjectTypes || (window.ObjectDefinitions?.TYPES) || {};
-const PLAYER_END_TYPE = EditorObjectTypes.PLAYER_END || 'player-end';
-const DOOR_VARIABLE_TYPE = EditorObjectTypes.DOOR_VARIABLE || 'door-variable';
+const EditorObjectTypes = window.ObjectTypes || {};
+const PLAYER_END_TYPE = EditorObjectTypes.PLAYER_END;
+const DOOR_VARIABLE_TYPE = EditorObjectTypes.DOOR_VARIABLE;
 
 class EditorObjectRenderer extends EditorRendererBase {
     renderObjectCatalog() {
@@ -90,38 +90,6 @@ class EditorObjectRenderer extends EditorRendererBase {
             header.appendChild(position);
 
             body.appendChild(header);
-
-            if (object.type === EditorObjectTypes.DOOR_VARIABLE) {
-                const config = document.createElement('div');
-                config.className = 'object-config';
-
-                const label = document.createElement('label');
-                label.className = 'object-config-label';
-
-                const select = document.createElement('select');
-                select.className = 'object-config-select';
-                this.manager.npcService.populateVariableSelect(select, object.variableId || '');
-                select.addEventListener('change', () => {
-                    this.gameEngine.setObjectVariable(EditorObjectTypes.DOOR_VARIABLE, object.roomIndex, select.value);
-                    this.renderObjects();
-                    this.service.worldRenderer.renderWorldGrid();
-                    this.manager.updateJSON();
-                    this.manager.history.pushCurrentState();
-                });
-                label.append(`${this.t('objects.switch.variableLabel')} `, select);
-                config.appendChild(label);
-
-                const status = document.createElement('div');
-                status.className = 'object-status';
-                const valueId = select.value || object.variableId;
-                const isOn = Boolean(runtimeMap.get(valueId || ''));
-                status.classList.toggle('is-on', isOn);
-                status.textContent = this.tf('objects.switch.stateLabel', {
-                    state: isOn ? this.t('objects.state.on') : this.t('objects.state.off')
-                });
-                config.appendChild(status);
-                body.appendChild(config);
-            }
 
             if (object.type === EditorObjectTypes.SWITCH || object.type === DOOR_VARIABLE_TYPE) {
                 const config = document.createElement('div');
