@@ -191,6 +191,9 @@ class GameState {
         if (choice?.id === 'max-life') {
             this.playerManager.healToFull();
         }
+        if (choice?.id === 'xp-boost') {
+            // XP boost applies passively; no extra action needed.
+        }
         if (this.skillManager.hasPendingSelections()) {
             const started = this.skillManager.startLevelSelection();
             if (started) {

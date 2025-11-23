@@ -262,7 +262,13 @@ class StatePlayerManager {
             };
         }
         this.ensurePlayerStats();
-        const gain = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+        let gain = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+        if (this.skillManager?.hasSkill?.('xp-boost')) {
+            const boost = this.skillManager?.getXpBoost?.() ?? 0;
+            if (boost > 0) {
+                gain = Math.floor(gain * (1 + boost));
+            }
+        }
         if (gain <= 0 || this.player.level >= this.maxLevel) {
             if (this.player.level >= this.maxLevel) {
                 this.player.experience = 0;

@@ -1,32 +1,40 @@
 class ShareVariableCodec {
     static encodeVariables(variables) {
         if (!Array.isArray(variables) || !variables.length) return '';
-        const lookup = new Map();
-        for (const entry of variables) {
-            if (typeof entry?.id !== 'string') continue;
-            lookup.set(entry.id, Boolean(entry.value));
-        }
-        let mask = 0;
+
         const ids = ShareConstants.VARIABLE_IDS;
-        for (let i = 0; i < ids.length; i++) {
-            const id = ids[i];
-            if (lookup.get(id)) {
-                mask |= (1 << i);
+        const idToState = new Map();
+        variables.forEach((entry) => {
+            if (typeof entry?.id === 'string') {
+                idToState.set(entry.id, Boolean(entry.value));
             }
-        }
-        if (mask === 0) return '';
-        return ShareBase64.toBase64Url(Uint8Array.from([mask]));
+        });
+
+        const byteLength = Math.ceil(ids.length / 8);
+        const encodedFlags = new Uint8Array(byteLength);
+        ids.forEach((id, index) => {
+            if (!idToState.get(id)) return;
+            const bitIndex = index & 7;   // index % 8
+            encodedFlags[byteIndex] |= (1 << bitIndex);
+        });
+
+        const hasAnyFlag = encodedFlags.some((value) => value !== 0);
+        if (!hasAnyFlag) return '';
+        return ShareBase64.toBase64Url(encodedFlags);
     }
 
     static decodeVariables(text) {
         const ids = ShareConstants.VARIABLE_IDS;
         const states = new Array(ids.length).fill(false);
         if (!text) return states;
-        const bytes = ShareBase64.fromBase64Url(text);
-        const mask = bytes[0] ?? 0;
-        for (let i = 0; i < ids.length; i++) {
-            states[i] = Boolean(mask & (1 << i));
-        }
+
+        const encodedFlags = ShareBase64.fromBase64Url(text);
+        ids.forEach((_, index) => {
+            const byteIndex = index >> 3;
+            const bitIndex = index & 7;
+            const byte = encodedFlags[byteIndex] ?? 0;
+            states[index] = Boolean(byte & (1 << bitIndex));
+        });
         return states;
     }
 

@@ -241,10 +241,17 @@ class MovementManager {
 
     canTraverseCollisionTile(tile = null) {
         if (!tile?.collision) return true;
-        const category = (tile.category || '').toString().toLowerCase();
-        const name = (tile.name || '').toString().toLowerCase();
-        const isWater = category.includes('água') || name.includes('água');
-        const isLava = category.includes('perigo') || name.includes('lava');
+        const normalize = (value = '') =>
+            value
+                .toString()
+                .trim()
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '');
+        const category = normalize(tile.category || '');
+        const name = normalize(tile.name || '');
+        const isWater = category === 'agua' || name.includes('agua');
+        const isLava = category === 'perigo' || name.includes('lava');
         if (isWater && this.gameState.hasSkill?.('water-walker')) {
             return true;
         }

@@ -46,10 +46,10 @@ class SkillDefinitions {
             icon: '🧪'
         },
         {
-            id: 'max-life',
-            nameKey: 'skills.maxLife.name',
-            descriptionKey: 'skills.maxLife.desc',
-            icon: '❤️'
+            id: 'xp-boost',
+            nameKey: 'skills.xpBoost.name',
+            descriptionKey: 'skills.xpBoost.desc',
+            icon: '📚'
         },
         {
             id: 'iron-body',
@@ -66,7 +66,7 @@ class SkillDefinitions {
         5: ['water-walker'],
         6: ['lava-walker'],
         7: ['potion-master'],
-        8: ['max-life'],
+        8: ['xp-boost'],
         9: ['keyless-doors']
     };
 

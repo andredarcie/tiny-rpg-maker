@@ -157,15 +157,15 @@ class ShareConstants {
     }
 
     static get VARIABLE_IDS() {
-        return ['var-1', 'var-2', 'var-3', 'var-4', 'var-5', 'var-6'];
+        return ['var-1', 'var-2', 'var-3', 'var-4', 'var-5', 'var-6', 'var-7', 'var-8', 'var-9', 'skill:bard'];
     }
 
     static get VARIABLE_NAMES() {
-        return ['1 - Preto', '2 - Azul Escuro', '3 - Roxo', '4 - Verde', '5 - Marrom', '6 - Cinza'];
+        return ['1 - Preto', '2 - Azul Escuro', '3 - Roxo', '4 - Verde', '5 - Marrom', '6 - Cinza', '7 - Azul Claro', '8 - Rosa Choque', '9 - Amarelo', 'Habilidade: Bardo'];
     }
 
     static get VARIABLE_COLORS() {
-        return ['#000000', '#1D2B53', '#7E2553', '#008751', '#AB5236', '#5F574F'];
+        return ['#000000', '#1D2B53', '#7E2553', '#008751', '#AB5236', '#5F574F', '#29ADFF', '#FF77A8', '#FFCCAA', '#FFD700'];
     }
 
     static get SUPPORTED_VERSIONS() {

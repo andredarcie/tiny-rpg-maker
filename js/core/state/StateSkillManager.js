@@ -15,6 +15,7 @@ class StateSkillManager {
             return {
                 owned: [],
                 bonusMaxLives: 0,
+                xpBoost: 0,
                 pendingSelections: 0,
                 necromancerCharges: 0,
                 pendingManualRevive: false,
@@ -34,6 +35,7 @@ class StateSkillManager {
         runtime.bonusMaxLives = Number.isFinite(runtime.bonusMaxLives)
             ? Math.max(0, Math.floor(runtime.bonusMaxLives))
             : 0;
+        runtime.xpBoost = Number.isFinite(runtime.xpBoost) ? Math.max(0, runtime.xpBoost) : 0;
         runtime.pendingSelections = Number.isFinite(runtime.pendingSelections)
             ? Math.max(0, Math.floor(runtime.pendingSelections))
             : 0;
@@ -75,6 +77,7 @@ class StateSkillManager {
         const runtime = this.ensureRuntime();
         runtime.owned = [];
         runtime.bonusMaxLives = 0;
+        runtime.xpBoost = 0;
         runtime.pendingSelections = 0;
         runtime.necromancerCharges = 0;
         runtime.pendingManualRevive = false;
@@ -117,8 +120,8 @@ class StateSkillManager {
     applyImmediateEffects(definition) {
         const runtime = this.ensureRuntime();
         switch (definition.id) {
-            case 'max-life':
-                runtime.bonusMaxLives += 1;
+            case 'xp-boost':
+                runtime.xpBoost = 0.5;
                 break;
             case 'necromancer':
                 // Only one revive for the whole game.
@@ -132,6 +135,11 @@ class StateSkillManager {
     getBonusMaxLives() {
         const runtime = this.ensureRuntime();
         return Math.max(0, runtime.bonusMaxLives || 0);
+    }
+
+    getXpBoost() {
+        const runtime = this.ensureRuntime();
+        return Math.max(0, Number(runtime.xpBoost) || 0);
     }
 
     queueLevelUps(count = 1, latestLevel = null) {
