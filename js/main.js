@@ -39,7 +39,9 @@ class TinyRPGApplication {
             getVariables: () => gameEngine.getVariableDefinitions(),
             setVariableDefault: (variableId, value) => gameEngine.setVariableDefault(variableId, value),
             addSprite: (npc) => gameEngine.addSprite(npc),
-            getSprites: () => gameEngine.getSprites()
+            getSprites: () => gameEngine.getSprites(),
+            resetNPCs: () => gameEngine.npcManager.resetNPCs(),
+            renderAll: () => editorManager.renderAll()
         };
 
         const editorManager = new EditorManager(gameEngine);
@@ -245,7 +247,20 @@ class TinyRPGApplication {
                 }
 
                 if (btn.dataset.tab === 'editor') {
-                    document.dispatchEvent(new CustomEvent('editor-tab-activated'));
+                    if (window.TinyRPGMaker && window.TinyRPGMaker.resetNPCs) {
+                        window.TinyRPGMaker.resetNPCs();
+                    }
+                    if (window.TinyRPGMaker && window.TinyRPGMaker.draw) {
+                        window.TinyRPGMaker.draw();
+                    }
+                document.dispatchEvent(new CustomEvent('editor-tab-activated'));
+                    if (window.TinyRPGMaker && window.TinyRPGMaker.renderAll) {
+                        window.TinyRPGMaker.renderAll();
+                    }
+                    if (window.TinyRPGMaker && window.TinyRPGMaker.exportGameData && window.TinyRPGMaker.importGameData) {
+                    const currentData = window.TinyRPGMaker.exportGameData();
+                    window.TinyRPGMaker.importGameData(currentData);
+                    }
                 }
             });
         });

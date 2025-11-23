@@ -168,6 +168,9 @@ class NPCManager {
         const roomIndex = clamp(Number(npc.roomIndex), 0, maxRoomIndex, 0);
         const x = clamp(Number(npc.x), 0, 7, 1);
         const y = clamp(Number(npc.y), 0, 7, 1);
+        const initialX = npc.initialX !== undefined ? npc.initialX : x;
+        const initialY = npc.initialY !== undefined ? npc.initialY : y;
+        const initialRoomIndex = npc.initialRoomIndex !== undefined ? npc.initialRoomIndex : roomIndex;
         const placed = npc.placed !== undefined ? Boolean(npc.placed) : true;
         const rawConditionId = npc.conditionVariableId ?? npc.conditionalVariableId ?? null;
         const rawConditionText = npc.conditionText ?? npc.conditionalText ?? '';
@@ -187,6 +190,9 @@ class NPCManager {
             roomIndex,
             x,
             y,
+            initialX,
+            initialY,
+            initialRoomIndex,
             placed,
             conditionVariableId,
             conditionText,
@@ -212,6 +218,23 @@ class NPCManager {
             rewardVariableId: null,
             conditionalRewardVariableId: null
         };
+    }
+
+    resetNPCs() {
+        const npcs = this.getNPCs();
+        for (const npc of npcs) {
+            console.log(`Cek NPC ${npc.id}: x=${npc.x}, initialX=${npc.initialX}`); // CCTV 2
+            
+            if (npc.initialX !== undefined) {
+                npc.x = npc.initialX;
+                console.log(`-> Reset X ke ${npc.initialX}`);
+            }
+            if (npc.initialY !== undefined) {
+                npc.y = npc.initialY;
+                 console.log(`-> Reset Y ke ${npc.initialY}`);
+            }
+            if (npc.initialRoomIndex !== undefined) npc.roomIndex = npc.initialRoomIndex;
+        }
     }
 
     addNPC(data) {
@@ -265,9 +288,12 @@ class NPCManager {
 
         npc.x = clamp(Number(x), 0, 7, npc.x);
         npc.y = clamp(Number(y), 0, 7, npc.y);
+        npc.initialX = npc.x;
+        npc.initialY = npc.y;
         if (roomIndex !== null && roomIndex !== undefined) {
             const maxRoomIndex = Math.max(0, (this.gameState?.game?.rooms?.length ?? 1) - 1);
             npc.roomIndex = clamp(Number(roomIndex), 0, maxRoomIndex, npc.roomIndex);
+            npc.initialRoomIndex = npc.roomIndex;
         }
         npc.placed = true;
         return true;
