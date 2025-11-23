@@ -14,6 +14,7 @@ class ShareVariableCodec {
         const encodedFlags = new Uint8Array(byteLength);
         ids.forEach((id, index) => {
             if (!idToState.get(id)) return;
+            const byteIndex = index >> 3; // index / 8
             const bitIndex = index & 7;   // index % 8
             encodedFlags[byteIndex] |= (1 << bitIndex);
         });
