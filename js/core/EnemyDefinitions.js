@@ -11,7 +11,7 @@ class EnemyDefinitions {
             description: 'o primeiro inimigo fraco.',
             damage: 1,
             missChance: 0.35,
-            experience: 10,
+            experience: 12,
             hasEyes: true,
             sprite: SpriteMatrixRegistry.get('enemy', 'giant-rat')
         },
@@ -23,7 +23,7 @@ class EnemyDefinitions {
             description: 'inimigo humano comum.',
             damage: 2,
             missChance: 0.25,
-            experience: 18,
+            experience: 22,
             hasEyes: true,
             sprite: SpriteMatrixRegistry.get('enemy', 'bandit')
         },
@@ -35,7 +35,7 @@ class EnemyDefinitions {
             description: 'o guerreiro corrompido.',
             damage: 3,
             missChance: 0.18,
-            experience: 34,
+            experience: 40,
             hasEyes: true,
             sprite: SpriteMatrixRegistry.get('enemy', 'dark-knight')
         },
@@ -47,7 +47,7 @@ class EnemyDefinitions {
             description: 'o mago das trevas.',
             damage: 4,
             missChance: 0.12,
-            experience: 55,
+            experience: 64,
             hasEyes: true,
             sprite: SpriteMatrixRegistry.get('enemy', 'necromancer')
         },
@@ -61,7 +61,7 @@ class EnemyDefinitions {
             missChance: 0.08,
             defeatActivationMessage: 'Selo do Dragão ativado!',
             defeatActivationMessageKey: 'enemies.defeat.dragon',
-            experience: 90,
+            experience: 108,
             hasEyes: true,
             boss: true,
             sprite: SpriteMatrixRegistry.get('enemy', 'dragon')
@@ -74,7 +74,7 @@ class EnemyDefinitions {
             description: 'o morto-vivo clássico.',
             damage: 2,
             missChance: 0.25,
-            experience: 20,
+            experience: 24,
             aliases: ['skull'],
             hasEyes: false,
             sprite: SpriteMatrixRegistry.get('enemy', 'skeleton')
@@ -89,7 +89,7 @@ class EnemyDefinitions {
             missChance: 0.08,
             defeatActivationMessage: 'Selo Real despertou!',
             defeatActivationMessageKey: 'enemies.defeat.fallenKing',
-            experience: 110,
+            experience: 132,
             hasEyes: true,
             boss: true,
             sprite: SpriteMatrixRegistry.get('enemy', 'fallen-king')
@@ -105,7 +105,7 @@ class EnemyDefinitions {
             defeatActivationMessage: 'Selo Demoníaco ativo!',
             defeatActivationMessageKey: 'enemies.defeat.ancientDemon',
             aliases: ['boss'],
-            experience: 150,
+            experience: 180,
             hasEyes: false,
             boss: true,
             sprite: SpriteMatrixRegistry.get('enemy', 'ancient-demon')
