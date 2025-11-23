@@ -1,4 +1,5 @@
-const EditorObjectTypes = window.ObjectTypes || {};
+const EditorObjectTypes = window.ObjectTypes || (window.ObjectDefinitions?.TYPES) || {};
+const PLAYER_END_TYPE = EditorObjectTypes.PLAYER_END || 'player-end';
 
 class EditorObjectRenderer extends EditorRendererBase {
     renderObjectCatalog() {
@@ -186,7 +187,8 @@ class EditorObjectRenderer extends EditorRendererBase {
                 body.appendChild(badge);
             }
 
-            if (object.type === EditorObjectTypes.PLAYER_END) {
+            const isPlayerEnd = object.type === PLAYER_END_TYPE;
+            if (isPlayerEnd) {
                 const config = document.createElement('div');
                 config.className = 'object-config';
 
@@ -218,7 +220,7 @@ class EditorObjectRenderer extends EditorRendererBase {
                 body.appendChild(config);
             }
 
-            if (object.type === EditorObjectTypes.PLAYER_END) {
+            if (isPlayerEnd) {
                 const badge = document.createElement('div');
                 badge.className = 'object-status';
                 badge.textContent = this.t('objects.status.gameEnd');
