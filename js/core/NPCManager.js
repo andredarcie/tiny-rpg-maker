@@ -223,8 +223,6 @@ class NPCManager {
     resetNPCs() {
         const npcs = this.getNPCs();
         for (const npc of npcs) {
-            console.log(`Cek NPC ${npc.id}: x=${npc.x}, initialX=${npc.initialX}`); // CCTV 2
-            
             if (npc.initialX !== undefined) {
                 npc.x = npc.initialX;
                 console.log(`-> Reset X ke ${npc.initialX}`);
