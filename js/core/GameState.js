@@ -66,6 +66,13 @@ class GameState {
                 choices: [],
                 cursor: 0
             },
+            levelUpCelebration: {
+                active: false,
+                level: null,
+                startTime: 0,
+                timeoutId: 0,
+                durationMs: 3000
+            },
             skillRuntime: null
         };
 
@@ -153,6 +160,9 @@ class GameState {
     }
 
     startLevelUpSelectionIfNeeded() {
+        if (this.isLevelUpCelebrationActive()) {
+            return null;
+        }
         if (this.skillManager.hasPendingSelections() && !this.skillManager.isOverlayActive()) {
             const started = this.skillManager.startLevelSelection();
             if (started) {
@@ -231,6 +241,7 @@ class GameState {
         this.objectManager.ensurePlayerStartObject();
         this.setGameOver(false);
         this.hidePickupOverlay();
+        this.hideLevelUpCelebration({ skipResume: true });
         this.resumeGame('game-over');
     }
 
@@ -473,6 +484,7 @@ class GameState {
 
     processLevelUpResult(result = null) {
         if (result?.leveledUp) {
+            this.showLevelUpCelebration(result.level);
             const levels = Number.isFinite(result.levelsGained)
                 ? Math.max(1, Math.floor(result.levelsGained))
                 : 1;
@@ -525,6 +537,65 @@ class GameState {
 
     isPickupOverlayActive() {
         return Boolean(this.getPickupOverlay().active);
+    }
+
+    getLevelUpCelebration() {
+        if (!this.state.levelUpCelebration) {
+            this.state.levelUpCelebration = {
+                active: false,
+                level: null,
+                startTime: 0,
+                timeoutId: 0,
+                durationMs: 3000
+            };
+        }
+        return this.state.levelUpCelebration;
+    }
+
+    showLevelUpCelebration(level = null, options = {}) {
+        const overlay = this.getLevelUpCelebration();
+        const numericLevel = Number.isFinite(level) ? Math.max(1, Math.floor(level)) : this.getLevel();
+        overlay.active = true;
+        overlay.level = numericLevel;
+        overlay.startTime = this.getNow();
+        overlay.durationMs = Number.isFinite(options.durationMs)
+            ? Math.max(300, Math.floor(options.durationMs))
+            : (overlay.durationMs || 3000);
+        if (overlay.timeoutId) {
+            clearTimeout(overlay.timeoutId);
+            overlay.timeoutId = 0;
+        }
+        const duration = overlay.durationMs || 3000;
+        overlay.timeoutId = setTimeout(() => this.hideLevelUpCelebration(), duration);
+        this.pauseGame('level-up-celebration');
+    }
+
+    hideLevelUpCelebration({ skipResume = false } = {}) {
+        const overlay = this.getLevelUpCelebration();
+        if (overlay.timeoutId) {
+            clearTimeout(overlay.timeoutId);
+            overlay.timeoutId = 0;
+        }
+        const wasActive = overlay.active;
+        overlay.active = false;
+        overlay.level = null;
+        overlay.startTime = 0;
+        overlay.durationMs = overlay.durationMs || 3000;
+        if (wasActive && !skipResume) {
+            this.resumeGame('level-up-celebration');
+            this.startLevelUpSelectionIfNeeded();
+        }
+    }
+
+    isLevelUpCelebrationActive() {
+        return Boolean(this.getLevelUpCelebration().active);
+    }
+
+    getNow() {
+        if (typeof performance !== 'undefined' && performance.now) {
+            return performance.now();
+        }
+        return Date.now();
     }
 
     pauseGame(reason = 'manual') {

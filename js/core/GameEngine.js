@@ -77,6 +77,16 @@ class GameEngine {
         this.renderer.draw();
     }
 
+    isLevelUpCelebrationActive() {
+        return this.gameState.isLevelUpCelebrationActive?.();
+    }
+
+    dismissLevelUpCelebration() {
+        if (!this.gameState.isLevelUpCelebrationActive?.()) return;
+        this.gameState.hideLevelUpCelebration?.();
+        this.renderer.draw();
+    }
+
     isLevelUpOverlayActive() {
         return this.gameState.isLevelUpOverlayActive?.();
     }

@@ -26,6 +26,9 @@ class MovementManager {
         if (this.gameState.isGameOver()) {
             return;
         }
+        if (this.gameState.isLevelUpCelebrationActive?.()) {
+            return;
+        }
         if (this.gameState.isLevelUpOverlayActive?.()) {
             return;
         }

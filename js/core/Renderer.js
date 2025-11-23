@@ -60,6 +60,7 @@ class Renderer {
         const gameplayCanvas = this.gameplayCanvasBounds;
         const introActive = this.isIntroOverlayActive();
         const pickupOverlayActive = this.gameState.isPickupOverlayActive?.();
+        const levelUpCelebrationActive = this.gameState.isLevelUpCelebrationActive?.();
         const levelUpOverlayActive = this.gameState.isLevelUpOverlayActive?.();
         ctx.save();
         ctx.translate(0, this.gameplayOffsetY);
@@ -82,13 +83,15 @@ class Renderer {
                 if (this.drawIconIdNextFrame) {
                     this.drawTileIconOnPlayer(ctx, this.drawIconIdNextFrame);
                 }
-                if (!pickupOverlayActive && !levelUpOverlayActive) {
+                if (!pickupOverlayActive && !levelUpOverlayActive && !levelUpCelebrationActive) {
                     this.dialogRenderer.drawDialog(ctx, gameplayCanvas);
                 }
             }
         }
         if (introActive) {
             this.overlayRenderer.drawIntroOverlay(ctx, gameplayCanvas);
+        } else if (levelUpCelebrationActive) {
+            this.overlayRenderer.drawLevelUpCelebrationOverlay(ctx, gameplayCanvas);
         } else if (pickupOverlayActive) {
             this.overlayRenderer.drawPickupOverlay(ctx, gameplayCanvas);
         }

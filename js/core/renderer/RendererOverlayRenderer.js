@@ -14,6 +14,7 @@ class RendererOverlayRenderer extends RendererModuleBase {
         this.introData = { title: 'Tiny RPG Maker', author: '' };
         this.pickupFx = { id: null, startTime: 0 };
         this.pickupAnimationHandle = 0;
+        this.levelUpAnimationHandle = 0;
     }
 
     setIntroData(data = {}) {
@@ -220,6 +221,49 @@ class RendererOverlayRenderer extends RendererModuleBase {
         this.drawLevelUpOverlay(ctx, { width: ctx.canvas.width, height: ctx.canvas.height });
     }
 
+    drawLevelUpCelebrationOverlay(ctx, gameplayCanvas) {
+        if (!ctx || !gameplayCanvas) return;
+        const overlay = this.gameState.getLevelUpCelebration?.();
+        if (!overlay?.active) {
+            this.stopLevelUpAnimationLoop();
+            return;
+        }
+        this.ensureLevelUpAnimationLoop();
+        this.entityRenderer.cleanupEnemyLabels();
+
+        const width = gameplayCanvas.width;
+        const height = gameplayCanvas.height;
+        const now = this.getNow();
+        const startTime = Number.isFinite(overlay.startTime) ? overlay.startTime : now;
+        const elapsed = Math.max(0, (now - startTime) / 1000);
+        const minSide = Math.min(width, height);
+        const baseSize = Math.floor(minSide * 0.62);
+        const popIn = this.easeOutBack(Math.min(1, elapsed / 0.42));
+        const wobble = 1 + Math.sin(elapsed * 5.2) * 0.035;
+        const size = Math.round(baseSize * (0.76 + popIn * 0.22) * wobble);
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const floatY = Math.sin(elapsed * 2.1) * 6;
+        const boxX = Math.round(centerX - size / 2);
+        const boxY = Math.round(centerY - size / 2 + floatY);
+        const accent = this.paletteManager.getColor(13) || '#F8E7A1';
+
+        ctx.save();
+        this.drawPickupFrame(ctx, { x: boxX, y: boxY, size, elapsed, accent });
+        ctx.restore();
+
+        const title = getOverlayText('player.levelUp', 'Level Up!');
+
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const titleFont = Math.max(12, Math.floor(height / 12));
+        ctx.font = `${titleFont}px "Press Start 2P", "VT323", monospace`;
+        ctx.fillStyle = '#FFF1E8';
+        ctx.fillText(title, centerX, centerY + floatY);
+        ctx.restore();
+    }
+
     drawPickupOverlay(ctx, gameplayCanvas) {
         if (!ctx || !gameplayCanvas) return;
         const overlay = this.gameState.getPickupOverlay?.();
@@ -264,8 +308,8 @@ class RendererOverlayRenderer extends RendererModuleBase {
 
     }
 
-    drawPickupFrame(ctx, { x, y, size, elapsed = 0 }) {
-        const accent = this.paletteManager.getColor(2) || '#FFF1E8';
+    drawPickupFrame(ctx, { x, y, size, elapsed = 0, accent = null }) {
+        const accentColor = accent || this.paletteManager.getColor(2) || '#FFF1E8';
         ctx.save();
         const gradient = ctx.createLinearGradient(x, y, x + size, y + size);
         gradient.addColorStop(0, 'rgba(7, 11, 26, 0.96)');
@@ -286,7 +330,7 @@ class RendererOverlayRenderer extends RendererModuleBase {
         const innerPad = Math.max(10, Math.floor(size * 0.08));
         const stripeHeight = Math.max(6, Math.floor(size * 0.05));
         ctx.globalAlpha = 0.18;
-        ctx.fillStyle = accent;
+        ctx.fillStyle = accentColor;
         ctx.fillRect(x + innerPad, y + innerPad, size - innerPad * 2, stripeHeight);
         ctx.fillRect(x + innerPad, y + size - innerPad - stripeHeight, size - innerPad * 2, stripeHeight);
         ctx.restore();
@@ -321,6 +365,26 @@ class RendererOverlayRenderer extends RendererModuleBase {
             };
         }
         return this.pickupFx;
+    }
+
+    ensureLevelUpAnimationLoop() {
+        if (this.levelUpAnimationHandle) return;
+        const step = () => {
+            if (!this.gameState.isLevelUpCelebrationActive?.()) {
+                this.stopLevelUpAnimationLoop();
+                this.renderer?.draw?.();
+                return;
+            }
+            this.levelUpAnimationHandle = this.schedulePickupFrame(step);
+            this.renderer?.draw?.();
+        };
+        this.levelUpAnimationHandle = this.schedulePickupFrame(step);
+    }
+
+    stopLevelUpAnimationLoop() {
+        if (!this.levelUpAnimationHandle) return;
+        this.cancelPickupFrame(this.levelUpAnimationHandle);
+        this.levelUpAnimationHandle = 0;
     }
 
     ensurePickupAnimationLoop() {
