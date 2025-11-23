@@ -297,7 +297,7 @@ class EnemyManager {
         const stealth = this.gameState.hasSkill?.('stealth');
         if (!stealth || !enemy) return false;
         const damage = this.getEnemyDamage(enemy.type);
-        return damage <= 3;
+        return damage <= 2;
     }
 
     assassinateEnemy(enemyIndex) {
