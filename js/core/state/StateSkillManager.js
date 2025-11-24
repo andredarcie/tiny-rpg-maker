@@ -137,6 +137,14 @@ class StateSkillManager {
         return Math.max(0, runtime.bonusMaxLives || 0);
     }
 
+    addBonusMaxLife(amount = 1) {
+        const runtime = this.ensureRuntime();
+        const numeric = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+        if (numeric <= 0) return runtime.bonusMaxLives;
+        runtime.bonusMaxLives = Math.max(0, (runtime.bonusMaxLives || 0) + numeric);
+        return runtime.bonusMaxLives;
+    }
+
     getXpBoost() {
         const runtime = this.ensureRuntime();
         return Math.max(0, Number(runtime.xpBoost) || 0);

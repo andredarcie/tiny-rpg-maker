@@ -326,6 +326,12 @@ class GameState {
         return this.playerFacade.addLife(amount);
     }
 
+    addBonusMaxLife(amount = 1) {
+        const bonus = this.skillManager.addBonusMaxLife?.(amount);
+        this.healPlayerToFull();
+        return bonus;
+    }
+
     addDamageShield(amount = 1, type = null) {
         return this.playerFacade.addDamageShield(amount, type);
     }

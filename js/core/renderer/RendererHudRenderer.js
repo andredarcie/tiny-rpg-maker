@@ -227,6 +227,10 @@ class RendererHudRenderer {
     }
 
     drawXpBar(ctx,x,y) {
+        const xpNeeded = this.gameState.getExperienceToNext?.();
+        if (!Number.isFinite(xpNeeded) || xpNeeded <= 0) {
+            return;
+        }
         const totalBarSize = 24;
         ctx.strokeStyle = 'rgba(204, 204, 204, 0.25)';
         ctx.lineWidth = 3;
@@ -238,7 +242,6 @@ class RendererHudRenderer {
         
         const currentXp = this.gameState.getExperience();
         if (currentXp == 0) {return;}
-        const xpNeeded = this.gameState.getExperienceToNext();
         const barSize = (currentXp * totalBarSize / xpNeeded);
 
         ctx.strokeStyle = this.paletteManager.getColor(13);

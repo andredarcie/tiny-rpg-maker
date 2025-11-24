@@ -63,10 +63,10 @@ class SkillDefinitions {
         2: ['necromancer', 'charisma'],
         3: ['iron-body'],
         4: ['stealth'],
-        5: ['water-walker'],
+        5: ['xp-boost'],
         6: ['lava-walker'],
         7: ['potion-master'],
-        8: ['xp-boost'],
+        8: ['water-walker'],
         9: ['keyless-doors']
     };
 

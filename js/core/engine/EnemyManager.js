@@ -150,6 +150,7 @@ class EnemyManager {
         this.tryTriggerDefeatVariable(enemy);
         this.renderer.flashScreen({ intensity: 0.8, duration: 160 });
 
+        this.checkAllEnemiesCleared();
         this.renderer.draw();
     }
 
@@ -315,6 +316,7 @@ class EnemyManager {
         this.tryTriggerDefeatVariable({ ...enemy, type });
         this.showStealthKillFeedback();
         this.renderer.flashScreen({ intensity: 0.4, duration: 120 });
+        this.checkAllEnemiesCleared();
         this.renderer.draw();
     }
 
@@ -351,6 +353,17 @@ class EnemyManager {
             return this.normalizeMissChance(explicit);
         }
         return this.fallbackMissChance;
+    }
+
+    checkAllEnemiesCleared() {
+        const remaining = this.gameState.getEnemies()?.length ?? 0;
+        if (remaining <= 0) {
+            const text = getEnemyLocaleText('game.clearAllEnemies', '');
+            if (text) {
+                this.dialogManager?.showDialog?.(text);
+            }
+            this.gameState.addBonusMaxLife?.(1);
+        }
     }
 
     normalizeMissChance(value) {
