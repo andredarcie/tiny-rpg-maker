@@ -225,11 +225,9 @@ class NPCManager {
         for (const npc of npcs) {
             if (npc.initialX !== undefined) {
                 npc.x = npc.initialX;
-                console.log(`-> Reset X ke ${npc.initialX}`);
             }
             if (npc.initialY !== undefined) {
                 npc.y = npc.initialY;
-                 console.log(`-> Reset Y ke ${npc.initialY}`);
             }
             if (npc.initialRoomIndex !== undefined) npc.roomIndex = npc.initialRoomIndex;
         }
