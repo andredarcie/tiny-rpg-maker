@@ -267,9 +267,7 @@ class EnemyManager {
     resolvePostMove(roomIndex, x, y, enemyIndex) {
         const player = this.gameState.getPlayer();
         if (player.roomIndex === roomIndex && player.x === x && player.y === y) {
-            const enemy = this.gameState.getEnemies()?.[enemyIndex] || null;
-            if (this.canAssassinate(enemy)) {
-                this.assassinateEnemy(enemyIndex);
+            if (this.tryStealthAssassination(enemyIndex)) {
                 return true;
             }
             this.handleEnemyCollision(enemyIndex);
@@ -301,6 +299,21 @@ class EnemyManager {
         return damage <= 2;
     }
 
+    tryStealthAssassination(enemyIndex) {
+        const enemies = this.gameState.getEnemies();
+        const enemy = enemies?.[enemyIndex];
+        if (!this.canAssassinate(enemy)) {
+            return false;
+        }
+        const missed = Math.random() < 0.25;
+        if (missed) {
+            this.showStealthMissFeedback();
+            return false;
+        }
+        this.assassinateEnemy(enemyIndex);
+        return true;
+    }
+
     assassinateEnemy(enemyIndex) {
         const enemies = this.gameState.getEnemies();
         const enemy = enemies?.[enemyIndex];
@@ -322,6 +335,12 @@ class EnemyManager {
 
     showStealthKillFeedback() {
         const text = getEnemyLocaleText('combat.stealthKill', '');
+        if (!text) return;
+        this.renderer.showCombatIndicator?.(text, { duration: 800 });
+    }
+
+    showStealthMissFeedback() {
+        const text = getEnemyLocaleText('combat.stealthMiss', '');
         if (!text) return;
         this.renderer.showCombatIndicator?.(text, { duration: 800 });
     }

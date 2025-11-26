@@ -22,6 +22,7 @@ class EditorExportService {
             const code = (typeof ShareUtils !== 'undefined' && typeof ShareUtils.encode === 'function')
                 ? ShareUtils.encode(gameData)
                 : '';
+            const downloadError = 'Unable to download project assets. Please run Tiny RPG Maker from an HTTP/HTTPS server (not file://) to export HTML.';
 
             let cssText = '';
             const linkEl = document.querySelector('link[rel="stylesheet"][href]');
@@ -29,19 +30,38 @@ class EditorExportService {
                 const href = linkEl.getAttribute('href');
                 try {
                     const resp = await fetch(href);
-                    if (resp.ok) cssText = await resp.text();
-                } catch (e) { /* ignore */ }
+                    if (resp.ok) {
+                        cssText = await resp.text();
+                    } else {
+                        alert(downloadError);
+                        return;
+                    }
+                } catch (e) {
+                    alert(downloadError);
+                    return;
+                }
             }
 
             const scripts = {};
+            const locale = (typeof TextResources !== 'undefined' && typeof TextResources.getLocale === 'function')
+                ? (TextResources.getLocale() || 'en-US')
+                : 'en-US';
             const scriptSrcs = Array.from(document.querySelectorAll('script[src]'))
                 .map((s) => s.getAttribute('src'))
                 .filter((src) => src && !src.includes('/editor/'));
             for (const src of scriptSrcs) {
                 try {
                     const resp = await fetch(src);
-                    if (resp.ok) scripts[src] = await resp.text();
-                } catch (e) { /* ignore */ }
+                    if (resp.ok) {
+                        scripts[src] = await resp.text();
+                    } else {
+                        alert(downloadError);
+                        return;
+                    }
+                } catch (e) {
+                    alert(downloadError);
+                    return;
+                }
             }
 
             const gameContainer = document.getElementById('game-container');
@@ -54,7 +74,7 @@ class EditorExportService {
             const allScripts = Object.values(scripts).join('');
 
             const html = `<!DOCTYPE html>
-                <html lang="pt-BR">
+                <html lang="${locale}">
                 <head>
                 <meta charset="utf-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1">
