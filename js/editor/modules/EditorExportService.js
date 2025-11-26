@@ -36,7 +36,7 @@ class EditorExportService {
             const scripts = {};
             const scriptSrcs = Array.from(document.querySelectorAll('script[src]'))
                 .map((s) => s.getAttribute('src'))
-                .filter((src) => src && !src.includes('EditorExportService') && !src.includes('/editor/'));
+                .filter((src) => src && !src.includes('/editor/'));
             for (const src of scriptSrcs) {
                 try {
                     const resp = await fetch(src);
