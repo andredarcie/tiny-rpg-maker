@@ -24,6 +24,8 @@ class TinyRPGApplication {
 
         const gameEngine = new GameEngine(gameCanvas);
         this.loadSharedGameIfAvailable(gameEngine);
+        const isExportMode = Boolean(window.__TINY_RPG_EXPORT_MODE);
+        let editorManager = null;
 
         document.addEventListener('game-tab-activated', (ev) => {
             if (ev?.detail?.initial) return;
@@ -50,10 +52,12 @@ class TinyRPGApplication {
             addSprite: (npc) => gameEngine.addSprite(npc),
             getSprites: () => gameEngine.getSprites(),
             resetNPCs: () => gameEngine.npcManager.resetNPCs(),
-            renderAll: () => editorManager.renderAll()
+            renderAll: () => editorManager?.renderAll?.()
         };
 
-        const editorManager = new EditorManager(gameEngine);
+        if (!isExportMode) {
+            editorManager = new EditorManager(gameEngine);
+        }
         this.bindResetButton(gameEngine);
         this.bindTouchPad(gameEngine);
         this.bindLanguageSelector();

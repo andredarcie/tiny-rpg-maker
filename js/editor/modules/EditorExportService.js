@@ -34,7 +34,9 @@ class EditorExportService {
             }
 
             const scripts = {};
-            const scriptSrcs = Array.from(document.querySelectorAll('script[src]')).map(s => s.getAttribute('src')).filter(x => !x.includes('EditorExportService'));
+            const scriptSrcs = Array.from(document.querySelectorAll('script[src]'))
+                .map((s) => s.getAttribute('src'))
+                .filter((src) => src && !src.includes('EditorExportService') && !src.includes('/editor/'));
             for (const src of scriptSrcs) {
                 try {
                     const resp = await fetch(src);
@@ -61,6 +63,7 @@ class EditorExportService {
                 #game-container{position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;background-color:#000;overflow:hidden}
                 </style>
                 <script>
+                window.__TINY_RPG_EXPORT_MODE = true;
                 window.__TINY_RPG_SHARED_CODE = ${JSON.stringify(code)};
                 if(!location.hash) try{ location.hash = '#' + window.__TINY_RPG_SHARED_CODE; }catch(e){}
                 </script>
