@@ -49,6 +49,46 @@ const NpcSpriteMatrices = {
         [ null,  9,  9,  9,  9,  9,  9, null ],
         [ null, null,  9, null, null,  9, null, null ]
     ],
+    king: [
+        [ null, null,  9,  9,  9,  9, null, null ],
+        [ null,  9, 15, 15, 15, 15,  9, null ],
+        [ null, null, 15, 12, 15, 12, null, null ],
+        [ null,  4,  4, 15, 15,  4,  4, null ],
+        [ null, 15,  4,  4,  4,  4, 15, null ],
+        [ null, null,  4,  4,  4,  4, null, null ],
+        [ null, null,  7,  7,  7,  7, null, null ],
+        [ null, null,  7, null, null,  7, null, null ]
+    ],
+    knight: [
+        [ null, null,  6,  6,  6,  6, null, null ],
+        [ null, null,  6, 15, 15,  6, null, null ],
+        [ null, null,  6,  6,  6,  6, null, null ],
+        [ null,  4,  4,  6,  6,  4,  4, null ],
+        [ null,  6,  4,  4,  4,  4,  6, null ],
+        [ null, null,  4,  4,  4,  4, null, null ],
+        [ null, null,  6,  6,  6,  6, null, null ],
+        [ null, null,  6, null, null,  6, null, null ]
+    ],
+    thief: [
+        [ null, null,  5,  5,  5,  5, null, null ],
+        [ null, null,  5, 15, 15,  5, null, null ],
+        [ null, null,  5, 12, 12,  5, null, null ],
+        [ null, 15, 15,  5,  5, 15, 15, null ],
+        [ null,  5, 15,  5,  5, 15,  5, null ],
+        [ null, null, 15, 15, 15, 15, null, null ],
+        [ null, null,  5,  5,  5,  5, null, null ],
+        [ null, null,  5, null, null,  5, null, null ]
+    ],
+    blacksmith: [
+        [ null, null,  6,  6,  6,  6, null, null ],
+        [ null, null,  6, 12, 12,  6, null, null ],
+        [ null, null,  6,  6,  6,  6, null, null ],
+        [ null,  5,  5,  6,  6,  5,  5, null ],
+        [ null,  6,  5,  6,  6,  5,  6, null ],
+        [ null, null,  5,  5,  5,  5, null, null ],
+        [ null, null,  9,  9,  9,  9, null, null ],
+        [ null, null,  9, null, null,  9, null, null ]
+    ],
     'wooden-sign': [
         [ null, null, null, null, null, null, null, null ],
         [ null,  4,  4,  4,  4,  4,  4, null ],
@@ -58,6 +98,16 @@ const NpcSpriteMatrices = {
         [ null,  4,  4,  4,  4,  4,  4, null ],
         [ null,  4, null, null, null, null,  4, null ],
         [ null,  4, null, null, null, null,  4, null ]
+    ],
+    'thought-bubble': [
+        [ null,  6,  6,  6,  6,  6,  6,  6 ],
+        [ null,  6,  1,  1,  1,  1,  1,  6 ],
+        [ null,  6,  6,  6,  6,  6,  6,  6 ],
+        [ null,  6,  1,  1,  1,  6,  6,  6 ],
+        [ null,  6,  6,  6,  6,  6,  6,  6 ],
+        [ null, null,  6,  6, null, null, null, null ],
+        [ null, null,  6, null, null, null, null, null ],
+        [ null, null, null, null, null, null, null, null ]
     ]
 };
 

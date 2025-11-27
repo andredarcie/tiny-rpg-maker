@@ -67,13 +67,8 @@ class ShareEncoder {
             const conditionIndexes = sprites.map((npc) => ShareVariableCodec.variableIdToNibble(npc.conditionVariableId));
             const rewardIndexes = sprites.map((npc) => ShareVariableCodec.variableIdToNibble(npc.rewardVariableId));
             const conditionalRewardIndexes = sprites.map((npc) => ShareVariableCodec.variableIdToNibble(npc.conditionalRewardVariableId));
-            const needsNpcTexts = sprites.some((sprite, index) => {
-                const def = ShareConstants.NPC_DEFINITIONS.find((entry) => entry.type === sprite.type);
-                const fallback = def ? (def.defaultText || '') : '';
-                return spriteTexts[index] !== fallback;
-            });
             const hasConditionalTexts = conditionalTexts.some((text) => typeof text === 'string' && text.trim().length);
-            const texts = needsNpcTexts ? ShareTextCodec.encodeTextArray(spriteTexts) : '';
+            const texts = ShareTextCodec.encodeTextArray(spriteTexts);
             const conditionalTextCode = hasConditionalTexts ? ShareTextCodec.encodeTextArray(conditionalTexts) : '';
             const conditionCode = ShareVariableCodec.encodeVariableNibbleArray(conditionIndexes);
             const rewardCode = ShareVariableCodec.encodeVariableNibbleArray(rewardIndexes);
