@@ -15,22 +15,28 @@ class EditorShareService {
         return key || '';
     }
 
+    async buildShareUrl() {
+        const share = window.ShareUtils
+            ? window.ShareUtils
+            : (typeof window !== 'undefined' ? window.TinyRPGShare : null);
+        if (!share?.buildShareUrl) {
+            alert(this.t('alerts.share.unavailable'));
+            return null;
+        }
+        const gameData = this.manager.gameEngine.exportGameData();
+        const url = share.buildShareUrl(gameData);
+        try {
+            window.history?.replaceState?.(null, '', url);
+        } catch {
+            /* ignore */
+        }
+        return url;
+    }
+
     async generateShareableUrl() {
         try {
-            const share = window.ShareUtils
-                ? window.ShareUtils
-                : (typeof window !== 'undefined' ? window.TinyRPGShare : null);
-            if (!share?.buildShareUrl) {
-                alert(this.t('alerts.share.unavailable'));
-                return;
-            }
-            const gameData = this.manager.gameEngine.exportGameData();
-            const url = share.buildShareUrl(gameData);
-            try {
-                window.history?.replaceState?.(null, '', url);
-            } catch {
-                // ignore
-            }
+            const url = await this.buildShareUrl();
+            if (!url) return;
 
             if (navigator.clipboard?.writeText) {
                 await navigator.clipboard.writeText(url);

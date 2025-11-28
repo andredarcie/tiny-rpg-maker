@@ -176,6 +176,29 @@ class MovementManager {
             }
         }
 
+        // Prevent passing through NPCs: trigger dialog and stay in place.
+        const npcAtTarget = this.findNpcAt(targetRoomIndex, targetX, targetY);
+        if (npcAtTarget) {
+            const dialogText = this.interactionManager.getNpcDialogText
+                ? this.interactionManager.getNpcDialogText(npcAtTarget)
+                : (npcAtTarget.text || '');
+            const dialogMeta = this.interactionManager.getNpcDialogMeta
+                ? this.interactionManager.getNpcDialogMeta(npcAtTarget)
+                : undefined;
+            if (dialogText) {
+                this.dialogManager.showDialog(dialogText, dialogMeta);
+                this.renderer.draw();
+            }
+            return;
+        }
+
+        // Prevent passing through enemies: resolve collision/combat without moving.
+        const enemyHit = this.enemyManager?.collideAt?.(targetRoomIndex, targetX, targetY) || false;
+        if (enemyHit) {
+            this.renderer.draw();
+            return;
+        }
+
         const supportsTransition = enteringNewRoom;
         const fromFrame = supportsTransition ? this.renderer.captureGameplayFrame() : null;
 
@@ -269,6 +292,16 @@ class MovementManager {
             tileY: coords?.y
         });
         this.renderer.draw();
+    }
+
+    findNpcAt(roomIndex, x, y) {
+        const sprites = this.gameState?.getGame()?.sprites || [];
+        return sprites.find((npc) =>
+            npc.placed &&
+            npc.roomIndex === roomIndex &&
+            npc.x === x &&
+            npc.y === y
+        ) || null;
     }
 }
 

@@ -276,6 +276,18 @@ class EnemyManager {
         return false;
     }
 
+    collideAt(roomIndex, x, y) {
+        const enemies = this.gameState.getEnemies();
+        const index = enemies.findIndex((enemy) =>
+            enemy.roomIndex === roomIndex &&
+            enemy.x === x &&
+            enemy.y === y
+        );
+        if (index === -1) return false;
+        this.handleEnemyCollision(index);
+        return true;
+    }
+
     normalizeEnemyType(type) {
         return EnemyDefinitions.normalizeType(type);
     }
