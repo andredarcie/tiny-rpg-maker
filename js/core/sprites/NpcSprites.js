@@ -10,104 +10,104 @@ const NpcSpriteMatrices = {
         [  5, null,  6,  6,  6,  6,  6, null ]
     ],
     'old-mage': [
-        [ null, null,  6,  6,  6,  6, null, null ],
-        [  6, null, 15, 12, 15, 12, null, null ],
-        [  6, null, 15, 15, 15, 15, null, null ],
-        [ 15,  5,  5,  6,  6,  6,  5, null ],
-        [  6, null,  5,  6,  6,  6, 15, null ],
-        [  6, null,  5,  5,  6,  6, null, null ],
-        [  6, null,  5,  5,  5,  5, null, null ],
-        [  6, null,  5,  5,  5,  5, null, null ]
+        [ null,  1,  6,  6,  6,  6,  1, null ],
+        [  1,  4, 15, 12, 15, 12,  1, null ],
+        [  1,  4, 15, 15, 15, 15,  1, null ],
+        [  1,  4,  5,  6,  6,  6,  5,  1 ],
+        [  1, 15,  5,  6,  6,  6, 15,  1 ],
+        [  1,  4,  5,  5,  6,  6,  1, null ],
+        [  1,  4,  5,  5,  5,  5,  1, null ],
+        [  1,  4,  5,  5,  5,  5,  1, null ]
     ],
     'villager-man': [
-        [ null, null, 15, 15, 15, 15, null, null ],
-        [ null, null, 15, 12, 15, 12, null, null ],
-        [ null, null, 15, 15, 15, 15, null, null ],
-        [ null,  4,  4, 15, 15,  4,  4, null ],
-        [ null, 15,  4,  4,  4,  4, 15, null ],
-        [ null, null,  4,  4,  4,  4, null, null ],
-        [ null, null,  9,  9,  9,  9, null, null ],
-        [ null, null,  9, null, null,  9, null, null ]
+        [ null, null,  1,  1,  1,  1, null, null ],
+        [ null,  1, 15, 15, 15, 15,  1, null ],
+        [ null,  1, 15, 12, 15, 12,  1, null ],
+        [ null,  1, 15, 15, 15, 15,  1, null ],
+        [  1,  4,  4,  4,  4,  4,  4,  1 ],
+        [  1, 15,  4,  4,  4,  4, 15,  1 ],
+        [ null,  1,  9,  9,  9,  9,  1, null ],
+        [ null,  1,  9,  1,  1,  9,  1, null ]
     ],
     'villager-woman': [
-        [ null, null,  4,  4,  4,  4, null, null ],
-        [ null, null,  4, 12, 15, 12, null, null ],
-        [ null, null,  4, 15, 15, 15, null, null ],
-        [ null, 14,  4, 15, 15, 14, 14, null ],
-        [ null, 15,  4, 14, 14, 14, 15, null ],
-        [ null, null, 14, 14, 14, 14, null, null ],
-        [ null, null, 14, 14, 14, 14, null, null ],
-        [ null, null, 14, 14, 14, 14, null, null ]
+        [ null, null,  1,  1,  1,  1, null, null ],
+        [ null,  1,  4,  4,  4,  4,  1, null ],
+        [ null,  1,  4, 12, 15, 12,  1, null ],
+        [ null,  1,  4, 15, 15, 15,  1, null ],
+        [  1, 14,  4, 14, 14, 14, 14,  1 ],
+        [  1, 15,  4, 14, 14, 14, 15,  1 ],
+        [ null,  1, 14, 14, 14, 14,  1, null ],
+        [ null,  1, 14, 14, 14, 14,  1, null ]
     ],
-    child: [
+    'child': [
         [ null, null, null, null, null, null, null, null ],
         [ null, null, null, null, null, null, null, null ],
-        [ null, null, null, null, null, null, null, null ],
-        [ null, null, 15, 15, 15, 15, null, null ],
-        [ null, null, 15, 12, 15, 12, null, null ],
-        [ null, null, 15, 15, 15, 15, null, null ],
+        [ null, null,  1,  1,  1,  1, null, null ],
+        [ null,  1, 15, 15, 15, 15,  1, null ],
+        [ null,  1, 15, 12, 15, 12,  1, null ],
         [ null,  9,  9,  9,  9,  9,  9, null ],
-        [ null, null,  9, null, null,  9, null, null ]
+        [  1, 15,  9,  9,  9,  9, 15,  1 ],
+        [ null,  1,  9,  1,  1,  9,  1, null ]
     ],
-    king: [
-        [ null, null,  9,  9,  9,  9, null, null ],
-        [ null,  9, 15, 15, 15, 15,  9, null ],
-        [ null, null, 15, 12, 15, 12, null, null ],
-        [ null,  4,  4, 15, 15,  4,  4, null ],
-        [ null, 15,  4,  4,  4,  4, 15, null ],
-        [ null, null,  4,  4,  4,  4, null, null ],
-        [ null, null,  7,  7,  7,  7, null, null ],
-        [ null, null,  7, null, null,  7, null, null ]
+    'king': [
+        [  1, 10,  1, 10,  1, 10,  1,  1 ],
+        [  1,  9,  9,  9,  9,  9,  1, 10 ],
+        [  1, 15, 15, 12, 15, 12,  1,  9 ],
+        [  1, 15, 15, 15, 15, 15,  1,  9 ],
+        [  1,  8,  7, 15, 15,  7,  1,  9 ],
+        [  1,  8,  8,  7,  8,  8,  8, 15 ],
+        [  1,  8,  8,  7,  8,  8,  1,  9 ],
+        [  1,  7,  7,  7,  7,  7,  1,  9 ]
     ],
-    knight: [
-        [ null, null,  6,  6,  6,  6, null, null ],
-        [ null, null,  6, 15, 15,  6, null, null ],
-        [ null, null,  6,  6,  6,  6, null, null ],
-        [ null,  4,  4,  6,  6,  4,  4, null ],
-        [ null,  6,  4,  4,  4,  4,  6, null ],
-        [ null, null,  4,  4,  4,  4, null, null ],
-        [ null, null,  6,  6,  6,  6, null, null ],
-        [ null, null,  6, null, null,  6, null, null ]
+    'knight': [
+        [ null, null,  1,  1,  1,  1, null, null ],
+        [ null,  1,  6,  6,  6,  6,  1, null ],
+        [ null,  1,  6, 12, 15, 12,  1, null ],
+        [ null,  1,  6,  6,  6,  6,  1, null ],
+        [  1,  5,  5,  6,  6,  5,  5,  1 ],
+        [  1,  6,  5,  5,  5,  5,  6,  1 ],
+        [ null,  1,  6,  6,  6,  6,  1, null ],
+        [ null,  1,  6,  1,  1,  6,  1, null ]
     ],
-    thief: [
-        [ null, null,  5,  5,  5,  5, null, null ],
-        [ null, null,  5, 15, 15,  5, null, null ],
-        [ null, null,  5, 12, 12,  5, null, null ],
-        [ null, 15, 15,  5,  5, 15, 15, null ],
-        [ null,  5, 15,  5,  5, 15,  5, null ],
-        [ null, null, 15, 15, 15, 15, null, null ],
-        [ null, null,  5,  5,  5,  5, null, null ],
-        [ null, null,  5, null, null,  5, null, null ]
+    'thief': [
+        [ null, null,  1,  1,  1,  1, null, null ],
+        [ null,  1,  5,  5,  5,  5,  1, null ],
+        [ null,  1,  5, 12, 15, 12,  1, null ],
+        [ null,  1,  5,  5,  5,  5,  1, null ],
+        [  1,  5,  5,  5,  5,  5,  5,  1 ],
+        [  1, 15,  5,  5,  5,  5, 15,  1 ],
+        [ null,  1, 13, 13, 13, 13,  1, null ],
+        [ null,  1, 13,  1,  1, 13,  1, null ]
     ],
-    blacksmith: [
-        [ null, null,  6,  6,  6,  6, null, null ],
-        [ null, null,  6, 12, 12,  6, null, null ],
-        [ null, null,  6,  6,  6,  6, null, null ],
-        [ null,  5,  5,  6,  6,  5,  5, null ],
-        [ null,  6,  5,  6,  6,  5,  6, null ],
-        [ null, null,  5,  5,  5,  5, null, null ],
-        [ null, null,  9,  9,  9,  9, null, null ],
-        [ null, null,  9, null, null,  9, null, null ]
+    'blacksmith': [
+        [ null, null,  1,  1,  1,  1, null, null ],
+        [ null,  1, 15, 15, 15, 15,  1, null ],
+        [ null,  1, 15, 12, 15, 12,  1, null ],
+        [ null,  1, 15, 15, 15, 15,  1, null ],
+        [  1,  6,  4,  6,  6,  4,  6,  1 ],
+        [  1, 15,  4,  4,  4,  4, 15,  1 ],
+        [ null,  1,  4,  4,  4,  4,  1, null ],
+        [ null,  1,  5,  1,  1,  5,  1, null ]
     ],
     'wooden-sign': [
-        [ null, null, null, null, null, null, null, null ],
-        [ null,  4,  4,  4,  4,  4,  4, null ],
-        [ null,  4,  5,  5,  5,  5,  4, null ],
-        [ null,  4,  4,  4,  4,  4,  4, null ],
-        [ null,  4,  5,  5,  5,  4,  4, null ],
-        [ null,  4,  4,  4,  4,  4,  4, null ],
-        [ null,  4, null, null, null, null,  4, null ],
-        [ null,  4, null, null, null, null,  4, null ]
+        [ null,  1,  1,  1,  1,  1,  1, null ],
+        [  1,  4,  4,  4,  4,  4,  4,  1 ],
+        [  1,  4,  5,  5,  5,  5,  4,  1 ],
+        [  1,  4,  4,  4,  4,  4,  4,  1 ],
+        [  1,  4,  5,  5,  5,  4,  4,  1 ],
+        [  1,  4,  4,  4,  4,  4,  4,  1 ],
+        [  1,  4,  1,  1,  1,  1,  4,  1 ],
+        [  1,  4,  1, null, null,  1,  4,  1 ]
     ],
     'thought-bubble': [
-        [ null,  6,  6,  6,  6,  6,  6,  6 ],
-        [ null,  6,  1,  1,  1,  1,  1,  6 ],
-        [ null,  6,  6,  6,  6,  6,  6,  6 ],
-        [ null,  6,  1,  1,  1,  6,  6,  6 ],
-        [ null,  6,  6,  6,  6,  6,  6,  6 ],
-        [ null, null,  6,  6, null, null, null, null ],
-        [ null, null,  6, null, null, null, null, null ],
-        [ null, null, null, null, null, null, null, null ]
+        [ null,  1,  1,  1,  1,  1,  1, null ],
+        [  1,  6,  6,  6,  6,  6,  6,  1 ],
+        [  1,  6,  1,  1,  1,  1,  6,  1 ],
+        [  1,  6,  6,  6,  6,  6,  6,  1 ],
+        [  1,  6,  1,  1,  1,  6,  6,  1 ],
+        [  1,  6,  6,  6,  6,  6,  6,  1 ],
+        [ null,  1,  6,  6,  1,  1,  1, null ],
+        [ null,  1,  6,  1, null, null, null, null ]
     ]
 };
 

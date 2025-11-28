@@ -100,16 +100,36 @@ class EditorWorldRenderer extends EditorRendererBase {
         });
     }
 
-    updateMapPosition(col, row) {
-        const label = this.dom.mapPosition;
-        if (!label) return;
-        if (!Number.isFinite(col) || !Number.isFinite(row)) {
-            label.textContent = '';
-            label.hidden = true;
-            return;
+    renderGameMinimap(activeColIndex = null, activeRowIndex = null) {
+        const container = this.dom.mapPosition;
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        for (let r = 1; r <= 3; r++) {
+            for (let c = 1; c <= 3; c++) {
+                const cell = document.createElement('div');
+                cell.className = 'game-minimap-cell';
+                cell.dataset.mmRow = String(r);
+                cell.dataset.mmCol = String(c);
+
+                if (r === activeRowIndex && c === activeColIndex) {
+                    cell.classList.add('game-minimap-cell-active');
+                } else {
+                    cell.classList.add('game-minimap-cell');
+                }
+
+                container.appendChild(cell);
+            }
         }
-        label.hidden = false;
-        label.textContent = `(${col},${row})`;
+    }
+
+    updateMapPosition(col, row) {
+        const container = this.dom.mapPosition;
+        if (!container) return;
+        try {
+            this.renderGameMinimap(col, row);
+        } catch (e) {}
     }
 }
 
