@@ -15,6 +15,7 @@ class EditorEventBinder extends EditorManagerModule {
             btnToggleNpcConditional,
             fileInput,
             editorCanvas,
+            npcVariantButtons,
             enemyTypes,
             enemiesList,
             objectTypes,
@@ -52,6 +53,15 @@ class EditorEventBinder extends EditorManagerModule {
         npcConditionalVariable?.addEventListener('change', (ev) => npcService.handleConditionVariableChange(ev.target.value));
         npcRewardVariable?.addEventListener('change', (ev) => npcService.handleRewardVariableChange(ev.target.value));
         npcConditionalRewardVariable?.addEventListener('change', (ev) => npcService.handleConditionalRewardVariableChange(ev.target.value));
+        if (Array.isArray(npcVariantButtons)) {
+            npcVariantButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    const variant = button.dataset.npcVariantFilter;
+                    if (!variant) return;
+                    npcService.setVariantFilter(variant);
+                });
+            });
+        }
 
         fileInput?.addEventListener('change', (ev) => shareService.loadGameFile(ev));
 

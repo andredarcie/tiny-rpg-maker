@@ -259,6 +259,16 @@ class EditorNpcService {
         this.manager.updateJSON();
         this.manager.history.pushCurrentState();
     }
+
+    setVariantFilter(variant) {
+        const allowed = ['human', 'elf', 'dwarf'];
+        const normalized = allowed.includes(variant) ? variant : 'human';
+        if (this.state.npcVariantFilter === normalized) return;
+        this.clearSelection({ render: false });
+        this.state.npcVariantFilter = normalized;
+        this.manager.renderService.renderNpcs();
+    }
+
 }
 
 if (typeof window !== 'undefined') {

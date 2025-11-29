@@ -151,6 +151,13 @@
                             <details open>
                                 <summary data-text-key="sections.npcs"></summary>
                                 <div class="npcs-panel">
+                                    <div class="npc-variant-selector">
+                                        <div class="npc-variant-buttons">
+                                            <button type="button" class="npc-variant-button active" data-npc-variant-filter="human" aria-pressed="true" data-text-key="npc.variant.human"></button>
+                                            <button type="button" class="npc-variant-button" data-npc-variant-filter="elf" aria-pressed="false" data-text-key="npc.variant.elf"></button>
+                                            <button type="button" class="npc-variant-button" data-npc-variant-filter="dwarf" aria-pressed="false" data-text-key="npc.variant.dwarf"></button>
+                                        </div>
+                                    </div>
                                     <div id="npcs-list" class="npcs-list"></div>
                                     <div class="npc-editor" hidden>
                                         <label for="npc-text" data-text-key="npc.dialog.defaultLabel"></label>

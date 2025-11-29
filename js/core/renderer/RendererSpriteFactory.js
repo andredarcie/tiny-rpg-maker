@@ -1,6 +1,7 @@
 class RendererSpriteFactory {
-    constructor(paletteManager) {
+    constructor(paletteManager, gameState = null) {
         this.paletteManager = paletteManager;
+        this.gameState = gameState;
         this.playerSprite = null;
         this.enemySprite = null;
         this.enemySprites = null;
@@ -66,7 +67,8 @@ class RendererSpriteFactory {
         const picoPalette = this.paletteManager.getPicoPalette();
         const sprites = {};
         for (const def of RendererConstants.NPC_DEFINITIONS) {
-            sprites[def.type] = this.mapPixels(def.sprite, picoPalette, () => this.buildDefaultNpcSprite(picoPalette));
+            const matrix = def.sprite;
+            sprites[def.type] = this.mapPixels(matrix, picoPalette, () => this.buildDefaultNpcSprite(picoPalette));
         }
         sprites.default = this.buildDefaultNpcSprite(picoPalette);
         return sprites;
@@ -141,6 +143,7 @@ class RendererSpriteFactory {
         if (!sprite) return;
         return sprite.map(line => [...line].reverse());
     }
+
 }
 
 if (typeof window !== 'undefined') {

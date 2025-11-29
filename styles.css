@@ -1530,6 +1530,42 @@ textarea {
     max-width: 150px;
 }
 
+.npc-variant-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: flex-start;
+    margin-bottom: 8px;
+}
+
+.npc-variant-buttons {
+    display: inline-flex;
+    gap: 6px;
+}
+
+.npc-variant-button {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--panel);
+    color: var(--text);
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+}
+
+.npc-variant-button:hover,
+.npc-variant-button:focus-visible {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+    outline: none;
+}
+
+.npc-variant-button.active {
+    border-color: var(--accent);
+    background: rgba(100, 181, 246, 0.12);
+    box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.18);
+}
+
 .npc-editor {
     display: grid;
     gap: 8px;

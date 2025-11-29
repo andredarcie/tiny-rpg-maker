@@ -9,6 +9,26 @@ const NpcSpriteMatrices = {
         [  5, null,  6,  6,  5,  6,  6, null ],
         [  5, null,  6,  6,  6,  6,  6, null ]
     ],
+    'default-elf': [
+        [ null, null, null, 11, 11, 11, null, null ],
+        [ null, null, 11,  7, 11,  7, 11, null ],
+        [ null, null, 10,  1, 10,  1, 10, null ],
+        [ 11, null, 10, 11, 11, 10, 11, null ],
+        [ 11, null, 10,  7,  7, 10, 10, null ],
+        [ 11, 10, 11, 10, 10, 11, 10, null ],
+        [ 11, null, 10, 10, 11, 10, 10, null ],
+        [ 11, null, 10, 10, 10, 10, 10, null ]
+    ],
+    'default-dwarf': [
+        [ null, null, null,  4,  4,  4, null, null ],
+        [ null, null,  4,  4,  4,  4,  4, null ],
+        [ null, null,  9,  9,  9,  9,  9, null ],
+        [  4, null,  9,  4,  4,  9,  4, null ],
+        [  4, null,  9,  4,  4,  9,  4, null ],
+        [  4,  9,  4,  9,  4,  9,  4, null ],
+        [  4, null,  9,  9,  4,  9,  9, null ],
+        [  4, null,  9,  9,  9,  9,  9, null ]
+    ],
     'old-mage': [
         [ null,  1,  6,  6,  6,  6,  1, null ],
         [  1,  4, 15, 12, 15, 12,  1, null ],
@@ -18,6 +38,26 @@ const NpcSpriteMatrices = {
         [  1,  4,  5,  5,  6,  6,  1, null ],
         [  1,  4,  5,  5,  5,  5,  1, null ],
         [  1,  4,  5,  5,  5,  5,  1, null ]
+    ],
+    'old-mage-elf': [
+        [ null, 15, 10, 10, 10, 10, 15, null ],
+        [  1, 15, 15, 11, 15, 11, 15, null ],
+        [  1,  4, 15, 15, 15, 15,  1, null ],
+        [  1,  4,  5, 10, 10, 10,  5,  1 ],
+        [  1, 15,  5, 10, 10, 10, 15,  1 ],
+        [  1,  4,  5,  5, 10, 10,  1, null ],
+        [  1,  4,  5,  5,  5,  5,  1, null ],
+        [  1,  4,  5,  5,  5,  5,  1, null ]
+    ],
+    'old-mage-dwarf': [
+        [ null,  1,  6,  6,  6,  6,  1, null ],
+        [  1,  2, 15,  9, 15,  9,  1, null ],
+        [  1,  4, 15, 15, 15, 15,  1, null ],
+        [  1,  4,  5,  6,  6,  6,  5,  1 ],
+        [  1, 15, 13,  6,  6,  6, 15,  1 ],
+        [  1,  4, 13, 13,  6,  6,  1, null ],
+        [ null,  1, 13,  1,  1, 13,  1, null ],
+        [ null, null, null, null, null, null, null, null ]
     ],
     'villager-man': [
         [ null, null,  1,  1,  1,  1, null, null ],
@@ -29,6 +69,26 @@ const NpcSpriteMatrices = {
         [ null,  1,  9,  9,  9,  9,  1, null ],
         [ null,  1,  9,  1,  1,  9,  1, null ]
     ],
+    'villager-man-elf': [
+        [ null, null, 11, 11, 11, 11, null, null ],
+        [ null, 11, 12,  7, 12,  7, 11, null ],
+        [ null, 11, 12, 11, 12, 11, 11, null ],
+        [ null, 11, 12, 12, 12, 12, 11, null ],
+        [ 11,  3, 11, 12, 12, 11,  3, 11 ],
+        [ 11, 12,  3, 11, 11,  3, 12, 11 ],
+        [ null, 11, 10, 10, 10, 10, 11, null ],
+        [ null, 11, 10, 11, 11, 10, 11, null ]
+    ],
+    'villager-man-dwarf': [
+        [ null, null,  4,  4,  4,  4, null, null ],
+        [ null,  4,  9,  9,  9,  9,  4, null ],
+        [ null,  4,  9,  4,  9,  4,  4, null ],
+        [ null,  4,  9,  9,  9,  9,  4, null ],
+        [  4,  9,  4,  4,  4,  4,  9,  4 ],
+        [  4, 10,  9,  4,  4,  9, 10,  4 ],
+        [ null,  4, 10, 10, 10, 10,  4, null ],
+        [ null,  4, 10,  4,  4, 10,  4, null ]
+    ],
     'villager-woman': [
         [ null, null,  1,  1,  1,  1, null, null ],
         [ null,  1,  4,  4,  4,  4,  1, null ],
@@ -38,6 +98,26 @@ const NpcSpriteMatrices = {
         [  1, 15,  4, 14, 14, 14, 15,  1 ],
         [ null,  1, 14, 14, 14, 14,  1, null ],
         [ null,  1, 14, 14, 14, 14,  1, null ]
+    ],
+    'villager-woman-elf': [
+        [ null, null, 11, 11, 11, 11, null, null ],
+        [ null, 11, 10, 10, 10, 10, 11, null ],
+        [ null, 11, 10,  7, 12,  7, 11, null ],
+        [ null, 11, 10, 12, 12, 12, 11, null ],
+        [ 11, 12, 10, 12, 12, 10, 12, 11 ],
+        [ 11,  7, 10, 12, 12, 10,  7, 11 ],
+        [ null, 11,  3,  3,  3,  3, 11, null ],
+        [ null, 11,  3,  3,  3,  3, 11, null ]
+    ],
+    'villager-woman-dwarf': [
+        [ null, null,  4,  4,  4,  4, null, null ],
+        [ null,  4,  9,  9,  9,  9,  4, null ],
+        [ null,  4,  9, 10,  4, 10,  4, null ],
+        [ null,  4,  9,  9,  9,  9,  4, null ],
+        [  4, 10,  9,  9,  9,  9, 10,  4 ],
+        [  4,  9,  9, 10, 10,  9,  9,  4 ],
+        [ null,  4,  5,  5,  5,  5,  4, null ],
+        [ null,  4,  5,  5,  5,  5,  4, null ]
     ],
     'child': [
         [ null, null, null, null, null, null, null, null ],
@@ -49,6 +129,26 @@ const NpcSpriteMatrices = {
         [  1, 15,  9,  9,  9,  9, 15,  1 ],
         [ null,  1,  9,  1,  1,  9,  1, null ]
     ],
+    'child-elf': [
+        [ null, null, null, null, null, null, null, null ],
+        [ null, null, 11, 11, 11, 11, null, null ],
+        [ null, 11, 12, 12, 12, 12, 11, null ],
+        [ null, 11,  7, 12, 12,  7, 11, null ],
+        [ null, 11, 12, 11, 12, 11, 11, null ],
+        [ null, 10, 10, 10, 10, 10, 10, null ],
+        [ 11, 12, 10, 10, 10, 10, 12, 11 ],
+        [ null, 11, 10, 11, 11, 10, 11, null ]
+    ],
+    'child-dwarf': [
+        [ null, null, null, null, null, null, null, null ],
+        [ null, null,  4,  4,  4,  4, null, null ],
+        [ null,  4, 10, 10, 10, 10,  4, null ],
+        [ null,  4,  9, 10, 10,  9,  4, null ],
+        [ null,  4, 10,  4, 10,  4,  4, null ],
+        [ null,  5,  5,  5,  5,  5,  5, null ],
+        [  4, 10,  5,  5,  5,  5, 10,  4 ],
+        [ null,  4,  5,  4,  4,  5,  4, null ]
+    ],
     'king': [
         [  1, 10,  1, 10,  1, 10,  1,  1 ],
         [  1,  9,  9,  9,  9,  9,  1, 10 ],
@@ -58,6 +158,26 @@ const NpcSpriteMatrices = {
         [  1,  8,  8,  7,  8,  8,  8, 15 ],
         [  1,  8,  8,  7,  8,  8,  1,  9 ],
         [  1,  7,  7,  7,  7,  7,  1,  9 ]
+    ],
+    'king-elf': [
+        [ 11,  7, 11,  7, 11,  7, 11, 11 ],
+        [ 11, 12, 12, 12, 12, 12, 11,  7 ],
+        [ 11, 12, 12, 10, 12, 10, 11, 12 ],
+        [ 11, 12, 12, 12, 12, 12, 11, 12 ],
+        [ 11,  3,  7, 12, 12,  7, 11, 12 ],
+        [ 11,  3,  3,  7,  3,  3,  3, 12 ],
+        [ 11,  3,  3,  7,  3,  3, 11, 12 ],
+        [ 11,  7,  7,  7,  7,  7, 11, 12 ]
+    ],
+    'king-dwarf': [
+        [  4, 10,  4, 10,  4, 10,  4,  4 ],
+        [  4,  9,  9,  9,  9,  9,  4, 10 ],
+        [  4,  9,  9, 10,  9, 10,  4,  9 ],
+        [  4,  9,  9,  9,  9,  9,  4,  9 ],
+        [  4, 10,  4,  9,  9,  4,  4,  9 ],
+        [  4, 10, 10,  4, 10, 10, 10,  9 ],
+        [  4, 10, 10,  4, 10, 10,  4,  9 ],
+        [  4,  4,  4,  4,  4,  4,  4,  9 ]
     ],
     'knight': [
         [ null, null,  1,  1,  1,  1, null, null ],
@@ -69,6 +189,26 @@ const NpcSpriteMatrices = {
         [ null,  1,  6,  6,  6,  6,  1, null ],
         [ null,  1,  6,  1,  1,  6,  1, null ]
     ],
+    'knight-elf': [
+        [ null, null, 11, 11, 11, 11, null, null ],
+        [ null, 11, 12, 12, 12, 12, 11, null ],
+        [ null, 11, 12,  7, 11,  7, 11, null ],
+        [ null, 11, 12, 12, 12, 12, 11, null ],
+        [ 11,  3,  3, 12, 12,  3,  3, 11 ],
+        [ 11, 12,  3,  3,  3,  3, 12, 11 ],
+        [ null, 11, 12, 12, 12, 12, 11, null ],
+        [ null, 11, 12, 11, 11, 12, 11, null ]
+    ],
+    'knight-dwarf': [
+        [ null, null,  4,  4,  4,  4, null, null ],
+        [ null,  4,  9,  9,  9,  9,  4, null ],
+        [ null,  4,  9, 10,  4, 10,  4, null ],
+        [ null,  4,  9,  9,  9,  9,  4, null ],
+        [  4, 10, 10,  9,  9, 10, 10,  4 ],
+        [  4,  9, 10, 10, 10, 10,  9,  4 ],
+        [ null,  4,  9,  9,  9,  9,  4, null ],
+        [ null,  4,  9,  4,  4,  9,  4, null ]
+    ],
     'thief': [
         [ null, null,  1,  1,  1,  1, null, null ],
         [ null,  1,  5,  5,  5,  5,  1, null ],
@@ -79,6 +219,26 @@ const NpcSpriteMatrices = {
         [ null,  1, 13, 13, 13, 13,  1, null ],
         [ null,  1, 13,  1,  1, 13,  1, null ]
     ],
+    'thief-elf': [
+        [ null, null, 11, 11, 11, 11, null, null ],
+        [ null, 11, 12, 12, 12, 12, 11, null ],
+        [ null, 11, 12,  7, 10,  7, 11, null ],
+        [ null, 11, 12, 12, 12, 12, 11, null ],
+        [ 11, 12, 12, 12, 12, 12, 12, 11 ],
+        [ 11,  7, 12, 12, 12, 12,  7, 11 ],
+        [ null, 11, 10, 10, 10, 10, 11, null ],
+        [ null, 11, 10, 11, 11, 10, 11, null ]
+    ],
+    'thief-dwarf': [
+        [ null, null,  4,  4,  4,  4, null, null ],
+        [ null,  4,  9,  9,  9,  9,  4, null ],
+        [ null,  4,  9, 10,  9, 10,  4, null ],
+        [ null,  4,  9,  9,  9,  9,  4, null ],
+        [  4,  9,  9,  9,  9,  9,  9,  4 ],
+        [  4, 10,  9,  9,  9,  9, 10,  4 ],
+        [ null,  4,  5,  5,  5,  5,  4, null ],
+        [ null,  4,  5,  4,  4,  5,  4, null ]
+    ],
     'blacksmith': [
         [ null, null,  1,  1,  1,  1, null, null ],
         [ null,  1, 15, 15, 15, 15,  1, null ],
@@ -88,6 +248,26 @@ const NpcSpriteMatrices = {
         [  1, 15,  4,  4,  4,  4, 15,  1 ],
         [ null,  1,  4,  4,  4,  4,  1, null ],
         [ null,  1,  5,  1,  1,  5,  1, null ]
+    ],
+    'blacksmith-elf': [
+        [ null, null, 11, 11, 11, 11, null, null ],
+        [ null, 11, 12, 12, 12, 12, 11, null ],
+        [ null, 11, 12,  7, 12,  7, 11, null ],
+        [ null, 11, 12, 12, 12, 12, 11, null ],
+        [ 11,  7, 10, 12, 12, 10,  7, 11 ],
+        [ 11, 12, 10, 10, 10, 10, 12, 11 ],
+        [ null, 11, 10, 10, 10, 10, 11, null ],
+        [ null, 11,  3, 11, 11,  3, 11, null ]
+    ],
+    'blacksmith-dwarf': [
+        [ null, null,  4,  4,  4,  4, null, null ],
+        [ null,  4,  9,  9,  9,  9,  4, null ],
+        [ null,  4,  9, 10,  9, 10,  4, null ],
+        [ null,  4,  9,  9,  9,  9,  4, null ],
+        [  4, 10,  4,  9,  9,  4, 10,  4 ],
+        [  4,  9, 10, 10, 10, 10,  9,  4 ],
+        [ null,  4, 10, 10, 10, 10,  4, null ],
+        [ null,  4,  5,  4,  4,  5,  4, null ]
     ],
     'wooden-sign': [
         [ null,  1,  1,  1,  1,  1,  1, null ],

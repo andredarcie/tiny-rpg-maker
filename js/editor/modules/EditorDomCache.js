@@ -17,6 +17,7 @@ class EditorDomCache {
         this.npcConditionalRewardVariable = root.getElementById('npc-conditional-reward-variable');
         this.btnToggleNpcConditional = root.getElementById('btn-toggle-npc-conditional');
         this.npcConditionalSection = root.getElementById('npc-conditional-section');
+        this.npcVariantButtons = Array.from(root.querySelectorAll('[data-npc-variant-filter]'));
         this.worldGrid = root.getElementById('world-grid');
         this.titleInput = root.getElementById('game-title');
         this.authorInput = root.getElementById('game-author');

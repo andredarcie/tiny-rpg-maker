@@ -4,8 +4,14 @@ class EditorNpcRenderer extends EditorRendererBase {
         if (!list) return;
 
         this.gameEngine.npcManager?.ensureDefaultNPCs?.();
+        this.updateVariantButtons();
         const game = this.gameEngine.getGame();
-        const definitions = this.gameEngine.npcManager?.getDefinitions?.() ?? [];
+        const filter = this.manager.state.npcVariantFilter || 'human';
+        const definitions = (this.gameEngine.npcManager?.getDefinitions?.() ?? [])
+            .filter((def) => {
+                if (!def.variant || def.variant === 'fixed') return true;
+                return def.variant === filter;
+            });
         const npcs = this.gameEngine.getSprites();
 
         list.innerHTML = '';
@@ -151,6 +157,17 @@ class EditorNpcRenderer extends EditorRendererBase {
             return this.t(npc.textKey, npc.text || '');
         }
         return npc.text || '';
+    }
+
+    updateVariantButtons() {
+        const buttons = Array.isArray(this.dom.npcVariantButtons) ? this.dom.npcVariantButtons : [];
+        if (!buttons.length) return;
+        const current = this.manager.state.npcVariantFilter || 'human';
+        buttons.forEach((btn) => {
+            const match = btn.dataset.npcVariantFilter === current;
+            btn.classList.toggle('active', match);
+            btn.setAttribute('aria-pressed', match ? 'true' : 'false');
+        });
     }
 }
 

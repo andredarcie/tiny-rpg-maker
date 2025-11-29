@@ -28,7 +28,7 @@ class Renderer {
         this.npcManager = npcManager;
 
         this.paletteManager = new RendererPalette(gameState);
-        this.spriteFactory = new RendererSpriteFactory(this.paletteManager);
+        this.spriteFactory = new RendererSpriteFactory(this.paletteManager, gameState);
         this.canvasHelper = new RendererCanvasHelper(canvas, this.ctx, tileManager);
         this.tileRenderer = new RendererTileRenderer(gameState, tileManager, this.paletteManager, this.canvasHelper);
         this.entityRenderer = new RendererEntityRenderer(gameState, tileManager, this.spriteFactory, this.canvasHelper, this.paletteManager);
