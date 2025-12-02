@@ -266,8 +266,8 @@ class EditorEnemyRenderer extends EditorRendererBase {
 
         overlay.style.width = `${width}px`;
         overlay.style.height = `${height}px`;
-        overlay.style.left = `${rectCanvas.left - rectWrapper.left}px`;
-        overlay.style.top = `${rectCanvas.top - rectWrapper.top}px`;
+        overlay.style.left = `${rectCanvas.left - rectWrapper.left + wrapper.scrollLeft}px`;
+        overlay.style.top = `${rectCanvas.top - rectWrapper.top + wrapper.scrollTop}px`;
 
         overlay.innerHTML = '';
 
