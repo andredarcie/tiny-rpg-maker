@@ -8,6 +8,7 @@ class EditorEnemyRenderer extends EditorRendererBase {
         const enemies = this.gameEngine
             .getActiveEnemies()
             .filter((enemy) => enemy.roomIndex === activeRoom);
+        this.renderEnemyOverlay(enemies, activeRoom);
         if (!enemies.length) return;
 
         const definitions = EditorConstants.ENEMY_DEFINITIONS;
@@ -19,7 +20,10 @@ class EditorEnemyRenderer extends EditorRendererBase {
             }
         });
 
-        enemies.forEach((enemy) => {
+        const bosses = enemies.filter((enemy) => definitionMap.get(enemy.type)?.boss);
+        if (!bosses.length) return;
+
+        bosses.forEach((enemy) => {
             const definition = definitionMap.get(enemy.type);
             const item = document.createElement('div');
             item.className = 'enemy-item';
@@ -68,6 +72,8 @@ class EditorEnemyRenderer extends EditorRendererBase {
         if (!definitions.length) return;
 
         const selectedType = this.manager.selectedEnemyType;
+
+        this.renderEnemyXpProgress(container.parentElement || container, container);
 
         definitions.forEach((definition) => {
             const card = document.createElement('div');
@@ -154,6 +160,130 @@ class EditorEnemyRenderer extends EditorRendererBase {
             .replace(/\s+/g, ' ')
             .trim();
         return cleaned || fallback || defaultName;
+    }
+
+    renderEnemyXpProgress(parent, beforeNode = null) {
+        if (!parent) return;
+        parent.querySelector('.enemy-xp-block')?.remove();
+        const { currentXp, totalXp, ratio, maxLevel } = this.getEnemyXpProgress();
+
+        const block = document.createElement('div');
+        block.className = 'enemy-xp-block';
+
+        const header = document.createElement('div');
+        header.className = 'enemy-xp-header';
+
+        const label = document.createElement('div');
+        label.className = 'enemy-xp-label';
+        label.textContent = this.t('enemies.xpBarLabel', 'XP ganho');
+
+        const value = document.createElement('div');
+        value.className = 'enemy-xp-value';
+        const valueText = this.tf('enemies.xpBarValue', { current: currentXp, total: totalXp }, `${currentXp} / ${totalXp} XP`);
+        value.textContent = `${valueText} · Lvl ${maxLevel}`;
+
+        header.append(label, value);
+
+        const track = document.createElement('div');
+        track.className = 'enemy-xp-track';
+
+        const fill = document.createElement('div');
+        fill.className = 'enemy-xp-fill';
+        fill.style.width = `${Math.round(ratio * 100)}%`;
+
+        track.appendChild(fill);
+        block.append(header, track);
+
+        if (beforeNode && beforeNode.parentElement === parent) {
+            parent.insertBefore(block, beforeNode);
+        } else {
+            parent.appendChild(block);
+        }
+    }
+
+    getEnemyXpProgress() {
+        const enemies = this.gameEngine?.getActiveEnemies?.() ?? [];
+        const totalXpFromEnemies = enemies.reduce((sum, enemy) => {
+            return sum + EnemyDefinitions.getExperienceReward(enemy.type);
+        }, 0);
+
+        const playerManager = this.gameEngine?.gameState?.playerManager ?? null;
+        const maxLevel = Number.isFinite(playerManager?.maxLevel) ? playerManager.maxLevel : 9;
+
+        let totalXpToMax = 0;
+        if (playerManager?.getExperienceForNextLevel) {
+            for (let level = 1; level < maxLevel; level++) {
+                totalXpToMax += playerManager.getExperienceForNextLevel(level) || 0;
+            }
+        }
+        if (!Number.isFinite(totalXpToMax) || totalXpToMax <= 0) {
+            const base = Number.isFinite(playerManager?.experienceBase) ? playerManager.experienceBase : 40;
+            const growth = Number.isFinite(playerManager?.experienceGrowth) ? playerManager.experienceGrowth : 1.8;
+            for (let level = 1; level < maxLevel; level++) {
+                totalXpToMax += Math.max(5, Math.floor(base * Math.pow(growth, level - 1)));
+            }
+        }
+
+        const currentXp = Math.max(0, Math.floor(totalXpFromEnemies));
+        const totalXp = Math.max(1, Math.floor(totalXpToMax));
+        const ratio = Math.max(0, Math.min(1, totalXp > 0 ? currentXp / totalXp : 0));
+
+        return { currentXp, totalXp, ratio, maxLevel };
+    }
+
+    renderEnemyOverlay(enemies, roomIndex) {
+        const canvas = this.dom.editorCanvas;
+        if (!canvas) return;
+        const wrapper = canvas.parentElement;
+        if (!wrapper) return;
+
+        const roomEnemies = Array.isArray(enemies)
+            ? enemies.filter((enemy) => enemy.roomIndex === roomIndex)
+            : [];
+
+        let overlay = wrapper.querySelector('.enemy-overlay');
+        if (!roomEnemies.length) {
+            if (overlay) {
+                overlay.innerHTML = '';
+                overlay.remove();
+            }
+            return;
+        }
+
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.className = 'enemy-overlay';
+            wrapper.appendChild(overlay);
+        }
+
+        const roomSize = this.gameEngine?.gameState?.worldManager?.roomSize || 8;
+        const rectCanvas = canvas.getBoundingClientRect();
+        const rectWrapper = wrapper.getBoundingClientRect();
+        const width = rectCanvas.width || canvas.clientWidth || canvas.width || 1;
+        const height = rectCanvas.height || canvas.clientHeight || canvas.height || 1;
+        const tileSizeX = width / roomSize;
+        const tileSizeY = height / roomSize;
+
+        overlay.style.width = `${width}px`;
+        overlay.style.height = `${height}px`;
+        overlay.style.left = `${rectCanvas.left - rectWrapper.left}px`;
+        overlay.style.top = `${rectCanvas.top - rectWrapper.top}px`;
+
+        overlay.innerHTML = '';
+
+        roomEnemies.forEach((enemy) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'enemy-overlay-remove';
+            btn.textContent = '✕';
+            btn.style.left = `${(enemy.x + 1) * tileSizeX}px`;
+            btn.style.top = `${enemy.y * tileSizeY}px`;
+            btn.addEventListener('click', (ev) => {
+                ev.stopPropagation();
+                this.manager.enemyService.removeEnemy(enemy.id);
+            });
+            overlay.appendChild(btn);
+        });
     }
 }
 

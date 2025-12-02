@@ -62,10 +62,21 @@ class StateEnemyManager {
             this.game.enemies = (this.game.enemies || []).filter((entry) => this.normalizeEnemyType(entry.type) !== normalizedType);
             this.state.enemies = (this.state.enemies || []).filter((entry) => this.normalizeEnemyType(entry.type) !== normalizedType);
         }
+
+        const targetRoom = this.worldManager.clampRoomIndex(enemy.roomIndex ?? 0);
+        const maxEnemiesPerRoom = 9;
+        const currentRoomCount = (this.game?.enemies || []).reduce((count, entry) => {
+            const room = this.worldManager.clampRoomIndex(entry.roomIndex ?? 0);
+            return room === targetRoom ? count + 1 : count;
+        }, 0);
+        if (currentRoomCount >= maxEnemiesPerRoom) {
+            return null;
+        }
+
         const entry = {
             id: enemy.id,
             type: normalizedType,
-            roomIndex: this.worldManager.clampRoomIndex(enemy.roomIndex ?? 0),
+            roomIndex: targetRoom,
             x: this.worldManager.clampCoordinate(enemy.x ?? 0),
             y: this.worldManager.clampCoordinate(enemy.y ?? 0),
             lastX: this.worldManager.clampCoordinate(enemy.x ?? 0),

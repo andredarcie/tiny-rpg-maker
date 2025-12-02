@@ -76,6 +76,8 @@ class ShareDataNormalizer {
     static normalizeEnemies(list) {
         if (!Array.isArray(list)) return [];
         const defs = ShareConstants.ENEMY_DEFINITIONS;
+        const perRoomCounts = new Map();
+
         return list
             .map((enemy, index) => {
                 const type = ShareDataNormalizer.normalizeEnemyType(enemy?.type);
@@ -94,7 +96,13 @@ class ShareDataNormalizer {
                     variableNibble: ShareVariableCodec.variableIdToNibble(defeatVariableId)
                 };
             })
-            .filter((enemy) => Number.isFinite(enemy.x) && Number.isFinite(enemy.y));
+            .filter((enemy) => {
+                if (!Number.isFinite(enemy.x) || !Number.isFinite(enemy.y)) return false;
+                const count = perRoomCounts.get(enemy.roomIndex) || 0;
+                if (count >= 9) return false;
+                perRoomCounts.set(enemy.roomIndex, count + 1);
+                return true;
+            });
     }
 
     static normalizeObjectPositions(list, type) {

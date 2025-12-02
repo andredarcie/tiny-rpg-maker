@@ -1,6 +1,8 @@
 class EditorEnemyService {
     constructor(editorManager) {
         this.manager = editorManager;
+        this.editorIndicator = null;
+        this.editorIndicatorTimeout = null;
     }
 
     get dom() {
@@ -50,6 +52,14 @@ class EditorEnemyService {
         if (existing) {
             return;
         }
+        const enemies = this.gameEngine.getActiveEnemies?.() ?? [];
+        const currentRoomCount = enemies.reduce((count, enemy) => (
+            enemy.roomIndex === roomIndex ? count + 1 : count
+        ), 0);
+        if (currentRoomCount >= 9) {
+            this.showEnemyLimitFeedback();
+            return;
+        }
         const definition = this.getEnemyDefinition(this.state.selectedEnemyType);
         const fallback = EditorConstants.ENEMY_DEFINITIONS[0]?.type || 'giant-rat';
         const type = definition?.type || fallback;
@@ -63,6 +73,7 @@ class EditorEnemyService {
             return;
         }
         this.manager.renderService.renderEnemies();
+        this.manager.renderService.renderEnemyCatalog();
         this.manager.renderService.renderWorldGrid();
         this.manager.renderService.renderEditor();
         this.manager.gameEngine.draw();
@@ -73,6 +84,7 @@ class EditorEnemyService {
     removeEnemy(enemyId) {
         this.gameEngine.removeEnemy(enemyId);
         this.manager.renderService.renderEnemies();
+        this.manager.renderService.renderEnemyCatalog();
         this.manager.renderService.renderWorldGrid();
         this.manager.renderService.renderEditor();
         this.manager.gameEngine.draw();
@@ -111,6 +123,49 @@ class EditorEnemyService {
             this.manager.renderEnemyCatalog();
         }
         return true;
+    }
+
+    getEditorIndicator() {
+        if (this.editorIndicator) return this.editorIndicator;
+        const container = document?.querySelector?.('.editor-map-wrapper');
+        if (!container) return null;
+        const indicator = document.createElement('div');
+        indicator.className = 'combat-indicator';
+        indicator.setAttribute('aria-live', 'polite');
+        indicator.setAttribute('aria-atomic', 'true');
+        container.appendChild(indicator);
+        this.editorIndicator = indicator;
+        return indicator;
+    }
+
+    showEnemyLimitFeedback() {
+        const indicator = this.getEditorIndicator();
+        if (this.editorIndicatorTimeout) {
+            clearTimeout(this.editorIndicatorTimeout);
+            this.editorIndicatorTimeout = null;
+        }
+        if (indicator) {
+            indicator.textContent = this.getEnemyLimitMessage();
+            indicator.classList.remove('visible');
+            indicator.setAttribute('data-visible', 'false');
+            void indicator.offsetWidth;
+            indicator.classList.add('visible');
+            indicator.setAttribute('data-visible', 'true');
+            this.editorIndicatorTimeout = setTimeout(() => {
+                indicator.classList.remove('visible');
+                indicator.setAttribute('data-visible', 'false');
+                indicator.textContent = '';
+                this.editorIndicatorTimeout = null;
+            }, 700);
+            return;
+        }
+        this.gameEngine?.renderer?.showCombatIndicator?.(this.getEnemyLimitMessage(), { duration: 700 });
+    }
+
+    getEnemyLimitMessage() {
+        const message = TextResources?.get?.('enemies.limitReached', '')?.trim?.();
+        if (message) return message;
+        return 'Max enemies reached';
     }
 
     getEnemyDefinition(type = null) {
