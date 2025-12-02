@@ -28,6 +28,19 @@ class EnemyDefinitions {
             sprite: SpriteMatrixRegistry.get('enemy', 'bandit')
         },
         {
+            type: 'skeleton',
+            id: 'enemy-skeleton',
+            name: '💀 Esqueleto',
+            nameKey: 'enemies.names.skeleton',
+            description: 'o morto-vivo clássico.',
+            damage: 2,
+            missChance: 0.25,
+            experience: 24,
+            aliases: ['skull'],
+            hasEyes: false,
+            sprite: SpriteMatrixRegistry.get('enemy', 'skeleton')
+        },
+        {
             type: 'dark-knight',
             id: 'enemy-dark-knight',
             name: '⚔️ Cavaleiro Negro',
@@ -65,19 +78,6 @@ class EnemyDefinitions {
             hasEyes: true,
             boss: true,
             sprite: SpriteMatrixRegistry.get('enemy', 'dragon')
-        },
-        {
-            type: 'skeleton',
-            id: 'enemy-skeleton',
-            name: '💀 Esqueleto',
-            nameKey: 'enemies.names.skeleton',
-            description: 'o morto-vivo clássico.',
-            damage: 2,
-            missChance: 0.25,
-            experience: 24,
-            aliases: ['skull'],
-            hasEyes: false,
-            sprite: SpriteMatrixRegistry.get('enemy', 'skeleton')
         },
         {
             type: 'fallen-king',
