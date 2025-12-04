@@ -73,7 +73,7 @@ class EditorEnemyRenderer extends EditorRendererBase {
 
         const selectedType = this.manager.selectedEnemyType;
 
-        this.renderEnemyXpProgress(container.parentElement || container, container);
+        this.renderEnemyCountProgress(container.parentElement || container, container);
 
         definitions.forEach((definition) => {
             const card = document.createElement('div');
@@ -162,10 +162,10 @@ class EditorEnemyRenderer extends EditorRendererBase {
         return cleaned || fallback || defaultName;
     }
 
-    renderEnemyXpProgress(parent, beforeNode = null) {
+    renderEnemyCountProgress(parent, beforeNode = null) {
         if (!parent) return;
         parent.querySelector('.enemy-xp-block')?.remove();
-        const { currentXp, totalXp, ratio, maxLevel } = this.getEnemyXpProgress();
+        const { currentCount, totalCount, ratio } = this.getEnemyCountProgress();
 
         const block = document.createElement('div');
         block.className = 'enemy-xp-block';
@@ -175,12 +175,16 @@ class EditorEnemyRenderer extends EditorRendererBase {
 
         const label = document.createElement('div');
         label.className = 'enemy-xp-label';
-        label.textContent = this.t('enemies.xpBarLabel', 'XP ganho');
+        label.textContent = this.t('enemies.xpBarLabel', 'Inimigos colocados');
 
         const value = document.createElement('div');
         value.className = 'enemy-xp-value';
-        const valueText = this.tf('enemies.xpBarValue', { current: currentXp, total: totalXp }, `${currentXp} / ${totalXp} XP`);
-        value.textContent = `${valueText} · Lvl ${maxLevel}`;
+        const valueText = this.tf(
+            'enemies.xpBarValue',
+            { current: currentCount, total: totalCount },
+            `${currentCount} / ${totalCount} inimigos`
+        );
+        value.textContent = valueText;
 
         header.append(label, value);
 
@@ -201,34 +205,22 @@ class EditorEnemyRenderer extends EditorRendererBase {
         }
     }
 
-    getEnemyXpProgress() {
+    getEnemyCountProgress() {
         const enemies = this.gameEngine?.getActiveEnemies?.() ?? [];
-        const totalXpFromEnemies = enemies.reduce((sum, enemy) => {
-            return sum + EnemyDefinitions.getExperienceReward(enemy.type);
-        }, 0);
+        const currentCount = enemies.length;
 
-        const playerManager = this.gameEngine?.gameState?.playerManager ?? null;
-        const maxLevel = Number.isFinite(playerManager?.maxLevel) ? playerManager.maxLevel : 9;
+        const game =
+            (this.gameEngine && (this.gameEngine.getGame?.() || this.gameEngine.gameState?.getGame?.())) ||
+            {};
+        const rows = Number(game?.world?.rows) || 3;
+        const cols = Number(game?.world?.cols) || 3;
+        const totalRooms = Math.max(1, rows * cols);
+        const maxPerRoom = 9;
+        const totalCount = totalRooms * maxPerRoom;
 
-        let totalXpToMax = 0;
-        if (playerManager?.getExperienceForNextLevel) {
-            for (let level = 1; level < maxLevel; level++) {
-                totalXpToMax += playerManager.getExperienceForNextLevel(level) || 0;
-            }
-        }
-        if (!Number.isFinite(totalXpToMax) || totalXpToMax <= 0) {
-            const base = Number.isFinite(playerManager?.experienceBase) ? playerManager.experienceBase : 40;
-            const growth = Number.isFinite(playerManager?.experienceGrowth) ? playerManager.experienceGrowth : 1.8;
-            for (let level = 1; level < maxLevel; level++) {
-                totalXpToMax += Math.max(5, Math.floor(base * Math.pow(growth, level - 1)));
-            }
-        }
+        const ratio = Math.max(0, Math.min(1, totalCount > 0 ? currentCount / totalCount : 0));
 
-        const currentXp = Math.max(0, Math.floor(totalXpFromEnemies));
-        const totalXp = Math.max(1, Math.floor(totalXpToMax));
-        const ratio = Math.max(0, Math.min(1, totalXp > 0 ? currentXp / totalXp : 0));
-
-        return { currentXp, totalXp, ratio, maxLevel };
+        return { currentCount, totalCount, ratio };
     }
 
     renderEnemyOverlay(enemies, roomIndex) {

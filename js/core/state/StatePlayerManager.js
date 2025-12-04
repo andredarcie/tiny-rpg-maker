@@ -5,8 +5,8 @@ class StatePlayerManager {
         this.skillManager = skillManager;
         this.maxLevel = 9;
         this.baseMaxLives = 3;
-        this.experienceBase = 55;
-        this.experienceGrowth = 1.6;
+        this.experienceBase = 6;
+        this.experienceGrowth = 1.35;
         this.maxKeys = 9;
         this.roomChangeDamageCooldown = 1000;
     }
