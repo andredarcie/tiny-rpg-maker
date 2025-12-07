@@ -13,9 +13,9 @@ const STATE_VARIABLE_PRESETS = Object.freeze([
     createVariablePreset('var-4', 4, 'variables.names.var4', '', '#008751'),
     createVariablePreset('var-5', 5, 'variables.names.var5', '', '#AB5236'),
     createVariablePreset('var-6', 6, 'variables.names.var6', '', '#5F574F'),
-    createVariablePreset('var-7', 7, 'variables.names.var7', '', '#C2C3C7'),
+    createVariablePreset('var-7', 7, 'variables.names.var7', '', '#29ADFF'),
     createVariablePreset('var-8', 8, 'variables.names.var8', '', '#FF77A8'),
-    createVariablePreset('var-9', 9, 'variables.names.var9', '', '#FFCCAA')
+    createVariablePreset('var-9', 9, 'variables.names.var9', '', '#FFFF27')
 ]);
 
 class StateVariableManager {

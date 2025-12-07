@@ -25,7 +25,8 @@ class EditorEventBinder extends EditorManagerModule {
             mapNavButtons,
             mobileNavButtons,
             mobilePanels,
-            worldGrid
+            worldGrid,
+            projectVariablesToggle
         } = this.dom;
 
         const manager = this.manager;
@@ -45,6 +46,7 @@ class EditorEventBinder extends EditorManagerModule {
         btnGenerateUrl?.addEventListener('click', () => shareService.generateShareableUrl());
         btnUndo?.addEventListener('click', () => manager.undo());
         btnRedo?.addEventListener('click', () => manager.redo());
+        projectVariablesToggle?.addEventListener('click', () => manager.toggleVariablePanel());
 
         titleInput?.addEventListener('input', () => manager.updateGameMetadata());
         authorInput?.addEventListener('input', () => manager.updateGameMetadata());

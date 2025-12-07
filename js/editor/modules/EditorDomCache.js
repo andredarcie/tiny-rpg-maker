@@ -31,6 +31,10 @@ class EditorDomCache {
         this.btnRedo = root.getElementById('btn-redo');
         this.enemyTypes = root.getElementById('enemy-types');
         this.enemiesList = root.getElementById('enemies-list');
+        this.projectVariablesContainer = root.getElementById('project-variables-container');
+        this.projectVariablesToggle = root.getElementById('project-variables-toggle');
+        this.projectVariableList = root.getElementById('project-variable-usage-list');
+        this.projectVariableSummary = root.getElementById('project-variable-usage-summary');
     }
 }
 

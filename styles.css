@@ -1154,6 +1154,114 @@ textarea {
     margin: 4px 0;
 }
 
+.project-variables {
+    flex: 1 1 100%;
+    background: linear-gradient(135deg, rgba(33, 38, 53, 0.8), rgba(24, 28, 40, 0.9));
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+}
+
+.project-variables__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.project-variables__title {
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+.project-variables__toggle {
+    align-self: stretch;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text);
+    cursor: pointer;
+    transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    text-align: left;
+    font-weight: 700;
+}
+
+.project-variables__toggle:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+.project-variables__summary {
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+.project-variables__list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.project-variable-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(12, 14, 22, 0.4);
+}
+
+.project-variable-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: var(--muted);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.03);
+}
+
+.project-variable-name {
+    flex: 1;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+
+.project-variable-badge {
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.project-variable-badge.in-use {
+    color: #a1f5c2;
+    background: rgba(71, 196, 134, 0.14);
+    border-color: rgba(71, 196, 134, 0.4);
+}
+
+.project-variable-badge.unused {
+    color: #f7c97c;
+    background: rgba(247, 201, 124, 0.14);
+    border-color: rgba(247, 201, 124, 0.35);
+}
+
+.project-variables.is-collapsed .project-variables__list {
+    display: none;
+}
+
 .enemies-panel {
     display: grid;
     gap: 12px;

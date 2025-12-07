@@ -17,6 +17,7 @@ class EditorState {
         this.activeMobilePanel = 'tiles';
         this.npcVariantFilter = 'human';
         this.playerEndTextUpdateTimer = null;
+        this.variablePanelCollapsed = true;
     }
 }
 

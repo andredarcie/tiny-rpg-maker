@@ -200,6 +200,10 @@ class EditorManager {
         this.renderService.renderWorldGrid();
     }
 
+    toggleVariablePanel() {
+        this.uiController.toggleVariablePanel();
+    }
+
     setActiveMobilePanel(panel) {
         this.uiController.setActiveMobilePanel(panel);
     }

@@ -11,8 +11,15 @@ class EditorUIController extends EditorManagerModule {
     }
 
     updateJSON() {
-        if (!this.dom.jsonArea) return;
-        this.dom.jsonArea.value = JSON.stringify(this.gameEngine.exportGameData(), null, 2);
+        if (this.dom.jsonArea) {
+            this.dom.jsonArea.value = JSON.stringify(this.gameEngine.exportGameData(), null, 2);
+        }
+        this.renderService.renderVariableUsage();
+    }
+
+    toggleVariablePanel() {
+        this.state.variablePanelCollapsed = !this.state.variablePanelCollapsed;
+        this.renderService.renderVariableUsage();
     }
 
     syncUI() {
