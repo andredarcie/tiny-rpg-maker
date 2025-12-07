@@ -1262,6 +1262,48 @@ textarea {
     display: none;
 }
 
+.project-skills__list {
+    gap: 10px;
+}
+
+.project-skill-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.project-skill-group-title {
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    color: var(--text);
+}
+
+.project-skill-item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    gap: 4px 10px;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(12, 14, 22, 0.4);
+}
+
+.project-skill-icon {
+    grid-row: 1 / span 2;
+    font-size: 1.1rem;
+}
+
+.project-skill-name {
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+.project-skill-desc {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
 .enemies-panel {
     display: grid;
     gap: 12px;

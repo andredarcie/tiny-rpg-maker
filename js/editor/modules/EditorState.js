@@ -18,6 +18,7 @@ class EditorState {
         this.npcVariantFilter = 'human';
         this.playerEndTextUpdateTimer = null;
         this.variablePanelCollapsed = true;
+        this.skillPanelCollapsed = true;
     }
 }
 

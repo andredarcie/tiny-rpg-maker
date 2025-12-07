@@ -188,6 +188,86 @@ class EditorRenderService {
         });
     }
 
+    renderSkillList() {
+        const list = this.dom.projectSkillsList;
+        if (!list) return;
+        const container = this.dom.projectSkillsContainer;
+        const toggle = this.dom.projectSkillsToggle;
+        list.innerHTML = '';
+
+        const skills = typeof SkillDefinitions !== 'undefined'
+            ? SkillDefinitions.getAll?.() || []
+            : [];
+        const levelMap = this.buildSkillLevelMap();
+        const grouped = this.groupSkillsByLevel(skills, levelMap);
+        const collapsed = Boolean(this.state.skillPanelCollapsed);
+        if (toggle) {
+            const actionText = collapsed
+                ? this.t('project.skills.toggle.show', 'Mostrar skills')
+                : this.t('project.skills.toggle.hide', 'Esconder skills');
+            const title = this.t('project.skills.title', 'Skills do jogo');
+            toggle.textContent = `${title} · ${actionText}`;
+        }
+        if (container) {
+            container.classList.toggle('is-collapsed', collapsed);
+        }
+        if (collapsed) {
+            return;
+        }
+
+        if (!skills.length) {
+            const empty = document.createElement('div');
+            empty.className = 'project-skill-item';
+            const text = document.createElement('span');
+            text.className = 'project-skill-name';
+            text.textContent = this.t('variables.none', 'Nenhuma');
+            empty.appendChild(text);
+            list.appendChild(empty);
+            return;
+        }
+
+        grouped.forEach(({ level, items }) => {
+            const group = document.createElement('div');
+            group.className = 'project-skill-group';
+
+            const title = document.createElement('div');
+            title.className = 'project-skill-group-title';
+            const label = Number.isFinite(level)
+                ? this.tf('project.skills.level', { value: level }, `Nível ${level}`)
+                : this.t('project.skills.level', 'Nível -');
+            title.textContent = label;
+            group.appendChild(title);
+
+            items.forEach((skill) => {
+                const item = document.createElement('div');
+                item.className = 'project-skill-item';
+
+                const icon = document.createElement('span');
+                icon.className = 'project-skill-icon';
+                icon.textContent = skill.icon || '✨';
+
+                const name = document.createElement('div');
+                name.className = 'project-skill-name';
+                const nameText = skill.nameKey
+                    ? this.t(skill.nameKey, skill.name || skill.id || '')
+                    : (skill.name || skill.id || '');
+                name.textContent = nameText || skill.id || '';
+
+                const desc = document.createElement('div');
+                desc.className = 'project-skill-desc';
+                const descText = skill.descriptionKey
+                    ? this.t(skill.descriptionKey, skill.description || '')
+                    : (skill.description || '');
+                desc.textContent = descText;
+
+                item.append(icon, name, desc);
+                group.appendChild(item);
+            });
+
+            list.appendChild(group);
+        });
+    }
+
     collectVariableUsage() {
         const used = new Set();
         const game = this.gameEngine?.getGame?.() || {};
@@ -221,6 +301,45 @@ class EditorRenderService {
         objects.forEach((object) => addIfValid(object.variableId));
 
         return used;
+    }
+
+    buildSkillLevelMap() {
+        const levelMap = new Map();
+        const entries = typeof SkillDefinitions !== 'undefined'
+            ? SkillDefinitions.LEVEL_SKILLS || {}
+            : {};
+        Object.entries(entries).forEach(([levelKey, ids]) => {
+            const level = Number(levelKey);
+            if (!Number.isFinite(level)) return;
+            (Array.isArray(ids) ? ids : []).forEach((id) => {
+                if (typeof id !== 'string') return;
+                if (!levelMap.has(id) || level < levelMap.get(id)) {
+                    levelMap.set(id, level);
+                }
+            });
+        });
+        return levelMap;
+    }
+
+    groupSkillsByLevel(skills, levelMap) {
+        const buckets = new Map();
+        skills.forEach((skill) => {
+            const level = levelMap.get(skill.id) ?? null;
+            const key = Number.isFinite(level) ? level : 'other';
+            if (!buckets.has(key)) {
+                buckets.set(key, []);
+            }
+            buckets.get(key).push(skill);
+        });
+        const sortedKeys = Array.from(buckets.keys()).sort((a, b) => {
+            const na = Number.isFinite(a) ? a : Infinity;
+            const nb = Number.isFinite(b) ? b : Infinity;
+            return na - nb;
+        });
+        return sortedKeys.map((key) => ({
+            level: Number.isFinite(key) ? key : null,
+            items: buckets.get(key) || []
+        }));
     }
 }
 

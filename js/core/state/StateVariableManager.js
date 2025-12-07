@@ -136,6 +136,47 @@ class StateVariableManager {
         return fallback;
     }
 
+    getPresetTranslationSet(preset) {
+        const names = new Set();
+        if (!preset) return names;
+        const maybeAdd = (value) => {
+            if (typeof value === 'string' && value.trim()) {
+                names.add(value.trim());
+            }
+        };
+        maybeAdd(preset.fallbackName);
+        maybeAdd(preset.name);
+        const bundles = (typeof TextResources !== 'undefined' && TextResources?.bundles) || (typeof TEXT_BUNDLES !== 'undefined' ? TEXT_BUNDLES : {});
+        if (preset.nameKey && bundles) {
+            Object.values(bundles).forEach((bundle) => {
+                if (!bundle) return;
+                maybeAdd(bundle[preset.nameKey]);
+            });
+        }
+        maybeAdd(this.getPresetDefaultName(preset));
+        return names;
+    }
+
+    refreshPresetNames() {
+        const presetsById = new Map(this.presets.map((preset) => [preset.id, preset]));
+        const apply = (list) => {
+            if (!Array.isArray(list)) return;
+            list.forEach((variable) => {
+                const preset = presetsById.get(variable.id);
+                if (!preset) return;
+                const defaults = this.getPresetTranslationSet(preset);
+                if (!variable.name || defaults.has(variable.name)) {
+                    const next = this.getPresetDefaultName(preset);
+                    if (variable.name !== next) {
+                        variable.name = next;
+                    }
+                }
+            });
+        };
+        apply(this.game?.variables);
+        apply(this.state?.variables);
+    }
+
     static get PRESETS() {
         return STATE_VARIABLE_PRESETS;
     }

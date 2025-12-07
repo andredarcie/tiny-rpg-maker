@@ -15,11 +15,17 @@ class EditorUIController extends EditorManagerModule {
             this.dom.jsonArea.value = JSON.stringify(this.gameEngine.exportGameData(), null, 2);
         }
         this.renderService.renderVariableUsage();
+        this.renderService.renderSkillList();
     }
 
     toggleVariablePanel() {
         this.state.variablePanelCollapsed = !this.state.variablePanelCollapsed;
         this.renderService.renderVariableUsage();
+    }
+
+    toggleSkillPanel() {
+        this.state.skillPanelCollapsed = !this.state.skillPanelCollapsed;
+        this.renderService.renderSkillList();
     }
 
     syncUI() {
@@ -67,6 +73,7 @@ class EditorUIController extends EditorManagerModule {
 
     handleLanguageChange() {
         TextResources.apply();
+        this.gameEngine?.gameState?.variableManager?.refreshPresetNames?.();
         this.refreshNpcLocalizedText();
         this.manager.renderAll();
         this.updateJSON();

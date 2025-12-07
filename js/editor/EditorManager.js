@@ -204,6 +204,10 @@ class EditorManager {
         this.uiController.toggleVariablePanel();
     }
 
+    toggleSkillPanel() {
+        this.uiController.toggleSkillPanel();
+    }
+
     setActiveMobilePanel(panel) {
         this.uiController.setActiveMobilePanel(panel);
     }

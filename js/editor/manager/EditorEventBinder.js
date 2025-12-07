@@ -26,7 +26,8 @@ class EditorEventBinder extends EditorManagerModule {
             mobileNavButtons,
             mobilePanels,
             worldGrid,
-            projectVariablesToggle
+            projectVariablesToggle,
+            projectSkillsToggle
         } = this.dom;
 
         const manager = this.manager;
@@ -47,6 +48,7 @@ class EditorEventBinder extends EditorManagerModule {
         btnUndo?.addEventListener('click', () => manager.undo());
         btnRedo?.addEventListener('click', () => manager.redo());
         projectVariablesToggle?.addEventListener('click', () => manager.toggleVariablePanel());
+        projectSkillsToggle?.addEventListener('click', () => manager.toggleSkillPanel());
 
         titleInput?.addEventListener('input', () => manager.updateGameMetadata());
         authorInput?.addEventListener('input', () => manager.updateGameMetadata());

@@ -35,6 +35,9 @@ class EditorDomCache {
         this.projectVariablesToggle = root.getElementById('project-variables-toggle');
         this.projectVariableList = root.getElementById('project-variable-usage-list');
         this.projectVariableSummary = root.getElementById('project-variable-usage-summary');
+        this.projectSkillsContainer = root.getElementById('project-skills-container');
+        this.projectSkillsToggle = root.getElementById('project-skills-toggle');
+        this.projectSkillsList = root.getElementById('project-skills-list');
     }
 }
 
