@@ -69,6 +69,16 @@ class RendererOverlayRenderer extends RendererModuleBase {
         const pending = Math.max(0, this.gameState.getPendingLevelUpChoices?.() || 0);
         const accent = this.paletteManager.getColor(7) || '#FFF1E8';
         const accentStrong = this.paletteManager.getColor(13) || accent;
+        const titleFont = Math.max(8, Math.floor(height / 34));
+        const pendingFont = Math.max(6, Math.floor(height / 58));
+        const layout = this.getLevelUpCardLayout({
+            width,
+            height,
+            choicesLength: choices.length,
+            hasPendingText: pending > 0,
+            titleFont,
+            pendingFont
+        });
 
         ctx.save();
         ctx.fillStyle = 'rgba(5, 7, 12, 0.88)';
@@ -77,7 +87,6 @@ class RendererOverlayRenderer extends RendererModuleBase {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
         ctx.fillStyle = accent;
-        const titleFont = Math.max(8, Math.floor(height / 34));
         const topPadding = Math.floor(height * 0.05);
         ctx.font = `${titleFont}px "Press Start 2P", "VT323", monospace`;
         const titleY = topPadding;
@@ -87,7 +96,6 @@ class RendererOverlayRenderer extends RendererModuleBase {
         if (pending > 0) {
             const pendingText = formatOverlayText('skills.pendingLabel', { value: pending }, '');
             if (pendingText) {
-                const pendingFont = Math.max(6, Math.floor(height / 58));
                 ctx.font = `${pendingFont}px monospace`;
                 ctx.fillStyle = accentStrong;
                 ctx.fillText(pendingText, centerX, nextY);
@@ -97,6 +105,54 @@ class RendererOverlayRenderer extends RendererModuleBase {
         nextY += Math.floor(height * 0.06);
 
         const cardCount = Math.max(1, choices.length || 1);
+        if (!choices.length) {
+            const allText = getOverlayText('skills.allUnlocked', '');
+            if (allText) {
+                ctx.font = `${Math.max(12, Math.floor(height / 16))}px monospace`;
+                ctx.fillStyle = accentStrong;
+                const centerY = layout?.cardArea
+                    ? layout.cardArea.cardYStart + layout.cardArea.cardHeight / 2
+                    : height / 2;
+                ctx.fillText(allText, centerX, centerY);
+            }
+            ctx.restore();
+            return;
+        }
+
+        const cardRects = layout?.rects || [];
+        cardRects.forEach((rect, index) => {
+            this.drawLevelUpCard(ctx, {
+                x: rect.x,
+                y: rect.y,
+                width: rect.width,
+                height: rect.height,
+                active: overlay.cursor === index,
+                data: choices[index]
+            });
+        });
+
+        ctx.restore();
+    }
+
+    getLevelUpCardLayout({
+        width = 0,
+        height = 0,
+        choicesLength = 0,
+        hasPendingText = false,
+        titleFont = null,
+        pendingFont = null
+    } = {}) {
+        const cardCount = Math.max(1, choicesLength || 1);
+        const computedTitleFont = Number.isFinite(titleFont) ? titleFont : Math.max(8, Math.floor(height / 34));
+        const computedPendingFont = Number.isFinite(pendingFont) ? pendingFont : Math.max(6, Math.floor(height / 58));
+        const topPadding = Math.floor(height * 0.05);
+        const titleY = topPadding;
+        let nextY = titleY + computedTitleFont + Math.floor(height * 0.02);
+        if (hasPendingText) {
+            nextY += computedPendingFont + Math.floor(height * 0.02);
+        }
+        nextY += Math.floor(height * 0.06);
+
         const perRow = cardCount === 2 ? 1 : cardCount;
         const rows = Math.max(1, Math.ceil(cardCount / perRow));
         const marginX = Math.max(4, Math.floor(width * 0.025));
@@ -110,33 +166,18 @@ class RendererOverlayRenderer extends RendererModuleBase {
         const maxCardHeight = Math.max(100, Math.floor((height - cardYStart - gapY * (rows - 1)) / rows));
         const cardHeight = Math.min(Math.max(100, maxCardHeight), Math.floor(height * 0.36));
 
-        if (!choices.length) {
-            const allText = getOverlayText('skills.allUnlocked', '');
-            if (allText) {
-                ctx.font = `${Math.max(12, Math.floor(height / 16))}px monospace`;
-                ctx.fillStyle = accentStrong;
-                ctx.fillText(allText, centerX, cardYStart + cardHeight / 2);
-            }
-            ctx.restore();
-            return;
-        }
-
-        choices.forEach((choice, index) => {
+        const rects = Array.from({ length: cardCount }, (_, index) => {
             const row = Math.floor(index / perRow);
             const col = index % perRow;
             const px = Math.round(startX + col * (cardWidth + gapX));
             const py = Math.round(cardYStart + row * (cardHeight + gapY));
-            this.drawLevelUpCard(ctx, {
-                x: px,
-                y: py,
-                width: cardWidth,
-                height: cardHeight,
-                active: overlay.cursor === index,
-                data: choice
-            });
+            return { x: px, y: py, width: cardWidth, height: cardHeight };
         });
 
-        ctx.restore();
+        return {
+            rects,
+            cardArea: { startX, cardYStart, cardWidth, cardHeight, gapX, gapY, perRow, rows }
+        };
     }
 
     drawLevelUpCard(ctx, { x, y, width, height, active = false, data = null }) {

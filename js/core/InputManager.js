@@ -114,7 +114,7 @@ class InputManager {
             ev.preventDefault?.();
             const touch = ev.changedTouches?.[0];
             if (touch) {
-                this.chooseLevelUpByPointer(touch.clientX);
+                this.chooseLevelUpByPointer(touch.clientX, touch.clientY);
             }
             this.touchStart = null;
             return;
@@ -179,7 +179,7 @@ class InputManager {
             ev.preventDefault?.();
             const touch = ev.changedTouches?.[0];
             if (touch) {
-                this.chooseLevelUpByPointer(touch.clientX);
+                this.chooseLevelUpByPointer(touch.clientX, touch.clientY);
             }
             this.touchStart = null;
             return;
@@ -235,7 +235,7 @@ class InputManager {
         if (!this.isGameModeActive()) return;
         if (this.gameEngine.isLevelUpOverlayActive?.()) {
             ev.preventDefault?.();
-            this.chooseLevelUpByPointer(ev.clientX);
+            this.chooseLevelUpByPointer(ev.clientX, ev.clientY);
         }
     }
 
@@ -264,8 +264,8 @@ class InputManager {
         }
     }
 
-    chooseLevelUpByPointer(clientX) {
-        const index = this.gameEngine.pickLevelUpChoiceFromPointer?.(clientX);
+    chooseLevelUpByPointer(clientX, clientY) {
+        const index = this.gameEngine.pickLevelUpChoiceFromPointer?.(clientX, clientY);
         if (index === null || index === undefined) return;
         this.gameEngine.chooseLevelUpSkill?.(index);
     }

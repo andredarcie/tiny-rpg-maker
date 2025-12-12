@@ -125,21 +125,53 @@ class GameEngine {
         return 'skill';
     }
 
-    pickLevelUpChoiceFromPointer(clientX) {
+    pickLevelUpChoiceFromPointer(clientX, clientY) {
         const overlay = this.gameState.getLevelUpOverlay?.();
         if (!overlay?.active) return null;
         const choices = Array.isArray(overlay.choices) ? overlay.choices : [];
         if (!choices.length) return null;
         const rect = this.canvas?.getBoundingClientRect?.();
-        if (!rect || !Number.isFinite(clientX)) {
+        if (!rect || !Number.isFinite(clientX) || !Number.isFinite(clientY)) {
             return Number.isFinite(overlay.cursor) ? overlay.cursor : 0;
         }
-        const width = rect.width || 1;
-        const normalizedX = this.clamp(clientX - rect.left, 0, width);
-        const slotWidth = width / choices.length;
-        if (slotWidth <= 0) return Number.isFinite(overlay.cursor) ? overlay.cursor : 0;
-        const index = Math.floor(normalizedX / slotWidth);
-        return this.clamp(index, 0, choices.length - 1);
+        const scaleX = this.canvas.width / (rect.width || 1);
+        const scaleY = this.canvas.height / (rect.height || 1);
+        const canvasX = (clientX - rect.left) * scaleX;
+        const canvasY = (clientY - rect.top) * scaleY;
+        const pending = Math.max(0, this.gameState.getPendingLevelUpChoices?.() || 0);
+        const layout = this.renderer?.overlayRenderer?.getLevelUpCardLayout?.({
+            width: this.canvas.width,
+            height: this.canvas.height,
+            choicesLength: choices.length,
+            hasPendingText: pending > 0
+        });
+        const rects = Array.isArray(layout?.rects) ? layout.rects : [];
+        const hitIndex = rects.findIndex((r) => (
+            canvasX >= r.x &&
+            canvasX <= r.x + r.width &&
+            canvasY >= r.y &&
+            canvasY <= r.y + r.height
+        ));
+        if (hitIndex >= 0) {
+            return hitIndex;
+        }
+        if (rects.length) {
+            let bestIndex = 0;
+            let bestDist = Number.POSITIVE_INFINITY;
+            rects.forEach((r, idx) => {
+                const cx = r.x + r.width / 2;
+                const cy = r.y + r.height / 2;
+                const dx = canvasX - cx;
+                const dy = canvasY - cy;
+                const dist = dx * dx + dy * dy;
+                if (dist < bestDist) {
+                    bestDist = dist;
+                    bestIndex = idx;
+                }
+            });
+            return bestIndex;
+        }
+        return Number.isFinite(overlay.cursor) ? overlay.cursor : 0;
     }
 
     resetGame() {
