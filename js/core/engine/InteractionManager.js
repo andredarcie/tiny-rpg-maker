@@ -221,8 +221,7 @@ class InteractionManager {
         const charisma = this.gameState.hasSkill?.('charisma');
         const conditionActive = hasConditionText && (
             (isBardCondition && charisma) ||
-            (conditionId && this.gameState.isVariableOn?.(conditionId)) ||
-            charisma
+            (conditionId && this.gameState.isVariableOn?.(conditionId))
         );
         const useConditionText = conditionActive && hasConditionText;
 
@@ -253,8 +252,7 @@ class InteractionManager {
         const charisma = this.gameState.hasSkill?.('charisma');
         const conditionActive = hasConditionText && (
             (isBardCondition && charisma) ||
-            (conditionId && this.gameState.isVariableOn?.(conditionId)) ||
-            charisma
+            (conditionId && this.gameState.isVariableOn?.(conditionId))
         );
 
         if (conditionActive && conditionalRewardId) {
