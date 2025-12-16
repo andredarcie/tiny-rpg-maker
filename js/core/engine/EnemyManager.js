@@ -176,6 +176,10 @@ class EnemyManager {
         return Math.max(a, Math.min(b, v));
     }
 
+    getRoomSize() {
+        return 8;
+    }
+
     defaultDirections() {
         return [
             [0, 0],
@@ -196,7 +200,7 @@ class EnemyManager {
         enemy.type = this.normalizeEnemyType(enemy.type);
 
         const dir = this.pickRandomDirection();
-        const target = this.getTargetPosition(enemy, dir);
+        const target = this.getTargetPosition(enemy, dir, game);
         const roomIndex = enemy.roomIndex ?? 0;
 
         if (!this.canEnterTile(roomIndex, target.x, target.y, game, enemies, index)) {
@@ -215,16 +219,18 @@ class EnemyManager {
         return base[Math.floor(Math.random() * base.length)];
     }
 
-    getTargetPosition(enemy, direction) {
+    getTargetPosition(enemy, direction, game = null) {
+        const size = this.getRoomSize(enemy.roomIndex, game);
         return {
-            x: this.clamp(enemy.x + direction[0], 0, 7),
-            y: this.clamp(enemy.y + direction[1], 0, 7)
+            x: this.clamp(enemy.x + direction[0], 0, size - 1),
+            y: this.clamp(enemy.y + direction[1], 0, size - 1)
         };
     }
 
     canEnterTile(roomIndex, x, y, game, enemies, movingIndex) {
         const room = game.rooms[roomIndex];
         if (!room) return false;
+        if (this.isBorderTile(roomIndex, x, y, game)) return false;
         if (room.walls?.[y]?.[x]) return false;
         if (this.isTileBlocked(roomIndex, x, y)) return false;
         if (this.hasBlockingObject(roomIndex, x, y)) return false;
@@ -262,6 +268,12 @@ class EnemyManager {
             other.x === x &&
             other.y === y
         );
+    }
+
+    isBorderTile(roomIndex, x, y, game = null) {
+        const size = this.getRoomSize(roomIndex, game);
+        if (size <= 2) return false;
+        return x === 0 || y === 0 || x === size - 1 || y === size - 1;
     }
 
     resolvePostMove(roomIndex, x, y, enemyIndex) {
