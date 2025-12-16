@@ -162,17 +162,24 @@ class StateSkillManager {
             ? Math.max(1, Math.floor(this.state.player.level))
             : 1;
         const finalLevel = Number.isFinite(latestLevel) ? Math.max(1, Math.floor(latestLevel)) : null;
+        const levelsCrossed = [];
+
         if (finalLevel !== null) {
             const start = Math.max(1, finalLevel - numeric + 1);
             for (let lvl = start; lvl <= finalLevel; lvl++) {
-                runtime.pendingLevelQueue.push(lvl);
+                levelsCrossed.push(lvl);
             }
         } else {
             for (let i = 0; i < numeric; i++) {
-                runtime.pendingLevelQueue.push(baseLevel);
+                levelsCrossed.push(baseLevel + i);
             }
         }
 
+        levelsCrossed.forEach((lvl) => {
+            if (lvl % 2 === 0) {
+                runtime.pendingLevelQueue.push(lvl);
+            }
+        });
         runtime.pendingSelections = runtime.pendingLevelQueue.length;
         return runtime.pendingSelections;
     }

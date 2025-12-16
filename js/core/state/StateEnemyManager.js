@@ -64,7 +64,7 @@ class StateEnemyManager {
         }
 
         const targetRoom = this.worldManager.clampRoomIndex(enemy.roomIndex ?? 0);
-        const maxEnemiesPerRoom = 9;
+        const maxEnemiesPerRoom = 6;
         const currentRoomCount = (this.game?.enemies || []).reduce((count, entry) => {
             const room = this.worldManager.clampRoomIndex(entry.roomIndex ?? 0);
             return room === targetRoom ? count + 1 : count;

@@ -28,12 +28,6 @@ class SkillDefinitions {
             icon: '🕶️'
         },
         {
-            id: 'water-walker',
-            nameKey: 'skills.waterWalker.name',
-            descriptionKey: 'skills.waterWalker.desc',
-            icon: '💧'
-        },
-        {
             id: 'lava-walker',
             nameKey: 'skills.lavaWalker.name',
             descriptionKey: 'skills.lavaWalker.desc',
@@ -45,29 +39,14 @@ class SkillDefinitions {
             descriptionKey: 'skills.potionMaster.desc',
             icon: '🧪'
         },
-        {
-            id: 'xp-boost',
-            nameKey: 'skills.xpBoost.name',
-            descriptionKey: 'skills.xpBoost.desc',
-            icon: '📚'
-        },
-        {
-            id: 'iron-body',
-            nameKey: 'skills.ironBody.name',
-            descriptionKey: 'skills.ironBody.desc',
-            icon: '🛡️'
-        }
     ];
 
     static LEVEL_SKILLS = {
         2: ['necromancer', 'charisma'],
-        3: ['iron-body'],
         4: ['stealth'],
-        5: ['xp-boost'],
-        6: ['lava-walker'],
-        7: ['potion-master'],
-        8: ['water-walker'],
-        9: ['keyless-doors']
+        6: ['potion-master'],
+        8: ['lava-walker'],
+        10: ['keyless-doors']
     };
 
     static getAll() {

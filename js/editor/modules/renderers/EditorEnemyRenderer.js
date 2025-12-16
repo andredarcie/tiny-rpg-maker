@@ -215,7 +215,7 @@ class EditorEnemyRenderer extends EditorRendererBase {
         const rows = Number(game?.world?.rows) || 3;
         const cols = Number(game?.world?.cols) || 3;
         const totalRooms = Math.max(1, rows * cols);
-        const maxPerRoom = 9;
+        const maxPerRoom = 6;
         const totalCount = totalRooms * maxPerRoom;
 
         const ratio = Math.max(0, Math.min(1, totalCount > 0 ? currentCount / totalCount : 0));

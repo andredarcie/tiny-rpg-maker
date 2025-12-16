@@ -3,7 +3,7 @@ class StatePlayerManager {
         this.state = state;
         this.worldManager = worldManager;
         this.skillManager = skillManager;
-        this.maxLevel = 9;
+        this.maxLevel = 10;
         this.baseMaxLives = 3;
         this.experienceBase = 6;
         this.experienceGrowth = 1.35;

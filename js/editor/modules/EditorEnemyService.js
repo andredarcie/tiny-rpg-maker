@@ -56,7 +56,7 @@ class EditorEnemyService {
         const currentRoomCount = enemies.reduce((count, enemy) => (
             enemy.roomIndex === roomIndex ? count + 1 : count
         ), 0);
-        if (currentRoomCount >= 9) {
+        if (currentRoomCount >= 6) {
             this.showEnemyLimitFeedback();
             return;
         }
