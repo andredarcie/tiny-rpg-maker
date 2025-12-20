@@ -38,6 +38,12 @@ class EditorDomCache {
         this.projectSkillsContainer = root.getElementById('project-skills-container');
         this.projectSkillsToggle = root.getElementById('project-skills-toggle');
         this.projectSkillsList = root.getElementById('project-skills-list');
+        this.projectTestContainer = root.getElementById('project-test-container');
+        this.projectTestToggle = root.getElementById('project-test-toggle');
+        this.projectTestPanel = root.getElementById('project-test-panel');
+        this.projectTestStartLevel = root.getElementById('project-test-start-level');
+        this.projectTestSkillList = root.getElementById('project-test-skill-list');
+        this.projectTestGodMode = root.getElementById('project-test-god-mode');
     }
 }
 

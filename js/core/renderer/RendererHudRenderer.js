@@ -45,13 +45,18 @@ class RendererHudRenderer {
         const availableWidth = Math.max(0, width - padding - rightReserved);
 
         const heartBaseSize = this.canvasHelper.getTilePixelSize?.() ?? 16;
+        const maxLives = this.gameState.getMaxLives?.() ?? 0;
         const heartSize = Math.max(6, Math.min(height - padding * 2, heartBaseSize / 2));
         const heartStride = heartSize + 2;
-        const heartsPerRow = Math.max(1, Math.floor(availableWidth / Math.max(heartStride, 1)));
+        const minPerRow = maxLives > 0 ? Math.max(1, Math.ceil(maxLives / 2)) : 1;
+        const heartsPerRow = Math.max(
+            minPerRow,
+            Math.floor(availableWidth / Math.max(heartStride, 1))
+        );
 
         this.drawHealth(ctx, {
-            offsetX: padding,
-            offsetY: padding + Math.max(0, (height - padding * 2 - heartSize) / 2),
+            offsetX: padding - 4,
+            offsetY: padding + Math.max(0, (height - padding * 2 - heartSize) / 2) - 2,
             heartsPerRow,
             heartSize,
             gap: 2

@@ -113,7 +113,7 @@ class ObjectDefinitions {
             nameKey: 'objects.label.sword',
             behavior: {
                 order: 80,
-                swordDurability: 4,
+                swordDurability: 5,
                 tags: ['placeable', 'collectible', 'sword', 'hide-when-collected']
             },
             sprite: SpriteMatrixRegistry.get('object', 'sword')
@@ -125,7 +125,7 @@ class ObjectDefinitions {
             nameKey: 'objects.label.swordBronze',
             behavior: {
                 order: 90,
-                swordDurability: 3,
+                swordDurability: 4,
                 tags: ['placeable', 'collectible', 'sword', 'hide-when-collected']
             },
             sprite: SpriteMatrixRegistry.get('object', 'sword-bronze')
@@ -137,7 +137,7 @@ class ObjectDefinitions {
             nameKey: 'objects.label.swordWood',
             behavior: {
                 order: 100,
-                swordDurability: 2,
+                swordDurability: 3,
                 tags: ['placeable', 'collectible', 'sword', 'hide-when-collected']
             },
             sprite: SpriteMatrixRegistry.get('object', 'sword-wood')

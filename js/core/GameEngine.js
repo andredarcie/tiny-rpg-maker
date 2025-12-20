@@ -201,6 +201,19 @@ class GameEngine {
         this.showIntroScreen();
     }
 
+    getTestSettings() {
+        return this.gameState.getTestSettings?.() || { startLevel: 1, skills: [], godMode: false };
+    }
+
+    updateTestSettings(settings = {}) {
+        this.gameState.setTestSettings?.(settings);
+        this.resetGame();
+    }
+
+    getMaxPlayerLevel() {
+        return this.gameState.getMaxPlayerLevel?.() || 1;
+    }
+
     // Compatibility accessors
     getState() {
         return this.gameState.getState();

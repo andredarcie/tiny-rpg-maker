@@ -48,7 +48,7 @@ class EnemyDefinitions {
             description: 'o guerreiro corrompido.',
             damage: 4,
             missChance: 0.18,
-            experience: 6,
+            experience: 7,
             hasEyes: true,
             sprite: SpriteMatrixRegistry.get('enemy', 'dark-knight')
         },
@@ -60,7 +60,7 @@ class EnemyDefinitions {
             description: 'o mago das trevas.',
             damage: 5,
             missChance: 0.12,
-            experience: 7,
+            experience: 8,
             hasEyes: true,
             sprite: SpriteMatrixRegistry.get('enemy', 'necromancer')
         },
@@ -74,7 +74,7 @@ class EnemyDefinitions {
             missChance: 0.08,
             defeatActivationMessage: 'Selo do Dragão ativado!',
             defeatActivationMessageKey: 'enemies.defeat.dragon',
-            experience: 8,
+            experience: 9,
             hasEyes: true,
             boss: true,
             sprite: SpriteMatrixRegistry.get('enemy', 'dragon')
@@ -89,7 +89,7 @@ class EnemyDefinitions {
             missChance: 0.08,
             defeatActivationMessage: 'Selo Real despertou!',
             defeatActivationMessageKey: 'enemies.defeat.fallenKing',
-            experience: 9,
+            experience: 10,
             hasEyes: true,
             boss: true,
             sprite: SpriteMatrixRegistry.get('enemy', 'fallen-king')
@@ -105,7 +105,7 @@ class EnemyDefinitions {
             defeatActivationMessage: 'Selo Demoníaco ativo!',
             defeatActivationMessageKey: 'enemies.defeat.ancientDemon',
             aliases: ['boss'],
-            experience: 10,
+            experience: 11,
             hasEyes: false,
             boss: true,
             sprite: SpriteMatrixRegistry.get('enemy', 'ancient-demon')
@@ -138,7 +138,7 @@ class EnemyDefinitions {
     static getExperienceReward(type) {
         const definition = this.getEnemyDefinition(type);
         if (!definition) return 0;
-        const reward = Number(definition.damage);
+        const reward = Number(definition.experience);
         if (!Number.isFinite(reward)) return 0;
         return Math.max(0, Math.floor(reward));
     }

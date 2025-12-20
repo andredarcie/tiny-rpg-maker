@@ -56,6 +56,33 @@ class StatePlayerManager {
         this.player.damageShieldMax = 0;
         this.player.swordType = null;
         this.player.lastDamageReduction = 0;
+        this.player.godMode = false;
+    }
+
+    setLevel(level = 1) {
+        if (!this.player) return 1;
+        const clamped = this.clampLevel(level);
+        this.player.level = clamped;
+        this.player.experience = 0;
+        this.player.maxLives = this.calculateMaxLives(clamped);
+        this.player.currentLives = this.player.maxLives;
+        this.player.lives = this.player.currentLives;
+        this.ensurePlayerStats();
+        return clamped;
+    }
+
+    setGodMode(active = false) {
+        if (!this.player) return false;
+        this.player.godMode = Boolean(active);
+        if (this.player.godMode) {
+            this.player.currentLives = this.player.maxLives;
+            this.player.lives = this.player.currentLives;
+        }
+        return this.player.godMode;
+    }
+
+    isGodMode() {
+        return Boolean(this.player?.godMode);
     }
 
     addKeys(amount = 1) {
@@ -89,6 +116,12 @@ class StatePlayerManager {
         let delta = Number.isFinite(amount) ? Math.max(0, amount) : 1;
         if (this.skillManager?.hasSkill?.('iron-body')) {
             delta = Math.max(0, delta - 1);
+        }
+        if (this.player.godMode) {
+            this.player.lastDamageReduction = delta;
+            this.player.currentLives = this.player.maxLives;
+            this.player.lives = this.player.currentLives;
+            return this.player.currentLives;
         }
         const shield = Math.max(0, Number(this.player.damageShield) || 0);
         const reduction = Math.min(shield, delta);
@@ -221,6 +254,7 @@ class StatePlayerManager {
         if (!Number.isFinite(this.player.lastDamageReduction)) {
             this.player.lastDamageReduction = 0;
         }
+        this.player.godMode = Boolean(this.player.godMode);
     }
 
     healToFull() {

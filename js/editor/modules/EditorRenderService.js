@@ -341,6 +341,96 @@ class EditorRenderService {
             items: buckets.get(key) || []
         }));
     }
+
+    renderTestTools() {
+        const container = this.dom.projectTestContainer;
+        const toggle = this.dom.projectTestToggle;
+        const panel = this.dom.projectTestPanel;
+        const startLevelSelect = this.dom.projectTestStartLevel;
+        const skillList = this.dom.projectTestSkillList;
+        const godModeInput = this.dom.projectTestGodMode;
+        if (!container || !toggle || !panel) return;
+
+        const collapsed = Boolean(this.state.testPanelCollapsed);
+        const title = this.t('project.test.title', 'Ajuda nos testes');
+        const actionText = collapsed
+            ? this.t('project.test.toggle.show', 'Mostrar')
+            : this.t('project.test.toggle.hide', 'Esconder');
+        toggle.textContent = `${title} · ${actionText}`;
+        container.classList.toggle('is-collapsed', collapsed);
+
+        const settings = this.gameEngine?.getTestSettings?.() || { startLevel: 1, skills: [], godMode: false };
+        const maxLevel = this.gameEngine?.getMaxPlayerLevel?.() ?? 1;
+
+        const hint = container.querySelector('.project-test__hint');
+        if (hint) {
+            hint.textContent = this.t(
+                'project.test.hint',
+                'Apenas para testar: estas opções não vão para a URL.'
+            );
+        }
+
+        if (startLevelSelect) {
+            startLevelSelect.innerHTML = '';
+            for (let lvl = 1; lvl <= maxLevel; lvl++) {
+                const option = document.createElement('option');
+                option.value = String(lvl);
+                option.textContent = this.tf(
+                    'project.test.levelOption',
+                    { value: lvl },
+                    `Nível ${lvl}`
+                );
+                if (lvl === settings.startLevel) {
+                    option.selected = true;
+                }
+                startLevelSelect.appendChild(option);
+            }
+        }
+
+        if (godModeInput) {
+            godModeInput.checked = Boolean(settings.godMode);
+        }
+
+        if (skillList) {
+            skillList.innerHTML = '';
+            const skills = typeof SkillDefinitions !== 'undefined'
+                ? SkillDefinitions.getAll?.() || []
+                : [];
+            const selected = new Set(Array.isArray(settings.skills) ? settings.skills : []);
+
+            if (!skills.length) {
+                const empty = document.createElement('div');
+                empty.className = 'project-test__skill';
+                empty.textContent = this.t('variables.none', 'Nenhuma');
+                skillList.appendChild(empty);
+                return;
+            }
+
+            skills.forEach((skill) => {
+                const wrapper = document.createElement('label');
+                wrapper.className = 'project-test__skill';
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.dataset.skillId = skill.id;
+                checkbox.checked = selected.has(skill.id);
+
+                const label = document.createElement('div');
+                label.className = 'project-test__skill-label';
+                const icon = document.createElement('span');
+                icon.className = 'project-test__skill-icon';
+                icon.textContent = skill.icon || '✨';
+                const name = document.createElement('span');
+                name.textContent = skill.nameKey
+                    ? this.t(skill.nameKey, skill.name || skill.id || '')
+                    : (skill.name || skill.id || '');
+
+                label.append(icon, name);
+                wrapper.append(checkbox, label);
+                skillList.appendChild(wrapper);
+            });
+        }
+    }
 }
 
 if (typeof window !== 'undefined') {

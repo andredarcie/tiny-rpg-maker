@@ -16,6 +16,7 @@ class EditorUIController extends EditorManagerModule {
         }
         this.renderService.renderVariableUsage();
         this.renderService.renderSkillList();
+        this.renderService.renderTestTools();
     }
 
     toggleVariablePanel() {
@@ -26,6 +27,31 @@ class EditorUIController extends EditorManagerModule {
     toggleSkillPanel() {
         this.state.skillPanelCollapsed = !this.state.skillPanelCollapsed;
         this.renderService.renderSkillList();
+    }
+
+    toggleTestPanel() {
+        this.state.testPanelCollapsed = !this.state.testPanelCollapsed;
+        this.renderService.renderTestTools();
+    }
+
+    setTestStartLevel(level) {
+        const maxLevel = this.gameEngine.getMaxPlayerLevel?.() ?? 1;
+        const numeric = Number.isFinite(level) ? Math.max(1, Math.min(maxLevel, Math.floor(level))) : 1;
+        this.gameEngine.updateTestSettings?.({ startLevel: numeric });
+        this.renderService.renderTestTools();
+    }
+
+    setTestSkills(skills) {
+        const normalized = Array.isArray(skills)
+            ? Array.from(new Set(skills.filter((id) => typeof id === 'string' && id)))
+            : [];
+        this.gameEngine.updateTestSettings?.({ skills: normalized });
+        this.renderService.renderTestTools();
+    }
+
+    setGodMode(active = false) {
+        this.gameEngine.updateTestSettings?.({ godMode: Boolean(active) });
+        this.renderService.renderTestTools();
     }
 
     syncUI() {

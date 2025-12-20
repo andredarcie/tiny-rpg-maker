@@ -19,6 +19,7 @@ class EditorState {
         this.playerEndTextUpdateTimer = null;
         this.variablePanelCollapsed = true;
         this.skillPanelCollapsed = true;
+        this.testPanelCollapsed = true;
     }
 }
 

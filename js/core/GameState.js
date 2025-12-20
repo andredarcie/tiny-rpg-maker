@@ -47,7 +47,8 @@ class GameState {
                 damageShield: 0,
                 damageShieldMax: 0,
                 swordType: null,
-                lastDamageReduction: 0
+                lastDamageReduction: 0,
+                godMode: false
             },
             dialog: { active: false, text: "", page: 1, maxPages: 1, meta: null },
             enemies: [],
@@ -75,6 +76,7 @@ class GameState {
             },
             skillRuntime: null
         };
+        this.testSettings = this.createDefaultTestSettings();
 
         this.worldManager = new StateWorldManager(this.game, roomSize);
         this.variableManager = new StateVariableManager(this.game, this.state);
@@ -150,6 +152,10 @@ class GameState {
 
     getPendingLevelUpChoices() {
         return this.skillManager.getPendingSelections();
+    }
+
+    getMaxPlayerLevel() {
+        return this.playerManager?.maxLevel ?? 1;
     }
 
     isLevelUpOverlayActive() {
@@ -233,6 +239,63 @@ class GameState {
         return Boolean(this.editorMode);
     }
 
+    createDefaultTestSettings() {
+        return {
+            startLevel: 1,
+            skills: [],
+            godMode: false
+        };
+    }
+
+    getTestSettings() {
+        if (!this.testSettings) {
+            this.testSettings = this.createDefaultTestSettings();
+        }
+        return {
+            startLevel: Number.isFinite(this.testSettings.startLevel)
+                ? Math.floor(this.testSettings.startLevel)
+                : 1,
+            skills: Array.isArray(this.testSettings.skills) ? this.testSettings.skills.slice() : [],
+            godMode: Boolean(this.testSettings.godMode)
+        };
+    }
+
+    setTestSettings(settings = {}) {
+        const current = this.getTestSettings();
+        const maxLevel = this.playerManager?.maxLevel ?? 10;
+        const startLevel = Number.isFinite(settings.startLevel)
+            ? Math.max(1, Math.min(maxLevel, Math.floor(settings.startLevel)))
+            : current.startLevel;
+
+        const allSkills = typeof SkillDefinitions !== 'undefined'
+            ? SkillDefinitions.getAll?.() || []
+            : [];
+        const validSkillIds = new Set(allSkills.map((skill) => skill.id));
+        const requestedSkills = Array.isArray(settings.skills)
+            ? settings.skills
+                .map((id) => (typeof id === 'string' ? id : null))
+                .filter((id) => id && validSkillIds.has(id))
+            : current.skills;
+        const skills = Array.from(new Set(requestedSkills));
+        const godMode = settings.godMode !== undefined ? Boolean(settings.godMode) : current.godMode;
+
+        this.testSettings = { startLevel, skills, godMode };
+        return this.getTestSettings();
+    }
+
+    applyTestSettingsRuntime() {
+        const settings = this.getTestSettings();
+        const startLevel = Number.isFinite(settings.startLevel) ? settings.startLevel : 1;
+        if (this.playerManager?.setLevel) {
+            this.playerManager.setLevel(startLevel);
+        }
+        if (Array.isArray(settings.skills) && settings.skills.length) {
+            settings.skills.forEach((id) => this.skillManager?.addSkill?.(id));
+        }
+        this.playerManager?.ensurePlayerStats?.();
+        this.playerManager?.setGodMode?.(settings.godMode);
+    }
+
     resetGame() {
         this.screenManager.reset();
         this.skillManager.resetRuntime();
@@ -243,6 +306,7 @@ class GameState {
         this.itemManager.resetItems();
         this.objectManager.resetRuntime();
         this.objectManager.ensurePlayerStartObject();
+        this.applyTestSettingsRuntime();
         this.setGameOver(false);
         this.hidePickupOverlay();
         this.clearNecromancerRevive();

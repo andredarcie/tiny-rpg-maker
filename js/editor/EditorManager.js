@@ -208,6 +208,22 @@ class EditorManager {
         this.uiController.toggleSkillPanel();
     }
 
+    toggleTestPanel() {
+        this.uiController.toggleTestPanel();
+    }
+
+    setTestStartLevel(level) {
+        this.uiController.setTestStartLevel(level);
+    }
+
+    setTestSkills(skills) {
+        this.uiController.setTestSkills(skills);
+    }
+
+    setGodMode(active) {
+        this.uiController.setGodMode(active);
+    }
+
     setActiveMobilePanel(panel) {
         this.uiController.setActiveMobilePanel(panel);
     }

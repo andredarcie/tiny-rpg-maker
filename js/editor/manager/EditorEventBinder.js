@@ -27,7 +27,11 @@ class EditorEventBinder extends EditorManagerModule {
             mobilePanels,
             worldGrid,
             projectVariablesToggle,
-            projectSkillsToggle
+            projectSkillsToggle,
+            projectTestToggle,
+            projectTestStartLevel,
+            projectTestSkillList,
+            projectTestGodMode
         } = this.dom;
 
         const manager = this.manager;
@@ -49,9 +53,26 @@ class EditorEventBinder extends EditorManagerModule {
         btnRedo?.addEventListener('click', () => manager.redo());
         projectVariablesToggle?.addEventListener('click', () => manager.toggleVariablePanel());
         projectSkillsToggle?.addEventListener('click', () => manager.toggleSkillPanel());
+        projectTestToggle?.addEventListener('click', () => manager.toggleTestPanel());
 
         titleInput?.addEventListener('input', () => manager.updateGameMetadata());
         authorInput?.addEventListener('input', () => manager.updateGameMetadata());
+        projectTestStartLevel?.addEventListener('change', (ev) => {
+            const value = Number(ev.target.value);
+            manager.setTestStartLevel(value);
+        });
+        projectTestGodMode?.addEventListener('change', (ev) => {
+            manager.setGodMode(ev.target.checked);
+        });
+        projectTestSkillList?.addEventListener('change', (ev) => {
+            const target = ev.target;
+            if (!target || target.tagName !== 'INPUT') return;
+            const skills = Array.from(projectTestSkillList.querySelectorAll('input[type="checkbox"][data-skill-id]'))
+                .filter((input) => input.checked)
+                .map((input) => input.dataset.skillId)
+                .filter(Boolean);
+            manager.setTestSkills(skills);
+        });
         npcText?.addEventListener('input', () => npcService.updateNpcText(npcText.value));
         npcConditionalText?.addEventListener('input', () => npcService.updateNpcConditionalText(npcConditionalText.value));
         npcConditionalVariable?.addEventListener('change', (ev) => npcService.handleConditionVariableChange(ev.target.value));

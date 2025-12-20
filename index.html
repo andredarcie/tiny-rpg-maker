@@ -218,6 +218,24 @@
                                         <button id="project-skills-toggle" class="project-variables__toggle" type="button"></button>
                                         <div id="project-skills-list" class="project-variables__list project-skills__list"></div>
                                     </div>
+                                    <div id="project-test-container" class="project-variables project-test">
+                                        <button id="project-test-toggle" class="project-variables__toggle project-test__toggle" type="button"></button>
+                                        <div id="project-test-panel" class="project-test__panel">
+                                            <p class="project-test__hint" data-text-key="project.test.hint"></p>
+                                            <label class="project-test__field">
+                                                <span data-text-key="project.test.startLevel"></span>
+                                                <select id="project-test-start-level"></select>
+                                            </label>
+                                            <label class="project-test__field project-test__checkbox">
+                                                <input type="checkbox" id="project-test-god-mode">
+                                                <span data-text-key="project.test.godMode"></span>
+                                            </label>
+                                            <div class="project-test__skills">
+                                                <div class="project-test__skills-title" data-text-key="project.test.skills"></div>
+                                                <div id="project-test-skill-list" class="project-test__skill-list"></div>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <label class="project-field">
                                         <span data-text-key="project.titleLabel"></span>
                                         <input type="text" id="game-title" data-placeholder-key="project.titlePlaceholder" maxlength="18">

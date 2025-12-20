@@ -1304,6 +1304,94 @@ textarea {
     font-size: 0.9rem;
 }
 
+.project-test {
+    gap: 8px;
+}
+
+.project-test__panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.project-test__hint {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.project-test__field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(12, 14, 22, 0.4);
+}
+
+.project-test__field select {
+    flex: 1;
+    max-width: 160px;
+}
+
+.project-test__checkbox {
+    cursor: pointer;
+    user-select: none;
+}
+
+.project-test__checkbox input {
+    width: 18px;
+    height: 18px;
+}
+
+.project-test__skills {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.project-test__skills-title {
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+.project-test__skill-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 8px;
+}
+
+.project-test__skill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(12, 14, 22, 0.35);
+}
+
+.project-test__skill input {
+    width: 16px;
+    height: 16px;
+}
+
+.project-test__skill-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+}
+
+.project-test__skill-icon {
+    font-size: 1rem;
+}
+
+.project-test.is-collapsed .project-test__panel {
+    display: none;
+}
+
 .enemies-panel {
     display: grid;
     gap: 12px;

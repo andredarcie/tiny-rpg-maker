@@ -108,16 +108,11 @@ class InteractionManager {
     }
 
     getSwordDurability(type) {
-        const OT = this.types;
-        switch (type) {
-            case OT.SWORD_WOOD:
-                return 1;
-            case OT.SWORD_BRONZE:
-                return 2;
-            case OT.SWORD:
-            default:
-                return 3;
+        const durability = ObjectDefinitions.getSwordDurability(type);
+        if (Number.isFinite(durability)) {
+            return Math.max(0, durability);
         }
+        return 0;
     }
 
     getSwordPriority(type) {
