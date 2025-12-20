@@ -400,7 +400,6 @@ class EnemyManager {
             if (text) {
                 this.dialogManager?.showDialog?.(text);
             }
-            this.gameState.addBonusMaxLife?.(1);
         }
     }
 
