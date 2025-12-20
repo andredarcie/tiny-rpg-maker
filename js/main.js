@@ -95,9 +95,11 @@ class TinyRPGApplication {
                 ev.stopImmediatePropagation();
                 const targetUrl = getBaseUrl();
                 openNewGameTab(targetUrl);
+                resetButton.blur();
                 return false;
             }
             gameEngine.resetGame();
+            resetButton.blur();
             return false;
         };
 
