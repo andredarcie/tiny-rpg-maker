@@ -261,7 +261,7 @@ class EditorNpcService {
     }
 
     setVariantFilter(variant) {
-        const allowed = ['human', 'elf', 'dwarf'];
+        const allowed = ['human', 'elf', 'dwarf', 'fixed'];
         const normalized = allowed.includes(variant) ? variant : 'human';
         if (this.state.npcVariantFilter === normalized) return;
         this.clearSelection({ render: false });

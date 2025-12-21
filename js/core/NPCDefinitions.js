@@ -2,7 +2,7 @@
  * NPCDefinitions centraliza os NPCs fixos disponiveis no editor.
  */
 class NPCDefinitions {
-    static NPC_VARIANTS = ['human', 'elf', 'dwarf'];
+    static NPC_VARIANTS = ['human', 'elf', 'dwarf', 'fixed'];
 
     static NPC_DEFINITIONS = [
         // Humans

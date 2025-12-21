@@ -9,8 +9,8 @@ class EditorNpcRenderer extends EditorRendererBase {
         const filter = this.manager.state.npcVariantFilter || 'human';
         const definitions = (this.gameEngine.npcManager?.getDefinitions?.() ?? [])
             .filter((def) => {
-                if (!def.variant || def.variant === 'fixed') return true;
-                return def.variant === filter;
+                const variant = def.variant || 'human';
+                return variant === filter;
             });
         const npcs = this.gameEngine.getSprites();
 
