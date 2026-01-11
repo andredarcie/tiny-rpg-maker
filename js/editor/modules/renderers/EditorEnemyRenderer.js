@@ -249,17 +249,15 @@ class EditorEnemyRenderer extends EditorRendererBase {
         }
 
         const roomSize = this.gameEngine?.gameState?.worldManager?.roomSize || 8;
-        const rectCanvas = canvas.getBoundingClientRect();
-        const rectWrapper = wrapper.getBoundingClientRect();
-        const width = rectCanvas.width || canvas.clientWidth || canvas.width || 1;
-        const height = rectCanvas.height || canvas.clientHeight || canvas.height || 1;
+        const width = canvas.offsetWidth || canvas.clientWidth || canvas.width || 1;
+        const height = canvas.offsetHeight || canvas.clientHeight || canvas.height || 1;
         const tileSizeX = width / roomSize;
         const tileSizeY = height / roomSize;
 
         overlay.style.width = `${width}px`;
         overlay.style.height = `${height}px`;
-        overlay.style.left = `${rectCanvas.left - rectWrapper.left + wrapper.scrollLeft}px`;
-        overlay.style.top = `${rectCanvas.top - rectWrapper.top + wrapper.scrollTop}px`;
+        overlay.style.left = `${canvas.offsetLeft}px`;
+        overlay.style.top = `${canvas.offsetTop}px`;
 
         overlay.innerHTML = '';
 
