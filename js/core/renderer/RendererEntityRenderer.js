@@ -40,7 +40,10 @@ class RendererEntityRenderer {
             }
             if (!sprite) continue;
             const px = object.x * tileSize;
-            const py = object.y * tileSize;
+            const floatOffset = object.isCollectible && !object.collected
+                ? this.getFloatingOffset(object.x, object.y, tileSize)
+                : 0;
+            const py = Math.round(object.y * tileSize + floatOffset);
             this.canvasHelper.drawSprite(ctx, sprite, px, py, step);
         }
     }
@@ -49,16 +52,19 @@ class RendererEntityRenderer {
         const game = this.gameState.getGame();
         const player = this.gameState.getPlayer();
         const tileSize = this.canvasHelper.getTilePixelSize();
+        const now = this.getNow();
 
         ctx.fillStyle = this.paletteManager.getColor(2);
         for (const item of game.items) {
             if (item.roomIndex !== player.roomIndex || item.collected) continue;
-            ctx.fillRect(
-                item.x * tileSize + tileSize * 0.25,
-                item.y * tileSize + tileSize * 0.25,
-                tileSize * 0.5,
-                tileSize * 0.5
-            );
+            const phase = (item.x * 0.75 + item.y * 1.15) * 0.6;
+            const floatOffset = Math.sin(now * 0.004 + phase) * tileSize * 0.1;
+            const sizeScale = 0.5 + Math.sin(now * 0.006 + phase) * 0.03;
+            const size = tileSize * sizeScale;
+            const sizeOffset = (tileSize * 0.5 - size) / 2;
+            const drawX = Math.round(item.x * tileSize + tileSize * 0.25 + sizeOffset);
+            const drawY = Math.round(item.y * tileSize + tileSize * 0.25 + floatOffset + sizeOffset);
+            ctx.fillRect(drawX, drawY, Math.round(size), Math.round(size));
         }
     }
 
@@ -134,6 +140,18 @@ class RendererEntityRenderer {
             return this.spriteFactory.turnSpriteHorizontally(sprite);
         }
         return sprite;
+    }
+
+    getFloatingOffset(x, y, tileSize) {
+        const phase = (x * 0.7 + y * 1.3) * 0.6;
+        return Math.sin(this.getNow() * 0.003 + phase) * tileSize * 0.12;
+    }
+
+    getNow() {
+        if (typeof performance !== 'undefined' && performance.now) {
+            return performance.now();
+        }
+        return Date.now();
     }
 
     getEnemyDamage(type) {
