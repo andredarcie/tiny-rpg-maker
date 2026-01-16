@@ -3,7 +3,7 @@
     --panel: #151821;
     --text: #e6e7eb;
     --muted: #9aa0aa;
-    --accent: #64b5f6;
+    --accent: #5bfa8e;
     --border: #232734;
     --hud-text-color: #fff;
     --screen-flash-color: #ff4040;
@@ -24,6 +24,10 @@ body {
     font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji", "Segoe UI Emoji";
     color: var(--text);
     background: radial-gradient(1200px 600px at 50% -200px, #182036 0%, var(--bg) 60%);
+}
+
+body * {
+    border-radius: 0 !important;
 }
 
 .app {
@@ -253,7 +257,26 @@ body.game-mode .app {
 }
 
 body.game-mode header {
-    display: none;
+    display: flex;
+    background: #0b0d12;
+    border-bottom: 2px solid #2a2f3a;
+    backdrop-filter: none;
+    color: #e9e2d0;
+    font-family: "VT323", "Press Start 2P", "Courier New", monospace;
+}
+
+body.game-mode header h1 {
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+body.game-mode header input {
+    border-radius: 0;
+    box-shadow: none;
+    background-image: none;
+    border: 2px solid #2a2f3a;
+    background: #0f131b;
+    color: #e9e2d0;
 }
 
 body.game-mode main {
@@ -316,6 +339,96 @@ body.game-mode #tab-game .game-controls {
 body.game-mode #tab-game .game-controls button {
     font-size: 0.75rem;
     padding: 6px 10px;
+}
+
+body.editor-mode {
+    --bg: #0b0d12;
+    --panel: #11151d;
+    --text: #e9e2d0;
+    --muted: #b2a894;
+    --accent: #5bfa8e;
+    --border: #2a2f3a;
+    background: var(--bg);
+    font-family: "VT323", "Press Start 2P", "Courier New", monospace;
+}
+
+body.editor-mode header {
+    background: #0b0d12;
+    border-bottom: 2px solid var(--border);
+    backdrop-filter: none;
+}
+
+body.editor-mode header h1 {
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+body.editor-mode .tabs,
+body.editor-mode .tab-content,
+body.editor-mode .tab-button,
+body.editor-mode .tab-action-button,
+body.editor-mode header input,
+body.editor-mode button,
+body.editor-mode input,
+body.editor-mode select,
+body.editor-mode textarea,
+body.editor-mode .map-nav-button,
+body.editor-mode .editor-mobile-nav-button,
+body.editor-mode [class*='card'],
+body.editor-mode [class*='badge'],
+body.editor-mode [class*='toggle'],
+body.editor-mode [class*='button'] {
+    border-radius: 0;
+    box-shadow: none;
+    background-image: none;
+}
+
+body.editor-mode .tabs,
+body.editor-mode .tab-content,
+body.editor-mode [class*='card'],
+body.editor-mode [class*='badge'] {
+    border: 2px solid var(--border);
+    background: var(--panel);
+}
+
+body.editor-mode .tab-button,
+body.editor-mode .tab-action-button,
+body.editor-mode button,
+body.editor-mode .map-nav-button,
+body.editor-mode .editor-mobile-nav-button {
+    border: 2px solid var(--border);
+    background: #141a24;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+body.editor-mode .tab-button:hover,
+body.editor-mode .tab-button.active,
+body.editor-mode .tab-action-button:hover,
+body.editor-mode button:hover,
+body.editor-mode .map-nav-button:hover:not(:disabled),
+body.editor-mode .editor-mobile-nav-button:hover {
+    background: #1f2735;
+    border-color: var(--accent);
+    color: #fff;
+}
+
+body.editor-mode input,
+body.editor-mode select,
+body.editor-mode textarea,
+body.editor-mode header input {
+    border: 2px solid var(--border);
+    background: #0f131b;
+    color: var(--text);
+}
+
+body.editor-mode .tab-button:focus-visible,
+body.editor-mode button:focus-visible,
+body.editor-mode .map-nav-button:focus-visible,
+body.editor-mode .editor-mobile-nav-button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
 }
 
 .game-container {
@@ -1173,6 +1286,42 @@ textarea {
     gap: 8px;
 }
 
+body.game-mode .tabs {
+    border: 2px solid #2a2f3a;
+    border-radius: 0;
+    box-shadow: none;
+    background: #11151d;
+    background-image: none;
+    font-family: "VT323", "Press Start 2P", "Courier New", monospace;
+}
+
+body.game-mode .tabs-title {
+    color: #b2a894;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+body.game-mode .tab-button,
+body.game-mode .tab-action-button {
+    border: 2px solid #2a2f3a;
+    border-radius: 0;
+    box-shadow: none;
+    background: #141a24;
+    background-image: none;
+    color: #e9e2d0;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-family: "VT323", "Press Start 2P", "Courier New", monospace;
+}
+
+body.game-mode .tab-button:hover,
+body.game-mode .tab-button.active,
+body.game-mode .tab-action-button:hover {
+    background: #1f2735;
+    border-color: #5bfa8e;
+    color: #fff;
+}
+
 .project-variables__title {
     font-weight: 700;
     letter-spacing: 0.2px;
@@ -1505,8 +1654,8 @@ textarea {
 }
 
 .enemy-card.boss {
-    border-color: rgba(255, 193, 7, 0.55);
-    background: linear-gradient(135deg, rgba(43, 32, 12, 0.6), rgba(24, 18, 10, 0.6));
+    border-color: var(--accent);
+    background: #121923;
 }
 
 .enemy-card:hover {
@@ -1542,9 +1691,9 @@ textarea {
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.5px;
-    color: #1f1302;
-    background: linear-gradient(135deg, #fbc02d, #ffeb3b);
-    border-radius: 12px;
+    color: #0b1d12;
+    background: var(--accent);
+    border-radius: 0;
     width: fit-content;
 }
 
