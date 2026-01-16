@@ -41,16 +41,18 @@ class RendererOverlayRenderer extends RendererModuleBase {
         ctx.font = `${Math.max(12, Math.floor(height / 12))}px monospace`;
         ctx.fillText(title, centerX, centerY - height * 0.12);
         if (author) {
+            const byline = formatOverlayText('intro.byline', { author }, `por ${author}`);
             ctx.fillStyle = 'rgba(255,255,255,0.8)';
             ctx.font = `${Math.max(10, Math.floor(height / 18))}px monospace`;
-            ctx.fillText(`por ${author}`, centerX, centerY);
+            ctx.fillText(byline, centerX, centerY);
         }
 
         if (this.renderer?.gameEngine?.canDismissIntroScreen) {
             const blink = ((Date.now() / 500) % 2) > 1 ? 0.3 : 0.95;
             ctx.fillStyle = `rgba(100, 181, 246, ${blink.toFixed(2)})`;
+            const startLabel = getOverlayText('intro.startAdventure', 'Iniciar aventura');
             ctx.font = `${Math.max(9, Math.floor(height / 20))}px monospace`;
-            ctx.fillText('Iniciar aventura', centerX, centerY + height * 0.18);
+            ctx.fillText(startLabel, centerX, centerY + height * 0.18);
         }
 
         ctx.restore();

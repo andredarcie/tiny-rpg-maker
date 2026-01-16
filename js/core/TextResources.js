@@ -1,6 +1,8 @@
 const TEXT_BUNDLES = {
     'pt-BR': {
         'app.title': 'Tiny RPG Maker',
+        'intro.byline': 'por {author}',
+        'intro.startAdventure': 'Iniciar aventura',
         'tabs.game': 'Jogo',
         'tabs.editor': 'Editor',
         'sections.tiles': 'Tiles',
@@ -268,6 +270,8 @@ const TEXT_BUNDLES = {
     },
     'en-US': {
         'app.title': 'Tiny RPG Maker',
+        'intro.byline': 'by {author}',
+        'intro.startAdventure': 'Start adventure',
         'tabs.game': 'Game',
         'tabs.editor': 'Editor',
         'sections.tiles': 'Tiles',
