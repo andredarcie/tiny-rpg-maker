@@ -1,4 +1,4 @@
-# Tiny RPG Maker
+# Tiny RPG Studio
 
 Browser-native RPG maker: paint tiles, build rooms, drop NPCs/enemies/objects, and play instantly in the same page. It’s deliberately small and limited to spark creativity—build micro-stories and tiny RPGs in minutes and share everything as a single URL.
 
