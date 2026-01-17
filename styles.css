@@ -8,6 +8,7 @@
     --hud-text-color: #fff;
     --screen-flash-color: #ff4040;
     --screen-flash-opacity: 0.85;
+    --base-font-size: 9px;
 }
 
 * {
@@ -19,9 +20,13 @@ body {
     height: 100%;
 }
 
+html {
+    font-size: var(--base-font-size);
+}
+
 body {
     margin: 0;
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    font-family: "Press Start 2P", "VT323", "Courier New", monospace;
     color: var(--text);
     background: radial-gradient(1200px 600px at 50% -200px, #182036 0%, var(--bg) 60%);
 }
@@ -42,7 +47,7 @@ header {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 16px clamp(16px, 4vw, 32px);
+    padding: 10px clamp(10px, 2.5vw, 20px);
     border-bottom: 1px solid var(--border);
     background: rgba(15, 19, 32, 0.82);
     backdrop-filter: blur(8px);
@@ -60,7 +65,7 @@ header h1 {
 header input {
     flex: 1 1 220px;
     max-width: 360px;
-    padding: 8px 12px;
+    padding: 5px 8px;
     background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 10px;
@@ -71,22 +76,22 @@ main {
     flex: 1;
     width: min(1100px, 100%);
     margin: 0 auto;
-    padding: clamp(16px, 4vw, 32px);
+    padding: clamp(10px, 2.5vw, 20px);
     display: grid;
-    gap: 24px;
+    gap: 16px;
 }
 
 .tabs {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    padding: clamp(6px, 2vw, 10px);
+    gap: 5px;
+    padding: clamp(3px, 1.2vw, 6px);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 14px;
     background: rgba(10, 13, 22, 0.8);
     width: 100%;
     max-width: 720px;
-    margin: clamp(6px, 2vw, 14px) auto;
+    margin: clamp(3px, 1.2vw, 8px) auto;
 }
 
 body.game-mode .tabs {
@@ -117,8 +122,8 @@ body.game-mode .tabs {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 34px;
-    padding: 8px 12px;
+    min-height: 28px;
+    padding: 5px 8px;
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(26, 32, 48, 0.9);
@@ -136,8 +141,8 @@ body.game-mode .tabs {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 34px;
-    padding: 8px 12px;
+    min-height: 28px;
+    padding: 5px 8px;
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(30, 35, 55, 0.88);
@@ -159,10 +164,10 @@ body.game-mode .tabs {
 
 @media (max-width: 640px) {
     .tabs {
-        gap: 6px;
-        padding: 6px;
-        border-radius: 12px;
-        margin: 6px auto 10px;
+        gap: 3px;
+        padding: 3px;
+        border-radius: 9px;
+        margin: 3px auto 6px;
     }
 
     .tabs-title {
@@ -170,18 +175,18 @@ body.game-mode .tabs {
     }
 
     .tabs-links {
-        gap: 6px;
+        gap: 3px;
         justify-content: center;
     }
 
     .tab-button {
-        min-height: 32px;
-        padding: 6px 10px;
+        min-height: 26px;
+        padding: 4px 7px;
         font-size: 0.85rem;
     }
 
     .tab-action-button {
-        padding: 6px 10px;
+        padding: 4px 7px;
         font-size: 0.8rem;
     }
 
@@ -205,7 +210,7 @@ body.game-mode .tabs {
 
 .tab-content {
     display: none;
-    padding: clamp(16px, 3vw, 28px);
+    padding: clamp(10px, 2vw, 18px);
     border: 1px solid var(--border);
     border-radius: 14px;
     background: rgba(10, 13, 22, 0.88);
@@ -244,7 +249,7 @@ body.editor-mode #tab-editor.tab-content.active {
 body.editor-mode #tab-editor .editor-layout {
     flex: 1;
     min-height: 0;
-    padding: clamp(16px, 4vw, 32px);
+    padding: clamp(10px, 2.5vw, 20px);
     overflow: auto;
 }
 
@@ -262,7 +267,7 @@ body.game-mode header {
     border-bottom: 2px solid #2a2f3a;
     backdrop-filter: none;
     color: #e9e2d0;
-    font-family: "VT323", "Press Start 2P", "Courier New", monospace;
+    font-family: "Press Start 2P", "VT323", "Courier New", monospace;
 }
 
 body.game-mode header h1 {
@@ -349,7 +354,7 @@ body.editor-mode {
     --accent: #5bfa8e;
     --border: #2a2f3a;
     background: var(--bg);
-    font-family: "VT323", "Press Start 2P", "Courier New", monospace;
+    font-family: "Press Start 2P", "VT323", "Courier New", monospace;
 }
 
 body.editor-mode header {
@@ -1292,7 +1297,7 @@ body.game-mode .tabs {
     box-shadow: none;
     background: #11151d;
     background-image: none;
-    font-family: "VT323", "Press Start 2P", "Courier New", monospace;
+    font-family: "Press Start 2P", "VT323", "Courier New", monospace;
 }
 
 body.game-mode .tabs-title {
@@ -1311,7 +1316,7 @@ body.game-mode .tab-action-button {
     color: #e9e2d0;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    font-family: "VT323", "Press Start 2P", "Courier New", monospace;
+    font-family: "Press Start 2P", "VT323", "Courier New", monospace;
 }
 
 body.game-mode .tab-button:hover,

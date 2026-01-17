@@ -6,9 +6,7 @@
     <title>Tiny RPG — Showcase</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         :root {
             color-scheme: dark;
@@ -17,12 +15,16 @@
             --muted: #9aa0aa;
             --accent: #64b5f6;
             --border: #232734;
+            --base-font-size: 9px;
+        }
+        html {
+            font-size: var(--base-font-size);
         }
         * { box-sizing: border-box; }
         body {
             margin: 0;
             min-height: 100vh;
-            font-family: "Inter", system-ui, sans-serif;
+            font-family: "Press Start 2P", "VT323", "Courier New", monospace;
             background: radial-gradient(1200px 600px at 50% -200px, #182036 0%, var(--bg) 60%);
             color: var(--text);
             line-height: 1.5;
@@ -41,7 +43,7 @@
             opacity: 0.35;
         }
         header {
-            padding: 48px 24px 32px;
+            padding: 30px 14px 20px;
             text-align: center;
         }
         header h1 {
@@ -56,20 +58,20 @@
             letter-spacing: 0.04em;
         }
         .cta-row {
-            margin: 20px 0 0;
+            margin: 16px 0 0;
             display: flex;
             justify-content: center;
             gap: 12px;
             flex-wrap: wrap;
         }
         .cta {
-            font-family: "Inter", sans-serif;
-            font-size: 0.95rem;
+            font-family: "Press Start 2P", "VT323", "Courier New", monospace;
+            font-size: 0.9rem;
             letter-spacing: 0.08em;
             text-transform: uppercase;
             color: var(--text);
             text-decoration: none;
-            padding: 8px 18px;
+            padding: 6px 14px;
             border: 1px solid var(--border);
             border-radius: 999px;
             transition: background 0.2s ease, color 0.2s ease;
@@ -85,12 +87,12 @@
             color: var(--text);
         }
         main {
-            padding: 0 24px 56px;
+            padding: 0 14px 36px;
             max-width: 960px;
             margin: 0 auto;
             display: flex;
             flex-direction: column;
-            gap: 40px;
+            gap: 26px;
         }
         .stats-grid {
             display: grid;
@@ -100,7 +102,7 @@
         .stat-card {
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 24px;
+            padding: 16px;
             text-align: center;
             background: rgba(15, 19, 32, 0.82);
         }
