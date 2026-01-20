@@ -237,45 +237,60 @@ class TinyRPGApplication {
             document.body.classList.toggle('game-mode', isGame);
         };
 
-        tabs.forEach((btn) => {
-            btn.addEventListener('click', () => {
-                tabs.forEach((other) => {
-                    other.classList.remove('active');
-                    other.setAttribute('aria-selected', 'false');
-                });
+        const activateTab = (btn) => {
+            if (btn.classList.contains('active')) {
+                return;
+            }
 
-                tabContents.forEach((content) => content.classList.remove('active'));
+            tabs.forEach((other) => {
+                other.classList.remove('active');
+                other.setAttribute('aria-selected', 'false');
+            });
 
-                btn.classList.add('active');
-                btn.setAttribute('aria-selected', 'true');
+            tabContents.forEach((content) => content.classList.remove('active'));
 
-                const targetId = `tab-${btn.dataset.tab}`;
-                const targetContent = document.getElementById(targetId);
-                if (targetContent) {
-                    targetContent.classList.add('active');
+            btn.classList.add('active');
+            btn.setAttribute('aria-selected', 'true');
+
+            const targetId = `tab-${btn.dataset.tab}`;
+            const targetContent = document.getElementById(targetId);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
+
+            applyLayoutMode(btn.dataset.tab);
+
+            if (btn.dataset.tab === 'game') {
+                document.dispatchEvent(new CustomEvent('game-tab-activated'));
+            }
+
+            if (btn.dataset.tab === 'editor') {
+                if (window.TinyRPGMaker && window.TinyRPGMaker.resetNPCs) {
+                    window.TinyRPGMaker.resetNPCs();
                 }
-
-                applyLayoutMode(btn.dataset.tab);
-
-                if (btn.dataset.tab === 'game') {
-                    document.dispatchEvent(new CustomEvent('game-tab-activated'));
+                if (window.TinyRPGMaker && window.TinyRPGMaker.draw) {
+                    window.TinyRPGMaker.draw();
                 }
-
-                if (btn.dataset.tab === 'editor') {
-                    if (window.TinyRPGMaker && window.TinyRPGMaker.resetNPCs) {
-                        window.TinyRPGMaker.resetNPCs();
-                    }
-                    if (window.TinyRPGMaker && window.TinyRPGMaker.draw) {
-                        window.TinyRPGMaker.draw();
-                    }
                 document.dispatchEvent(new CustomEvent('editor-tab-activated'));
-                    if (window.TinyRPGMaker && window.TinyRPGMaker.renderAll) {
-                        window.TinyRPGMaker.renderAll();
-                    }
-                    if (window.TinyRPGMaker && window.TinyRPGMaker.exportGameData && window.TinyRPGMaker.importGameData) {
+                if (window.TinyRPGMaker && window.TinyRPGMaker.renderAll) {
+                    window.TinyRPGMaker.renderAll();
+                }
+                if (window.TinyRPGMaker && window.TinyRPGMaker.exportGameData && window.TinyRPGMaker.importGameData) {
                     const currentData = window.TinyRPGMaker.exportGameData();
                     window.TinyRPGMaker.importGameData(currentData);
-                    }
+                }
+            }
+        };
+
+        tabs.forEach((btn) => {
+            btn.addEventListener('pointerdown', (ev) => {
+                ev.preventDefault();
+                activateTab(btn);
+            });
+            btn.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Enter' || ev.key === ' ') {
+                    ev.preventDefault();
+                    activateTab(btn);
                 }
             });
         });

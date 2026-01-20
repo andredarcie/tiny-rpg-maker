@@ -27,6 +27,7 @@ class EditorDomCache {
         this.btnNpcDelete = root.getElementById('npc-delete');
         this.npcEditor = root.querySelector('.npc-editor');
         this.btnGenerateUrl = root.getElementById('btn-generate-url');
+        this.shareUrlInput = root.getElementById('project-share-url');
         this.btnUndo = root.getElementById('btn-undo');
         this.btnRedo = root.getElementById('btn-redo');
         this.enemyTypes = root.getElementById('enemy-types');

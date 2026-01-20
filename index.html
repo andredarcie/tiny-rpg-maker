@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Tiny RPG Maker</title>
+    <title>Tiny RPG Studio</title>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -38,8 +38,8 @@
             <div class="tabs">
                 <p class="tabs-title" data-text-key="app.title"></p>
                 <div class="tabs-links">
-                    <button class="tab-button active" data-tab="game" aria-selected="true" data-text-key="tabs.game"></button>
-                    <button class="tab-button" data-tab="editor" aria-selected="false" data-text-key="tabs.editor"></button>
+                    <button class="tab-button active" type="button" data-tab="game" aria-selected="true" data-text-key="tabs.game"></button>
+                    <button class="tab-button" type="button" data-tab="editor" aria-selected="false" data-text-key="tabs.editor"></button>
                     <button id="btn-reset" class="tab-action-button" type="button" data-text-key="buttons.reset" data-aria-label-key="aria.reset"></button>
                 </div>
             </div>
@@ -115,7 +115,6 @@
 
                     <div class="editor-center">
                         <div class="editor-section editor-section--map">
-                            <div id="editor-map-position" class="game-minimap" aria-hidden="true"></div>
                             <div class="editor-map-wrapper">
                                 <button
                                     type="button"
@@ -257,6 +256,10 @@
                                     </label>
                                     <p class="project-share-hint" data-text-key="project.shareHint"></p>
                                     <button id="btn-generate-url" data-text-key="project.generateUrl"></button>
+                                    <label class="project-field project-field--share-url">
+                                        <span data-text-key="project.shareUrlLabel"></span>
+                                        <input id="project-share-url" type="text" readonly spellcheck="false" autocomplete="off" inputmode="url">
+                                    </label>
                                     <button id="btn-generate-html" data-text-key="project.generateHTML"></button>
                                 </div>
                             </details>

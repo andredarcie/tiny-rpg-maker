@@ -1,8 +1,8 @@
 :root {
     --bg: #0e0f13;
     --panel: #151821;
-    --text: #e6e7eb;
-    --muted: #9aa0aa;
+    --text: #ffffff;
+    --muted: #ffffff;
     --accent: #5bfa8e;
     --border: #232734;
     --hud-text-color: #fff;
@@ -92,6 +92,9 @@ main {
     width: 100%;
     max-width: 720px;
     margin: clamp(3px, 1.2vw, 8px) auto;
+    position: relative;
+    z-index: 20;
+    pointer-events: auto;
 }
 
 body.game-mode .tabs {
@@ -154,12 +157,19 @@ body.game-mode .tabs {
     transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
 }
 
-.tab-button:hover,
-.tab-button.active,
-.tab-action-button:hover {
+.tab-button.active {
     background: rgba(100, 181, 246, 0.2);
     border-color: rgba(100, 181, 246, 0.45);
     color: #fff;
+}
+
+@media (hover: hover) {
+    .tab-button:hover,
+    .tab-action-button:hover {
+        background: rgba(100, 181, 246, 0.2);
+        border-color: rgba(100, 181, 246, 0.45);
+        color: #fff;
+    }
 }
 
 @media (max-width: 640px) {
@@ -266,7 +276,7 @@ body.game-mode header {
     background: #0b0d12;
     border-bottom: 2px solid #2a2f3a;
     backdrop-filter: none;
-    color: #e9e2d0;
+    color: #ffffff;
     font-family: "Press Start 2P", "VT323", "Courier New", monospace;
 }
 
@@ -281,7 +291,7 @@ body.game-mode header input {
     background-image: none;
     border: 2px solid #2a2f3a;
     background: #0f131b;
-    color: #e9e2d0;
+    color: #ffffff;
 }
 
 body.game-mode main {
@@ -310,6 +320,8 @@ body.game-mode #tab-game.tab-content {
     box-shadow: none;
     background: #000;
     min-height: 0;
+    position: relative;
+    z-index: 1;
 }
 
 body.game-mode #tab-game.tab-content.active {
@@ -349,8 +361,8 @@ body.game-mode #tab-game .game-controls button {
 body.editor-mode {
     --bg: #0b0d12;
     --panel: #11151d;
-    --text: #e9e2d0;
-    --muted: #b2a894;
+    --text: #ffffff;
+    --muted: #ffffff;
     --accent: #5bfa8e;
     --border: #2a2f3a;
     background: var(--bg);
@@ -396,6 +408,15 @@ body.editor-mode [class*='badge'] {
     background: var(--panel);
 }
 
+body.editor-mode .tile-card.selected,
+body.editor-mode .npc-card.selected,
+body.editor-mode .enemy-card.selected,
+body.editor-mode .object-type-card.selected {
+    border-color: var(--accent);
+    background: rgba(100, 181, 246, 0.1);
+    box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.15);
+}
+
 body.editor-mode .tab-button,
 body.editor-mode .tab-action-button,
 body.editor-mode button,
@@ -408,15 +429,22 @@ body.editor-mode .editor-mobile-nav-button {
     letter-spacing: 0.06em;
 }
 
-body.editor-mode .tab-button:hover,
-body.editor-mode .tab-button.active,
-body.editor-mode .tab-action-button:hover,
-body.editor-mode button:hover,
-body.editor-mode .map-nav-button:hover:not(:disabled),
-body.editor-mode .editor-mobile-nav-button:hover {
+body.editor-mode .tab-button.active {
     background: #1f2735;
     border-color: var(--accent);
     color: #fff;
+}
+
+@media (hover: hover) {
+    body.editor-mode .tab-button:hover,
+    body.editor-mode .tab-action-button:hover,
+    body.editor-mode button:hover,
+    body.editor-mode .map-nav-button:hover:not(:disabled),
+    body.editor-mode .editor-mobile-nav-button:hover {
+        background: #1f2735;
+        border-color: var(--accent);
+        color: #fff;
+    }
 }
 
 body.editor-mode input,
@@ -1243,6 +1271,10 @@ textarea {
     min-width: 200px;
 }
 
+.project-field--share-url {
+    flex-basis: 100%;
+}
+
 .project-field span {
     font-size: 0.85rem;
     color: var(--muted);
@@ -1255,6 +1287,11 @@ textarea {
     background: var(--panel);
     color: var(--text);
     font-size: 0.95rem;
+}
+
+.project-field--share-url input {
+    cursor: text;
+    user-select: text;
 }
 
 .project-actions button {
@@ -1301,7 +1338,7 @@ body.game-mode .tabs {
 }
 
 body.game-mode .tabs-title {
-    color: #b2a894;
+    color: #ffffff;
     letter-spacing: 0.12em;
     text-transform: uppercase;
 }
@@ -1313,18 +1350,25 @@ body.game-mode .tab-action-button {
     box-shadow: none;
     background: #141a24;
     background-image: none;
-    color: #e9e2d0;
+    color: #ffffff;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     font-family: "Press Start 2P", "VT323", "Courier New", monospace;
 }
 
-body.game-mode .tab-button:hover,
-body.game-mode .tab-button.active,
-body.game-mode .tab-action-button:hover {
+body.game-mode .tab-button.active {
     background: #1f2735;
     border-color: #5bfa8e;
     color: #fff;
+}
+
+@media (hover: hover) {
+    body.game-mode .tab-button:hover,
+    body.game-mode .tab-action-button:hover {
+        background: #1f2735;
+        border-color: #5bfa8e;
+        color: #fff;
+    }
 }
 
 .project-variables__title {
@@ -1696,8 +1740,8 @@ body.game-mode .tab-action-button:hover {
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.5px;
-    color: #0b1d12;
-    background: var(--accent);
+    color: #ffffff;
+    background: #1f7f4e;
     border-radius: 0;
     width: fit-content;
 }
@@ -1907,7 +1951,7 @@ body.game-mode .tab-action-button:hover {
 .npc-card .npc-preview {
     width: 48px;
     height: 48px;
-    border: 1px solid var(--border);
+    border: none;
     border-radius: 4px;
     background: var(--panel);
     display: block;

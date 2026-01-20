@@ -11,7 +11,7 @@ const formatOverlayText = (key, params = {}, fallback = '') => {
 class RendererOverlayRenderer extends RendererModuleBase {
     constructor(renderer) {
         super(renderer);
-        this.introData = { title: 'Tiny RPG Maker', author: '' };
+        this.introData = { title: 'Tiny RPG Studio', author: '' };
         this.pickupFx = { id: null, startTime: 0 };
         this.pickupAnimationHandle = 0;
         this.levelUpAnimationHandle = 0;
@@ -19,14 +19,14 @@ class RendererOverlayRenderer extends RendererModuleBase {
 
     setIntroData(data = {}) {
         this.introData = {
-            title: data.title || 'Tiny RPG Maker',
+            title: data.title || 'Tiny RPG Studio',
             author: data.author || ''
         };
     }
 
     drawIntroOverlay(ctx, gameplayCanvas) {
         this.entityRenderer.cleanupEnemyLabels();
-        const title = this.introData?.title || 'Tiny RPG Maker';
+        const title = this.introData?.title || 'Tiny RPG Studio';
         const author = (this.introData?.author || '').trim();
         const width = gameplayCanvas.width;
         const height = gameplayCanvas.height;
@@ -71,8 +71,8 @@ class RendererOverlayRenderer extends RendererModuleBase {
         const pending = Math.max(0, this.gameState.getPendingLevelUpChoices?.() || 0);
         const accent = this.paletteManager.getColor(7) || '#FFF1E8';
         const accentStrong = this.paletteManager.getColor(13) || accent;
-        const titleFont = Math.max(8, Math.floor(height / 34));
-        const pendingFont = Math.max(6, Math.floor(height / 58));
+        const titleFont = Math.max(7, Math.floor(height / 42));
+        const pendingFont = Math.max(5, Math.floor(height / 70));
         const layout = this.getLevelUpCardLayout({
             width,
             height,
@@ -110,7 +110,7 @@ class RendererOverlayRenderer extends RendererModuleBase {
         if (!choices.length) {
             const allText = getOverlayText('skills.allUnlocked', '');
             if (allText) {
-                ctx.font = `${Math.max(12, Math.floor(height / 16))}px monospace`;
+                ctx.font = `${Math.max(9, Math.floor(height / 20))}px monospace`;
                 ctx.fillStyle = accentStrong;
                 const centerY = layout?.cardArea
                     ? layout.cardArea.cardYStart + layout.cardArea.cardHeight / 2
@@ -205,22 +205,22 @@ class RendererOverlayRenderer extends RendererModuleBase {
         ctx.fillStyle = '#FFFFFF';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'top';
-        const nameFont = Math.max(9, Math.floor(height / 12));
+        const nameFont = Math.max(8, Math.floor(height / 16));
         ctx.font = `${nameFont}px "Press Start 2P", "VT323", monospace`;
         ctx.fillText(name, x + padding, y + padding);
 
         if (data?.icon) {
-            ctx.font = `${Math.max(9, Math.floor(height / 11))}px monospace`;
+            ctx.font = `${Math.max(8, Math.floor(height / 14))}px monospace`;
             ctx.textAlign = 'right';
             ctx.fillText(data.icon, x + width - padding, y + padding + Math.max(0, Math.floor(height * 0.02)));
             ctx.textAlign = 'left';
         }
 
-        ctx.font = `${Math.max(8, Math.floor(height / 18))}px monospace`;
+        ctx.font = `${Math.max(7, Math.floor(height / 22))}px monospace`;
         ctx.fillStyle = 'rgba(255,255,255,0.9)';
-        const descTopGap = Math.max(6, Math.floor(height * 0.08));
+        const descTopGap = Math.max(5, Math.floor(height * 0.06));
         const textY = y + padding + nameFont + descTopGap;
-        const lineHeight = Math.max(9, Math.floor(height / 16));
+        const lineHeight = Math.max(8, Math.floor(height / 20));
         this.drawWrappedText(ctx, description, x + padding, textY, width - padding * 2, lineHeight, 2);
 
         ctx.restore();
@@ -521,15 +521,13 @@ class RendererOverlayRenderer extends RendererModuleBase {
             ctx.save();
             const padding = Math.floor(this.canvas.width * 0.08);
             const availableWidth = Math.max(32, this.canvas.width - padding * 2);
-            const messageFontSize = Math.max(12, Math.floor(this.canvas.height / 14));
+            const messageFontSize = Math.max(7, Math.floor(this.canvas.height / 30));
             const lineHeight = Math.round(messageFontSize * 1.4);
-            const textFont = `bold ${messageFontSize}px "Press Start 2P", "VT323", monospace`;
+            const textFont = `${messageFontSize}px "Press Start 2P", "VT323", monospace`;
             ctx.font = textFont;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'top';
             ctx.fillStyle = '#F8FAFC';
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.lineWidth = Math.max(1, Math.floor(messageFontSize / 10));
 
             const wrapLines = (text) => {
                 const sections = text.replace(/\r\n/g, '\n').split(/\n+/).map((section) => section.trim()).filter(Boolean);
@@ -568,7 +566,6 @@ class RendererOverlayRenderer extends RendererModuleBase {
             lines.forEach((line) => {
                 if (line.trim().length) {
                     const alignedY = Math.round(cursorY) + 0.5;
-                    ctx.strokeText(line, centerX, alignedY);
                     ctx.fillText(line, centerX, alignedY);
                 }
                 cursorY += lineHeight;
@@ -577,14 +574,11 @@ class RendererOverlayRenderer extends RendererModuleBase {
         }
 
         ctx.fillStyle = '#FFFFFF';
-        let fontSize = Math.max(8, Math.floor(this.canvas.height / 10));
-        const endFont = `bold ${fontSize}px "Press Start 2P", monospace`;
+        let fontSize = Math.max(5, Math.floor(this.canvas.height / 22));
+        const endFont = `${fontSize}px "Press Start 2P", monospace`;
         ctx.font = endFont;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
-        ctx.lineWidth = Math.max(1, Math.floor(fontSize / 12));
-        ctx.strokeText(isVictory ? 'The End' : 'Game Over', centerX, centerY);
         ctx.fillText(isVictory ? 'The End' : 'Game Over', centerX, centerY);
 
         if (!this.gameState.canResetAfterGameOver) {
@@ -594,15 +588,14 @@ class RendererOverlayRenderer extends RendererModuleBase {
         ctx.save();
         const blink = ((Date.now() / 500) % 2) > 1 ? 0.3 : 0.95;
         ctx.fillStyle = `rgba(100, 181, 246, ${blink.toFixed(2)})`;
-        fontSize = Math.max(5, Math.floor(this.canvas.height / 15));
-        ctx.font = `bold ${fontSize}px "Press Start 2P", monospace`;
+        fontSize = Math.max(4, Math.floor(this.canvas.height / 26));
+        ctx.font = `${fontSize}px "Press Start 2P", monospace`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         const retryY = Math.round(this.canvas.height / 1.5) + 0.5;
         const reviveLabel = this.gameState.hasNecromancerReviveReady?.()
             ? getOverlayText('skills.necromancer.revivePrompt', '')
             : getOverlayText(isVictory ? 'gameOver.retryVictory' : 'gameOver.retryDefeat', '');
-        ctx.strokeText(reviveLabel, centerX, retryY);
         ctx.fillText(reviveLabel, centerX, retryY);
         ctx.restore();
         ctx.restore();

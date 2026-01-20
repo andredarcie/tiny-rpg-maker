@@ -123,7 +123,7 @@ class EditorUIController extends EditorManagerModule {
 
     normalizeTitle(raw) {
         const text = String(raw || '').slice(0, 18).replace(/\s+/g, ' ').trim();
-        return text || 'Tiny RPG Maker';
+        return text || 'Tiny RPG Studio';
     }
 
     normalizeAuthor(raw) {

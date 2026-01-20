@@ -31,7 +31,7 @@ class GameEngine {
         this.awaitingRestart = false;
         this.introVisible = false;
         this.introStartTime = 0;
-        this.introData = { title: 'Tiny RPG Maker', author: '' };
+        this.introData = { title: 'Tiny RPG Studio', author: '' };
         this.canDismissIntroScreen = false;
         this.timeToResetAfterIntro = 2000;
         this.setupIntroScreen();
@@ -234,7 +234,7 @@ class GameEngine {
 
     syncDocumentTitle() {
         const game = this.gameState.getGame();
-        document.title = game.title || 'Tiny RPG Maker';
+        document.title = game.title || 'Tiny RPG Studio';
     }
 
     setupIntroScreen() {
@@ -268,14 +268,14 @@ class GameEngine {
     refreshIntroScreen() {
         const game = this.getGame();
         this.introData = {
-            title: game.title || 'Tiny RPG Maker',
+            title: game.title || 'Tiny RPG Studio',
             author: (game.author || '').trim()
         };
         this.renderer.setIntroData(this.introData);
     }
 
     getIntroData() {
-        return this.introData || { title: 'Tiny RPG Maker', author: '' };
+        return this.introData || { title: 'Tiny RPG Studio', author: '' };
     }
 
     // Editor-facing helpers

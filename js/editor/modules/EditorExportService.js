@@ -22,7 +22,7 @@ class EditorExportService {
             const code = (typeof ShareUtils !== 'undefined' && typeof ShareUtils.encode === 'function')
                 ? ShareUtils.encode(gameData)
                 : '';
-            const downloadError = 'Unable to download project assets. Please run Tiny RPG Maker from an HTTP/HTTPS server (not file://) to export HTML.';
+            const downloadError = 'Unable to download project assets. Please run Tiny RPG Studio from an HTTP/HTTPS server (not file://) to export HTML.';
 
             let cssText = '';
             const linkEl = document.querySelector('link[rel="stylesheet"][href]');

@@ -33,10 +33,17 @@ class EditorShareService {
         return url;
     }
 
+    updateShareUrlField(url) {
+        const input = this.manager?.dom?.shareUrlInput;
+        if (!input) return;
+        input.value = url || '';
+    }
+
     async generateShareableUrl() {
         try {
             const url = await this.buildShareUrl();
             if (!url) return;
+            this.updateShareUrlField(url);
 
             if (navigator.clipboard?.writeText) {
                 await navigator.clipboard.writeText(url);

@@ -31,7 +31,8 @@ class EditorEventBinder extends EditorManagerModule {
             projectTestToggle,
             projectTestStartLevel,
             projectTestSkillList,
-            projectTestGodMode
+            projectTestGodMode,
+            shareUrlInput
         } = this.dom;
 
         const manager = this.manager;
@@ -64,6 +65,8 @@ class EditorEventBinder extends EditorManagerModule {
         projectTestGodMode?.addEventListener('change', (ev) => {
             manager.setGodMode(ev.target.checked);
         });
+        shareUrlInput?.addEventListener('focus', () => shareUrlInput.select());
+        shareUrlInput?.addEventListener('click', () => shareUrlInput.select());
         projectTestSkillList?.addEventListener('change', (ev) => {
             const target = ev.target;
             if (!target || target.tagName !== 'INPUT') return;

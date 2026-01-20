@@ -1,6 +1,6 @@
 const TEXT_BUNDLES = {
     'pt-BR': {
-        'app.title': 'Tiny RPG Maker',
+        'app.title': 'Tiny RPG Studio',
         'intro.byline': 'por {author}',
         'intro.startAdventure': 'Iniciar aventura',
         'tabs.game': 'Jogo',
@@ -27,7 +27,7 @@ const TEXT_BUNDLES = {
         'doors.opened': 'Você usou uma chave para abrir a porta.',
         'doors.locked': 'Porta trancada. Precisa de uma chave.',
         'doors.unlockedSkill': 'Sua habilidade abriu a porta sem usar chave.',
-        'log.engineReady': 'Tiny RPG Maker engine initialized successfully.',
+        'log.engineReady': 'Tiny RPG Studio engine initialized successfully.',
         'npc.dialog.defaultLabel': 'Diálogo padrão:',
         'npc.dialog.placeholder': 'Digite o diálogo do NPC...',
         'npc.reward.defaultLabel': 'Ao concluir o diálogo padrão, ativar variável:',
@@ -120,6 +120,7 @@ const TEXT_BUNDLES = {
         'project.authorPlaceholder': 'Seu nome ou estúdio',
         'project.languageLabel': 'Idioma',
         'project.generateUrl': 'Gerar URL do jogo',
+        'project.shareUrlLabel': 'URL do jogo',
         'project.generateHTML': 'Exportar Projeto',
         'project.variables.title': 'Variáveis do jogo',
         'project.variables.usage': '{used}/{total} usadas',
@@ -269,7 +270,7 @@ const TEXT_BUNDLES = {
         'tiles.summaryFallback': 'Tile {id}'
     },
     'en-US': {
-        'app.title': 'Tiny RPG Maker',
+        'app.title': 'Tiny RPG Studio',
         'intro.byline': 'by {author}',
         'intro.startAdventure': 'Start adventure',
         'tabs.game': 'Game',
@@ -296,7 +297,7 @@ const TEXT_BUNDLES = {
         'doors.opened': 'You used a key to open the door.',
         'doors.locked': 'Door locked. You need a key.',
         'doors.unlockedSkill': 'Your skill opens the door without a key.',
-        'log.engineReady': 'Tiny RPG Maker engine initialized successfully.',
+        'log.engineReady': 'Tiny RPG Studio engine initialized successfully.',
         'npc.dialog.defaultLabel': 'Default dialogue:',
         'npc.dialog.placeholder': 'Type the NPC dialogue...',
         'npc.reward.defaultLabel': 'After the default dialogue, enable variable:',
@@ -386,6 +387,7 @@ const TEXT_BUNDLES = {
         'project.authorPlaceholder': 'Your name or studio',
         'project.languageLabel': 'Language',
         'project.generateUrl': 'Generate share URL',
+        'project.shareUrlLabel': 'Game URL',
         'project.generateHTML': 'Export Project',
         'project.variables.title': 'Game variables',
         'project.variables.usage': '{used}/{total} used',

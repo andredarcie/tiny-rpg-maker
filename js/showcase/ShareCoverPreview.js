@@ -167,7 +167,7 @@ class ShareCoverPreview {
         ctx.lineWidth = 2;
         ctx.strokeRect(3, 3, width - 6, height - 6);
 
-        const title = (this.gameData?.title || 'Tiny RPG Maker').trim() || 'Tiny RPG Maker';
+        const title = (this.gameData?.title || 'Tiny RPG Studio').trim() || 'Tiny RPG Studio';
         const author = (this.gameData?.author || '').trim();
         const centerX = width / 2;
         const centerY = height / 2;

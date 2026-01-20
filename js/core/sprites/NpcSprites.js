@@ -62,7 +62,7 @@ const NpcSpriteMatrices = {
     'villager-man': [
         [ null, null,  1,  1,  1,  1, null, null ],
         [ null,  1, 15, 15, 15, 15,  1, null ],
-        [ null,  1, 15,  0, 15,  0,  1, null ],
+        [ null,  1, 15, 12, 15, 12,  1, null ],
         [ null,  1, 15, 15, 15, 15,  1, null ],
         [  1,  4,  4,  4,  4,  4,  4,  1 ],
         [  1, 15,  4,  4,  4,  4, 15,  1 ],
@@ -92,7 +92,7 @@ const NpcSpriteMatrices = {
     'villager-woman': [
         [ null, null,  1,  1,  1,  1, null, null ],
         [ null,  1,  4,  4,  4,  4,  1, null ],
-        [ null,  1,  4,  0, 15,  0,  1, null ],
+        [ null,  1,  4, 12, 15, 12,  1, null ],
         [ null,  1,  4, 15, 15, 15,  1, null ],
         [  1, 14,  4, 14, 14, 14, 14,  1 ],
         [  1, 15,  4, 14, 14, 14, 15,  1 ],
@@ -124,7 +124,7 @@ const NpcSpriteMatrices = {
         [ null, null, null, null, null, null, null, null ],
         [ null, null,  1,  1,  1,  1, null, null ],
         [ null,  1, 15, 15, 15, 15,  1, null ],
-        [ null,  1, 15,  0, 15,  0,  1, null ],
+        [ null,  1, 15, 12, 15, 12,  1, null ],
         [  1,  9,  9,  9,  9,  9,  9,  1 ],
         [  1, 15,  9,  9,  9,  9, 15,  1 ],
         [ null,  1,  2,  1,  1,  2,  1, null ]
@@ -152,7 +152,7 @@ const NpcSpriteMatrices = {
     'king': [
         [  1, 10,  1, 10,  1, 10,  1,  1 ],
         [  1,  9,  9,  9,  9,  9,  1, 10 ],
-        [  1, 15, 15,  0, 15,  0,  1,  9 ],
+        [  1, 15, 15, 12, 15, 12,  1,  9 ],
         [  1, 15, 15, 15, 15, 15,  1,  9 ],
         [  1,  8,  7, 15, 15,  7,  1,  9 ],
         [  1,  8,  8,  7,  8,  8,  8, 15 ],
@@ -182,7 +182,7 @@ const NpcSpriteMatrices = {
     'knight': [
         [ null, null,  1,  1,  1,  1, null, null ],
         [ null,  1,  6,  6,  6,  6,  1, null ],
-        [ null,  1,  6,  0, 15,  0,  1, null ],
+        [ null,  1,  6, 12, 15, 12,  1, null ],
         [ null,  1,  6,  6,  6,  6,  1, null ],
         [  1,  5,  5,  6,  6,  5,  5,  1 ],
         [  1,  6,  5,  5,  5,  5,  6,  1 ],
@@ -212,7 +212,7 @@ const NpcSpriteMatrices = {
     'thief': [
         [ null, null,  1,  1,  1,  1, null, null ],
         [ null,  1,  5,  5,  5,  5,  1, null ],
-        [ null,  1,  5,  0, 15,  0,  1, null ],
+        [ null,  1,  5, 12, 15, 12,  1, null ],
         [ null,  1,  5,  5,  5,  5,  1, null ],
         [  1,  5,  5,  5,  5,  5,  5,  1 ],
         [  1, 15,  5,  5,  5,  5, 15,  1 ],
@@ -242,7 +242,7 @@ const NpcSpriteMatrices = {
     'blacksmith': [
         [ null, null,  1,  1,  1,  1, null, null ],
         [ null,  1, 15, 15, 15, 15,  1, null ],
-        [ null,  1, 15,  0, 15,  0,  1, null ],
+        [ null,  1, 15, 12, 15, 12,  1, null ],
         [ null,  1, 15, 15, 15, 15,  1, null ],
         [  1,  6,  4,  6,  6,  4,  6,  1 ],
         [  1, 15,  4,  4,  4,  4, 15,  1 ],
