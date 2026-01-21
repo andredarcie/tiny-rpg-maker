@@ -319,6 +319,45 @@
     <script src="js/core/share/ShareEncoder.js?v=20250208"></script>
     <script src="js/core/share/ShareDecoder.js?v=20250208"></script>
     <script src="js/core/share/ShareUrlHelper.js?v=20250208"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
+        import {
+            addDoc,
+            collection,
+            getFirestore,
+            serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAQVJVjDKFB7GBKMBUGJ5g5Gj3dGzPIdK8",
+            authDomain: "tiny-rpg-studio.firebaseapp.com",
+            projectId: "tiny-rpg-studio",
+            storageBucket: "tiny-rpg-studio.firebasestorage.app",
+            messagingSenderId: "985096774156",
+            appId: "1:985096774156:web:71802842fd9328f6ae0429",
+            measurementId: "G-B56JRXPGED"
+        };
+
+        window.TinyRPGFirebaseConfig = firebaseConfig;
+        window.TinyRPGFirebaseCollection = "shareUrls";
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.TinyRPGFirebaseApp = app;
+        window.TinyRPGFirebaseDb = db;
+        window.TinyRPGFirebaseFirestore = { addDoc, collection, serverTimestamp };
+
+        try {
+            if (firebaseConfig.measurementId) {
+                getAnalytics(app);
+            }
+        } catch (error) {
+            console.warn('[TinyRPG] Firebase analytics unavailable.', error);
+        }
+    </script>
+    <script src="js/core/FirebaseShareTracker.js?v=20250301"></script>
     <script src="js/core/TileDefinitions.js?v=20250208"></script>
     <script src="js/core/NPCDefinitions.js?v=20250208"></script>
     <script src="js/core/EnemyDefinitions.js?v=20250208"></script>
@@ -361,10 +400,6 @@
     <script src="js/editor/modules/EditorExportService.js?v=20250208"></script>
 </body>
 </html>
-
-
-
-
 
 
 

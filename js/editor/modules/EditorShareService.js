@@ -1,6 +1,7 @@
 class EditorShareService {
     constructor(editorManager) {
         this.manager = editorManager;
+        this.shareTracker = this.createShareTracker();
     }
 
     get text() {
@@ -51,10 +52,29 @@ class EditorShareService {
             } else {
                 prompt(this.t('alerts.share.copyPrompt'), url);
             }
+
+            this.trackShareUrl(url);
         } catch (error) {
             console.error(error);
             alert(this.t('alerts.share.generateError'));
         }
+    }
+
+    createShareTracker() {
+        if (typeof FirebaseShareTracker === 'undefined') return null;
+        if (FirebaseShareTracker.fromGlobal) {
+            return FirebaseShareTracker.fromGlobal();
+        }
+        const config = typeof window !== 'undefined' ? window.TinyRPGFirebaseConfig : null;
+        const collection = typeof window !== 'undefined' ? window.TinyRPGFirebaseCollection : null;
+        return new FirebaseShareTracker(config, { collection });
+    }
+
+    async trackShareUrl(url) {
+        if (!this.shareTracker?.trackShareUrl) return;
+        console.info('[TinyRPG] Tracking share URL...', { url });
+        const ok = await this.shareTracker.trackShareUrl(url, { source: 'editor' });
+        console.info('[TinyRPG] Share URL tracking result:', ok ? 'ok' : 'failed');
     }
 
     saveGame() {
