@@ -1,7 +1,7 @@
 
-import { ShareDecoder } from './share/ShareDecoder';
-import { ShareEncoder } from './share/ShareEncoder';
-import { ShareUrlHelper } from './share/ShareUrlHelper';
+import { ShareDecoder } from './ShareDecoder';
+import { ShareEncoder } from './ShareEncoder';
+import { ShareUrlHelper } from './ShareUrlHelper';
 /**
  * ShareUtils delega a serialização/compartilhamento para os codecs especializados.
  */

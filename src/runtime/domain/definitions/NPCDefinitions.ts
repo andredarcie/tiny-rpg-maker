@@ -1,12 +1,14 @@
 
 import { SpriteMatrixRegistry } from '../sprites/SpriteMatrixRegistry';
+import { Npc } from '../entities/Npc';
+import type { NpcDefinitionData, NpcVariant } from '../entities/Npc';
 /**
  * NPCDefinitions centraliza os NPCs fixos disponiveis no editor.
  */
 class NPCDefinitions {
-    static NPC_VARIANTS = ['human', 'elf', 'dwarf', 'fixed'];
+    static NPC_VARIANTS = ['human', 'elf', 'dwarf', 'fixed'] as const;
 
-    static NPC_DEFINITIONS = [
+    static NPC_DEFINITION_DATA: NpcDefinitionData[] = [
         // Humans
         {
             type: 'old-mage',
@@ -302,20 +304,22 @@ class NPCDefinitions {
         }
     ];
 
-    static get definitions() {
+    static NPC_DEFINITIONS: Npc[] = NPCDefinitions.NPC_DEFINITION_DATA.map((entry) => new Npc(entry));
+
+    static get definitions(): Npc[] {
         return this.NPC_DEFINITIONS;
     }
 
-    static getNpcDefinition(type) {
+    static getNpcDefinition(type: string | null | undefined): Npc | null {
         return this.NPC_DEFINITIONS.find((entry) => entry.type === type) || null;
     }
 
-    static normalizeVariant(variant) {
+    static normalizeVariant(variant: string | null | undefined): NpcVariant {
         const normalized = String(variant || '').toLowerCase();
-        return this.NPC_VARIANTS.includes(normalized) ? normalized : 'human';
+        return this.NPC_VARIANTS.includes(normalized as NpcVariant) ? (normalized as NpcVariant) : 'human';
     }
 
-    static getVariants() {
+    static getVariants(): NpcVariant[] {
         return this.NPC_VARIANTS.slice();
     }
 }

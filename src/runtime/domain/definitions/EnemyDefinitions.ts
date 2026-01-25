@@ -1,30 +1,13 @@
 import { SpriteMatrixRegistry } from '../sprites/SpriteMatrixRegistry';
+import { Enemy } from '../entities/Enemy';
+import type { EnemyDefinitionData } from '../entities/Enemy';
 
-type SpriteMatrix = (number | null)[][];
-
-type EnemyDefinition = {
-    type: string;
-    id: string;
-    name: string;
-    nameKey: string;
-    description: string;
-    damage: number;
-    missChance: number;
-    experience: number;
-    hasEyes: boolean;
-    sprite: SpriteMatrix;
-    aliases?: string[];
-    boss?: boolean;
-    defeatActivationMessage?: string;
-    defeatActivationMessageKey?: string;
-};
-
-type EnemyTypeInput = EnemyDefinition['type'] | null | undefined;
+type EnemyTypeInput = string | null | undefined;
 /**
  * EnemyDefinitions concentra os inimigos disponiveis para o editor.
  */
 class EnemyDefinitions {
-    static ENEMY_DEFINITIONS: EnemyDefinition[] = [
+    static ENEMY_DEFINITION_DATA: EnemyDefinitionData[] = [
         {
             type: 'giant-rat',
             id: 'enemy-giant-rat',
@@ -134,24 +117,22 @@ class EnemyDefinitions {
         }
     ];
 
-    static get definitions(): EnemyDefinition[] {
+    static ENEMY_DEFINITIONS: Enemy[] = EnemyDefinitions.ENEMY_DEFINITION_DATA.map((entry) => new Enemy(entry));
+
+    static get definitions(): Enemy[] {
         return this.ENEMY_DEFINITIONS;
     }
 
-    static getDefault(): EnemyDefinition | null {
+    static getDefault(): Enemy | null {
         return this.ENEMY_DEFINITIONS[0] || null;
     }
 
-    static getEnemyDefinition(type: EnemyTypeInput): EnemyDefinition | null {
+    static getEnemyDefinition(type: EnemyTypeInput): Enemy | null {
         if (typeof type !== 'string' || !type) return null;
-        const direct = this.ENEMY_DEFINITIONS.find((entry) => entry.type === type);
-        if (direct) return direct;
-        return this.ENEMY_DEFINITIONS.find((entry) =>
-            Array.isArray(entry.aliases) && entry.aliases.includes(type)
-        ) || null;
+        return this.ENEMY_DEFINITIONS.find((entry) => entry.matchesType(type)) || null;
     }
 
-    static normalizeType(type: EnemyTypeInput): EnemyDefinition['type'] {
+    static normalizeType(type: EnemyTypeInput): string {
         const definition = this.getEnemyDefinition(type);
         if (definition) return definition.type;
         return this.getDefault()?.type || 'giant-rat';
@@ -160,17 +141,13 @@ class EnemyDefinitions {
     static getExperienceReward(type: EnemyTypeInput): number {
         const definition = this.getEnemyDefinition(type);
         if (!definition) return 0;
-        const reward = Number(definition.experience);
-        if (!Number.isFinite(reward)) return 0;
-        return Math.max(0, Math.floor(reward));
+        return definition.getExperienceReward();
     }
 
     static getMissChance(type: EnemyTypeInput): number | null {
         const definition = this.getEnemyDefinition(type);
         if (!definition) return null;
-        const value = Number(definition.missChance);
-        if (!Number.isFinite(value)) return null;
-        return Math.max(0, Math.min(1, value));
+        return definition.getMissChance();
     }
 }
 

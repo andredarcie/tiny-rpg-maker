@@ -1,9 +1,12 @@
 
+import { Skill } from '../entities/Skill';
+import type { SkillDefinitionData } from '../entities/Skill';
+
 /**
  * SkillDefinitions centralizes the available level-up skills.
  */
 class SkillDefinitions {
-    static SKILLS = [
+    static SKILL_DEFINITION_DATA: SkillDefinitionData[] = [
         {
             id: 'keyless-doors',
             nameKey: 'skills.keylessDoors.name',
@@ -42,6 +45,8 @@ class SkillDefinitions {
         },
     ];
 
+    static SKILLS: Skill[] = SkillDefinitions.SKILL_DEFINITION_DATA.map((entry) => new Skill(entry));
+
     static LEVEL_SKILLS = {
         2: ['necromancer', 'charisma'],
         4: ['stealth'],
@@ -50,16 +55,16 @@ class SkillDefinitions {
         10: ['keyless-doors']
     };
 
-    static getAll() {
+    static getAll(): Skill[] {
         return this.SKILLS;
     }
 
-    static getById(id) {
+    static getById(id: string | null | undefined): Skill | null {
         if (typeof id !== 'string' || !id) return null;
         return this.SKILLS.find((skill) => skill.id === id) || null;
     }
 
-    static getSkillsForLevel(level) {
+    static getSkillsForLevel(level: number): string[] {
         const numeric = Number.isFinite(level) ? Math.max(1, Math.floor(level)) : 1;
         const list = this.LEVEL_SKILLS[numeric] || [];
         if (!Array.isArray(list)) return [];
@@ -74,7 +79,7 @@ class SkillDefinitions {
         return unique;
     }
 
-    static buildQueueForLevel(level, carryover = [], owned = []) {
+    static buildQueueForLevel(level: number, carryover: string[] = [], owned: string[] = []) {
         const normalizedCarry = Array.isArray(carryover) ? carryover : [];
         const ownedSet = new Set(Array.isArray(owned) ? owned : []);
         const base = this.getSkillsForLevel(level);
@@ -97,7 +102,7 @@ class SkillDefinitions {
         return queue;
     }
 
-    static pickRandom(count = 2, exclude = []) {
+    static pickRandom(count = 2, exclude: string[] = []) {
         const normalized = Array.isArray(exclude) ? exclude : [];
         const pool = this.getAll().filter((skill) => !normalized.includes(skill.id));
         if (!pool.length) return [];
@@ -105,7 +110,7 @@ class SkillDefinitions {
         return shuffled.slice(0, Math.max(1, Math.min(count, shuffled.length)));
     }
 
-    static shuffle(list) {
+    static shuffle(list: Skill[]): Skill[] {
         const arr = Array.isArray(list) ? list.slice() : [];
         for (let i = arr.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));

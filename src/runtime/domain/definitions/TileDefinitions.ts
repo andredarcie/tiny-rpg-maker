@@ -1,4 +1,7 @@
 
+import { Tile } from '../entities/Tile';
+import type { TileDefinitionData, TileFrame } from '../entities/Tile';
+
 /**
  * TileDefinitions centraliza a paleta PICO-8 e os tiles padrão.
  */
@@ -22,32 +25,45 @@ class TileDefinitions {
         "#FFCCAA"
     ]);
 
-    static createTile(id, name, layouts, collision = false, category = 'Diversos') {
+    static createTile(
+        id: number,
+        name: string,
+        layouts: (number | null)[][][] | (number | null)[][],
+        collision = false,
+        category = 'Diversos'
+    ) {
         const layoutList = Array.isArray(layouts) ? layouts.filter(Boolean) : [layouts];
         const frames = (layoutList.length ? layoutList : [this.createEmptyLayout()])
             .map((layout) => this.toPixels(layout));
-        return {
+        const data: TileDefinitionData = {
             id,
             name,
-            pixels: frames[0],
-            frames,
-            animated: frames.length > 1,
+            pixels: frames[0] as TileFrame,
+            frames: frames as TileFrame[],
             collision,
             category
         };
+        return new Tile(data);
     }
 
     static createEmptyLayout() {
         return Array.from({ length: 8 }, () => Array(8).fill(null));
     }
 
-    static toPixels(layout) {
+    static toPixels(layout: (number | null)[][]): TileFrame {
         return layout.map((row) =>
             row.map((value) => (value === null ? 'transparent' : (this.PICO8_COLORS[value] ?? 'transparent')))
         );
     }
 
-    static tile(index, name, layout, collision = false, category = 'Diversos', alternateLayout = null) {
+    static tile(
+        index: number,
+        name: string,
+        layout: (number | null)[][],
+        collision = false,
+        category = 'Diversos',
+        alternateLayout: (number | null)[][] | null = null
+    ) {
         const layouts = [layout];
         if (Array.isArray(alternateLayout)) {
             layouts.push(alternateLayout);
@@ -55,7 +71,7 @@ class TileDefinitions {
         return this.createTile(index, name, layouts, collision, category);
     }
 
-    static TILE_PRESETS = [
+    static TILE_PRESETS: Tile[] = [
         this.tile(0, 'Grama Vibrante', [
             [  3,  3,  3,  3,  3,  3,  3,  3 ],
             [  3,  3,  3,  3,  3,  3,  3,  3 ],
