@@ -21,7 +21,9 @@ type GameStateLike = {
   prepareNecromancerRevive?: () => void;
   isVariableOn: (id: string) => boolean;
   normalizeVariableId: (id: string | null) => string | null;
-  setVariableValue: (id: string, value: boolean, persist?: boolean) => boolean;
+  setVariableValue: (id: string, value: boolean, persist?: boolean) => [boolean, boolean?];
+  getObjectAt?: (roomIndex: number, x: number, y: number) => GameObjectLike | null;
+  hasSkill?: (skillId: string) => boolean;
 };
 
 type RendererLike = {
@@ -65,6 +67,12 @@ type EnemyLike = {
   y: number;
   lastX?: number;
   defeatVariableId?: string | null;
+};
+
+type GameObjectLike = {
+  type: string;
+  opened?: boolean;
+  variableId?: string | null;
 };
 
 type TileMapLike = {
@@ -306,7 +314,7 @@ class EnemyManager {
     enemy.type = this.normalizeEnemyType(enemy.type);
 
     const dir = this.pickRandomDirection();
-    const target = this.getTargetPosition(enemy, dir, game);
+    const target = this.getTargetPosition(enemy, dir);
     const roomIndex = enemy.roomIndex ?? 0;
 
     if (!this.canEnterTile(roomIndex, target.x, target.y, game, enemies, index)) {
@@ -336,7 +344,7 @@ class EnemyManager {
   canEnterTile(roomIndex: number, x: number, y: number, game: GameData, enemies: EnemyLike[], movingIndex: number): boolean {
     const room = game.rooms[roomIndex];
     if (!room) return false;
-    if (this.isBorderTile(roomIndex, x, y, game)) return false;
+    if (this.isBorderTile(roomIndex, x, y)) return false;
     if (room.walls?.[y]?.[x]) return false;
     if (this.isTileBlocked(roomIndex, x, y)) return false;
     if (this.hasBlockingObject(roomIndex, x, y)) return false;
@@ -369,7 +377,7 @@ class EnemyManager {
     return enemies.some((other, index) => index !== movingIndex && other.roomIndex === roomIndex && other.x === x && other.y === y);
   }
 
-  isBorderTile(roomIndex: number, x: number, y: number): boolean {
+  isBorderTile(_roomIndex: number, x: number, y: number): boolean {
     const size = this.getRoomSize();
     if (size <= 2) return false;
     return x === 0 || y === 0 || x === size - 1 || y === size - 1;
@@ -465,12 +473,13 @@ class EnemyManager {
   }
 
   shouldStartLevelOverlay(): boolean {
-    return Boolean(this.gameState?.getPendingLevelUpChoices?.() > 0);
+    const pendingChoices = this.gameState.getPendingLevelUpChoices?.() ?? 0;
+    return pendingChoices > 0;
   }
 
   getEnemyDamage(type: string): number {
     const definition = this.getEnemyDefinition(type);
-    if (definition && Number.isFinite(definition.damage)) {
+    if (definition && typeof definition.damage === 'number' && Number.isFinite(definition.damage)) {
       return Math.max(1, definition.damage);
     }
     return 1;
@@ -553,7 +562,7 @@ class EnemyManager {
   tryTriggerDefeatVariable(enemy: EnemyLike): boolean {
     const config = this.getDefeatVariableConfig(enemy);
     if (!config) return false;
-    const updated = this.gameState.setVariableValue(config.variableId, true, config.persist);
+    const [updated] = this.gameState.setVariableValue(config.variableId, true, config.persist);
     const isActive = this.gameState.isVariableOn(config.variableId);
     if (!updated && !isActive) {
       return false;

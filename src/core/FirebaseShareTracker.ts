@@ -1,99 +1,145 @@
 
+type FirebaseCompatApp = {
+  collection: (name: string) => { add: (payload: unknown) => Promise<unknown> };
+};
+
+type FirebaseCompatInstance = {
+  apps?: unknown[];
+  app?: () => FirebaseCompatApp;
+  initializeApp?: (...args: any[]) => FirebaseCompatApp;
+  firestore?: () => FirebaseCompatApp;
+  FieldValue?: { serverTimestamp?: () => unknown };
+};
+
+type FirebaseModuleHelpers = {
+  addDoc?: (...args: any[]) => Promise<unknown>;
+  collection?: (...args: any[]) => unknown;
+  serverTimestamp?: () => unknown;
+};
+
+type TrackerOptions = {
+  collection?: string | null;
+};
+
+type TinyRpgGlobal = typeof globalThis & {
+  TinyRPGFirebaseConfig?: Record<string, unknown> | null;
+  TinyRPGFirebaseCollection?: string | null;
+  TinyRPGFirebaseDb?: FirebaseCompatApp | null;
+  TinyRPGFirebaseFirestore?: FirebaseModuleHelpers | null;
+  firebase?: FirebaseCompatInstance | null;
+};
+
+const tinyRpgGlobal = globalThis as TinyRpgGlobal;
+
 class FirebaseShareTracker {
-    constructor(config = null, options = {}) {
-        this.config = config || null;
-        this.collection = options.collection || 'shareUrls';
-        this.app = null;
-        this.db = null;
-        this.mode = null;
-        this.firestoreHelpers = null;
-        this.init();
-    }
+  config: Record<string, unknown> | null;
+  collection: string;
+  app: FirebaseCompatApp | null;
+  db: FirebaseCompatApp | null;
+  mode: 'modular' | 'compat' | null;
+  firestoreHelpers: FirebaseModuleHelpers | null;
 
-    static fromGlobal() {
-        const config = globalThis.TinyRPGFirebaseConfig ?? null;
-        const collection = globalThis.TinyRPGFirebaseCollection ?? null;
-        return new FirebaseShareTracker(config, { collection });
-    }
+  constructor(config: Record<string, unknown> | null = null, options: TrackerOptions = {}) {
+    this.config = config || null;
+    this.collection = options.collection || 'shareUrls';
+    this.app = null;
+    this.db = null;
+    this.mode = null;
+    this.firestoreHelpers = null;
+    this.init();
+  }
 
-    get firebase() {
-        return globalThis.firebase ?? null;
-    }
+  static fromGlobal(): FirebaseShareTracker {
+    const config = tinyRpgGlobal.TinyRPGFirebaseConfig ?? null;
+    const collection = tinyRpgGlobal.TinyRPGFirebaseCollection ?? null;
+    return new FirebaseShareTracker(config, { collection });
+  }
 
-    init() {
-        if (this.initFromModule()) return true;
-        if (!this.config) return false;
-        return this.initFromCompat();
-    }
+  get firebase(): FirebaseCompatInstance | null {
+    return tinyRpgGlobal.firebase ?? null;
+  }
 
-    initFromModule() {
-        const db = globalThis.TinyRPGFirebaseDb ?? null;
-        const helpers = globalThis.TinyRPGFirebaseFirestore ?? null;
-        if (!db || !helpers?.addDoc || !helpers?.collection) return false;
-        this.db = db;
-        this.firestoreHelpers = helpers;
-        this.mode = 'modular';
-        console.info('[TinyRPG] Firebase tracker initialized (modular).');
-        return true;
-    }
+  init(): boolean {
+    if (this.initFromModule()) return true;
+    if (!this.config) return false;
+    return this.initFromCompat();
+  }
 
-    initFromCompat() {
-        const firebase = this.firebase;
-        if (!firebase?.initializeApp) {
-            console.warn('[TinyRPG] Firebase SDK not available.');
-            return false;
+  initFromModule(): boolean {
+    const db = tinyRpgGlobal.TinyRPGFirebaseDb ?? null;
+    const helpers = tinyRpgGlobal.TinyRPGFirebaseFirestore ?? null;
+    if (!db || !helpers?.addDoc || !helpers?.collection) return false;
+    this.db = db;
+    this.firestoreHelpers = helpers;
+    this.mode = 'modular';
+    console.info('[TinyRPG] Firebase tracker initialized (modular).');
+    return true;
+  }
+
+  initFromCompat(): boolean {
+    const firebase = this.firebase;
+    if (!firebase?.initializeApp) {
+      console.warn('[TinyRPG] Firebase SDK not available.');
+      return false;
+    }
+    try {
+      this.app = firebase.apps?.length ? firebase.app?.() ?? null : firebase.initializeApp?.(this.config) ?? null;
+    } catch (error) {
+      console.warn('[TinyRPG] Firebase init failed.', error);
+      return false;
+    }
+    if (!firebase.firestore) {
+      console.warn('[TinyRPG] Firebase Firestore not available.');
+      return false;
+    }
+    this.db = firebase.firestore?.() ?? null;
+    if (!this.db) {
+      console.warn('[TinyRPG] Firebase Firestore not available.');
+      return false;
+    }
+    this.mode = 'compat';
+    console.info('[TinyRPG] Firebase tracker initialized (compat).');
+    return true;
+  }
+
+  buildPayload(url: string, metadata: Record<string, unknown> = {}): Record<string, unknown> {
+    const serverTimestamp = this.mode === 'modular'
+      ? this.firestoreHelpers?.serverTimestamp
+      : this.firebase?.FieldValue?.serverTimestamp;
+    return {
+      url,
+      createdAt: serverTimestamp ? serverTimestamp() : new Date().toISOString(),
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+      language: typeof navigator !== 'undefined' ? navigator.language : '',
+      referrer: typeof document !== 'undefined' ? document.referrer : '',
+      ...metadata,
+    };
+  }
+
+  async trackShareUrl(url: string, metadata: Record<string, unknown> = {}): Promise<boolean> {
+    if (!url) return false;
+    if (!this.db) {
+      this.init();
+    }
+    if (!this.db) return false;
+    try {
+      const payload = this.buildPayload(url, metadata);
+      if (this.mode === 'modular') {
+        const { addDoc, collection } = this.firestoreHelpers ?? {};
+        if (addDoc && collection) {
+          const collectionRef = collection(this.db, this.collection);
+          await addDoc(collectionRef, payload);
         }
-        try {
-            this.app = firebase.apps?.length ? firebase.app() : firebase.initializeApp(this.config);
-        } catch (error) {
-            console.warn('[TinyRPG] Firebase init failed.', error);
-            return false;
-        }
-        if (!firebase.firestore) {
-            console.warn('[TinyRPG] Firebase Firestore not available.');
-            return false;
-        }
-        this.db = firebase.firestore();
-        this.mode = 'compat';
-        console.info('[TinyRPG] Firebase tracker initialized (compat).');
-        return true;
+      } else if (typeof this.db.collection === 'function') {
+        await this.db.collection(this.collection).add(payload);
+      }
+      console.info('[TinyRPG] Share URL tracked.', { url, collection: this.collection });
+      return true;
+    } catch (error) {
+      console.warn('[TinyRPG] Failed to track share URL.', error);
+      return false;
     }
-
-    buildPayload(url, metadata = {}) {
-        const serverTimestamp = this.mode === 'modular'
-            ? this.firestoreHelpers?.serverTimestamp
-            : this.firebase?.firestore?.FieldValue?.serverTimestamp;
-        return {
-            url,
-            createdAt: serverTimestamp ? serverTimestamp() : new Date().toISOString(),
-            userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
-            language: typeof navigator !== 'undefined' ? navigator.language : '',
-            referrer: typeof document !== 'undefined' ? document.referrer : '',
-            ...metadata
-        };
-    }
-
-    async trackShareUrl(url, metadata = {}) {
-        if (!url) return false;
-        if (!this.db) {
-            this.init();
-        }
-        if (!this.db) return false;
-        try {
-            const payload = this.buildPayload(url, metadata);
-            if (this.mode === 'modular') {
-                const { addDoc, collection } = this.firestoreHelpers;
-                await addDoc(collection(this.db, this.collection), payload);
-            } else {
-                await this.db.collection(this.collection).add(payload);
-            }
-            console.info('[TinyRPG] Share URL tracked.', { url, collection: this.collection });
-            return true;
-        } catch (error) {
-            console.warn('[TinyRPG] Failed to track share URL.', error);
-            return false;
-        }
-    }
+  }
 }
 
 export { FirebaseShareTracker };

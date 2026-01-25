@@ -1,24 +1,54 @@
 
 import { TILE_PRESETS } from '../core/TileDefinitions';
+import { ShareDecoder } from '../core/share/ShareDecoder';
+
+type ShareCoverOptions = {
+  width?: number;
+  height?: number;
+  devicePixelRatio?: number;
+  canvas?: HTMLCanvasElement;
+};
+
+type TilePixels = (string | null)[][];
+
+type ShareMapLike = {
+  ground?: (number | null)[][];
+  overlay?: (number | null)[][];
+};
+
+type ShareGameData = {
+  title?: string;
+  author?: string;
+  tileset?: { map?: ShareMapLike | null } | null;
+};
 
 class ShareCoverPreview {
-    constructor(options = {}) {
-        this.width = Math.max(64, options.width ?? 256);
-        this.height = Math.max(64, options.height ?? this.width);
-        const devicePixelRatio = options.devicePixelRatio || (globalThis.devicePixelRatio || 1);
-        this.dpr = Math.max(1, Math.min(3, devicePixelRatio));
-        this.canvas = options.canvas instanceof HTMLCanvasElement ? options.canvas : document.createElement('canvas');
-        this.canvas.width = Math.round(this.width * this.dpr);
-        this.canvas.height = Math.round(this.height * this.dpr);
-        this.canvas.style.width = `${this.width}px`;
-        this.canvas.style.height = `${this.height}px`;
-        this.ctx = this.canvas.getContext('2d');
-        if (this.ctx && this.dpr !== 1) {
-            this.ctx.scale(this.dpr, this.dpr);
-        }
-    }
+  static tileCache?: Map<number, TilePixels>;
+  width: number;
+  height: number;
+  dpr: number;
+  canvas: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D | null;
+  gameData: ShareGameData | null;
 
-    static extractShareCode(value = '') {
+  constructor(options: ShareCoverOptions = {}) {
+    this.width = Math.max(64, options.width ?? 256);
+    this.height = Math.max(64, options.height ?? this.width);
+    const devicePixelRatio = options.devicePixelRatio || (globalThis.devicePixelRatio || 1);
+    this.dpr = Math.max(1, Math.min(3, devicePixelRatio));
+    this.canvas = options.canvas instanceof HTMLCanvasElement ? options.canvas : document.createElement('canvas');
+    this.canvas.width = Math.round(this.width * this.dpr);
+    this.canvas.height = Math.round(this.height * this.dpr);
+    this.canvas.style.width = `${this.width}px`;
+    this.canvas.style.height = `${this.height}px`;
+    this.ctx = this.canvas.getContext('2d');
+    if (this.ctx && this.dpr !== 1) {
+      this.ctx.scale(this.dpr, this.dpr);
+    }
+    this.gameData = null;
+  }
+
+    static extractShareCode(value = ''): string {
         const text = String(value || '').trim();
         if (!text) return '';
         if (text.startsWith('#')) {
@@ -35,59 +65,59 @@ class ShareCoverPreview {
         return text.includes('.') ? text : '';
     }
 
-    static decodeShareUrl(shareUrl) {
-        if (typeof ShareDecoder?.decodeShareCode !== 'function') {
-            throw new Error('ShareDecoder is unavailable');
-        }
+    static decodeShareUrl(shareUrl: string): ShareGameData {
         const code = ShareCoverPreview.extractShareCode(shareUrl);
         if (!code) {
             throw new Error('No share code found in the provided URL.');
         }
-        const data = ShareDecoder.decodeShareCode(code);
+        const data = ShareDecoder.decodeShareCode(code) as ShareGameData | null;
         if (!data) {
             throw new Error('Unable to decode the provided share code.');
         }
         return data;
     }
 
-    static ensureTileCache() {
-        if (this.tileCache) return;
+    static ensureTileCache(): void {
+        if (this.tileCache instanceof Map) return;
         const tiles = TILE_PRESETS || [];
         this.tileCache = new Map();
         tiles.forEach((tile) => {
-            if (tile && typeof tile.id === 'number') {
-                this.tileCache.set(tile.id, tile.pixels);
+            if (!tile || typeof tile.id !== 'number') return;
+            const pixels = Array.isArray(tile.pixels) ? (tile.pixels as TilePixels) : null;
+            if (pixels) {
+                this.tileCache!.set(tile.id, pixels);
             }
         });
     }
 
-    static getTilePixels(tileId) {
-        if (!Number.isFinite(tileId) || tileId < 0) return null;
+    static getTilePixels(tileId: number | null | undefined): TilePixels | null {
+        if (!Number.isFinite(tileId) || tileId === null || tileId === undefined || tileId < 0) return null;
         this.ensureTileCache();
-        return this.tileCache.get(tileId) || null;
+        return this.tileCache?.get(Number(tileId)) || null;
     }
 
-    renderFromUrl(shareUrl) {
+    renderFromUrl(shareUrl: string): HTMLCanvasElement {
         this.gameData = ShareCoverPreview.decodeShareUrl(shareUrl);
         this.render();
         return this.canvas;
     }
 
-    render() {
+    render(): HTMLCanvasElement {
         if (!this.ctx) return this.canvas;
         this.clear();
         this.drawBackdrop();
-        this.drawMapPreview(this.gameData?.tileset?.map);
+        this.drawMapPreview(this.gameData?.tileset?.map ?? undefined);
         this.drawIntroOverlay();
         return this.canvas;
     }
 
-    clear() {
-        this.ctx.clearRect(0, 0, this.width, this.height);
+    clear(): void {
+        this.ctx?.clearRect(0, 0, this.width, this.height);
     }
 
-    drawBackdrop() {
+    drawBackdrop(): void {
         const ctx = this.ctx;
+        if (!ctx) return;
         const gradient = ctx.createLinearGradient(0, 0, this.width, this.height);
         gradient.addColorStop(0, '#04060e');
         gradient.addColorStop(1, '#101b3a');
@@ -95,7 +125,9 @@ class ShareCoverPreview {
         ctx.fillRect(0, 0, this.width, this.height);
     }
 
-    drawMapPreview(map = {}) {
+    drawMapPreview(map: ShareMapLike | undefined = {}): void {
+        const ctx = this.ctx;
+        if (!ctx) return;
         const ground = Array.isArray(map?.ground) ? map.ground : [];
         const overlay = Array.isArray(map?.overlay) ? map.overlay : [];
         const rows = Math.max(ground.length, overlay.length, 8);
@@ -112,7 +144,6 @@ class ShareCoverPreview {
         const offsetX = (this.width - mapWidth) / 2;
         const offsetY = (this.height - mapHeight) / 2;
 
-        const ctx = this.ctx;
         ctx.save();
         ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
         ctx.shadowBlur = 24;
@@ -123,11 +154,11 @@ class ShareCoverPreview {
         ctx.strokeStyle = 'rgba(255,255,255,0.08)';
         ctx.strokeRect(offsetX - 6, offsetY - 6, mapWidth + 12, mapHeight + 12);
 
-        const drawLayer = (layer) => {
+        const drawLayer = (layer: (number | null)[][]): void => {
             layer.forEach((row, y) => {
                 if (!Array.isArray(row)) return;
                 row.forEach((tileId, x) => {
-                    if (!Number.isFinite(tileId) || tileId < 0) return;
+                    if (typeof tileId !== 'number' || Number.isNaN(tileId) || tileId < 0) return;
                     this.drawTile(tileId, offsetX + x * tileWidth, offsetY + y * tileHeight, tileWidth, tileHeight);
                 });
             });
@@ -139,10 +170,10 @@ class ShareCoverPreview {
         ctx.restore();
     }
 
-    drawTile(tileId, px, py, width, height) {
+    drawTile(tileId: number, px: number, py: number, width: number, height: number): void {
         const pixels = ShareCoverPreview.getTilePixels(tileId);
-        if (!pixels) return;
         const ctx = this.ctx;
+        if (!pixels || !ctx) return;
         const rows = pixels.length || 8;
         const cols = pixels[0]?.length || 8;
         const cellWidth = width / cols;
@@ -159,8 +190,9 @@ class ShareCoverPreview {
         }
     }
 
-    drawIntroOverlay() {
+    drawIntroOverlay(): void {
         const ctx = this.ctx;
+        if (!ctx) return;
         const width = this.width;
         const height = this.height;
         ctx.save();
@@ -178,7 +210,7 @@ class ShareCoverPreview {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
-        const fitText = (text, maxWidth, baseSize) => {
+        const fitText = (text: string, maxWidth: number, baseSize: number): number => {
             let size = baseSize;
             ctx.font = `${size}px "Space Mono", monospace`;
             while (ctx.measureText(text).width > maxWidth && size > 12) {

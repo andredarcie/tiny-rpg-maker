@@ -1,18 +1,25 @@
 
 import { EditorRendererBase } from './EditorRendererBase';
+
+type TileDefinitionLike = {
+    id: number | string;
+    name?: string;
+    category?: string;
+};
+
 class EditorTilePanelRenderer extends EditorRendererBase {
-    renderTileList() {
+    renderTileList(): void {
         const tileList = this.dom.tileList;
         if (!tileList) return;
 
-        const tiles = this.gameEngine.getTiles();
-        const groups = new Map();
-        tiles.forEach((tile) => {
+        const tiles = this.gameEngine.getTiles() as TileDefinitionLike[];
+        const groups = new Map<string, TileDefinitionLike[]>();
+        tiles.forEach((tile: TileDefinitionLike) => {
             const category = tile.category || 'Diversos';
             if (!groups.has(category)) {
                 groups.set(category, []);
             }
-            groups.get(category).push(tile);
+            groups.get(category)?.push(tile);
         });
 
         const categoryOrder = ['Terreno', 'Natureza', 'Agua', 'Construcoes', 'Interior', 'Decoracao', 'Objetos', 'Diversos'];
@@ -25,10 +32,10 @@ class EditorTilePanelRenderer extends EditorRendererBase {
             return ia - ib;
         });
 
-        const orderedTiles = [];
-        categories.forEach((category) => {
+        const orderedTiles: TileDefinitionLike[] = [];
+        categories.forEach((category: string) => {
             const categoryTiles = groups.get(category) || [];
-            categoryTiles.forEach((tile) => orderedTiles.push(tile));
+            categoryTiles.forEach((tile: TileDefinitionLike) => orderedTiles.push(tile));
         });
 
         tileList.innerHTML = '';
@@ -36,7 +43,7 @@ class EditorTilePanelRenderer extends EditorRendererBase {
         const grid = document.createElement('div');
         grid.className = 'tile-grid';
 
-        orderedTiles.forEach((tile) => {
+        orderedTiles.forEach((tile: TileDefinitionLike) => {
             const card = document.createElement('button');
             card.type = 'button';
             card.className = 'tile-card';
@@ -61,9 +68,9 @@ class EditorTilePanelRenderer extends EditorRendererBase {
         tileList.appendChild(grid);
     }
 
-    updateSelectedTilePreview() {
+    updateSelectedTilePreview(): void {
         const preview = this.dom.selectedTilePreview;
-        const tile = this.gameEngine.getTiles().find((entry) => entry.id === this.manager.selectedTileId);
+        const tile = (this.gameEngine.getTiles() as TileDefinitionLike[]).find((entry) => entry.id === this.manager.selectedTileId);
         if (!preview || !tile) return;
         this.gameEngine.renderer.drawTileOnCanvas(preview, tile);
         if (this.dom.tileSummary) {

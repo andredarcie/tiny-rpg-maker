@@ -1,6 +1,17 @@
 
+type EditorRendererServiceLike = {
+  manager: any;
+  dom: any;
+  state: any;
+  gameEngine: any;
+  t: (key: string, fallback?: string) => string;
+  tf: (key: string, params?: Record<string, unknown>, fallback?: string) => string;
+};
+
 class EditorRendererBase {
-    constructor(service) {
+    service: EditorRendererServiceLike;
+
+    constructor(service: EditorRendererServiceLike) {
         this.service = service;
     }
 
@@ -20,11 +31,11 @@ class EditorRendererBase {
         return this.service.gameEngine;
     }
 
-    t(key, fallback = '') {
+    t(key: string, fallback = ''): string {
         return this.service.t(key, fallback);
     }
 
-    tf(key, params = {}, fallback = '') {
+    tf(key: string, params: Record<string, unknown> = {}, fallback = ''): string {
         return this.service.tf(key, params, fallback);
     }
 }

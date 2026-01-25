@@ -1,7 +1,30 @@
 
 import { EditorRendererBase } from './EditorRendererBase';
+
+type NpcDefinitionLike = {
+    type: string;
+    variant?: string;
+    name?: string;
+    nameKey?: string;
+};
+
+type EditorNpcLike = {
+    id?: string;
+    type: string;
+    roomIndex: number;
+    x: number;
+    y: number;
+    placed?: boolean;
+    text?: string;
+    textKey?: string;
+    conditionText?: string;
+    conditionVariableId?: string | null;
+    rewardVariableId?: string | null;
+    conditionalRewardVariableId?: string | null;
+};
+
 class EditorNpcRenderer extends EditorRendererBase {
-    renderNpcs() {
+    renderNpcs(): void {
         const list = this.dom.npcsList;
         if (!list) return;
 
@@ -9,15 +32,16 @@ class EditorNpcRenderer extends EditorRendererBase {
         this.updateVariantButtons();
         const game = this.gameEngine.getGame();
         const filter = this.manager.state.npcVariantFilter || 'human';
-        const definitions = (this.gameEngine.npcManager?.getDefinitions?.() ?? [])
-            .filter((def) => {
+        const definitions = (this.gameEngine.npcManager?.getDefinitions?.() ?? []) as NpcDefinitionLike[];
+        const filteredDefinitions = definitions
+            .filter((def: NpcDefinitionLike) => {
                 const variant = def.variant || 'human';
                 return variant === filter;
             });
-        const npcs = this.gameEngine.getSprites();
+        const npcs = this.gameEngine.getSprites() as EditorNpcLike[];
 
         list.innerHTML = '';
-        definitions.forEach((def) => {
+        filteredDefinitions.forEach((def: NpcDefinitionLike) => {
             const npc = npcs.find((entry) => entry.type === def.type) || null;
             const card = document.createElement('div');
             card.className = 'npc-card';
@@ -69,8 +93,8 @@ class EditorNpcRenderer extends EditorRendererBase {
         this.updateNpcForm();
     }
 
-    drawNpcPreview(canvas, definition) {
-        if (!canvas) return;
+    drawNpcPreview(canvas: HTMLCanvasElement, definition: NpcDefinitionLike): void {
+        if (!(canvas instanceof HTMLCanvasElement)) return;
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -90,9 +114,9 @@ class EditorNpcRenderer extends EditorRendererBase {
         }
     }
 
-    updateNpcForm() {
+    updateNpcForm(): void {
         const selectedNpcId = this.manager.selectedNpcId;
-        const npc = this.gameEngine.getSprites().find((entry) => entry.id === selectedNpcId);
+        const npc = (this.gameEngine.getSprites() as EditorNpcLike[]).find((entry) => entry.id === selectedNpcId);
         const {
             npcEditor,
             npcText,
@@ -144,7 +168,7 @@ class EditorNpcRenderer extends EditorRendererBase {
         }
     }
 
-    getNpcName(definition) {
+    getNpcName(definition: NpcDefinitionLike | null): string {
         if (!definition) return this.t('npc.defaultName', 'NPC');
         const fallback = definition.name || this.t('npc.defaultName', 'NPC');
         if (definition.nameKey) {
@@ -153,7 +177,7 @@ class EditorNpcRenderer extends EditorRendererBase {
         return fallback;
     }
 
-    getNpcDialogueText(npc) {
+    getNpcDialogueText(npc: EditorNpcLike | null): string {
         if (!npc) return '';
         if (npc.textKey) {
             return this.t(npc.textKey, npc.text || '');
@@ -161,11 +185,11 @@ class EditorNpcRenderer extends EditorRendererBase {
         return npc.text || '';
     }
 
-    updateVariantButtons() {
+    updateVariantButtons(): void {
         const buttons = Array.isArray(this.dom.npcVariantButtons) ? this.dom.npcVariantButtons : [];
         if (!buttons.length) return;
         const current = this.manager.state.npcVariantFilter || 'human';
-        buttons.forEach((btn) => {
+        buttons.forEach((btn: HTMLButtonElement) => {
             const match = btn.dataset.npcVariantFilter === current;
             btn.classList.toggle('active', match);
             btn.setAttribute('aria-pressed', match ? 'true' : 'false');

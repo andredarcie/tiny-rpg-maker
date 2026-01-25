@@ -1,33 +1,36 @@
 
 import { EditorConstants } from '../EditorConstants';
+import { RendererConstants } from '../../../core/renderer/RendererConstants';
 import { EditorRendererBase } from './EditorRendererBase';
+type EnemyRecord = Record<string, any>;
+
 class EditorEnemyRenderer extends EditorRendererBase {
-    renderEnemies() {
+    renderEnemies(): void {
         const list = this.dom.enemiesList;
         if (!list) return;
         list.innerHTML = '';
 
         const activeRoom = this.state.activeRoomIndex;
-        const enemies = this.gameEngine
-            .getActiveEnemies()
-            .filter((enemy) => enemy.roomIndex === activeRoom);
+        const enemies = (this.gameEngine
+            .getActiveEnemies() as EnemyRecord[])
+            .filter((enemy: EnemyRecord) => enemy.roomIndex === activeRoom);
         this.renderEnemyOverlay(enemies, activeRoom);
         if (!enemies.length) return;
 
-        const definitions = EditorConstants.ENEMY_DEFINITIONS;
-        const definitionMap = new Map();
-        definitions.forEach((entry) => {
+        const definitions = EditorConstants.ENEMY_DEFINITIONS as EnemyRecord[];
+        const definitionMap = new Map<string, EnemyRecord>();
+        definitions.forEach((entry: EnemyRecord) => {
             definitionMap.set(entry.type, entry);
             if (Array.isArray(entry.aliases)) {
-                entry.aliases.forEach((alias) => definitionMap.set(alias, entry));
+                entry.aliases.forEach((alias: string) => definitionMap.set(alias, entry));
             }
         });
 
-        const bosses = enemies.filter((enemy) => definitionMap.get(enemy.type)?.boss);
+        const bosses = enemies.filter((enemy: EnemyRecord) => definitionMap.get(enemy.type)?.boss);
         if (!bosses.length) return;
 
-        bosses.forEach((enemy) => {
-            const definition = definitionMap.get(enemy.type);
+        bosses.forEach((enemy: EnemyRecord) => {
+            const definition = definitionMap.get(enemy.type) ?? null;
             const item = document.createElement('div');
             item.className = 'enemy-item';
 
@@ -66,19 +69,19 @@ class EditorEnemyRenderer extends EditorRendererBase {
         });
     }
 
-    renderEnemyCatalog() {
+    renderEnemyCatalog(): void {
         const container = this.dom.enemyTypes;
         if (!container) return;
         container.innerHTML = '';
 
-        const definitions = EditorConstants.ENEMY_DEFINITIONS;
+        const definitions = EditorConstants.ENEMY_DEFINITIONS as EnemyRecord[];
         if (!definitions.length) return;
 
         const selectedType = this.manager.selectedEnemyType;
 
         this.renderEnemyCountProgress(container.parentElement || container, container);
 
-        definitions.forEach((definition) => {
+        definitions.forEach((definition: EnemyRecord) => {
             const card = document.createElement('div');
             card.className = 'enemy-card';
             card.dataset.type = definition.type;
@@ -120,8 +123,8 @@ class EditorEnemyRenderer extends EditorRendererBase {
         });
     }
 
-    drawEnemyPreview(canvas, definition) {
-        if (!canvas) return;
+    drawEnemyPreview(canvas: HTMLCanvasElement, definition: EnemyRecord): void {
+        if (!(canvas instanceof HTMLCanvasElement)) return;
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -152,7 +155,7 @@ class EditorEnemyRenderer extends EditorRendererBase {
         }
     }
 
-    getEnemyDisplayName(definition, fallback = '') {
+    getEnemyDisplayName(definition: EnemyRecord | null, fallback = ''): string {
         const defaultName = this.t('enemy.defaultName', 'Inimigo');
         const fallbackName = definition?.name || fallback || defaultName;
         const localized = definition?.nameKey
@@ -165,7 +168,7 @@ class EditorEnemyRenderer extends EditorRendererBase {
         return cleaned || fallback || defaultName;
     }
 
-    renderEnemyCountProgress(parent, beforeNode = null) {
+    renderEnemyCountProgress(parent: HTMLElement | null, beforeNode: HTMLElement | null = null): void {
         if (!parent) return;
         parent.querySelector('.enemy-xp-block')?.remove();
         const { currentCount, totalCount, ratio } = this.getEnemyCountProgress();
@@ -208,8 +211,8 @@ class EditorEnemyRenderer extends EditorRendererBase {
         }
     }
 
-    getEnemyCountProgress() {
-        const enemies = this.gameEngine?.getActiveEnemies?.() ?? [];
+    getEnemyCountProgress(): { currentCount: number; totalCount: number; ratio: number } {
+        const enemies = (this.gameEngine?.getActiveEnemies?.() ?? []) as EnemyRecord[];
         const currentCount = enemies.length;
 
         const game =
@@ -226,14 +229,14 @@ class EditorEnemyRenderer extends EditorRendererBase {
         return { currentCount, totalCount, ratio };
     }
 
-    renderEnemyOverlay(enemies, roomIndex) {
+    renderEnemyOverlay(enemies: EnemyRecord[], roomIndex: number): void {
         const canvas = this.dom.editorCanvas;
         if (!canvas) return;
         const wrapper = canvas.parentElement;
         if (!wrapper) return;
 
         const roomEnemies = Array.isArray(enemies)
-            ? enemies.filter((enemy) => enemy.roomIndex === roomIndex)
+            ? enemies.filter((enemy: EnemyRecord) => enemy.roomIndex === roomIndex)
             : [];
 
         let overlay = wrapper.querySelector('.enemy-overlay');
@@ -264,14 +267,14 @@ class EditorEnemyRenderer extends EditorRendererBase {
 
         overlay.innerHTML = '';
 
-        roomEnemies.forEach((enemy) => {
+        roomEnemies.forEach((enemy: EnemyRecord) => {
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'enemy-overlay-remove';
             btn.textContent = '✕';
             btn.style.left = `${(enemy.x + 1) * tileSizeX}px`;
             btn.style.top = `${enemy.y * tileSizeY}px`;
-            btn.addEventListener('click', (ev) => {
+            btn.addEventListener('click', (ev: MouseEvent) => {
                 ev.stopPropagation();
                 this.manager.enemyService.removeEnemy(enemy.id);
             });

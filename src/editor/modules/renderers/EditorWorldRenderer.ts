@@ -1,7 +1,7 @@
 
 import { EditorRendererBase } from './EditorRendererBase';
 class EditorWorldRenderer extends EditorRendererBase {
-    renderWorldGrid() {
+    renderWorldGrid(): void {
         const grid = this.dom.worldGrid;
         if (!grid) return;
 
@@ -52,7 +52,7 @@ class EditorWorldRenderer extends EditorRendererBase {
         this.renderMapNavigation();
     }
 
-    renderMapNavigation() {
+    renderMapNavigation(): void {
         const buttons = Array.isArray(this.dom.mapNavButtons) ? this.dom.mapNavButtons : [];
         const game = this.gameEngine.getGame();
         const rows = Math.max(1, Number(game.world?.rows) || 1);
@@ -69,7 +69,7 @@ class EditorWorldRenderer extends EditorRendererBase {
             return;
         }
 
-        const canMove = (rowOffset, colOffset) => {
+        const canMove = (rowOffset: number, colOffset: number): boolean => {
             const nextRow = currentRow + rowOffset;
             const nextCol = currentCol + colOffset;
             if (nextRow < 0 || nextRow >= rows || nextCol < 0 || nextCol >= cols) {
@@ -79,7 +79,7 @@ class EditorWorldRenderer extends EditorRendererBase {
             return targetIndex >= 0 && targetIndex <= maxIndex;
         };
 
-        buttons.forEach((button) => {
+        buttons.forEach((button: HTMLButtonElement) => {
             const direction = button.dataset.direction;
             let enabled = false;
             switch (direction) {
@@ -102,7 +102,7 @@ class EditorWorldRenderer extends EditorRendererBase {
         });
     }
 
-    renderGameMinimap(activeColIndex = null, activeRowIndex = null) {
+    renderGameMinimap(activeColIndex: number | null = null, activeRowIndex: number | null = null): void {
         const container = this.dom.mapPosition;
         if (!container) return;
 
@@ -126,7 +126,7 @@ class EditorWorldRenderer extends EditorRendererBase {
         }
     }
 
-    updateMapPosition(col, row) {
+    updateMapPosition(col: number, row: number): void {
         const container = this.dom.mapPosition;
         if (!container) return;
         try {

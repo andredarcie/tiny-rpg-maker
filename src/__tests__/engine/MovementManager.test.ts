@@ -19,7 +19,7 @@ describe('MovementManager', () => {
     getGame: () => ({ rooms: [] }),
     getObjectAt: () => null,
     isVariableOn: () => false,
-    hasSkill: () => false,
+    hasSkill: vi.fn((_skill: string) => false),
     consumeKey: () => false,
     getKeys: () => 0,
     setPlayerPosition: vi.fn(),
@@ -56,7 +56,7 @@ describe('MovementManager', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     getSpy.mockImplementation((_key: string, fallback = '') => fallback || 'text');
-    formatSpy.mockImplementation((_key: string, _params: Record<string, unknown>, fallback = '') => fallback || 'text');
+    formatSpy.mockImplementation((_key: string, _params?: Record<string, unknown>, fallback = '') => fallback || 'text');
   });
 
   it('advances dialog pages when a dialog is active', () => {
@@ -95,7 +95,7 @@ describe('MovementManager', () => {
 
   it('honors collision traversal skills', () => {
     const gameState = createGameState(false);
-    gameState.hasSkill = (skill: string) => skill === 'water-walker';
+    gameState.hasSkill.mockImplementation((skill: string) => skill === 'water-walker');
     const manager = new MovementManager({
       gameState,
       tileManager,

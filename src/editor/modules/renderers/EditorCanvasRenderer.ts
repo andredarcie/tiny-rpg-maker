@@ -1,7 +1,12 @@
 
 import { EditorRendererBase } from './EditorRendererBase';
+
+type CanvasObjectLike = { type: string; roomIndex: number; x: number; y: number };
+type CanvasNpcLike = { type: string; roomIndex: number; x: number; y: number; placed?: boolean };
+type CanvasEnemyLike = { type: string; roomIndex: number; x: number; y: number; id?: string };
+
 class EditorCanvasRenderer extends EditorRendererBase {
-    renderEditor() {
+    renderEditor(): void {
         const ctx = this.manager.ectx;
         const canvas = this.dom.editorCanvas;
         if (!ctx || !canvas) return;
@@ -48,12 +53,13 @@ class EditorCanvasRenderer extends EditorRendererBase {
         this.drawEntities(tileSize);
     }
 
-    drawEntities(tileSize) {
+    drawEntities(tileSize: number): void {
         const ctx = this.manager.ectx;
         const roomIndex = this.state.activeRoomIndex;
         const step = tileSize / 8;
 
-        const objects = this.gameEngine.getObjectsForRoom(roomIndex);
+        const objects = (this.gameEngine.getObjectsForRoom(roomIndex) ||
+            []) as CanvasObjectLike[];
         for (const object of objects) {
             this.gameEngine.renderer.drawObjectSprite(
                 ctx,
@@ -64,7 +70,9 @@ class EditorCanvasRenderer extends EditorRendererBase {
             );
         }
 
-        const npcs = this.gameEngine.getSprites().filter((npc) => npc.roomIndex === roomIndex && npc.placed);
+        const npcs = (this.gameEngine.getSprites() as CanvasNpcLike[]).filter(
+            (npc: CanvasNpcLike) => npc.roomIndex === roomIndex && npc.placed,
+        );
         for (const npc of npcs) {
             const sprite = this.gameEngine.renderer.npcSprites[npc.type] ||
                 this.gameEngine.renderer.npcSprites.default;
@@ -77,7 +85,9 @@ class EditorCanvasRenderer extends EditorRendererBase {
             );
         }
 
-        const enemies = this.gameEngine.getActiveEnemies().filter((enemy) => enemy.roomIndex === roomIndex);
+        const enemies = (this.gameEngine.getActiveEnemies() as CanvasEnemyLike[]).filter(
+            (enemy: CanvasEnemyLike) => enemy.roomIndex === roomIndex,
+        );
         const renderer = this.gameEngine.renderer;
         const enemySprites = renderer.enemySprites || {};
         for (const enemy of enemies) {
@@ -93,7 +103,7 @@ class EditorCanvasRenderer extends EditorRendererBase {
         }
     }
 
-    drawTile(ctx, tileId, px, py, size) {
+    drawTile(ctx: CanvasRenderingContext2D, tileId: string | number, px: number, py: number, size: number): void {
         const tileManager = this.manager.gameEngine.tileManager;
         const tile = tileManager.getTile(tileId);
         if (!tile) return;

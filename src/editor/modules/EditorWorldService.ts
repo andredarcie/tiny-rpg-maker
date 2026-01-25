@@ -1,6 +1,23 @@
 
+type EditorManagerLike = {
+    domCache: any;
+    state: any;
+    gameEngine: any;
+    npcService: { clearSelection: () => void };
+    enemyService: { deactivatePlacement: () => void };
+    renderService: {
+        renderWorldGrid: () => void;
+        renderObjects: () => void;
+        renderEditor: () => void;
+        renderEnemies: () => void;
+    };
+    renderObjectCatalog: () => void;
+};
+
 class EditorWorldService {
-    constructor(editorManager) {
+    manager: EditorManagerLike;
+
+    constructor(editorManager: EditorManagerLike) {
         this.manager = editorManager;
     }
 
@@ -16,7 +33,7 @@ class EditorWorldService {
         return this.manager.gameEngine;
     }
 
-    setActiveRoom(index) {
+    setActiveRoom(index: number | string) {
         const target = Number(index);
         if (!Number.isFinite(target)) return;
         const totalRooms = this.gameEngine.getGame().rooms?.length || 1;
@@ -37,7 +54,7 @@ class EditorWorldService {
         this.manager.renderService.renderEnemies();
     }
 
-    moveActiveRoom(direction) {
+    moveActiveRoom(direction: string | null | undefined) {
         if (!direction) return;
         const normalized = String(direction).toLowerCase();
         const game = this.gameEngine.getGame();

@@ -65,7 +65,7 @@ type GameStateLike = {
   setActiveEndingText?: (text: string) => void;
   normalizeVariableId?: (id: string | null) => string | null;
   isVariableOn?: (id: string) => boolean;
-  setVariableValue?: (id: string, value: boolean) => void;
+  setVariableValue?: (id: string, value: boolean, persist?: boolean) => [boolean, boolean?];
   addKeys?: (count: number) => void;
   getLives?: () => number;
   getMaxLives?: () => number;
@@ -154,7 +154,13 @@ class InteractionManager {
         const currentLives = this.gameState.getLives?.();
         const maxLives = this.gameState.getMaxLives?.();
         const fullHeal = this.gameState.hasSkill?.('potion-master');
-        if (Number.isFinite(currentLives) && Number.isFinite(maxLives) && currentLives >= maxLives) {
+        if (
+          typeof currentLives === 'number' &&
+          typeof maxLives === 'number' &&
+          Number.isFinite(currentLives) &&
+          Number.isFinite(maxLives) &&
+          currentLives >= maxLives
+        ) {
           return false;
         }
         object.collected = true;
@@ -256,7 +262,7 @@ class InteractionManager {
     const OT = this.types;
     if (object.type !== OT.SWITCH) return false;
     object.on = !object.on;
-    const variableId = this.gameState.normalizeVariableId?.(object.variableId) ?? null;
+    const variableId = this.gameState.normalizeVariableId?.(object.variableId ?? null) ?? null;
     if (variableId) {
       this.gameState.setVariableValue?.(variableId, object.on);
     }
@@ -302,7 +308,7 @@ class InteractionManager {
     const useConditionText = conditionActive && hasConditionText;
 
     if (useConditionText) {
-      return npc.conditionText;
+      return npc.conditionText ?? '';
     }
 
     if (typeof npc.text === 'string' && npc.text.trim()) {
@@ -310,7 +316,7 @@ class InteractionManager {
     }
 
     if (useConditionText) {
-      return npc.conditionText || '';
+      return npc.conditionText ?? '';
     }
 
     return npc.text || 'Hello!';
@@ -320,8 +326,9 @@ class InteractionManager {
     const rawConditionId = npc?.conditionVariableId || null;
     const isBardCondition = rawConditionId === 'skill:bard';
     const conditionId = isBardCondition ? null : this.gameState.normalizeVariableId?.(rawConditionId) ?? null;
-    const rewardId = this.gameState.normalizeVariableId?.(npc.rewardVariableId) ?? null;
-    const conditionalRewardId = this.gameState.normalizeVariableId?.(npc.conditionalRewardVariableId) ?? null;
+    const rewardId = this.gameState.normalizeVariableId?.(npc.rewardVariableId ?? null) ?? null;
+    const conditionalRewardId =
+      this.gameState.normalizeVariableId?.(npc.conditionalRewardVariableId ?? null) ?? null;
     const hasConditionText = typeof npc.conditionText === 'string' && npc.conditionText.trim().length > 0;
     const charisma = this.gameState.hasSkill?.('charisma');
     const conditionActive =

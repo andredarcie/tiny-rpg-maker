@@ -23,29 +23,43 @@ describe('EnemyManager', () => {
     getTile: vi.fn(() => null),
   };
 
-  const baseGameState = () => ({
-    playing: true,
-    getEnemyDefinitions: vi.fn(() => []),
-    getEnemies: vi.fn(() => []),
-    addEnemy: vi.fn(() => 'enemy-1'),
-    removeEnemy: vi.fn(),
-    getGame: vi.fn(() => ({ rooms: [] })),
-    getPlayer: vi.fn(() => ({ roomIndex: 0, x: 0, y: 0 })),
-    isPlayerOnDamageCooldown: vi.fn(() => false),
-    damagePlayer: vi.fn(() => 1),
-    consumeLastDamageReduction: vi.fn(() => 0),
-    handleEnemyDefeated: vi.fn(() => null),
-    isVariableOn: vi.fn(() => false),
-    normalizeVariableId: vi.fn((id: string | null) => id),
-    setVariableValue: vi.fn(() => true),
-  });
+  const baseEnemyDefinition = {
+    type: 'test-enemy',
+    id: 'enemy-test',
+    name: 'Test Enemy',
+    nameKey: 'enemies.names.test',
+    description: 'test',
+    damage: 1,
+    missChance: 0,
+    experience: 1,
+    hasEyes: true,
+    sprite: [],
+  };
+
+  const baseGameState = () =>
+    ({
+      playing: true,
+      getEnemyDefinitions: vi.fn(() => []),
+      getEnemies: vi.fn(() => []),
+      addEnemy: vi.fn(() => 'enemy-1'),
+      removeEnemy: vi.fn(),
+      getGame: vi.fn(() => ({ rooms: [] })),
+      getPlayer: vi.fn(() => ({ roomIndex: 0, x: 0, y: 0 })),
+      isPlayerOnDamageCooldown: vi.fn(() => false),
+      damagePlayer: vi.fn(() => 1),
+      consumeLastDamageReduction: vi.fn(() => 0),
+      handleEnemyDefeated: vi.fn(() => null),
+      isVariableOn: vi.fn(() => false),
+      normalizeVariableId: vi.fn((id: string | null) => id),
+      setVariableValue: vi.fn((_id: string, _value: boolean, _persist?: boolean) => [true, false] as [boolean, boolean?]),
+    }) satisfies ConstructorParameters<typeof EnemyManager>[0];
 
   beforeEach(() => {
     vi.clearAllMocks();
     getSpy.mockImplementation((key: string, fallback = '') => (key === 'combat.cooldown' ? 'Safe' : fallback || 'text'));
-    formatSpy.mockImplementation((_key: string, _params: Record<string, unknown>, fallback = '') => fallback || 'text');
-    normalizeSpy.mockImplementation((type: string) => type);
-    getDefinitionSpy.mockImplementation(() => ({ damage: 1 }));
+    formatSpy.mockImplementation((_key: string, _params?: Record<string, unknown>, fallback = '') => fallback || 'text');
+    normalizeSpy.mockImplementation((type: string | null | undefined) => type ?? 'test-enemy');
+    getDefinitionSpy.mockImplementation(() => ({ ...baseEnemyDefinition }));
     getExperienceSpy.mockImplementation(() => 2);
     getMissChanceSpy.mockImplementation(() => null);
   });
@@ -54,7 +68,7 @@ describe('EnemyManager', () => {
     const gameState = baseGameState();
     const manager = new EnemyManager(gameState, renderer, tileManager);
 
-    const id = manager.addEnemy({ type: 'rat' });
+    const id = manager.addEnemy({ type: 'rat', roomIndex: 0, x: 0, y: 0 });
 
     expect(id).toBe('enemy-1');
     expect(gameState.addEnemy).toHaveBeenCalled();
@@ -101,12 +115,13 @@ describe('EnemyManager', () => {
 
   it('triggers defeat variables and shows message', () => {
     getDefinitionSpy.mockImplementation(() => ({
+      ...baseEnemyDefinition,
       activateVariableOnDefeat: { variableId: 'var-1', message: 'Unlocked' },
     }));
     const gameState = baseGameState();
     const manager = new EnemyManager(gameState, renderer, tileManager);
 
-    const result = manager.tryTriggerDefeatVariable({ type: 'rat' });
+    const result = manager.tryTriggerDefeatVariable({ type: 'rat', roomIndex: 0, x: 0, y: 0 });
 
     expect(result).toBe(true);
     expect(gameState.setVariableValue).toHaveBeenCalledWith('var-1', true, true);
@@ -158,7 +173,7 @@ describe('EnemyManager', () => {
       handleEnemyDefeated: vi.fn(() => null),
       isVariableOn: vi.fn(() => false),
       normalizeVariableId: vi.fn((id: string | null) => id),
-      setVariableValue: vi.fn(() => true),
+      setVariableValue: vi.fn(() => [true, false]),
       isGameOver: () => false,
       isLevelUpCelebrationActive: () => false,
       isLevelUpOverlayActive: () => false,

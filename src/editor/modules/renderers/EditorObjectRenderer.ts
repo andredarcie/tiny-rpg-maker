@@ -1,4 +1,5 @@
 
+import { StateObjectManager } from '../../../core/state/StateObjectManager';
 import { OBJECT_TYPES } from '../../../core/ObjectDefinitions';
 import { EditorConstants } from '../EditorConstants';
 import { EditorRendererBase } from './EditorRendererBase';
@@ -7,13 +8,32 @@ const EditorObjectTypes = OBJECT_TYPES;
 const PLAYER_END_TYPE = EditorObjectTypes.PLAYER_END;
 const DOOR_VARIABLE_TYPE = EditorObjectTypes.DOOR_VARIABLE;
 
+type ObjectDefinitionLike = {
+    type: string;
+    name?: string;
+    nameKey?: string;
+};
+
+type EditorObjectLike = {
+    id?: string;
+    type: string;
+    roomIndex: number;
+    x: number;
+    y: number;
+    variableId?: string | null;
+    on?: boolean;
+    opened?: boolean;
+    collected?: boolean;
+    endingText?: string;
+};
+
 class EditorObjectRenderer extends EditorRendererBase {
-    renderObjectCatalog() {
+    renderObjectCatalog(): void {
         const container = this.dom.objectTypes;
         if (!container) return;
         container.innerHTML = '';
 
-        const definitions = EditorConstants.OBJECT_DEFINITIONS;
+        const definitions = EditorConstants.OBJECT_DEFINITIONS as ObjectDefinitionLike[];
         if (!Array.isArray(definitions) || !definitions.length) return;
 
         const selectedType = this.manager.selectedObjectType;
@@ -56,15 +76,16 @@ class EditorObjectRenderer extends EditorRendererBase {
         });
     }
 
-    renderObjects() {
+    renderObjects(): void {
         const container = this.dom.objectsList;
         if (!container) return;
         container.innerHTML = '';
 
-        const objects = this.gameEngine.getObjectsForRoom(this.state.activeRoomIndex);
-        const definitions = EditorConstants.OBJECT_DEFINITIONS;
+        const objects = (this.gameEngine.getObjectsForRoom(this.state.activeRoomIndex) ||
+            []) as EditorObjectLike[];
+        const definitions = EditorConstants.OBJECT_DEFINITIONS as ObjectDefinitionLike[];
 
-        objects.forEach((object) => {
+        objects.forEach((object: EditorObjectLike) => {
             const card = document.createElement('div');
             card.className = 'object-card';
             card.dataset.type = object.type;
@@ -222,8 +243,8 @@ class EditorObjectRenderer extends EditorRendererBase {
         });
     }
 
-    drawObjectPreview(canvas, type) {
-        if (!canvas) return;
+    drawObjectPreview(canvas: HTMLCanvasElement, type: string): void {
+        if (!(canvas instanceof HTMLCanvasElement)) return;
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -237,7 +258,7 @@ class EditorObjectRenderer extends EditorRendererBase {
         renderer.drawObjectSprite(ctx, type, 0, 0, step);
     }
 
-    getObjectLabel(type, definitions) {
+    getObjectLabel(type: string, definitions: ObjectDefinitionLike[]): string {
         const def = definitions.find((entry) => entry.type === type);
         if (def?.nameKey) {
             return this.t(def.nameKey, def?.name || type);
