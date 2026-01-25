@@ -1,11 +1,11 @@
 
-import { EnemyDefinitions } from '../../core/EnemyDefinitions';
-import { ObjectDefinitions } from '../../core/ObjectDefinitions';
+import { EnemyDefinitions } from '../../runtime/domain/definitions/EnemyDefinitions';
+import { ItemDefinitions } from '../../runtime/domain/definitions/ItemDefinitions';
 
 class EditorConstants {
     static get OBJECT_DEFINITIONS() {
         if (!this._objectDefinitions) {
-            this._objectDefinitions = ObjectDefinitions.definitions || [];
+            this._objectDefinitions = ItemDefinitions.definitions || [];
         }
         return this._objectDefinitions;
     }
@@ -18,7 +18,7 @@ class EditorConstants {
     }
 
     static get OBJECT_TYPE_ORDER() {
-        return ObjectDefinitions.getEditorTypeOrder();
+        return ItemDefinitions.getEditorTypeOrder();
     }
 }
 

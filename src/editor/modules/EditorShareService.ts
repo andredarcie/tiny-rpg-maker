@@ -1,7 +1,7 @@
 
-import { FirebaseShareTracker } from '../../core/FirebaseShareTracker';
-import { ShareUtils } from '../../core/ShareUtils';
-import { TextResources } from '../../core/TextResources';
+import { FirebaseShareTracker } from '../../runtime/infra/share/FirebaseShareTracker';
+import { ShareUtils } from '../../runtime/infra/share/ShareUtils';
+import { TextResources } from '../../runtime/adapters/TextResources';
 class EditorShareService {
     constructor(editorManager) {
         this.manager = editorManager;

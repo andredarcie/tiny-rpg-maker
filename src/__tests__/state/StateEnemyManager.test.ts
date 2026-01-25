@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { StateEnemyManager } from '../../core/state/StateEnemyManager';
+import { StateEnemyManager } from '../../runtime/domain/state/StateEnemyManager';
 
 const createWorldManager = () => ({
   clampRoomIndex: (value: number) => {

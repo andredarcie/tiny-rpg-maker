@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { RendererSpriteFactory } from '../../core/renderer/RendererSpriteFactory';
+import { RendererSpriteFactory } from '../../runtime/adapters/renderer/RendererSpriteFactory';
 
 const makeMatrix = (value: number) =>
   Array.from({ length: 8 }, () => Array.from({ length: 8 }, () => value));
@@ -7,7 +7,7 @@ const makeMatrix = (value: number) =>
 let enemyDefinitions: Array<{ type: string; sprite: number[][]; aliases?: string[] }> = [];
 let normalizeType = (type: string) => type;
 
-vi.mock('../../core/renderer/RendererConstants', () => ({
+vi.mock('../../runtime/adapters/renderer/RendererConstants', () => ({
   RendererConstants: {
     get ENEMY_DEFINITIONS() {
       return enemyDefinitions;
@@ -21,13 +21,13 @@ vi.mock('../../core/renderer/RendererConstants', () => ({
   }
 }));
 
-vi.mock('../../core/EnemyDefinitions', () => ({
+vi.mock('../../runtime/domain/definitions/EnemyDefinitions', () => ({
   EnemyDefinitions: {
     normalizeType: (type: string) => normalizeType(type),
   },
 }));
 
-vi.mock('../../core/sprites/SpriteMatrixRegistry', () => ({
+vi.mock('../../runtime/domain/sprites/SpriteMatrixRegistry', () => ({
   SpriteMatrixRegistry: {
     get: () => makeMatrix(0),
   },

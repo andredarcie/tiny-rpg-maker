@@ -1,9 +1,9 @@
 import { EditorManager } from './editor/EditorManager';
 import { EditorExportService } from './editor/modules/EditorExportService';
-import { GameEngine } from './core/GameEngine';
-import { ShareUtils } from './core/ShareUtils';
-import { getTinyRpgApi, setTinyRpgApi } from './core/TinyRpgApi';
-import { TextResources } from './core/TextResources';
+import { GameEngine } from './runtime/services/GameEngine';
+import { ShareUtils } from './runtime/infra/share/ShareUtils';
+import { getTinyRpgApi, setTinyRpgApi } from './runtime/infra/TinyRpgApi';
+import { TextResources } from './runtime/adapters/TextResources';
 
 const getTextResource = (key: string, fallback = ''): string => {
   const value = TextResources.get(key, fallback);

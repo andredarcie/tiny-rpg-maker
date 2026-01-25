@@ -1,6 +1,6 @@
 
-import { EnemyDefinitions } from '../../core/EnemyDefinitions';
-import { TextResources } from '../../core/TextResources';
+import { EnemyDefinitions } from '../../runtime/domain/definitions/EnemyDefinitions';
+import { TextResources } from '../../runtime/adapters/TextResources';
 import { EditorConstants } from './EditorConstants';
 class EditorEnemyService {
     constructor(editorManager) {

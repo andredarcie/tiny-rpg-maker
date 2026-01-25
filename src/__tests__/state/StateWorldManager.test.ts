@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { StateWorldManager } from '../../core/state/StateWorldManager';
+import { StateWorldManager } from '../../runtime/domain/state/StateWorldManager';
 
 describe('StateWorldManager', () => {
   it('creates world rooms with coordinates', () => {

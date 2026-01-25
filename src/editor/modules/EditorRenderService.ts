@@ -1,7 +1,7 @@
 
-import { SkillDefinitions } from '../../core/SkillDefinitions';
-import { TextResources } from '../../core/TextResources';
-import { PICO8_COLORS } from '../../core/TileDefinitions';
+import { SkillDefinitions } from '../../runtime/domain/definitions/SkillDefinitions';
+import { TextResources } from '../../runtime/adapters/TextResources';
+import { PICO8_COLORS } from '../../runtime/domain/definitions/TileDefinitions';
 import { EditorCanvasRenderer } from './renderers/EditorCanvasRenderer';
 import { EditorEnemyRenderer } from './renderers/EditorEnemyRenderer';
 import { EditorNpcRenderer } from './renderers/EditorNpcRenderer';

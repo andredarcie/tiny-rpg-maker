@@ -1,6 +1,6 @@
 
-import { TILE_PRESETS } from '../core/TileDefinitions';
-import { ShareDecoder } from '../core/share/ShareDecoder';
+import { TILE_PRESETS } from '../runtime/domain/definitions/TileDefinitions';
+import { ShareDecoder } from '../runtime/infra/share/ShareDecoder';
 
 type ShareCoverOptions = {
   width?: number;

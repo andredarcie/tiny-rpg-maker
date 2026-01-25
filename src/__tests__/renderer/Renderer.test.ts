@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import { Renderer } from '../../core/Renderer';
+import { Renderer } from '../../runtime/adapters/Renderer';
 
-vi.mock('../../core/renderer/RendererPalette', () => ({
+vi.mock('../../runtime/adapters/renderer/RendererPalette', () => ({
   RendererPalette: class {
     getColor() {
       return '#000';
@@ -9,7 +9,7 @@ vi.mock('../../core/renderer/RendererPalette', () => ({
   },
 }));
 
-vi.mock('../../core/renderer/RendererSpriteFactory', () => ({
+vi.mock('../../runtime/adapters/renderer/RendererSpriteFactory', () => ({
   RendererSpriteFactory: class {
     getPlayerSprite() {
       return [[null]];
@@ -29,7 +29,7 @@ vi.mock('../../core/renderer/RendererSpriteFactory', () => ({
   },
 }));
 
-vi.mock('../../core/renderer/RendererCanvasHelper', () => ({
+vi.mock('../../runtime/adapters/renderer/RendererCanvasHelper', () => ({
   RendererCanvasHelper: class {
     getTilePixelSize() {
       return 8;
@@ -41,7 +41,7 @@ vi.mock('../../core/renderer/RendererCanvasHelper', () => ({
   },
 }));
 
-vi.mock('../../core/renderer/RendererTileRenderer', () => ({
+vi.mock('../../runtime/adapters/renderer/RendererTileRenderer', () => ({
   RendererTileRenderer: class {
     clearCanvas() {}
     drawBackground() {}
@@ -50,7 +50,7 @@ vi.mock('../../core/renderer/RendererTileRenderer', () => ({
   },
 }));
 
-vi.mock('../../core/renderer/RendererEntityRenderer', () => ({
+vi.mock('../../runtime/adapters/renderer/RendererEntityRenderer', () => ({
   RendererEntityRenderer: class {
     setViewportOffset() {}
     drawObjects() {}
@@ -62,20 +62,20 @@ vi.mock('../../core/renderer/RendererEntityRenderer', () => ({
   },
 }));
 
-vi.mock('../../core/renderer/RendererDialogRenderer', () => ({
+vi.mock('../../runtime/adapters/renderer/RendererDialogRenderer', () => ({
   RendererDialogRenderer: class {
     drawDialog() {}
   },
 }));
 
-vi.mock('../../core/renderer/RendererHudRenderer', () => ({
+vi.mock('../../runtime/adapters/renderer/RendererHudRenderer', () => ({
   RendererHudRenderer: class {
     drawHUD() {}
     drawInventory() {}
   },
 }));
 
-vi.mock('../../core/renderer/RendererEffectsManager', () => ({
+vi.mock('../../runtime/adapters/renderer/RendererEffectsManager', () => ({
   RendererEffectsManager: class {
     drawEdgeFlash() {}
     flashEdge() {}
@@ -84,7 +84,7 @@ vi.mock('../../core/renderer/RendererEffectsManager', () => ({
   },
 }));
 
-vi.mock('../../core/renderer/RendererTransitionManager', () => ({
+vi.mock('../../runtime/adapters/renderer/RendererTransitionManager', () => ({
   RendererTransitionManager: class {
     isActive() {
       return false;
@@ -96,7 +96,7 @@ vi.mock('../../core/renderer/RendererTransitionManager', () => ({
   },
 }));
 
-vi.mock('../../core/renderer/RendererOverlayRenderer', () => ({
+vi.mock('../../runtime/adapters/renderer/RendererOverlayRenderer', () => ({
   RendererOverlayRenderer: class {
     setIntroData() {}
     drawIntroOverlay() {}

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { RendererDialogRenderer } from '../../core/renderer/RendererDialogRenderer';
+import { RendererDialogRenderer } from '../../runtime/adapters/renderer/RendererDialogRenderer';
 
 describe('RendererDialogRenderer', () => {
   it('splits dialog into pages and normalizes the page index', () => {

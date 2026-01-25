@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SpriteMatrixRegistry } from '../../core/sprites/SpriteMatrixRegistry';
+import { SpriteMatrixRegistry } from '../../runtime/domain/sprites/SpriteMatrixRegistry';
 
 describe('SpriteMatrixRegistry', () => {
   it('returns a matrix for a known group and type', () => {

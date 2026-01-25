@@ -1,6 +1,6 @@
 
 import { EditorConstants } from '../EditorConstants';
-import { RendererConstants } from '../../../core/renderer/RendererConstants';
+import { RendererConstants } from '../../../runtime/adapters/renderer/RendererConstants';
 import { EditorRendererBase } from './EditorRendererBase';
 type EnemyRecord = Record<string, any>;
 

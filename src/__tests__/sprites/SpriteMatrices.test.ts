@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { ObjectSpriteMatrices } from '../../core/sprites/ObjectSprites';
-import { NpcSpriteMatrices } from '../../core/sprites/NpcSprites';
-import { EnemySpriteMatrices } from '../../core/sprites/EnemySprites';
-import { PlayerSpriteMatrices } from '../../core/sprites/PlayerSprites';
+import { ObjectSpriteMatrices } from '../../runtime/domain/sprites/ObjectSprites';
+import { NpcSpriteMatrices } from '../../runtime/domain/sprites/NpcSprites';
+import { EnemySpriteMatrices } from '../../runtime/domain/sprites/EnemySprites';
+import { PlayerSpriteMatrices } from '../../runtime/domain/sprites/PlayerSprites';
 
 const assertMatrix = (matrix: (number | null)[][]) => {
   expect(Array.isArray(matrix)).toBe(true);

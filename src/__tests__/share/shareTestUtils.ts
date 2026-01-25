@@ -1,18 +1,18 @@
 import { afterAll, vi } from 'vitest';
-import { EnemyDefinitions } from '../../core/EnemyDefinitions';
-import { OBJECT_TYPES } from '../../core/ObjectDefinitions';
-import { StateObjectManager } from '../../core/state/StateObjectManager';
-import { ShareBase64 } from '../../core/share/ShareBase64';
-import { ShareConstants } from '../../core/share/ShareConstants';
-import { ShareDataNormalizer } from '../../core/share/ShareDataNormalizer';
-import { ShareDecoder } from '../../core/share/ShareDecoder';
-import { ShareEncoder } from '../../core/share/ShareEncoder';
-import { ShareMath } from '../../core/share/ShareMath';
-import { ShareMatrixCodec } from '../../core/share/ShareMatrixCodec';
-import { SharePositionCodec } from '../../core/share/SharePositionCodec';
-import { ShareTextCodec } from '../../core/share/ShareTextCodec';
-import { ShareUrlHelper } from '../../core/share/ShareUrlHelper';
-import { ShareVariableCodec } from '../../core/share/ShareVariableCodec';
+import { EnemyDefinitions } from '../../runtime/domain/definitions/EnemyDefinitions';
+import { ITEM_TYPES } from '../../runtime/domain/definitions/ItemDefinitions';
+import { StateObjectManager } from '../../runtime/domain/state/StateObjectManager';
+import { ShareBase64 } from '../../runtime/infra/share/ShareBase64';
+import { ShareConstants } from '../../runtime/infra/share/ShareConstants';
+import { ShareDataNormalizer } from '../../runtime/infra/share/ShareDataNormalizer';
+import { ShareDecoder } from '../../runtime/infra/share/ShareDecoder';
+import { ShareEncoder } from '../../runtime/infra/share/ShareEncoder';
+import { ShareMath } from '../../runtime/infra/share/ShareMath';
+import { ShareMatrixCodec } from '../../runtime/infra/share/ShareMatrixCodec';
+import { SharePositionCodec } from '../../runtime/infra/share/SharePositionCodec';
+import { ShareTextCodec } from '../../runtime/infra/share/ShareTextCodec';
+import { ShareUrlHelper } from '../../runtime/infra/share/ShareUrlHelper';
+import { ShareVariableCodec } from '../../runtime/infra/share/ShareVariableCodec';
 
 type SetupOptions = {
   npcDefinitions?: Array<{ id?: string; type: string; name?: string; defaultText?: string; defaultTextKey?: string }>;
@@ -23,7 +23,7 @@ type SetupOptions = {
 };
 
 export function setupShareGlobals(options: SetupOptions = {}) {
-  const originalObjectTypes = { ...OBJECT_TYPES };
+  const originalObjectTypes = { ...ITEM_TYPES };
   const originalNpcDefinitions = (ShareConstants as ShareConstantsHack)._npcDefinitions;
   const originalEnemyDefinitions = (ShareConstants as ShareConstantsHack)._enemyDefinitions;
 
@@ -34,7 +34,7 @@ export function setupShareGlobals(options: SetupOptions = {}) {
     (ShareConstants as ShareConstantsHack)._enemyDefinitions = options.enemyDefinitions;
   }
   if (options.objectTypes) {
-    Object.assign(OBJECT_TYPES, options.objectTypes);
+    Object.assign(ITEM_TYPES, options.objectTypes);
   }
   if (options.enemyNormalize) {
     vi.spyOn(EnemyDefinitions, 'normalizeType').mockImplementation(options.enemyNormalize);
@@ -44,12 +44,12 @@ export function setupShareGlobals(options: SetupOptions = {}) {
   }
 
   afterAll(() => {
-    Object.keys(OBJECT_TYPES).forEach((key) => {
+    Object.keys(ITEM_TYPES).forEach((key) => {
       if (!(key in originalObjectTypes)) {
-        delete (OBJECT_TYPES as Record<string, string>)[key];
+        delete (ITEM_TYPES as Record<string, string>)[key];
       }
     });
-    Object.assign(OBJECT_TYPES, originalObjectTypes);
+    Object.assign(ITEM_TYPES, originalObjectTypes);
     (ShareConstants as ShareConstantsHack)._npcDefinitions = originalNpcDefinitions;
     (ShareConstants as ShareConstantsHack)._enemyDefinitions = originalEnemyDefinitions;
     vi.restoreAllMocks();

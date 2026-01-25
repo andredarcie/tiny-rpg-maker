@@ -1,5 +1,5 @@
 
-import { TextResources } from '../../core/TextResources';
+import { TextResources } from '../../runtime/adapters/TextResources';
 import { EditorManagerModule } from './EditorManagerModule';
 class EditorUIController extends EditorManagerModule {
     updateGameMetadata() {

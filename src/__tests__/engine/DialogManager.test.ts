@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { DialogManager } from '../../core/engine/DialogManager';
+import { DialogManager } from '../../runtime/services/engine/DialogManager';
 
 describe('DialogManager', () => {
   const pauseGame = vi.fn();

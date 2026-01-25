@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ShareConstants } from '../../core/share/ShareConstants';
+import { ShareConstants } from '../../runtime/infra/share/ShareConstants';
 
 describe('ShareConstants', () => {
   it('exposes current version and world metadata', () => {

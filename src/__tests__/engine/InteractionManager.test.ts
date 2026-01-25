@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ObjectDefinitions } from '../../core/ObjectDefinitions';
-import { InteractionManager } from '../../core/engine/InteractionManager';
-import { TextResources } from '../../core/TextResources';
+import { ItemDefinitions } from '../../runtime/domain/definitions/ItemDefinitions';
+import { InteractionManager } from '../../runtime/services/engine/InteractionManager';
+import { TextResources } from '../../runtime/adapters/TextResources';
 
 describe('InteractionManager', () => {
-  const getDefinitionSpy = vi.spyOn(ObjectDefinitions, 'getObjectDefinition');
-  const getDurabilitySpy = vi.spyOn(ObjectDefinitions, 'getSwordDurability');
+  const getDefinitionSpy = vi.spyOn(ItemDefinitions, 'getObjectDefinition');
+  const getDurabilitySpy = vi.spyOn(ItemDefinitions, 'getSwordDurability');
   const getSpy = vi.spyOn(TextResources, 'get');
   const formatSpy = vi.spyOn(TextResources, 'format');
   const dialogManager = { showDialog: vi.fn() };

@@ -1,4 +1,4 @@
-import type { Tileset } from '../core/tileTypes';
+import type { Tileset } from '../runtime/domain/definitions/tileTypes';
 import type { AnyRecord } from './common';
 
 export type { AnyRecord } from './common';

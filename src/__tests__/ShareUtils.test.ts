@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ShareUtils } from '../core/ShareUtils';
-import { ShareDecoder } from '../core/share/ShareDecoder';
-import { ShareEncoder } from '../core/share/ShareEncoder';
-import { ShareUrlHelper } from '../core/share/ShareUrlHelper';
+import { ShareUtils } from '../runtime/infra/share/ShareUtils';
+import { ShareDecoder } from '../runtime/infra/share/ShareDecoder';
+import { ShareEncoder } from '../runtime/infra/share/ShareEncoder';
+import { ShareUrlHelper } from '../runtime/infra/share/ShareUrlHelper';
 
 describe('ShareUtils', () => {
   it('delegates to share helpers', () => {

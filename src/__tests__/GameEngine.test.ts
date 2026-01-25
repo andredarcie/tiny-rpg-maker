@@ -9,18 +9,18 @@ import {
   StubNpcManager,
   StubRenderer,
   StubTileManager
-} from './stubs'
+} from './stubs/index'
 
-vi.mock('../core/GameState', () => ({ GameState: StubGameState }))
-vi.mock('../core/TileManager', () => ({ TileManager: StubTileManager }))
-vi.mock('../core/NPCManager', () => ({ NPCManager: StubNpcManager }))
-vi.mock('../core/Renderer', () => ({ Renderer: StubRenderer }))
-vi.mock('../core/engine/DialogManager', () => ({ DialogManager: StubDialogManager }))
-vi.mock('../core/engine/InteractionManager', () => ({ InteractionManager: StubInteractionManager }))
-vi.mock('../core/engine/EnemyManager', () => ({ EnemyManager: StubEnemyManager }))
-vi.mock('../core/engine/MovementManager', () => ({ MovementManager: StubMovementManager }))
-vi.mock('../core/InputManager', () => ({ InputManager: StubInputManager }))
-vi.mock('../core/TextResources', () => ({
+vi.mock('../runtime/domain/GameState', () => ({ GameState: StubGameState }))
+vi.mock('../runtime/services/TileManager', () => ({ TileManager: StubTileManager }))
+vi.mock('../runtime/services/NPCManager', () => ({ NPCManager: StubNpcManager }))
+vi.mock('../runtime/adapters/Renderer', () => ({ Renderer: StubRenderer }))
+vi.mock('../runtime/services/engine/DialogManager', () => ({ DialogManager: StubDialogManager }))
+vi.mock('../runtime/services/engine/InteractionManager', () => ({ InteractionManager: StubInteractionManager }))
+vi.mock('../runtime/services/engine/EnemyManager', () => ({ EnemyManager: StubEnemyManager }))
+vi.mock('../runtime/services/engine/MovementManager', () => ({ MovementManager: StubMovementManager }))
+vi.mock('../runtime/adapters/InputManager', () => ({ InputManager: StubInputManager }))
+vi.mock('../runtime/adapters/TextResources', () => ({
   TextResources: {
     format: (_key: string, params?: { name?: string }, fallback = '') => {
       return `pickup:${params?.name ?? fallback}`
@@ -32,7 +32,7 @@ vi.mock('../core/TextResources', () => ({
 let GameEngineCtor: GameEngineCtor
 
 beforeAll(async () => {
-  const mod = await import('../core/GameEngine')
+  const mod = await import('../runtime/services/GameEngine')
   GameEngineCtor = mod.GameEngine as GameEngineCtor
 })
 

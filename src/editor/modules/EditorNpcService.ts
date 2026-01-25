@@ -1,5 +1,5 @@
 
-import { TextResources } from '../../core/TextResources';
+import { TextResources } from '../../runtime/adapters/TextResources';
 class EditorNpcService {
     constructor(editorManager) {
         this.manager = editorManager;

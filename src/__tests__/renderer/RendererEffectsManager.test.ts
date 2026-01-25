@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { RendererEffectsManager } from '../../core/renderer/RendererEffectsManager';
+import { RendererEffectsManager } from '../../runtime/adapters/renderer/RendererEffectsManager';
 
 const createElementStub = () => ({
   classList: {

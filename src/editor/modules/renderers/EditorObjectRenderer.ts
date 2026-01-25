@@ -1,10 +1,10 @@
 
-import { StateObjectManager } from '../../../core/state/StateObjectManager';
-import { OBJECT_TYPES } from '../../../core/ObjectDefinitions';
+import { StateObjectManager } from '../../../runtime/domain/state/StateObjectManager';
+import { ITEM_TYPES } from '../../../runtime/domain/definitions/ItemDefinitions';
 import { EditorConstants } from '../EditorConstants';
 import { EditorRendererBase } from './EditorRendererBase';
 
-const EditorObjectTypes = OBJECT_TYPES;
+const EditorObjectTypes = ITEM_TYPES;
 const PLAYER_END_TYPE = EditorObjectTypes.PLAYER_END;
 const DOOR_VARIABLE_TYPE = EditorObjectTypes.DOOR_VARIABLE;
 

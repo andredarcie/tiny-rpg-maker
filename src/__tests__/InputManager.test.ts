@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { InputManager } from '../core/InputManager';
+import { InputManager } from '../runtime/adapters/InputManager';
 
 type GameEngineStub = {
   gameState: {

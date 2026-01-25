@@ -3,17 +3,17 @@ import { describe, expect, it, vi } from 'vitest';
 describe('RendererConstants', () => {
   it('returns definitions from module sources', async () => {
     vi.resetModules();
-    vi.doMock('../../core/NPCDefinitions', () => ({
+    vi.doMock('../../runtime/domain/definitions/NPCDefinitions', () => ({
       NPCDefinitions: { definitions: [{ type: 'npc-a' }] },
     }));
-    vi.doMock('../../core/ObjectDefinitions', () => ({
-      ObjectDefinitions: { definitions: [{ type: 'obj-a' }] },
+    vi.doMock('../../runtime/domain/definitions/ItemDefinitions', () => ({
+      ItemDefinitions: { definitions: [{ type: 'obj-a' }] },
     }));
-    vi.doMock('../../core/EnemyDefinitions', () => ({
+    vi.doMock('../../runtime/domain/definitions/EnemyDefinitions', () => ({
       EnemyDefinitions: { definitions: [{ type: 'enemy-a' }] },
     }));
 
-    const { RendererConstants } = await import('../../core/renderer/RendererConstants');
+    const { RendererConstants } = await import('../../runtime/adapters/renderer/RendererConstants');
 
     expect(RendererConstants.NPC_DEFINITIONS[0].type).toBe('npc-a');
     expect(RendererConstants.OBJECT_DEFINITIONS[0].type).toBe('obj-a');
@@ -22,7 +22,7 @@ describe('RendererConstants', () => {
 
   it('returns a default palette', async () => {
     vi.resetModules();
-    const { RendererConstants } = await import('../../core/renderer/RendererConstants');
+    const { RendererConstants } = await import('../../runtime/adapters/renderer/RendererConstants');
 
     expect(RendererConstants.DEFAULT_PALETTE.length).toBeGreaterThan(0);
   });

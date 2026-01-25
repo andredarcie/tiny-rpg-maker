@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { GameState } from '../core/GameState';
+import { GameState } from '../runtime/domain/GameState';
 
 describe('GameState', () => {
   it('initializes core defaults and clamps current room', () => {

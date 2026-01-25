@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { RendererModuleBase } from '../../core/renderer/RendererModuleBase';
-import { RendererCanvasHelper } from '../../core/renderer/RendererCanvasHelper';
-import { RendererMinimapRenderer } from '../../core/renderer/RendererMinimapRenderer';
-import { RendererTileRenderer } from '../../core/renderer/RendererTileRenderer';
-import { RendererEntityRenderer } from '../../core/renderer/RendererEntityRenderer';
-import { RendererHudRenderer } from '../../core/renderer/RendererHudRenderer';
-import { RendererOverlayRenderer } from '../../core/renderer/RendererOverlayRenderer';
-import { RendererTransitionManager } from '../../core/renderer/RendererTransitionManager';
+import { RendererModuleBase } from '../../runtime/adapters/renderer/RendererModuleBase';
+import { RendererCanvasHelper } from '../../runtime/adapters/renderer/RendererCanvasHelper';
+import { RendererMinimapRenderer } from '../../runtime/adapters/renderer/RendererMinimapRenderer';
+import { RendererTileRenderer } from '../../runtime/adapters/renderer/RendererTileRenderer';
+import { RendererEntityRenderer } from '../../runtime/adapters/renderer/RendererEntityRenderer';
+import { RendererHudRenderer } from '../../runtime/adapters/renderer/RendererHudRenderer';
+import { RendererOverlayRenderer } from '../../runtime/adapters/renderer/RendererOverlayRenderer';
+import { RendererTransitionManager } from '../../runtime/adapters/renderer/RendererTransitionManager';
 
 describe('Renderer modules', () => {
   it('RendererModuleBase exposes renderer properties', () => {

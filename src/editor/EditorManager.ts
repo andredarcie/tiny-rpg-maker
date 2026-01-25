@@ -1,5 +1,5 @@
 
-import { EnemyDefinitions } from '../core/EnemyDefinitions';
+import { EnemyDefinitions } from '../runtime/domain/definitions/EnemyDefinitions';
 import { EditorConstants } from './modules/EditorConstants';
 import { EditorDomCache } from './modules/EditorDomCache';
 import { EditorEnemyService } from './modules/EditorEnemyService';

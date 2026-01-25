@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { NPCManager } from '../../core/NPCManager';
-import { FirebaseShareTracker } from '../../core/FirebaseShareTracker';
+import { NPCManager } from '../../runtime/services/NPCManager';
+import { FirebaseShareTracker } from '../../runtime/infra/share/FirebaseShareTracker';
 import { ShareCoverPreview } from '../../showcase/ShareCoverPreview';
 
 describe('Core managers', () => {

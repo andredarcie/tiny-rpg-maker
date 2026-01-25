@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { MovementManager } from '../../core/engine/MovementManager';
-import { TextResources } from '../../core/TextResources';
+import { MovementManager } from '../../runtime/services/engine/MovementManager';
+import { TextResources } from '../../runtime/adapters/TextResources';
 
 describe('MovementManager', () => {
   const getSpy = vi.spyOn(TextResources, 'get');

@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { EnemyDefinitions } from '../../core/EnemyDefinitions';
-import { EnemyManager } from '../../core/engine/EnemyManager';
-import { MovementManager } from '../../core/engine/MovementManager';
-import { TextResources } from '../../core/TextResources';
+import { EnemyDefinitions } from '../../runtime/domain/definitions/EnemyDefinitions';
+import { EnemyManager } from '../../runtime/services/engine/EnemyManager';
+import { MovementManager } from '../../runtime/services/engine/MovementManager';
+import { TextResources } from '../../runtime/adapters/TextResources';
 
 describe('EnemyManager', () => {
   const getSpy = vi.spyOn(TextResources, 'get');

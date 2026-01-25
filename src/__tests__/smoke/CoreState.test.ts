@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { StateDataManager } from '../../core/state/StateDataManager';
-import { StateVariableManager } from '../../core/state/StateVariableManager';
-import { StateSkillManager } from '../../core/state/StateSkillManager';
-import { StateItemManager } from '../../core/state/StateItemManager';
-import { StateDialogManager } from '../../core/state/StateDialogManager';
-import { GameStateLifecycle } from '../../core/state/GameStateLifecycle';
-import { GameStateWorldFacade } from '../../core/state/GameStateWorldFacade';
-import { GameStateDataFacade } from '../../core/state/GameStateDataFacade';
-import { GameStateScreenManager } from '../../core/state/GameStateScreenManager';
+import { StateDataManager } from '../../runtime/domain/state/StateDataManager';
+import { StateVariableManager } from '../../runtime/domain/state/StateVariableManager';
+import { StateSkillManager } from '../../runtime/domain/state/StateSkillManager';
+import { StateItemManager } from '../../runtime/domain/state/StateItemManager';
+import { StateDialogManager } from '../../runtime/domain/state/StateDialogManager';
+import { GameStateLifecycle } from '../../runtime/domain/state/GameStateLifecycle';
+import { GameStateWorldFacade } from '../../runtime/domain/state/GameStateWorldFacade';
+import { GameStateDataFacade } from '../../runtime/domain/state/GameStateDataFacade';
+import { GameStateScreenManager } from '../../runtime/domain/state/GameStateScreenManager';
 
 describe('Core state classes', () => {
   it('StateDataManager exports a class', () => {

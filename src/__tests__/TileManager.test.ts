@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { GameStateApi, TileDefinition, TileFrame, TileMap } from '../core/tileTypes';
-import { TileManager } from '../core/TileManager';
+import type { GameStateApi, TileDefinition, TileFrame, TileMap } from '../runtime/domain/definitions/tileTypes';
+import { TileManager } from '../runtime/services/TileManager';
 
 const makeFrame = (value: string): TileFrame =>
   Array.from({ length: 8 }, () => Array.from({ length: 8 }, () => value));
@@ -20,7 +20,7 @@ const createGameState = (overrides?: Partial<GameStateApi>): GameStateApi => ({
 
 let presets: TileDefinition[] = [];
 
-vi.mock('../core/tilePresets', () => ({
+vi.mock('../runtime/domain/definitions/tilePresets', () => ({
   get TILE_PRESETS_SOURCE() {
     return presets;
   },
