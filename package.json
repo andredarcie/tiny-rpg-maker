@@ -1,0 +1,27 @@
+{
+  "name": "tiny-rpg-maker",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "build:export": "vite build -c vite.export.config.ts",
+    "preview": "vite preview",
+    "lint": "eslint . --max-warnings=0",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.44.1",
+    "@typescript-eslint/parser": "^8.44.1",
+    "@playwright/test": "^1.55.0",
+    "@vitest/coverage-v8": "^4.0.18",
+    "eslint": "^9.35.0",
+    "jsdom": "^24.1.0",
+    "typescript": "~5.9.3",
+    "vite": "^7.2.4",
+    "vitest": "^4.0.18"
+  }
+}

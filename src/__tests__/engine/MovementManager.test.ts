@@ -1,0 +1,147 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { MovementManager } from '../../core/engine/MovementManager';
+import { TextResources } from '../../core/TextResources';
+
+describe('MovementManager', () => {
+  const getSpy = vi.spyOn(TextResources, 'get');
+  const formatSpy = vi.spyOn(TextResources, 'format');
+  const createGameState = (dialogActive = false) => ({
+    game: { roomSize: 8 },
+    isGameOver: () => false,
+    isLevelUpCelebrationActive: () => false,
+    isLevelUpOverlayActive: () => false,
+    isPickupOverlayActive: () => false,
+    getDialog: () => ({ active: dialogActive, page: 1, maxPages: 2 }),
+    setDialogPage: vi.fn(),
+    getPlayer: () => ({ roomIndex: 0, x: 0, y: 0, lastX: 0 }),
+    getRoomCoords: () => ({ row: 0, col: 0 }),
+    getRoomIndex: () => null,
+    getGame: () => ({ rooms: [] }),
+    getObjectAt: () => null,
+    isVariableOn: () => false,
+    hasSkill: () => false,
+    consumeKey: () => false,
+    getKeys: () => 0,
+    setPlayerPosition: vi.fn(),
+  });
+
+  const renderer = {
+    draw: vi.fn(),
+    captureGameplayFrame: vi.fn(),
+    startRoomTransition: vi.fn(() => false),
+    flashEdge: vi.fn(),
+  };
+
+  const dialogManager = {
+    closeDialog: vi.fn(),
+    showDialog: vi.fn(),
+  };
+
+  const interactionManager = {
+    handlePlayerInteractions: vi.fn(),
+    getNpcDialogText: vi.fn(),
+    getNpcDialogMeta: vi.fn(),
+  };
+
+  const enemyManager = {
+    collideAt: vi.fn(() => false),
+    checkCollisionAt: vi.fn(),
+  };
+
+  const tileManager = {
+    getTileMap: vi.fn(() => ({ ground: [], overlay: [] })),
+    getTile: vi.fn(() => null),
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    getSpy.mockImplementation((_key: string, fallback = '') => fallback || 'text');
+    formatSpy.mockImplementation((_key: string, _params: Record<string, unknown>, fallback = '') => fallback || 'text');
+  });
+
+  it('advances dialog pages when a dialog is active', () => {
+    const gameState = createGameState(true);
+    const manager = new MovementManager({
+      gameState,
+      tileManager,
+      renderer,
+      dialogManager,
+      interactionManager,
+      enemyManager,
+    });
+
+    manager.tryMove(1, 0);
+
+    expect(gameState.setDialogPage).toHaveBeenCalledWith(2);
+    expect(renderer.draw).toHaveBeenCalled();
+  });
+
+  it('closes dialog when the last page is reached', () => {
+    const gameState = createGameState(true);
+    gameState.getDialog = () => ({ active: true, page: 2, maxPages: 2 });
+    const manager = new MovementManager({
+      gameState,
+      tileManager,
+      renderer,
+      dialogManager,
+      interactionManager,
+      enemyManager,
+    });
+
+    manager.tryMove(1, 0);
+
+    expect(dialogManager.closeDialog).toHaveBeenCalled();
+  });
+
+  it('honors collision traversal skills', () => {
+    const gameState = createGameState(false);
+    gameState.hasSkill = (skill: string) => skill === 'water-walker';
+    const manager = new MovementManager({
+      gameState,
+      tileManager,
+      renderer,
+      dialogManager,
+      interactionManager,
+      enemyManager,
+    });
+
+    expect(manager.canTraverseCollisionTile({ collision: true, category: 'agua' })).toBe(true);
+    expect(manager.canTraverseCollisionTile({ collision: true, category: 'perigo' })).toBe(false);
+  });
+
+  it('sets a damage cooldown timestamp when entering a new room', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(1000);
+
+    const player = { roomIndex: 0, x: 0, y: 0, lastX: 0, lastRoomChangeTime: null as number | null };
+    const gameState = {
+      ...createGameState(false),
+      getPlayer: () => player,
+      getRoomCoords: () => ({ row: 0, col: 0 }),
+      getRoomIndex: (_row: number, col: number) => (col === -1 ? 1 : null),
+      getGame: () => ({ rooms: [{}, {}] }),
+      setPlayerPosition: (x: number, y: number, roomIndex: number | null) => {
+        player.x = x;
+        player.y = y;
+        if (roomIndex !== null) {
+          player.roomIndex = roomIndex;
+        }
+      },
+    };
+    const manager = new MovementManager({
+      gameState,
+      tileManager,
+      renderer,
+      dialogManager,
+      interactionManager,
+      enemyManager,
+    });
+
+    manager.tryMove(-1, 0);
+
+    expect(player.roomIndex).toBe(1);
+    expect(player.lastRoomChangeTime).toBe(1000);
+
+    vi.useRealTimers();
+  });
+});

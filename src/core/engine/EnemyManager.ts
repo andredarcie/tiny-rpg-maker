@@ -1,0 +1,573 @@
+import { EnemyDefinitions } from '../EnemyDefinitions';
+import { OBJECT_TYPES } from '../ObjectDefinitions';
+import { TextResources } from '../TextResources';
+
+type GameStateLike = {
+  playing: boolean;
+  isEditorModeActive?: () => boolean;
+  getEnemyDefinitions: () => unknown;
+  getEnemies: () => EnemyLike[];
+  addEnemy: (enemy: EnemyLike) => string | null;
+  removeEnemy: (id: string) => void;
+  getGame: () => GameData;
+  getPlayer: () => PlayerLike;
+  isPlayerOnDamageCooldown: () => boolean;
+  damagePlayer: (amount: number) => number;
+  consumeLastDamageReduction: () => number;
+  consumeRecentReviveFlag?: () => boolean;
+  handleEnemyDefeated: (xp: number) => { leveledUp?: boolean } | null;
+  getPendingLevelUpChoices?: () => number;
+  startLevelUpSelectionIfNeeded?: () => void;
+  prepareNecromancerRevive?: () => void;
+  isVariableOn: (id: string) => boolean;
+  normalizeVariableId: (id: string | null) => string | null;
+  setVariableValue: (id: string, value: boolean, persist?: boolean) => boolean;
+};
+
+type RendererLike = {
+  draw: () => void;
+  flashScreen: (payload: Record<string, unknown>) => void;
+  showCombatIndicator: (text: string, options?: Record<string, unknown>) => void;
+};
+
+type TileManagerLike = {
+  getTileMap: (roomIndex: number) => TileMapLike | null;
+  getTile: (tileId: string | number) => TileDefinition | null;
+};
+
+type Options = {
+  onPlayerDefeated?: () => void;
+  interval?: number;
+  directions?: number[][];
+  dialogManager?: { showDialog?: (text: string) => void } | null;
+  missChance?: number;
+};
+
+type PlayerLike = {
+  roomIndex: number;
+  x: number;
+  y: number;
+};
+
+type RoomLike = {
+  walls?: boolean[][];
+};
+
+type GameData = {
+  rooms: RoomLike[];
+};
+
+type EnemyLike = {
+  id?: string;
+  type: string;
+  roomIndex?: number;
+  x: number;
+  y: number;
+  lastX?: number;
+  defeatVariableId?: string | null;
+};
+
+type TileMapLike = {
+  ground?: (string | number | null)[][];
+  overlay?: (string | number | null)[][];
+};
+
+type TileDefinition = {
+  collision?: boolean;
+};
+
+type DefeatVariableConfig = {
+  variableId?: string;
+  persist?: boolean;
+  message?: string;
+  messageKey?: string;
+};
+
+type EnemyDefinitionLike = {
+  hasEyes?: boolean;
+  damage?: number;
+  activateVariableOnDefeat?: DefeatVariableConfig | null;
+  defeatActivationMessageKey?: string;
+  defeatActivationMessage?: string;
+};
+
+const getEnemyLocaleText = (key: string, fallback = ''): string => {
+  const value = TextResources.get(key, fallback);
+  return value || fallback || '';
+};
+
+const formatEnemyLocaleText = (
+  key: string,
+  params: Record<string, unknown> = {},
+  fallback = '',
+): string => {
+  const value = TextResources.format(key, params, fallback);
+  return value || fallback || '';
+};
+
+class EnemyManager {
+  gameState: GameStateLike;
+  renderer: RendererLike;
+  tileManager: TileManagerLike;
+  onPlayerDefeated: () => void;
+  interval: number;
+  enemyMoveTimer: ReturnType<typeof setInterval> | null;
+  directions: number[][];
+  dialogManager: Options['dialogManager'] | null;
+  fallbackMissChance: number;
+
+  constructor(gameState: GameStateLike, renderer: RendererLike, tileManager: TileManagerLike, options: Options = {}) {
+    this.gameState = gameState;
+    this.renderer = renderer;
+    this.tileManager = tileManager;
+    this.onPlayerDefeated = options.onPlayerDefeated || (() => {});
+    this.interval = options.interval || 600;
+    this.enemyMoveTimer = null;
+    this.directions = options.directions || this.defaultDirections();
+    this.dialogManager = options.dialogManager || null;
+    this.fallbackMissChance = this.normalizeMissChance(options.missChance === undefined ? 0.25 : options.missChance);
+  }
+
+  getEnemyDefinitions(): unknown {
+    return this.gameState.getEnemyDefinitions();
+  }
+
+  getActiveEnemies(): EnemyLike[] {
+    return this.gameState.getEnemies();
+  }
+
+  addEnemy(enemy: EnemyLike): string | null {
+    const id = enemy.id || this.generateEnemyId();
+    const type = this.normalizeEnemyType(enemy.type);
+    const addedId = this.gameState.addEnemy({
+      id,
+      type,
+      roomIndex: enemy.roomIndex ?? 0,
+      x: enemy.x ?? 0,
+      y: enemy.y ?? 0,
+      lastX: enemy.x ?? 0,
+      defeatVariableId: enemy.defeatVariableId ?? null,
+    });
+    if (!addedId) {
+      return null;
+    }
+    this.renderer.draw();
+    return addedId;
+  }
+
+  removeEnemy(enemyId: string): void {
+    this.gameState.removeEnemy(enemyId);
+    this.renderer.draw();
+  }
+
+  generateEnemyId(): string {
+    const cryptoObj = typeof crypto !== 'undefined' ? crypto : globalThis.crypto ?? null;
+    if (cryptoObj?.randomUUID) {
+      return cryptoObj.randomUUID();
+    }
+    return `enemy-${Math.random().toString(36).slice(2, 10)}`;
+  }
+
+  start(): void {
+    if (this.enemyMoveTimer) {
+      clearInterval(this.enemyMoveTimer);
+    }
+    this.enemyMoveTimer = setInterval(() => this.tick(), this.interval);
+  }
+
+  stop(): void {
+    if (this.enemyMoveTimer) {
+      clearInterval(this.enemyMoveTimer);
+      this.enemyMoveTimer = null;
+    }
+  }
+
+  tick(): void {
+    if (!this.gameState.playing) return;
+    if (this.gameState.isEditorModeActive?.()) return;
+
+    const enemies = this.gameState.getEnemies();
+    if (!this.hasMovableEnemies(enemies)) return;
+
+    const game = this.gameState.getGame();
+    let moved = false;
+
+    for (let i = 0; i < enemies.length; i++) {
+      const result = this.tryMoveEnemy(enemies, i, game);
+      if (result === 'moved') {
+        moved = true;
+      } else if (result === 'collided') {
+        moved = true;
+        break;
+      }
+    }
+
+    if (moved) {
+      this.renderer.draw();
+    }
+  }
+
+  handleEnemyCollision(enemyIndex: number): void {
+    if (this.gameState.isPlayerOnDamageCooldown()) {
+      this.renderer.showCombatIndicator(getEnemyLocaleText('combat.cooldown', ''), { duration: 700 });
+      return;
+    }
+
+    const enemies = this.gameState.getEnemies();
+    const enemy = enemies[enemyIndex];
+    if (!enemy) return;
+    enemy.type = this.normalizeEnemyType(enemy.type);
+    if (this.canAssassinate(enemy)) {
+      this.assassinateEnemy(enemyIndex);
+      return;
+    }
+    const missChance = this.getEnemyMissChance(enemy.type);
+    const attackMissed = this.attackMissed(missChance);
+
+    enemies.splice(enemyIndex, 1);
+
+    if (attackMissed) {
+      this.showMissFeedback();
+    } else {
+      const damage = this.getEnemyDamage(enemy.type);
+      const lives = this.gameState.damagePlayer(damage);
+      const reduction = this.gameState.consumeLastDamageReduction();
+      const revived = this.gameState.consumeRecentReviveFlag?.() || false;
+      if (revived) {
+        this.renderer.showCombatIndicator(getEnemyLocaleText('skills.necromancer.revive', ''), { duration: 900 });
+      }
+      if (reduction > 0) {
+        const text =
+          reduction >= damage
+            ? getEnemyLocaleText('combat.block.full', '')
+            : formatEnemyLocaleText('combat.block.partial', { value: reduction }, '');
+        this.renderer.showCombatIndicator(text, { duration: 700 });
+      }
+      if (lives <= 0) {
+        this.onPlayerDefeated();
+        return;
+      }
+    }
+
+    const experienceReward = this.getExperienceReward(enemy.type);
+    const defeatResult = this.gameState.handleEnemyDefeated(experienceReward);
+    if (defeatResult?.leveledUp && this.shouldStartLevelOverlay()) {
+      this.gameState.startLevelUpSelectionIfNeeded?.();
+    }
+
+    this.tryTriggerDefeatVariable(enemy);
+    this.renderer.flashScreen({ intensity: 0.8, duration: 160 });
+
+    this.checkAllEnemiesCleared();
+    this.renderer.draw();
+  }
+
+  checkCollisionAt(x: number, y: number): void {
+    const enemies = this.gameState.getEnemies();
+    const playerRoom = this.gameState.getPlayer().roomIndex;
+    const index = enemies.findIndex(
+      (enemy) => enemy.roomIndex === playerRoom && enemy.x === x && enemy.y === y,
+    );
+    if (index !== -1) {
+      const enemy = enemies[index];
+      if (this.canAssassinate(enemy)) {
+        this.assassinateEnemy(index);
+        return;
+      }
+      this.handleEnemyCollision(index);
+    }
+  }
+
+  clamp(v: number, a: number, b: number): number {
+    return Math.max(a, Math.min(b, v));
+  }
+
+  getRoomSize(): number {
+    return 8;
+  }
+
+  defaultDirections(): number[][] {
+    return [
+      [0, 0],
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1],
+    ];
+  }
+
+  hasMovableEnemies(enemies: EnemyLike[]): boolean {
+    return Array.isArray(enemies) && enemies.length > 0;
+  }
+
+  tryMoveEnemy(enemies: EnemyLike[], index: number, game: GameData): 'none' | 'moved' | 'collided' {
+    const enemy = enemies[index];
+    if (!enemy) return 'none';
+    enemy.type = this.normalizeEnemyType(enemy.type);
+
+    const dir = this.pickRandomDirection();
+    const target = this.getTargetPosition(enemy, dir, game);
+    const roomIndex = enemy.roomIndex ?? 0;
+
+    if (!this.canEnterTile(roomIndex, target.x, target.y, game, enemies, index)) {
+      return 'none';
+    }
+
+    enemy.lastX = enemy.x;
+    enemy.x = target.x;
+    enemy.y = target.y;
+
+    return this.resolvePostMove(roomIndex, target.x, target.y, index) ? 'collided' : 'moved';
+  }
+
+  pickRandomDirection(): number[] {
+    const base = this.directions;
+    return base[Math.floor(Math.random() * base.length)];
+  }
+
+  getTargetPosition(enemy: EnemyLike, direction: number[]): { x: number; y: number } {
+    const size = this.getRoomSize();
+    return {
+      x: this.clamp(enemy.x + direction[0], 0, size - 1),
+      y: this.clamp(enemy.y + direction[1], 0, size - 1),
+    };
+  }
+
+  canEnterTile(roomIndex: number, x: number, y: number, game: GameData, enemies: EnemyLike[], movingIndex: number): boolean {
+    const room = game.rooms[roomIndex];
+    if (!room) return false;
+    if (this.isBorderTile(roomIndex, x, y, game)) return false;
+    if (room.walls?.[y]?.[x]) return false;
+    if (this.isTileBlocked(roomIndex, x, y)) return false;
+    if (this.hasBlockingObject(roomIndex, x, y)) return false;
+    return !this.isOccupied(enemies, movingIndex, roomIndex, x, y);
+  }
+
+  isTileBlocked(roomIndex: number, x: number, y: number): boolean {
+    const tileMap = this.tileManager.getTileMap(roomIndex);
+    const groundId = tileMap?.ground?.[y]?.[x] ?? null;
+    const overlayId = tileMap?.overlay?.[y]?.[x] ?? null;
+    const candidateId = overlayId ?? groundId;
+    if (candidateId === null || candidateId === undefined) return false;
+    const tile = this.tileManager.getTile(candidateId);
+    return Boolean(tile?.collision);
+  }
+
+  hasBlockingObject(roomIndex: number, x: number, y: number): boolean {
+    const OT = OBJECT_TYPES;
+    const blockingObject = this.gameState.getObjectAt?.(roomIndex, x, y) ?? null;
+    if (!blockingObject) return false;
+    if (blockingObject.type === OT.DOOR && !blockingObject.opened) return true;
+    if (blockingObject.type === OT.DOOR_VARIABLE) {
+      const isOpen = blockingObject.variableId ? this.gameState.isVariableOn(blockingObject.variableId) : false;
+      return !isOpen;
+    }
+    return false;
+  }
+
+  isOccupied(enemies: EnemyLike[], movingIndex: number, roomIndex: number, x: number, y: number): boolean {
+    return enemies.some((other, index) => index !== movingIndex && other.roomIndex === roomIndex && other.x === x && other.y === y);
+  }
+
+  isBorderTile(roomIndex: number, x: number, y: number): boolean {
+    const size = this.getRoomSize();
+    if (size <= 2) return false;
+    return x === 0 || y === 0 || x === size - 1 || y === size - 1;
+  }
+
+  resolvePostMove(roomIndex: number, x: number, y: number, enemyIndex: number): boolean {
+    const player = this.gameState.getPlayer();
+    if (player.roomIndex === roomIndex && player.x === x && player.y === y) {
+      if (this.tryStealthAssassination(enemyIndex)) {
+        return true;
+      }
+      this.handleEnemyCollision(enemyIndex);
+      return true;
+    }
+    return false;
+  }
+
+  collideAt(roomIndex: number, x: number, y: number): boolean {
+    const enemies = this.gameState.getEnemies();
+    const index = enemies.findIndex((enemy) => enemy.roomIndex === roomIndex && enemy.x === x && enemy.y === y);
+    if (index === -1) return false;
+    this.handleEnemyCollision(index);
+    return true;
+  }
+
+  normalizeEnemyType(type: string): string {
+    return EnemyDefinitions.normalizeType(type);
+  }
+
+  getEnemyDefinition(type: string): EnemyDefinitionLike | null {
+    return EnemyDefinitions.getEnemyDefinition(type);
+  }
+
+  enemyHasEyes(enemy: EnemyLike): boolean {
+    if (!enemy) return true;
+    const definition = this.getEnemyDefinition(enemy.type);
+    if (!definition) return true;
+    if (definition.hasEyes === false) return false;
+    return true;
+  }
+
+  canAssassinate(enemy: EnemyLike): boolean {
+    const stealth = this.gameState.hasSkill?.('stealth');
+    if (!stealth || !enemy) return false;
+    const damage = this.getEnemyDamage(enemy.type);
+    return damage <= 2;
+  }
+
+  tryStealthAssassination(enemyIndex: number): boolean {
+    const enemies = this.gameState.getEnemies();
+    const enemy = enemies?.[enemyIndex];
+    if (!this.canAssassinate(enemy)) {
+      return false;
+    }
+    const missed = Math.random() < 0.25;
+    if (missed) {
+      this.showStealthMissFeedback();
+      return false;
+    }
+    this.assassinateEnemy(enemyIndex);
+    return true;
+  }
+
+  assassinateEnemy(enemyIndex: number): void {
+    const enemies = this.gameState.getEnemies();
+    const enemy = enemies?.[enemyIndex];
+    if (!enemy) return;
+    const type = this.normalizeEnemyType(enemy.type);
+    enemies.splice(enemyIndex, 1);
+
+    const experienceReward = this.getExperienceReward(type);
+    const defeatResult = this.gameState.handleEnemyDefeated(experienceReward);
+    if (defeatResult?.leveledUp && this.shouldStartLevelOverlay()) {
+      this.gameState.startLevelUpSelectionIfNeeded?.();
+    }
+    this.tryTriggerDefeatVariable({ ...enemy, type });
+    this.showStealthKillFeedback();
+    this.renderer.flashScreen({ intensity: 0.4, duration: 120 });
+    this.checkAllEnemiesCleared();
+    this.renderer.draw();
+  }
+
+  showStealthKillFeedback(): void {
+    const text = getEnemyLocaleText('combat.stealthKill', '');
+    if (!text) return;
+    this.renderer.showCombatIndicator?.(text, { duration: 800 });
+  }
+
+  showStealthMissFeedback(): void {
+    const text = getEnemyLocaleText('combat.stealthMiss', '');
+    if (!text) return;
+    this.renderer.showCombatIndicator?.(text, { duration: 800 });
+  }
+
+  shouldStartLevelOverlay(): boolean {
+    return Boolean(this.gameState?.getPendingLevelUpChoices?.() > 0);
+  }
+
+  getEnemyDamage(type: string): number {
+    const definition = this.getEnemyDefinition(type);
+    if (definition && Number.isFinite(definition.damage)) {
+      return Math.max(1, definition.damage);
+    }
+    return 1;
+  }
+
+  getExperienceReward(type: string): number {
+    return EnemyDefinitions.getExperienceReward(type);
+  }
+
+  getEnemyMissChance(type: string): number {
+    const explicit = EnemyDefinitions.getMissChance(type);
+    if (explicit !== null && explicit !== undefined) {
+      return this.normalizeMissChance(explicit);
+    }
+    return this.fallbackMissChance;
+  }
+
+  checkAllEnemiesCleared(): void {
+    const remaining = this.gameState.getEnemies()?.length ?? 0;
+    if (remaining <= 0) {
+      const text = getEnemyLocaleText('game.clearAllEnemies', '');
+      if (text) {
+        this.dialogManager?.showDialog?.(text);
+      }
+    }
+  }
+
+  normalizeMissChance(value: number): number {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) {
+      return 0.25;
+    }
+    return Math.max(0, Math.min(1, numeric));
+  }
+
+  attackMissed(chance?: number): boolean {
+    let normalized: number;
+    if (chance === undefined) {
+      normalized = this.normalizeMissChance(this.fallbackMissChance);
+      this.fallbackMissChance = normalized;
+    } else {
+      normalized = this.normalizeMissChance(chance);
+    }
+    if (normalized <= 0) return false;
+    if (normalized >= 1) return true;
+    return Math.random() < normalized;
+  }
+
+  getDefeatVariableConfig(enemy: EnemyLike): { variableId: string; persist: boolean; message: string | null } | null {
+    if (!enemy) return null;
+    const definition = this.getEnemyDefinition(enemy.type);
+    const baseConfig =
+      definition?.activateVariableOnDefeat && typeof definition.activateVariableOnDefeat === 'object'
+        ? definition.activateVariableOnDefeat
+        : null;
+    let variableId = typeof enemy.defeatVariableId === 'string' ? enemy.defeatVariableId : null;
+    if (!variableId) {
+      const fallbackId = typeof baseConfig?.variableId === 'string' ? baseConfig.variableId : null;
+      variableId = fallbackId;
+    }
+    variableId = this.gameState.normalizeVariableId(variableId);
+    if (!variableId) return null;
+    const persist = baseConfig?.persist !== undefined ? Boolean(baseConfig.persist) : true;
+    let message = null;
+    if (typeof baseConfig?.message === 'string' && baseConfig.message.trim().length) {
+      message = baseConfig.message.trim();
+    } else if (baseConfig?.messageKey) {
+      message = getEnemyLocaleText(baseConfig.messageKey, baseConfig.message || '');
+    } else if (definition?.defeatActivationMessageKey) {
+      message = getEnemyLocaleText(
+        definition.defeatActivationMessageKey,
+        definition.defeatActivationMessage?.trim() || '',
+      );
+    } else if (typeof definition?.defeatActivationMessage === 'string' && definition.defeatActivationMessage.trim().length) {
+      message = definition.defeatActivationMessage.trim();
+    }
+    return { variableId, persist, message };
+  }
+
+  tryTriggerDefeatVariable(enemy: EnemyLike): boolean {
+    const config = this.getDefeatVariableConfig(enemy);
+    if (!config) return false;
+    const updated = this.gameState.setVariableValue(config.variableId, true, config.persist);
+    const isActive = this.gameState.isVariableOn(config.variableId);
+    if (!updated && !isActive) {
+      return false;
+    }
+
+    if (config.message) {
+      this.renderer.showCombatIndicator(config.message, { duration: 900 });
+    }
+    return true;
+  }
+
+  showMissFeedback(): void {
+    this.renderer.showCombatIndicator('Miss', { duration: 500 });
+  }
+}
+
+export { EnemyManager };

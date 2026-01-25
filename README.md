@@ -1,22 +1,76 @@
 # Tiny RPG Studio
 
-Browser-native RPG maker: paint tiles, build rooms, drop NPCs/enemies/objects, and play instantly in the same page. It’s deliberately small and limited to spark creativity—build micro-stories and tiny RPGs in minutes and share everything as a single URL.
+Tiny RPG Studio is a browser-native RPG maker. Paint tiles, build rooms, drop NPCs/enemies/objects, and play instantly in the same page. It is intentionally small and constrained to spark creativity: build micro-stories in minutes and share everything as a single URL.
 
-## Run
-- Open `index.html` directly in your browser (no server, no build).
+## Features
+- Side-by-side Editor/Game tabs for instant iteration.
+- Shareable games: one URL encodes the full game state.
+- Lightweight runtime: fast load, no heavy framework dependencies.
+- Editor tools for tiles, NPCs, enemies, objects, variables, and worlds.
 
-## No tooling required
-- No frameworks, no libs, no bundlers, no build tools — just vanilla HTML/CSS/JS.
+## Requirements
+- Node.js 18+ (recommended)
+- npm
 
-## What it offers
-- Side-by-side **Editor/Game** tabs for instant iteration.
-- Shareable games: one simple URL = full game.
+## Install
+```bash
+npm install
+```
 
-## Zero install
-No downloads or installs. Build a tiny RPG straight in the browser—even on mobile. Try crafting one in a minute and share the link.
+## Development
+```bash
+npm run dev
+```
 
-## Runs anywhere
-Super-light static site: works on old phones, tablets, and desktops. Just open the link in a browser and play.
+Open the URL Vite prints (usually `http://localhost:5173`).
 
-## Contribute
-Fully open source—anyone can help and collaborate on the project.
+## Build
+```bash
+npm run build
+```
+
+## Preview Production Build
+```bash
+npm run preview
+```
+
+## Tests
+```bash
+npm test
+```
+
+### E2E (Playwright)
+```bash
+npx playwright install
+npm run test:e2e
+```
+
+## Project Structure
+```
+src/
+  core/              Core game systems (engine, renderer, tiles, share, etc.)
+  editor/            Editor UI logic and services
+  state/             Game state facades and managers
+  __tests__/         Vitest unit tests
+public/
+  js/                Legacy JS assets kept for reference
+  styles.css         Global styles
+index.html           Main entry (Vite)
+vite.config.ts       Vite config
+```
+
+## Share Codes
+- The app serializes game data into compact share codes.
+- Codes can be shared as a URL hash (e.g. `#v1...`) and decoded on load.
+
+## Export Mode
+Some editor flows render exports with flags set on `window` (e.g. `__TINY_RPG_EXPORT_MODE`).
+When exporting, the app can open a new tab and generate a static HTML payload.
+
+## Contributing
+- Keep changes small and focused.
+- Add tests for new logic when possible.
+- Run `npm test` before opening a PR.
+
+## License
+See the repository license file.
