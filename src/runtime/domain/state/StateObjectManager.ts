@@ -1,5 +1,6 @@
 
-import { ItemDefinitions, ITEM_TYPES } from '../definitions/ItemDefinitions';
+import { ITEM_TYPES } from '../constants/itemTypes';
+import { itemCatalog } from '../services/ItemCatalog';
 const PLAYER_END_TEXT_LIMIT = 40;
 
 class StateObjectManager {
@@ -36,7 +37,7 @@ class StateObjectManager {
     }
 
     static getPlaceableTypesArray() {
-        return ItemDefinitions.getPlaceableTypes();
+        return itemCatalog.getPlaceableTypes();
     }
 
     static getPlaceableTypeSet() {
@@ -45,13 +46,13 @@ class StateObjectManager {
 
     static getCollectibleTypeSet() {
         if (!this._collectibleSet) {
-            this._collectibleSet = new Set(ItemDefinitions.getCollectibleTypes());
+            this._collectibleSet = new Set(itemCatalog.getCollectibleTypes());
         }
         return this._collectibleSet;
     }
 
     static isCollectibleType(type) {
-        return ItemDefinitions.isCollectible(type);
+        return itemCatalog.isCollectible(type);
     }
 
     constructor(game, worldManager, variableManager) {
@@ -100,7 +101,7 @@ class StateObjectManager {
                     ? object.id.trim()
                     : this.generateObjectId(type, roomIndex);
                 const fallbackVariableId = this.variableManager?.getFirstVariableId?.() ?? null;
-                const needsVariable = ItemDefinitions.requiresVariable(type);
+                const needsVariable = itemCatalog.requiresVariable(type);
                 const normalizedVariable = needsVariable
                     ? (this.variableManager?.normalizeVariableId?.(object?.variableId) ?? fallbackVariableId)
                     : null;
@@ -221,10 +222,10 @@ class StateObjectManager {
         if (StateObjectManager.isCollectibleType(normalizedType)) {
             entry.collected = false;
         }
-        if (ItemDefinitions.isLockedDoor(normalizedType)) {
+        if (itemCatalog.isLockedDoor(normalizedType)) {
             entry.opened = false;
         }
-        if (ItemDefinitions.isVariableDoor(normalizedType)) {
+        if (itemCatalog.isVariableDoor(normalizedType)) {
             const fallbackVariableId = this.variableManager?.getFirstVariableId?.() ?? null;
             entry.variableId = this.variableManager?.normalizeVariableId?.(entry.variableId) ?? fallbackVariableId;
         }
@@ -253,7 +254,7 @@ class StateObjectManager {
     }
 
     setObjectVariable(type: string, roomIndex: number, variableId: string | null) {
-        const handledByDefinition = ItemDefinitions.requiresVariable(type);
+        const handledByDefinition = itemCatalog.requiresVariable(type);
         if (!handledByDefinition) return null;
         const targetRoom = this.worldManager.clampRoomIndex(roomIndex ?? 0);
         const entry = this.getObjects().find((object) =>
@@ -349,14 +350,14 @@ class StateObjectManager {
         const type = entry.type;
         const isCollectible = StateObjectManager.isCollectibleType(type);
         entry.isCollectible = isCollectible;
-        entry.hideWhenCollected = ItemDefinitions.shouldHideWhenCollected(type);
-        entry.hiddenInRuntime = ItemDefinitions.isHiddenInRuntime(type);
-        entry.isLockedDoor = ItemDefinitions.isLockedDoor(type);
-        entry.hideWhenOpened = ItemDefinitions.shouldHideWhenOpened(type);
-        entry.isVariableDoor = ItemDefinitions.isVariableDoor(type);
-        entry.hideWhenVariableOpen = ItemDefinitions.shouldHideWhenVariableOpen(type);
-        entry.requiresVariable = ItemDefinitions.requiresVariable(type);
-        entry.swordDurability = ItemDefinitions.getSwordDurability(type);
+        entry.hideWhenCollected = itemCatalog.shouldHideWhenCollected(type);
+        entry.hiddenInRuntime = itemCatalog.isHiddenInRuntime(type);
+        entry.isLockedDoor = itemCatalog.isLockedDoor(type);
+        entry.hideWhenOpened = itemCatalog.shouldHideWhenOpened(type);
+        entry.isVariableDoor = itemCatalog.isVariableDoor(type);
+        entry.hideWhenVariableOpen = itemCatalog.shouldHideWhenVariableOpen(type);
+        entry.requiresVariable = itemCatalog.requiresVariable(type);
+        entry.swordDurability = itemCatalog.getSwordDurability(type);
         return entry;
     }
 

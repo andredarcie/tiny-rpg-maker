@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { EnemyDefinitions } from '../../runtime/domain/definitions/EnemyDefinitions';
 import { NPCDefinitions } from '../../runtime/domain/definitions/NPCDefinitions';
-import { ItemDefinitions } from '../../runtime/domain/definitions/ItemDefinitions';
+import { itemCatalog } from '../../runtime/domain/services/ItemCatalog';
 import { PICO8_COLORS, TILE_PRESETS, TileDefinitions } from '../../runtime/domain/definitions/TileDefinitions';
 import { SkillDefinitions } from '../../runtime/domain/definitions/SkillDefinitions';
 
@@ -14,8 +14,8 @@ describe('Core definitions', () => {
     expect(NPCDefinitions.definitions.length).toBeGreaterThan(0);
   });
 
-  it('ItemDefinitions exposes placeable types', () => {
-    expect(ItemDefinitions.getPlaceableTypes().length).toBeGreaterThan(0);
+  it('ItemCatalog exposes placeable types', () => {
+    expect(itemCatalog.getPlaceableTypes().length).toBeGreaterThan(0);
   });
 
   it('TileDefinitions exposes presets and colors', () => {

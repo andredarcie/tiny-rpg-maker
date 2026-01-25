@@ -1,5 +1,5 @@
 
-import { ITEM_TYPES } from '../../domain/definitions/ItemDefinitions';
+import { ITEM_TYPES } from '../../domain/constants/itemTypes';
 import { ShareConstants } from './ShareConstants';
 import { ShareDataNormalizer } from './ShareDataNormalizer';
 import { ShareMatrixCodec } from './ShareMatrixCodec';

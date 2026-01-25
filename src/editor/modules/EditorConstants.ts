@@ -1,6 +1,7 @@
 
 import { EnemyDefinitions } from '../../runtime/domain/definitions/EnemyDefinitions';
 import { ItemDefinitions } from '../../runtime/domain/definitions/ItemDefinitions';
+import { itemCatalog } from '../../runtime/domain/services/ItemCatalog';
 
 class EditorConstants {
     static get OBJECT_DEFINITIONS() {
@@ -18,7 +19,7 @@ class EditorConstants {
     }
 
     static get OBJECT_TYPE_ORDER() {
-        return ItemDefinitions.getEditorTypeOrder();
+        return itemCatalog.getEditorTypeOrder();
     }
 }
 

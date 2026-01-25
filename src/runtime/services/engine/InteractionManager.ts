@@ -1,4 +1,5 @@
-import { ItemDefinitions, ITEM_TYPES } from '../../domain/definitions/ItemDefinitions';
+import { ITEM_TYPES, type ItemType } from '../../domain/constants/itemTypes';
+import { itemCatalog } from '../../domain/services/ItemCatalog';
 import { TextResources } from '../../adapters/TextResources';
 
 type DialogManagerApi = {
@@ -20,7 +21,7 @@ type ItemState = {
 };
 
 type GameObjectState = {
-  type: string;
+  type: ItemType;
   roomIndex: number;
   x: number;
   y: number;
@@ -96,7 +97,7 @@ class InteractionManager {
     this.options = options;
   }
 
-  get types(): Record<string, string> {
+  get types(): typeof ITEM_TYPES {
     return ITEM_TYPES;
   }
 
@@ -201,7 +202,7 @@ class InteractionManager {
   }
 
   getSwordDurability(type: string): number {
-    const durability = ItemDefinitions.getSwordDurability(type);
+    const durability = itemCatalog.getSwordDurability(type);
     if (Number.isFinite(durability)) {
       return Math.max(0, durability);
     }
@@ -236,7 +237,7 @@ class InteractionManager {
   }
 
   getObjectDisplayName(type: string): string {
-    const definition = ItemDefinitions.getObjectDefinition(type);
+    const definition = itemCatalog.getItemDefinition(type);
     if (!definition) {
       return type || '';
     }

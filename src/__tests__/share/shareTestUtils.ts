@@ -1,6 +1,6 @@
 import { afterAll, vi } from 'vitest';
 import { EnemyDefinitions } from '../../runtime/domain/definitions/EnemyDefinitions';
-import { ITEM_TYPES } from '../../runtime/domain/definitions/ItemDefinitions';
+import { ITEM_TYPES } from '../../runtime/domain/constants/itemTypes';
 import { StateObjectManager } from '../../runtime/domain/state/StateObjectManager';
 import { ShareBase64 } from '../../runtime/infra/share/ShareBase64';
 import { ShareConstants } from '../../runtime/infra/share/ShareConstants';

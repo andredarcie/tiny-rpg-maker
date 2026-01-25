@@ -1,5 +1,5 @@
 import { EnemyDefinitions } from '../../domain/definitions/EnemyDefinitions';
-import { ITEM_TYPES } from '../../domain/definitions/ItemDefinitions';
+import { ITEM_TYPES } from '../../domain/constants/itemTypes';
 import { TextResources } from '../../adapters/TextResources';
 
 type GameStateApi = {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { StateObjectManager } from '../../runtime/domain/state/StateObjectManager';
-import { ITEM_TYPES } from '../../runtime/domain/definitions/ItemDefinitions';
+import { ITEM_TYPES } from '../../runtime/domain/constants/itemTypes';
 
 const createWorldManager = () => ({
   clampRoomIndex: (value: number) => {

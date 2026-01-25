@@ -1,5 +1,5 @@
 
-import { ItemDefinitions } from '../../runtime/domain/definitions/ItemDefinitions';
+import { itemCatalog } from '../../runtime/domain/services/ItemCatalog';
 import { EditorConstants } from './EditorConstants';
 class EditorObjectService {
     constructor(editorManager) {
@@ -133,7 +133,7 @@ class EditorObjectService {
             const normalized = definitions.find((entry) => entry.type === type)?.type || null;
             if (normalized) return normalized;
         }
-        const fallbackTypes = new Set(ItemDefinitions.getPlaceableTypes());
+        const fallbackTypes = new Set(itemCatalog.getPlaceableTypes());
         return fallbackTypes.has(type) ? type : null;
     }
 }

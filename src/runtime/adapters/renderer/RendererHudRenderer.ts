@@ -1,4 +1,4 @@
-import { ITEM_TYPES } from '../../domain/definitions/ItemDefinitions';
+import { ITEM_TYPES } from '../../domain/constants/itemTypes';
 
 class RendererHudRenderer {
     gameState: GameStateApi;

@@ -1,6 +1,6 @@
 
 import { StateObjectManager } from '../../../runtime/domain/state/StateObjectManager';
-import { ITEM_TYPES } from '../../../runtime/domain/definitions/ItemDefinitions';
+import { ITEM_TYPES } from '../../../runtime/domain/constants/itemTypes';
 import { EditorConstants } from '../EditorConstants';
 import { EditorRendererBase } from './EditorRendererBase';
 
