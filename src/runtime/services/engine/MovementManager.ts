@@ -37,6 +37,17 @@ type NpcState = {
   text?: string;
 };
 
+type RoomState = {
+  walls?: boolean[][];
+};
+
+type GameObjectState = {
+  isVariableDoor?: boolean;
+  variableId?: string | null;
+  isLockedDoor?: boolean;
+  opened?: boolean;
+};
+
 type TileDefinition = {
   collision?: boolean;
   category?: string;
@@ -107,7 +118,11 @@ class MovementManager {
     if (this.gameState.isPickupOverlayActive?.()) {
       return;
     }
-    const dialog = this.gameState.getDialog();
+    const dialog = this.gameState.getDialog() as {
+      active: boolean;
+      page: number;
+      maxPages: number;
+    };
     if (dialog.active) {
       if (dialog.page >= dialog.maxPages) {
         this.dialogManager.closeDialog();
@@ -177,7 +192,7 @@ class MovementManager {
 
     const enteringNewRoom = targetRoomIndex !== roomIndex;
 
-    const targetRoom = this.gameState.getGame().rooms?.[targetRoomIndex];
+    const targetRoom = this.gameState.getGame().rooms?.[targetRoomIndex] as RoomState | undefined;
     if (!targetRoom) {
       if (enteringNewRoom) {
         this.flashBlockedEdge(direction, { x: targetX, y: targetY });
@@ -192,7 +207,7 @@ class MovementManager {
       return;
     }
 
-    const objectAtTarget = this.gameState.getObjectAt(targetRoomIndex, targetX, targetY) ?? null;
+    const objectAtTarget = (this.gameState.getObjectAt(targetRoomIndex, targetX, targetY) as GameObjectState | null) ?? null;
     const isVariableDoor = Boolean(objectAtTarget?.isVariableDoor);
     if (isVariableDoor) {
       const variableId = objectAtTarget?.variableId;
@@ -217,7 +232,7 @@ class MovementManager {
         if (objectAtTarget) {
           objectAtTarget.opened = true;
         }
-        const remainingKeys = this.gameState.getKeys();
+        const remainingKeys = Number(this.gameState.getKeys());
         const message = openedWithSkill
           ? getMovementText('doors.unlockedSkill', getMovementText('doors.opened', ''))
           : Number.isFinite(remainingKeys)

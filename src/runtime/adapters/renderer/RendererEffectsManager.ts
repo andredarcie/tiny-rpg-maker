@@ -41,6 +41,14 @@ class RendererEffectsManager extends RendererModuleBase {
         }
     }
 
+    get effectsGameState(): EffectsGameState {
+        return this.gameState as EffectsGameState;
+    }
+
+    get effectsCanvasHelper(): EffectsCanvasHelper {
+        return this.canvasHelper as EffectsCanvasHelper;
+    }
+
     showCombatIndicator(text: string, options: { duration?: number } = {}) {
         const element = this.combatIndicatorElement;
         if (!element) return;
@@ -130,14 +138,14 @@ class RendererEffectsManager extends RendererModuleBase {
             return;
         }
 
-        const tileSize = Math.max(1, this.canvasHelper.getTilePixelSize());
+        const tileSize = Math.max(1, this.effectsCanvasHelper.getTilePixelSize());
         const thickness = Math.max(2, Math.floor(tileSize / 4));
         const highlightSize = tileSize;
-        const clampIndex = (value, fallback = 0) => {
+        const clampIndex = (value: number | null | undefined, fallback = 0) => {
             if (!Number.isFinite(value)) return Math.max(0, Math.min(7, Math.floor(fallback)));
             return Math.max(0, Math.min(7, Math.floor(value)));
         };
-        const player = this.gameState.getPlayer();
+        const player = this.effectsGameState.getPlayer();
         const tileX = clampIndex(state.tileX, player?.x ?? 0);
         const tileY = clampIndex(state.tileY, player?.y ?? 0);
         ctx.save();
@@ -164,3 +172,11 @@ class RendererEffectsManager extends RendererModuleBase {
 }
 
 export { RendererEffectsManager };
+
+type EffectsGameState = {
+    getPlayer: () => { x: number; y: number };
+};
+
+type EffectsCanvasHelper = {
+    getTilePixelSize: () => number;
+};

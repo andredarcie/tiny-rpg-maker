@@ -1,26 +1,32 @@
 
 import { EnemyDefinitions } from '../definitions/EnemyDefinitions';
+import type { GameDefinition, RuntimeState, EnemyDefinition, VariableDefinition } from '../../../types/gameState';
+import type { StateWorldManager } from './StateWorldManager';
 class StateEnemyManager {
-    constructor(game: unknown, state: unknown, worldManager: unknown) {
+    game: GameDefinition | null;
+    state: RuntimeState | null;
+    worldManager: StateWorldManager;
+
+    constructor(game: GameDefinition, state: RuntimeState, worldManager: StateWorldManager) {
         this.game = game;
         this.state = state;
         this.worldManager = worldManager;
     }
 
-    setGame(game: unknown) {
+    setGame(game: GameDefinition) {
         this.game = game;
     }
 
-    setState(state: unknown) {
+    setState(state: RuntimeState) {
         this.state = state;
     }
 
-    setWorldManager(worldManager: unknown) {
+    setWorldManager(worldManager: StateWorldManager) {
         this.worldManager = worldManager;
     }
 
-    cloneEnemies(enemies) {
-        const list = [];
+    cloneEnemies(enemies: EnemyDefinition[] | null | undefined): EnemyDefinition[] {
+        const list: EnemyDefinition[] = [];
         (enemies || []).forEach((enemy) => {
             const normalizedType = this.normalizeEnemyType(enemy.type);
             if (this.isBossType(normalizedType)) {
@@ -43,21 +49,21 @@ class StateEnemyManager {
         return list;
     }
 
-    resetRuntime() {
+    resetRuntime(): EnemyDefinition[] {
         if (!this.state) return [];
         this.state.enemies = this.cloneEnemies(this.game?.enemies);
         return this.state.enemies;
     }
 
-    getEnemies() {
+    getEnemies(): EnemyDefinition[] {
         return this.state?.enemies ?? [];
     }
 
-    getEnemyDefinitions() {
+    getEnemyDefinitions(): EnemyDefinition[] {
         return this.game?.enemies ?? [];
     }
 
-    addEnemy(enemy) {
+    addEnemy(enemy: EnemyDefinition): string | null {
         if (!this.game || !this.state) return null;
         const normalizedType = this.normalizeEnemyType(enemy.type);
         if (this.isBossType(normalizedType)) {
@@ -89,7 +95,7 @@ class StateEnemyManager {
         return entry.id;
     }
 
-    removeEnemy(enemyId) {
+    removeEnemy(enemyId: string) {
         if (!this.game || !this.state) return;
         this.game.enemies = this.game.enemies.filter((enemy) => enemy.id !== enemyId);
         this.state.enemies = this.state.enemies.filter((enemy) => enemy.id !== enemyId);
@@ -106,7 +112,7 @@ class StateEnemyManager {
         }
     }
 
-    setEnemyVariable(enemyId: string | number, variableId: string | null = null) {
+    setEnemyVariable(enemyId: string | number, variableId: string | null = null): boolean {
         const normalized = this.normalizeEnemyVariableId(variableId);
         let changed = false;
 
@@ -128,18 +134,18 @@ class StateEnemyManager {
         return changed;
     }
 
-    normalizeEnemyType(type) {
+    normalizeEnemyType(type: string | null | undefined): string {
         return EnemyDefinitions.normalizeType(type);
     }
 
-    isBossType(type) {
+    isBossType(type: string): boolean {
         const definition = EnemyDefinitions.getEnemyDefinition(type);
         return Boolean(definition?.boss);
     }
 
-    normalizeEnemyVariableId(variableId) {
+    normalizeEnemyVariableId(variableId: string | null | undefined): string | null {
         if (typeof variableId !== 'string') return null;
-        const definitions = Array.isArray(this.game?.variables) ? this.game.variables : [];
+        const definitions: VariableDefinition[] = Array.isArray(this.game?.variables) ? this.game.variables : [];
         return definitions.some((variable) => variable.id === variableId) ? variableId : null;
     }
 }

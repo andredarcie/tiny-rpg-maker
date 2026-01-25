@@ -25,6 +25,30 @@ class RendererOverlayRenderer extends RendererModuleBase {
         this.levelUpAnimationHandle = 0;
     }
 
+    get overlayGameState(): OverlayGameState {
+        return this.gameState as OverlayGameState;
+    }
+
+    get overlayPalette(): PaletteManagerApi {
+        return this.paletteManager as PaletteManagerApi;
+    }
+
+    get overlaySpriteFactory(): SpriteFactoryApi {
+        return this.spriteFactory as SpriteFactoryApi;
+    }
+
+    get overlayCanvasHelper(): CanvasHelperApi {
+        return this.canvasHelper as CanvasHelperApi;
+    }
+
+    get overlayEntityRenderer(): EntityRendererApi {
+        return this.entityRenderer as EntityRendererApi;
+    }
+
+    get overlayRenderer(): OverlayRendererApi {
+        return this.renderer as OverlayRendererApi;
+    }
+
     setIntroData(data: IntroDataInput = {}) {
         this.introData = {
             title: data.title || 'Tiny RPG Studio',
@@ -33,7 +57,7 @@ class RendererOverlayRenderer extends RendererModuleBase {
     }
 
     drawIntroOverlay(ctx: CanvasRenderingContext2D, gameplayCanvas: { width: number; height: number }) {
-        this.entityRenderer.cleanupEnemyLabels();
+        this.overlayEntityRenderer.cleanupEnemyLabels();
         const title = this.introData?.title || 'Tiny RPG Studio';
         const author = (this.introData?.author || '').trim();
         const width = gameplayCanvas.width;
@@ -55,7 +79,8 @@ class RendererOverlayRenderer extends RendererModuleBase {
             ctx.fillText(byline, centerX, centerY);
         }
 
-        if (this.renderer?.gameEngine?.canDismissIntroScreen) {
+        const renderer = this.overlayRenderer;
+        if (renderer?.gameEngine?.canDismissIntroScreen) {
             const blink = ((Date.now() / 500) % 2) > 1 ? 0.3 : 0.95;
             ctx.fillStyle = `rgba(100, 181, 246, ${blink.toFixed(2)})`;
             const startLabel = getOverlayText('intro.startAdventure', 'Iniciar aventura');
@@ -68,17 +93,18 @@ class RendererOverlayRenderer extends RendererModuleBase {
 
     drawLevelUpOverlay(ctx: CanvasRenderingContext2D, gameplayCanvas: { width: number; height: number }) {
         if (!ctx || !gameplayCanvas) return;
-        const overlay = this.gameState.getLevelUpOverlay?.();
+        const gameState = this.overlayGameState;
+        const overlay = gameState.getLevelUpOverlay?.();
         if (!overlay?.active) return;
-        this.entityRenderer.cleanupEnemyLabels();
+        this.overlayEntityRenderer.cleanupEnemyLabels();
         const choices = Array.isArray(overlay.choices) ? overlay.choices : [];
         const width = gameplayCanvas.width;
         const height = gameplayCanvas.height;
         const centerX = width / 2;
         const title = getOverlayText('skills.levelUpTitle', 'Level Up!');
-        const pending = Math.max(0, this.gameState.getPendingLevelUpChoices?.() || 0);
-        const accent = this.paletteManager.getColor(7) || '#FFF1E8';
-        const accentStrong = this.paletteManager.getColor(13) || accent;
+        const pending = Math.max(0, gameState.getPendingLevelUpChoices?.() || 0);
+        const accent = this.overlayPalette.getColor(7) || '#FFF1E8';
+        const accentStrong = this.overlayPalette.getColor(13) || accent;
         const titleFont = Math.max(7, Math.floor(height / 42));
         const pendingFont = Math.max(5, Math.floor(height / 70));
         const layout = this.getLevelUpCardLayout({
@@ -194,7 +220,9 @@ class RendererOverlayRenderer extends RendererModuleBase {
         { x, y, width, height, active = false, data = null }: LevelUpCardOptions
     ) {
         ctx.save();
-        const accent = active ? (this.paletteManager.getColor(13) || '#64b5f6') : (this.paletteManager.getColor(6) || '#C2C3C7');
+        const accent = active
+            ? (this.overlayPalette.getColor(13) || '#64b5f6')
+            : (this.overlayPalette.getColor(6) || '#C2C3C7');
         ctx.fillStyle = active ? 'rgba(100, 181, 246, 0.16)' : 'rgba(0, 0, 0, 0.55)';
         ctx.strokeStyle = accent;
         ctx.lineWidth = Math.max(2, Math.floor(width * 0.015));
@@ -284,13 +312,14 @@ class RendererOverlayRenderer extends RendererModuleBase {
 
     drawLevelUpCelebrationOverlay(ctx: CanvasRenderingContext2D, gameplayCanvas: { width: number; height: number }) {
         if (!ctx || !gameplayCanvas) return;
-        const overlay = this.gameState.getLevelUpCelebration?.();
+        const gameState = this.overlayGameState;
+        const overlay = gameState.getLevelUpCelebration?.();
         if (!overlay?.active) {
             this.stopLevelUpAnimationLoop();
             return;
         }
         this.ensureLevelUpAnimationLoop();
-        this.entityRenderer.cleanupEnemyLabels();
+        this.overlayEntityRenderer.cleanupEnemyLabels();
 
         const width = gameplayCanvas.width;
         const height = gameplayCanvas.height;
@@ -307,7 +336,7 @@ class RendererOverlayRenderer extends RendererModuleBase {
         const floatY = Math.sin(elapsed * 2.1) * 6;
         const boxX = Math.round(centerX - size / 2);
         const boxY = Math.round(centerY - size / 2 + floatY);
-        const accent = this.paletteManager.getColor(13) || '#F8E7A1';
+        const accent = this.overlayPalette.getColor(13) || '#F8E7A1';
 
         ctx.save();
         this.drawPickupFrame(ctx, { x: boxX, y: boxY, size, elapsed, accent });
@@ -327,7 +356,8 @@ class RendererOverlayRenderer extends RendererModuleBase {
 
     drawPickupOverlay(ctx: CanvasRenderingContext2D, gameplayCanvas: { width: number; height: number }) {
         if (!ctx || !gameplayCanvas) return;
-        const overlay = this.gameState.getPickupOverlay?.();
+        const gameState = this.overlayGameState;
+        const overlay = gameState.getPickupOverlay?.();
         if (!overlay?.active) {
             this.stopPickupAnimationLoop();
             return;
@@ -364,7 +394,7 @@ class RendererOverlayRenderer extends RendererModuleBase {
             const spriteSize = step * 8;
             const spriteX = Math.round(centerX - spriteSize / 2);
             const spriteY = Math.round(boxY + size / 2 - spriteSize / 2);
-            this.canvasHelper.drawSprite(ctx, sprite, spriteX, spriteY, step);
+            this.overlayCanvasHelper.drawSprite(ctx, sprite, spriteX, spriteY, step);
         }
 
     }
@@ -373,7 +403,7 @@ class RendererOverlayRenderer extends RendererModuleBase {
         ctx: CanvasRenderingContext2D,
         { x, y, size, elapsed = 0, accent = null }: { x: number; y: number; size: number; elapsed?: number; accent?: string | null }
     ) {
-        const accentColor = accent || this.paletteManager.getColor(2) || '#FFF1E8';
+        const accentColor = accent || this.overlayPalette.getColor(2) || '#FFF1E8';
         ctx.save();
         const gradient = ctx.createLinearGradient(x, y, x + size, y + size);
         gradient.addColorStop(0, 'rgba(7, 11, 26, 0.96)');
@@ -437,13 +467,13 @@ class RendererOverlayRenderer extends RendererModuleBase {
     ensureLevelUpAnimationLoop() {
         if (this.levelUpAnimationHandle) return;
         const step = () => {
-            if (!this.gameState.isLevelUpCelebrationActive?.()) {
+            if (!this.overlayGameState.isLevelUpCelebrationActive?.()) {
                 this.stopLevelUpAnimationLoop();
-                this.renderer?.draw?.();
+                this.overlayRenderer?.draw?.();
                 return;
             }
             this.levelUpAnimationHandle = this.schedulePickupFrame(step);
-            this.renderer?.draw?.();
+            this.overlayRenderer?.draw?.();
         };
         this.levelUpAnimationHandle = this.schedulePickupFrame(step);
     }
@@ -457,12 +487,12 @@ class RendererOverlayRenderer extends RendererModuleBase {
     ensurePickupAnimationLoop() {
         if (this.pickupAnimationHandle) return;
         const step = () => {
-            if (!this.gameState.isPickupOverlayActive?.()) {
+            if (!this.overlayGameState.isPickupOverlayActive?.()) {
                 this.stopPickupAnimationLoop();
                 return;
             }
             this.pickupAnimationHandle = this.schedulePickupFrame(step);
-            this.renderer?.draw?.();
+            this.overlayRenderer?.draw?.();
         };
         this.pickupAnimationHandle = this.schedulePickupFrame(step);
     }
@@ -511,14 +541,15 @@ class RendererOverlayRenderer extends RendererModuleBase {
         return Date.now();
     }
 
-    getPickupSprite(overlay: PickupOverlay | null = null) {
+    getPickupSprite(overlay: PickupOverlay | null = null): (number | null)[][] | null {
         if (!overlay?.spriteGroup) return null;
-        const factory = this.spriteFactory;
+        const factory = this.overlaySpriteFactory;
         if (!factory) return null;
         switch (overlay.spriteGroup) {
             case 'object': {
                 const sprites = factory.getObjectSprites();
-                return sprites?.[overlay.spriteType] || null;
+                const spriteType = overlay.spriteType || '';
+                return spriteType ? sprites?.[spriteType] || null : null;
             }
             default:
                 return null;
@@ -528,14 +559,15 @@ class RendererOverlayRenderer extends RendererModuleBase {
     drawGameOverScreen() {
         const ctx = this.ctx;
         if (!ctx) return;
-        this.entityRenderer.cleanupEnemyLabels();
+        this.overlayEntityRenderer.cleanupEnemyLabels();
         ctx.save();
         ctx.fillStyle = '#000000';
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        const reason = this.gameState.getGameOverReason();
+        const gameState = this.overlayGameState;
+        const reason = gameState.getGameOverReason();
         const isVictory = reason === 'victory';
         const endingText = isVictory
-            ? (this.gameState.getActiveEndingText() || '')
+            ? (gameState.getActiveEndingText?.() || '')
             : '';
         const hasEndingText = isVictory && endingText.trim().length > 0;
 
@@ -553,10 +585,14 @@ class RendererOverlayRenderer extends RendererModuleBase {
             ctx.textBaseline = 'top';
             ctx.fillStyle = '#F8FAFC';
 
-            const wrapLines = (text) => {
-                const sections = text.replace(/\r\n/g, '\n').split(/\n+/).map((section) => section.trim()).filter(Boolean);
+            const wrapLines = (text: string): string[] => {
+                const sections = text
+                    .replace(/\r\n/g, '\n')
+                    .split(/\n+/)
+                    .map((section) => section.trim())
+                    .filter(Boolean);
                 if (!sections.length) return [];
-                const lines = [];
+                const lines: string[] = [];
                 sections.forEach((section, index) => {
                     const words = section.split(/\s+/);
                     let current = '';
@@ -605,7 +641,7 @@ class RendererOverlayRenderer extends RendererModuleBase {
         ctx.textBaseline = 'middle';
         ctx.fillText(isVictory ? 'The End' : 'Game Over', centerX, centerY);
 
-        if (!this.gameState.canResetAfterGameOver) {
+        if (!gameState.canResetAfterGameOver) {
             ctx.restore();
             return;
         }
@@ -617,7 +653,7 @@ class RendererOverlayRenderer extends RendererModuleBase {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         const retryY = Math.round(this.canvas.height / 1.5) + 0.5;
-        const reviveLabel = this.gameState.hasNecromancerReviveReady?.()
+        const reviveLabel = gameState.hasNecromancerReviveReady?.()
             ? getOverlayText('skills.necromancer.revivePrompt', '')
             : getOverlayText(isVictory ? 'gameOver.retryVictory' : 'gameOver.retryDefeat', '');
         ctx.fillText(reviveLabel, centerX, retryY);
@@ -634,6 +670,27 @@ type IntroDataInput = {
     author?: string;
 };
 
+type OverlayRendererApi = {
+    draw?: () => void;
+    gameEngine?: { canDismissIntroScreen?: boolean };
+};
+
+type EntityRendererApi = {
+    cleanupEnemyLabels: () => void;
+};
+
+type PaletteManagerApi = {
+    getColor: (index: number) => string;
+};
+
+type SpriteFactoryApi = {
+    getObjectSprites: () => Record<string, (number | null)[][]>;
+};
+
+type CanvasHelperApi = {
+    drawSprite: (ctx: CanvasRenderingContext2D, sprite: (number | null)[][] | null, x: number, y: number, step: number) => void;
+};
+
 type SkillChoice = {
     id?: string;
     nameKey?: string;
@@ -646,6 +703,30 @@ type PickupOverlay = {
     name?: string;
     spriteGroup?: string;
     spriteType?: string;
+};
+
+type LevelUpOverlay = {
+    active?: boolean;
+    choices?: SkillChoice[];
+    cursor?: number;
+};
+
+type LevelUpCelebration = {
+    active?: boolean;
+    startTime?: number;
+};
+
+type OverlayGameState = {
+    getLevelUpOverlay?: () => LevelUpOverlay | null;
+    getPendingLevelUpChoices?: () => number;
+    getLevelUpCelebration?: () => LevelUpCelebration | null;
+    isLevelUpCelebrationActive?: () => boolean;
+    getPickupOverlay?: () => PickupOverlay | null;
+    isPickupOverlayActive?: () => boolean;
+    getGameOverReason: () => string | null;
+    getActiveEndingText?: () => string;
+    canResetAfterGameOver?: boolean;
+    hasNecromancerReviveReady?: () => boolean;
 };
 
 type LevelUpLayoutOptions = {

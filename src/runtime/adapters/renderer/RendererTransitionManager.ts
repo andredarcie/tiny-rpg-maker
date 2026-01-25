@@ -41,6 +41,30 @@ class RendererTransitionManager extends RendererModuleBase {
         this.transition = { active: false };
     }
 
+    get transitionGameState(): TransitionGameState {
+        return this.gameState as TransitionGameState;
+    }
+
+    get transitionTileManager(): TransitionTileManagerApi {
+        return this.tileManager as TransitionTileManagerApi;
+    }
+
+    get transitionPalette(): PaletteManagerApi {
+        return this.paletteManager as PaletteManagerApi;
+    }
+
+    get transitionSpriteFactory(): SpriteFactoryApi {
+        return this.spriteFactory as SpriteFactoryApi;
+    }
+
+    get transitionCanvasHelper(): CanvasHelperApi {
+        return this.canvasHelper as CanvasHelperApi;
+    }
+
+    get transitionRenderer(): TransitionRendererApi {
+        return this.renderer as TransitionRendererApi;
+    }
+
     isActive() {
         return Boolean(this.transition?.active);
     }
@@ -77,9 +101,9 @@ class RendererTransitionManager extends RendererModuleBase {
             rafId: null
         };
 
-        this.gameState.pauseGame('room-transition');
+        this.transitionGameState.pauseGame('room-transition');
 
-        this.renderer.draw();
+        this.transitionRenderer.draw();
         this.scheduleTick();
         return true;
     }
@@ -94,7 +118,7 @@ class RendererTransitionManager extends RendererModuleBase {
                 this.finish();
                 return;
             }
-            this.renderer.draw();
+            this.transitionRenderer.draw();
             this.transition.rafId = globalThis.requestAnimationFrame(tick);
         };
         this.transition.rafId = globalThis.requestAnimationFrame(tick);
@@ -144,7 +168,7 @@ class RendererTransitionManager extends RendererModuleBase {
                 break;
         }
         ctx.save();
-        ctx.fillStyle = this.paletteManager.getColor(this.gameState.getCurrentRoom()?.bg ?? 0);
+        ctx.fillStyle = this.transitionPalette.getColor(this.transitionGameState.getCurrentRoom()?.bg ?? 0);
         ctx.fillRect(0, 0, width, height);
         ctx.drawImage(transition.fromFrame, Math.round(fromX), Math.round(fromY));
         ctx.drawImage(transition.toFrame, Math.round(toX), Math.round(toY));
@@ -162,11 +186,21 @@ class RendererTransitionManager extends RendererModuleBase {
         const tileSize = Math.max(1, Math.floor(frameCanvas.width / 8));
         const tileX = Math.max(0, Math.min(7, Math.floor(coords.x ?? 0)));
         const tileY = Math.max(0, Math.min(7, Math.floor(coords.y ?? 0)));
-        const roomIndex = Number.isFinite(coords.roomIndex)
-            ? coords.roomIndex
-            : (this.gameState.getPlayer()?.roomIndex ?? 0);
-        const room = this.gameState.getGame().rooms?.[roomIndex];
-        ctx.fillStyle = this.paletteManager.getColor(room?.bg ?? 0);
+        const roomIndex = Math.max(
+            0,
+            Math.floor(
+                Number(
+                    Number.isFinite(coords.roomIndex)
+                        ? coords.roomIndex
+                        : (this.transitionGameState.getPlayer()?.roomIndex ?? 0)
+                )
+            )
+        );
+        const game = this.transitionGameState.getGame() as { rooms?: Array<{ bg?: number }> };
+        const rooms = Array.isArray(game.rooms) ? game.rooms : [];
+        const room = rooms[roomIndex];
+        const bg = typeof room?.bg === 'number' ? room.bg : 0;
+        ctx.fillStyle = this.transitionPalette.getColor(bg);
         ctx.fillRect(tileX * tileSize, tileY * tileSize, tileSize, tileSize);
         this.drawTileStackOnContext(ctx, roomIndex, tileX, tileY, tileSize);
     }
@@ -179,19 +213,19 @@ class RendererTransitionManager extends RendererModuleBase {
         const step = tileSize / 8;
         const x = path.from.x + (path.to.x - path.from.x) * progress;
         const y = path.from.y + (path.to.y - path.from.y) * progress;
-        let sprite = this.spriteFactory.getPlayerSprite();
+        let sprite = this.transitionSpriteFactory.getPlayerSprite();
         let facingLeft = path.facingLeft;
         if (facingLeft === undefined) {
             facingLeft = path.to.x < path.from.x;
         }
         if (facingLeft) {
-            sprite = this.spriteFactory.turnSpriteHorizontally(sprite);
+            sprite = this.transitionSpriteFactory.turnSpriteHorizontally(sprite);
         }
-        this.canvasHelper.drawSprite(ctx, sprite, x * tileSize, y * tileSize, step);
+        this.transitionCanvasHelper.drawSprite(ctx, sprite, x * tileSize, y * tileSize, step);
     }
 
     drawTileStackOnContext(ctx: CanvasRenderingContext2D, roomIndex: number, tileX: number, tileY: number, tileSize: number) {
-        const tileMap = this.tileManager.getTileMap(roomIndex);
+        const tileMap = this.transitionTileManager.getTileMap(roomIndex);
         if (!tileMap) return;
         const px = tileX * tileSize;
         const py = tileY * tileSize;
@@ -206,7 +240,7 @@ class RendererTransitionManager extends RendererModuleBase {
     }
 
     drawTilePixelsOnContext(ctx: CanvasRenderingContext2D, tileId: string | number, px: number, py: number, size: number) {
-        const pixels = this.tileManager.getTilePixels(tileId);
+        const pixels = this.transitionTileManager.getTilePixels(tileId);
         if (!pixels) return;
         const step = Math.max(1, Math.floor(size / 8));
         for (let y = 0; y < 8; y++) {
@@ -226,9 +260,45 @@ class RendererTransitionManager extends RendererModuleBase {
         }
         const callback = this.transition.onComplete;
         this.transition = { active: false };
-        this.gameState.resumeGame('room-transition');
+        this.transitionGameState.resumeGame('room-transition');
         callback?.();
     }
 }
 
 export { RendererTransitionManager };
+
+type TransitionRendererApi = {
+    draw: () => void;
+};
+
+type TransitionGameState = {
+    pauseGame: (reason: string) => void;
+    resumeGame: (reason: string) => void;
+    getCurrentRoom: () => { bg?: number };
+    getPlayer: () => { roomIndex?: number };
+    getGame: () => { rooms?: Array<{ bg?: number }> };
+};
+
+type TransitionTileManagerApi = {
+    getTileMap: (roomIndex: number) => { ground?: (string | number | null)[][]; overlay?: (string | number | null)[][] } | null;
+    getTilePixels: (tileId: string | number) => (string | null)[][] | null;
+};
+
+type PaletteManagerApi = {
+    getColor: (index: number) => string;
+};
+
+type SpriteFactoryApi = {
+    getPlayerSprite: () => (number | null)[][] | null;
+    turnSpriteHorizontally: (sprite: (number | null)[][] | null) => (number | null)[][] | null;
+};
+
+type CanvasHelperApi = {
+    drawSprite: (
+        ctx: CanvasRenderingContext2D,
+        sprite: (number | null)[][] | null,
+        x: number,
+        y: number,
+        step: number
+    ) => void;
+};

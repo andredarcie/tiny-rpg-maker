@@ -544,13 +544,13 @@ const TEXT_BUNDLES = {
 const TextResources = {
     defaultLocale: 'pt-BR',
     locale: 'pt-BR',
-    bundles: TEXT_BUNDLES,
+    bundles: TEXT_BUNDLES as Record<string, Record<string, string>>,
 
-    getStrings(locale = this.locale) {
+    getStrings(locale: string = this.locale): Record<string, string> {
         return this.bundles[locale] || this.bundles[this.defaultLocale] || {};
     },
 
-    detectBrowserLocale() {
+    detectBrowserLocale(): string {
         if (typeof navigator === 'undefined') {
             return this.defaultLocale;
         }
@@ -570,7 +570,7 @@ const TextResources = {
         return this.defaultLocale;
     },
 
-    setLocale(locale, { silent = false, root } = {}) {
+    setLocale(locale: string, { silent = false, root }: { silent?: boolean; root?: Document | HTMLElement } = {}): boolean {
         if (!locale || !this.bundles[locale]) {
             return false;
         }
@@ -582,11 +582,11 @@ const TextResources = {
         return true;
     },
 
-    getLocale() {
+    getLocale(): string {
         return this.locale;
     },
 
-    extend(locale, strings = {}) {
+    extend(locale: string, strings: Record<string, string> = {}): void {
         if (!locale || typeof strings !== 'object') return;
         const existing = this.bundles[locale] || {};
         this.bundles[locale] = { ...existing, ...strings };
@@ -595,7 +595,7 @@ const TextResources = {
         }
     },
 
-    get(key, fallback = '') {
+    get(key: string | null | undefined, fallback = ''): string {
         if (!key) return fallback || '';
         const strings = this.getStrings(this.locale);
         if (Object.prototype.hasOwnProperty.call(strings, key)) {
@@ -610,18 +610,23 @@ const TextResources = {
         return fallback || key || '';
     },
 
-    format(key, params = {}, fallback = '') {
+    format(
+        key: string | null | undefined,
+        params: Record<string, string | number | boolean> = {},
+        fallback = ''
+    ): string {
         const template = this.get(key, fallback);
         if (!template) return fallback || key || '';
         return template.replace(/\{(\w+)\}/g, (_, token) => {
             if (Object.prototype.hasOwnProperty.call(params, token)) {
-                return params[token];
+                const value = params[token];
+                return value === undefined || value === null ? '' : String(value);
             }
             return '';
         });
     },
 
-    apply(root = document) {
+    apply(root: Document | HTMLElement = document): void {
         if (!root || typeof root.querySelectorAll !== 'function') return;
         root.querySelectorAll('[data-text-key]').forEach((el) => {
             const key = el.getAttribute('data-text-key');
