@@ -29,32 +29,12 @@ type EnemyManagerApi = {
   checkCollisionAt: (x: number, y: number) => void;
 };
 
-type PlayerState = {
-  roomIndex: number;
-  x: number;
-  y: number;
-  lastX?: number;
-  lastRoomChangeTime?: number | null;
-};
-
-type RoomState = {
-  walls?: boolean[][];
-};
-
 type NpcState = {
   placed?: boolean;
   roomIndex: number;
   x: number;
   y: number;
   text?: string;
-};
-
-type GameObjectState = {
-  isVariableDoor?: boolean;
-  variableId?: string;
-  isLockedDoor?: boolean;
-  opened?: boolean;
-  type?: string;
 };
 
 type TileDefinition = {

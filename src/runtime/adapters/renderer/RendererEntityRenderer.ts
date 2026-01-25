@@ -296,8 +296,4 @@ type PaletteManagerApi = {
 
 type TileManagerApi = Record<string, unknown>;
 
-type EnemyDefinitionData = {
-    damage?: number;
-};
-
 export { RendererEntityRenderer };
