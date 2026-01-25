@@ -8,7 +8,6 @@ import { GameStateLifecycle } from '../../core/state/GameStateLifecycle';
 import { GameStateWorldFacade } from '../../core/state/GameStateWorldFacade';
 import { GameStateDataFacade } from '../../core/state/GameStateDataFacade';
 import { GameStateScreenManager } from '../../core/state/GameStateScreenManager';
-import { GameStatePlayerFacade } from '../../core/state/GameStatePlayerFacade';
 
 describe('Core state classes', () => {
   it('StateDataManager exports a class', () => {
@@ -47,7 +46,4 @@ describe('Core state classes', () => {
     expect(typeof GameStateScreenManager).toBe('function');
   });
 
-  it('GameStatePlayerFacade exports a class', () => {
-    expect(typeof GameStatePlayerFacade).toBe('function');
-  });
 });

@@ -72,7 +72,6 @@ class EditorExportService {
                 'js/core/state/GameStateLifecycle.js',
                 'js/core/state/GameStateScreenManager.js',
                 'js/core/state/GameStateWorldFacade.js',
-                'js/core/state/GameStatePlayerFacade.js',
                 'js/core/state/GameStateDataFacade.js',
                 'js/core/state/StateDataManager.js',
                 'js/core/GameState.js',

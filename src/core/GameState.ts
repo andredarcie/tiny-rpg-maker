@@ -3,7 +3,6 @@ import { SkillDefinitions } from './SkillDefinitions';
 import { GameStateLifecycle } from './state/GameStateLifecycle';
 import { GameStateScreenManager } from './state/GameStateScreenManager';
 import { GameStateDataFacade } from './state/GameStateDataFacade';
-import { GameStatePlayerFacade } from './state/GameStatePlayerFacade';
 import { GameStateWorldFacade } from './state/GameStateWorldFacade';
 import { StateDataManager } from './state/StateDataManager';
 import { StateDialogManager } from './state/StateDialogManager';
@@ -47,7 +46,6 @@ class GameState {
     dialogManager: StateDialogManager;
     itemManager: StateItemManager;
     worldFacade: GameStateWorldFacade;
-    playerFacade: GameStatePlayerFacade;
     screenManager: GameStateScreenManager;
     dataManager: StateDataManager;
     dataFacade: GameStateDataFacade;
@@ -147,7 +145,6 @@ class GameState {
         this.dialogManager = new StateDialogManager(this.state);
         this.itemManager = new StateItemManager(this.game);
         this.worldFacade = new GameStateWorldFacade(this, this.worldManager);
-        this.playerFacade = new GameStatePlayerFacade(this, this.playerManager);
         this.screenManager = new GameStateScreenManager(this);
         this.dataManager = new StateDataManager({
             game: this.game,
@@ -198,7 +195,7 @@ class GameState {
     }
 
     getPlayer(): PlayerRuntimeState | null {
-        return this.playerFacade.getPlayer() as PlayerRuntimeState | null;
+        return this.playerManager.getPlayer() as PlayerRuntimeState | null;
     }
 
     getSkills(): string[] {
@@ -279,7 +276,7 @@ class GameState {
     }
 
     setPlayerPosition(x: number, y: number, roomIndex: number | null = null) {
-        this.playerFacade.setPlayerPosition(x, y, roomIndex);
+        this.playerManager.setPosition(x, y, roomIndex);
     }
 
     setDialog(active: boolean, text: string = "", meta: AnyRecord | null = null): void {
@@ -361,7 +358,7 @@ class GameState {
     resetGame(): void {
         this.screenManager.reset();
         this.skillManager.resetRuntime();
-        this.playerFacade.resetPlayer();
+        this.playerManager.reset(this.game.start);
         this.dialogManager.reset();
         this.enemyManager.resetRuntime();
         this.variableManager.resetRuntime();
@@ -445,11 +442,11 @@ class GameState {
     }
 
     addKeys(amount = 1) {
-        return this.playerFacade.addKeys(amount);
+        return this.playerManager.addKeys(amount);
     }
 
     addLife(amount = 1) {
-        return this.playerFacade.addLife(amount);
+        return this.playerManager.gainLives(amount);
     }
 
     addBonusMaxLife(amount = 1) {
@@ -459,35 +456,35 @@ class GameState {
     }
 
     addDamageShield(amount = 1, type = null) {
-        return this.playerFacade.addDamageShield(amount, type);
+        return this.playerManager.addDamageShield(amount, type);
     }
 
     getDamageShield() {
-        return this.playerFacade.getDamageShield();
+        return this.playerManager.getDamageShield();
     }
 
     getDamageShieldMax() {
-        return this.playerFacade.getDamageShieldMax();
+        return this.playerManager.getDamageShieldMax();
     }
 
     getSwordType() {
-        return this.playerFacade.getSwordType();
+        return this.playerManager.getSwordType();
     }
 
     consumeKey() {
-        return this.playerFacade.consumeKey();
+        return this.playerManager.consumeKey();
     }
 
     getKeys() {
-        return this.playerFacade.getKeys();
+        return this.playerManager.getKeys();
     }
 
     getMaxKeys() {
-        return this.playerFacade.getMaxKeys();
+        return this.playerManager.getMaxKeys();
     }
 
     consumeLastDamageReduction() {
-        return this.playerFacade.consumeLastDamageReduction();
+        return this.playerManager.consumeLastDamageReduction();
     }
 
     ensureDefaultVariables(): unknown {
@@ -582,44 +579,44 @@ class GameState {
     }
 
     damagePlayer(amount = 1) {
-        return this.playerFacade.damage(amount);
+        return this.playerManager.damage(amount);
     }
 
     isPlayerOnDamageCooldown() {
-        return this.playerFacade.isOnDamageCooldown();
+        return this.playerManager.isOnDamageCooldown();
     }
 
     getLives() {
-        return this.playerFacade.getLives();
+        return this.playerManager.getLives();
     }
 
     getMaxLives() {
-        return this.playerFacade.getMaxLives();
+        return this.playerManager.getMaxLives();
     }
 
     getLevel() {
-        return this.playerFacade.getLevel();
+        return this.playerManager.getLevel();
     }
 
     healPlayerToFull() {
-        return this.playerFacade.healPlayerToFull();
+        return this.playerManager.healToFull();
     }
 
     getExperience() {
-        return this.playerFacade.getExperience();
+        return this.playerManager.getExperience();
     }
 
     getExperienceToNext() {
-        return this.playerFacade.getExperienceToNext();
+        return this.playerManager.getExperienceToNext();
     }
 
     addExperience(amount = 0): LevelUpResult | null {
-        const result = this.playerFacade.addExperience(amount);
+        const result = this.playerManager.addExperience(amount);
         return this.processLevelUpResult(result);
     }
 
     handleEnemyDefeated(experienceReward = 0): LevelUpResult | null {
-        const result = this.playerFacade.handleEnemyDefeated(experienceReward);
+        const result = this.playerManager.handleEnemyDefeated(experienceReward);
         return this.processLevelUpResult(result);
     }
 
