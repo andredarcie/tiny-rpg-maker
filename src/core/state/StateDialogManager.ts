@@ -1,10 +1,12 @@
 
+import type { AnyRecord } from '../../types/gameState';
+
 class StateDialogManager {
-    constructor(state) {
+    constructor(state: unknown) {
         this.state = state;
     }
 
-    setState(state) {
+    setState(state: unknown) {
         this.state = state;
     }
 
@@ -16,7 +18,7 @@ class StateDialogManager {
         return this.dialog;
     }
 
-    setDialog(active, text = "", meta = null) {
+    setDialog(active: boolean, text: string = "", meta: AnyRecord | null = null) {
         const dialog = this.dialog;
         if (!dialog) return;
         if (!active) {
@@ -34,7 +36,7 @@ class StateDialogManager {
         dialog.meta = meta || null;
     }
 
-    setPage(page) {
+    setPage(page: number) {
         const dialog = this.dialog;
         if (!dialog) return;
         const numeric = Number(page);

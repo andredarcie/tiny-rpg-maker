@@ -1,41 +1,41 @@
 import type { TileId } from '../tileTypes';
 
-type RoomLike = {
+type RoomState = {
     bg: number;
     tiles: number[][];
     walls: boolean[][];
 };
 
 type RendererGameState = {
-    getCurrentRoom: () => RoomLike;
+    getCurrentRoom: () => RoomState;
     getPlayer?: () => { roomIndex?: number | null };
 };
 
-type TileMapLike = {
+type TileMapState = {
     ground: (TileId | null)[][];
     overlay: (TileId | null)[][];
 };
 
-type TileManagerLike = {
-    getTileMap: (roomIndex: number) => TileMapLike | null;
+type TileManagerApi = {
+    getTileMap: (roomIndex: number) => TileMapState | null;
 };
 
-type PaletteManagerLike = {
+type PaletteManagerApi = {
     getColor: (index: number) => string;
 };
 
-type CanvasHelperLike = {
+type CanvasHelperApi = {
     getTilePixelSize: () => number;
     drawCustomTile: (tileId: TileId, px: number, py: number, size: number) => void;
 };
 
 class RendererTileRenderer {
     gameState: RendererGameState;
-    tileManager: TileManagerLike;
-    paletteManager: PaletteManagerLike;
-    canvasHelper: CanvasHelperLike;
+    tileManager: TileManagerApi;
+    paletteManager: PaletteManagerApi;
+    canvasHelper: CanvasHelperApi;
 
-    constructor(gameState: RendererGameState, tileManager: TileManagerLike, paletteManager: PaletteManagerLike, canvasHelper: CanvasHelperLike) {
+    constructor(gameState: RendererGameState, tileManager: TileManagerApi, paletteManager: PaletteManagerApi, canvasHelper: CanvasHelperApi) {
         this.gameState = gameState;
         this.tileManager = tileManager;
         this.paletteManager = paletteManager;

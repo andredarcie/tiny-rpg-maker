@@ -25,7 +25,7 @@ type RendererEngine = {
     isIntroVisible?: () => boolean;
 } & Record<string, unknown>;
 
-type TileManagerLike = {
+type TileManagerApi = {
     getAnimationFrameCount: () => number;
     advanceAnimationFrame: () => number;
 };
@@ -45,7 +45,7 @@ class Renderer {
     gameplayCanvasBounds!: { width: number; height: number };
     gameState!: RendererGameState;
     gameEngine!: RendererEngine | null;
-    tileManager!: TileManagerLike;
+    tileManager!: TileManagerApi;
     npcManager!: Record<string, unknown>;
     paletteManager!: RendererPalette;
     spriteFactory!: RendererSpriteFactory;
@@ -70,7 +70,7 @@ class Renderer {
     constructor(
         canvas: HTMLCanvasElement,
         gameState: RendererGameState,
-        tileManager: TileManagerLike,
+        tileManager: TileManagerApi,
         npcManager: Record<string, unknown>,
         gameEngine: RendererEngine | null = null
     ) {

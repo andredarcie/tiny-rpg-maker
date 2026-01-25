@@ -1,5 +1,5 @@
 
-type EditorRendererServiceLike = {
+type EditorRendererServiceApi = {
   manager: any;
   dom: any;
   state: any;
@@ -9,9 +9,9 @@ type EditorRendererServiceLike = {
 };
 
 class EditorRendererBase {
-    service: EditorRendererServiceLike;
+    service: EditorRendererServiceApi;
 
-    constructor(service: EditorRendererServiceLike) {
+    constructor(service: EditorRendererServiceApi) {
         this.service = service;
     }
 

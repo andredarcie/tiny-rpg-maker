@@ -27,7 +27,7 @@ type LevelUpLayout = {
   rects?: { x: number; y: number; width: number; height: number }[];
 };
 
-type GameStateLike = {
+type GameStateApi = {
   getGame: () => GameData;
   getPlayer?: () => { roomIndex?: number };
   resetGame: () => void;
@@ -69,7 +69,7 @@ type GameStateLike = {
   getPendingLevelUpChoices?: () => number;
 };
 
-type TileManagerLike = {
+type TileManagerApi = {
   ensureDefaultTiles: () => void;
   getTiles: () => unknown;
   getTileMap: (roomIndex: number) => unknown;
@@ -78,13 +78,13 @@ type TileManagerLike = {
   setMapTile: (x: number, y: number, tileId: string | number, roomIndex: number) => void;
 };
 
-type NpcManagerLike = {
+type NpcManagerApi = {
   ensureDefaultNPCs?: () => void;
   getNPCs: () => unknown;
   addNPC: (npc: unknown) => unknown;
 };
 
-type RendererLike = {
+type RendererApi = {
   draw: () => void;
   setIntroData: (data: IntroData) => void;
   overlayRenderer?: {
@@ -97,18 +97,18 @@ type RendererLike = {
   };
 };
 
-type DialogManagerLike = {
+type DialogManagerApi = {
   showDialog: (text: string, options?: Record<string, unknown>) => void;
   reset: () => void;
   completeDialog: () => void;
   closeDialog: () => void;
 };
 
-type InteractionManagerLike = {
+type InteractionManagerApi = {
   handlePlayerInteractions: () => void;
 };
 
-type EnemyManagerLike = {
+type EnemyManagerApi = {
   getEnemyDefinitions: () => unknown;
   getActiveEnemies: () => unknown;
   addEnemy: (enemy: unknown) => unknown;
@@ -121,23 +121,23 @@ type EnemyManagerLike = {
   checkCollisionAt: (x: number, y: number) => void;
 };
 
-type MovementManagerLike = {
+type MovementManagerApi = {
   tryMove: (dx: number, dy: number) => void;
 };
 
-type InputManagerLike = Record<string, unknown>;
+type InputManagerApi = Record<string, unknown>;
 
 export class GameEngine {
   canvas: HTMLCanvasElement;
-  gameState: GameStateLike;
-  tileManager: TileManagerLike;
-  npcManager: NpcManagerLike;
-  renderer: RendererLike;
-  dialogManager: DialogManagerLike;
-  interactionManager: InteractionManagerLike;
-  enemyManager: EnemyManagerLike;
-  movementManager: MovementManagerLike;
-  inputManager: InputManagerLike;
+  gameState: GameStateApi;
+  tileManager: TileManagerApi;
+  npcManager: NpcManagerApi;
+  renderer: RendererApi;
+  dialogManager: DialogManagerApi;
+  interactionManager: InteractionManagerApi;
+  enemyManager: EnemyManagerApi;
+  movementManager: MovementManagerApi;
+  inputManager: InputManagerApi;
   awaitingRestart: boolean;
   introVisible: boolean;
   introStartTime: number;
@@ -149,19 +149,19 @@ export class GameEngine {
     this.canvas = canvas;
 
     // Boot core subsystems
-    this.gameState = new GameState() as GameStateLike;
-    this.tileManager = new TileManager(this.gameState) as TileManagerLike;
-    this.npcManager = new NPCManager(this.gameState) as NpcManagerLike;
+    this.gameState = new GameState() as GameStateApi;
+    this.tileManager = new TileManager(this.gameState) as TileManagerApi;
+    this.npcManager = new NPCManager(this.gameState) as NpcManagerApi;
     this.npcManager.ensureDefaultNPCs?.();
-    this.renderer = new Renderer(canvas, this.gameState, this.tileManager, this.npcManager, this) as RendererLike;
-    this.dialogManager = new DialogManager(this.gameState, this.renderer) as DialogManagerLike;
+    this.renderer = new Renderer(canvas, this.gameState, this.tileManager, this.npcManager, this) as RendererApi;
+    this.dialogManager = new DialogManager(this.gameState, this.renderer) as DialogManagerApi;
     this.interactionManager = new InteractionManager(this.gameState, this.dialogManager, {
       onPlayerVictory: () => this.handleGameCompletion(),
-    }) as InteractionManagerLike;
+    }) as InteractionManagerApi;
     this.enemyManager = new EnemyManager(this.gameState, this.renderer, this.tileManager, {
       onPlayerDefeated: () => this.handlePlayerDefeat(),
       dialogManager: this.dialogManager,
-    }) as EnemyManagerLike;
+    }) as EnemyManagerApi;
     this.movementManager = new MovementManager({
       gameState: this.gameState,
       tileManager: this.tileManager,
@@ -169,8 +169,8 @@ export class GameEngine {
       dialogManager: this.dialogManager,
       interactionManager: this.interactionManager,
       enemyManager: this.enemyManager,
-    }) as MovementManagerLike;
-    this.inputManager = new InputManager(this) as InputManagerLike;
+    }) as MovementManagerApi;
+    this.inputManager = new InputManager(this) as InputManagerApi;
     this.awaitingRestart = false;
     this.introVisible = false;
     this.introStartTime = 0;

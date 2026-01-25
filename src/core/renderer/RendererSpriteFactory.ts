@@ -6,18 +6,18 @@ type Sprite = (string | null)[][];
 type SpriteOrNull = Sprite | null;
 type SpriteMap = Record<string, SpriteOrNull>;
 
-type GameStateLike = Record<string, unknown> | null;
+type GameStateApi = Record<string, unknown> | null;
 
 class RendererSpriteFactory {
     paletteManager: { getPicoPalette: () => string[] };
-    gameState: GameStateLike;
+    gameState: GameStateApi;
     playerSprite: SpriteOrNull;
     enemySprite: SpriteOrNull;
     enemySprites: SpriteMap | null;
     npcSprites: SpriteMap | null;
     objectSprites: SpriteMap | null;
 
-    constructor(paletteManager: { getPicoPalette: () => string[] }, gameState: GameStateLike = null) {
+    constructor(paletteManager: { getPicoPalette: () => string[] }, gameState: GameStateApi = null) {
         this.paletteManager = paletteManager;
         this.gameState = gameState;
         this.playerSprite = null;

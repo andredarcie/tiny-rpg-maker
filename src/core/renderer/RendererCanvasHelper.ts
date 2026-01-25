@@ -2,7 +2,7 @@ import type { TileDefinition } from '../tileTypes';
 
 type TilePixels = (string | null)[][];
 
-type TileManagerLike = {
+type TileManagerApi = {
     getTile: (tileId: string | number) => TileDefinition | null;
     getTilePixels?: (tile: TileDefinition, frameOverride?: number | null) => TilePixels | null;
 };
@@ -10,9 +10,9 @@ type TileManagerLike = {
 class RendererCanvasHelper {
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
-    tileManager: TileManagerLike | null;
+    tileManager: TileManagerApi | null;
 
-    constructor(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, tileManager: TileManagerLike | null) {
+    constructor(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, tileManager: TileManagerApi | null) {
         this.canvas = canvas;
         this.ctx = context;
         this.tileManager = tileManager || null;

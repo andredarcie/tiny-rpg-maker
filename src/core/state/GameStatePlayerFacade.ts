@@ -1,6 +1,6 @@
 
 class GameStatePlayerFacade {
-    constructor(gameState, playerManager) {
+    constructor(gameState: unknown, playerManager: unknown) {
         this.gameState = gameState;
         this.playerManager = playerManager;
     }
@@ -9,7 +9,7 @@ class GameStatePlayerFacade {
         return this.playerManager.getPlayer();
     }
 
-    setPlayerPosition(x, y, roomIndex = null) {
+    setPlayerPosition(x: number, y: number, roomIndex: number | null = null) {
         this.playerManager.setPosition(x, y, roomIndex);
     }
 

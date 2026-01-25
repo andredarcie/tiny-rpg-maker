@@ -1,12 +1,12 @@
 
 import { SkillDefinitions } from '../SkillDefinitions';
 class StateSkillManager {
-    constructor(state) {
+    constructor(state: unknown) {
         this.state = state;
         this.resetRuntime();
     }
 
-    setState(state) {
+    setState(state: unknown) {
         this.state = state;
         this.ensureRuntime();
         this.ensureOverlay();
@@ -101,13 +101,13 @@ class StateSkillManager {
         return this.ensureRuntime().owned.slice();
     }
 
-    hasSkill(skillId) {
+    hasSkill(skillId: string) {
         if (!skillId) return false;
         const runtime = this.ensureRuntime();
         return runtime.owned.includes(skillId);
     }
 
-    addSkill(skillId) {
+    addSkill(skillId: string) {
         const runtime = this.ensureRuntime();
         const definition = SkillDefinitions.getById(skillId);
         if (!definition) return null;
@@ -119,7 +119,7 @@ class StateSkillManager {
         return definition;
     }
 
-    applyImmediateEffects(definition) {
+    applyImmediateEffects(definition: { id: string }) {
         const runtime = this.ensureRuntime();
         switch (definition.id) {
             case 'xp-boost':
@@ -139,7 +139,7 @@ class StateSkillManager {
         return Math.max(0, runtime.bonusMaxLives || 0);
     }
 
-    addBonusMaxLife(amount = 1) {
+    addBonusMaxLife(amount: number = 1) {
         const runtime = this.ensureRuntime();
         const numeric = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
         if (numeric <= 0) return runtime.bonusMaxLives;
@@ -152,7 +152,7 @@ class StateSkillManager {
         return Math.max(0, Number(runtime.xpBoost) || 0);
     }
 
-    queueLevelUps(count = 1, latestLevel = null) {
+    queueLevelUps(count: number = 1, latestLevel: number | null = null) {
         const runtime = this.ensureRuntime();
         const numeric = Number.isFinite(count) ? Math.max(0, Math.floor(count)) : 0;
         if (numeric <= 0) {
@@ -245,7 +245,7 @@ class StateSkillManager {
         return choices;
     }
 
-    moveCursor(delta = 0) {
+    moveCursor(delta: number = 0) {
         const overlay = this.ensureOverlay();
         if (!overlay.active) return overlay.cursor;
         const choiceCount = overlay.choices.length;
@@ -259,7 +259,7 @@ class StateSkillManager {
         return overlay.cursor;
     }
 
-    completeSelection(index = null) {
+    completeSelection(index: number | null = null) {
         const overlay = this.ensureOverlay();
         if (!overlay.active) return null;
         const effectiveIndex = Number.isFinite(index) ? Math.max(0, Math.min(overlay.choices.length - 1, Math.floor(index))) : overlay.cursor;

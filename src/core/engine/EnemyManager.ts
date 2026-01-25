@@ -2,15 +2,15 @@ import { EnemyDefinitions } from '../EnemyDefinitions';
 import { OBJECT_TYPES } from '../ObjectDefinitions';
 import { TextResources } from '../TextResources';
 
-type GameStateLike = {
+type GameStateApi = {
   playing: boolean;
   isEditorModeActive?: () => boolean;
   getEnemyDefinitions: () => unknown;
-  getEnemies: () => EnemyLike[];
-  addEnemy: (enemy: EnemyLike) => string | null;
+  getEnemies: () => EnemyState[];
+  addEnemy: (enemy: EnemyState) => string | null;
   removeEnemy: (id: string) => void;
   getGame: () => GameData;
-  getPlayer: () => PlayerLike;
+  getPlayer: () => PlayerState;
   isPlayerOnDamageCooldown: () => boolean;
   damagePlayer: (amount: number) => number;
   consumeLastDamageReduction: () => number;
@@ -22,18 +22,18 @@ type GameStateLike = {
   isVariableOn: (id: string) => boolean;
   normalizeVariableId: (id: string | null) => string | null;
   setVariableValue: (id: string, value: boolean, persist?: boolean) => [boolean, boolean?];
-  getObjectAt?: (roomIndex: number, x: number, y: number) => GameObjectLike | null;
+  getObjectAt?: (roomIndex: number, x: number, y: number) => GameObjectState | null;
   hasSkill?: (skillId: string) => boolean;
 };
 
-type RendererLike = {
+type RendererApi = {
   draw: () => void;
   flashScreen: (payload: Record<string, unknown>) => void;
   showCombatIndicator: (text: string, options?: Record<string, unknown>) => void;
 };
 
-type TileManagerLike = {
-  getTileMap: (roomIndex: number) => TileMapLike | null;
+type TileManagerApi = {
+  getTileMap: (roomIndex: number) => TileMapState | null;
   getTile: (tileId: string | number) => TileDefinition | null;
 };
 
@@ -45,21 +45,21 @@ type Options = {
   missChance?: number;
 };
 
-type PlayerLike = {
+type PlayerState = {
   roomIndex: number;
   x: number;
   y: number;
 };
 
-type RoomLike = {
+type RoomState = {
   walls?: boolean[][];
 };
 
 type GameData = {
-  rooms: RoomLike[];
+  rooms: RoomState[];
 };
 
-type EnemyLike = {
+type EnemyState = {
   id?: string;
   type: string;
   roomIndex?: number;
@@ -69,13 +69,13 @@ type EnemyLike = {
   defeatVariableId?: string | null;
 };
 
-type GameObjectLike = {
+type GameObjectState = {
   type: string;
   opened?: boolean;
   variableId?: string | null;
 };
 
-type TileMapLike = {
+type TileMapState = {
   ground?: (string | number | null)[][];
   overlay?: (string | number | null)[][];
 };
@@ -91,7 +91,7 @@ type DefeatVariableConfig = {
   messageKey?: string;
 };
 
-type EnemyDefinitionLike = {
+type EnemyDefinitionData = {
   hasEyes?: boolean;
   damage?: number;
   activateVariableOnDefeat?: DefeatVariableConfig | null;
@@ -114,9 +114,9 @@ const formatEnemyLocaleText = (
 };
 
 class EnemyManager {
-  gameState: GameStateLike;
-  renderer: RendererLike;
-  tileManager: TileManagerLike;
+  gameState: GameStateApi;
+  renderer: RendererApi;
+  tileManager: TileManagerApi;
   onPlayerDefeated: () => void;
   interval: number;
   enemyMoveTimer: ReturnType<typeof setInterval> | null;
@@ -124,7 +124,7 @@ class EnemyManager {
   dialogManager: Options['dialogManager'] | null;
   fallbackMissChance: number;
 
-  constructor(gameState: GameStateLike, renderer: RendererLike, tileManager: TileManagerLike, options: Options = {}) {
+  constructor(gameState: GameStateApi, renderer: RendererApi, tileManager: TileManagerApi, options: Options = {}) {
     this.gameState = gameState;
     this.renderer = renderer;
     this.tileManager = tileManager;
@@ -140,11 +140,11 @@ class EnemyManager {
     return this.gameState.getEnemyDefinitions();
   }
 
-  getActiveEnemies(): EnemyLike[] {
+  getActiveEnemies(): EnemyState[] {
     return this.gameState.getEnemies();
   }
 
-  addEnemy(enemy: EnemyLike): string | null {
+  addEnemy(enemy: EnemyState): string | null {
     const id = enemy.id || this.generateEnemyId();
     const type = this.normalizeEnemyType(enemy.type);
     const addedId = this.gameState.addEnemy({
@@ -304,11 +304,11 @@ class EnemyManager {
     ];
   }
 
-  hasMovableEnemies(enemies: EnemyLike[]): boolean {
+  hasMovableEnemies(enemies: EnemyState[]): boolean {
     return Array.isArray(enemies) && enemies.length > 0;
   }
 
-  tryMoveEnemy(enemies: EnemyLike[], index: number, game: GameData): 'none' | 'moved' | 'collided' {
+  tryMoveEnemy(enemies: EnemyState[], index: number, game: GameData): 'none' | 'moved' | 'collided' {
     const enemy = enemies[index];
     if (!enemy) return 'none';
     enemy.type = this.normalizeEnemyType(enemy.type);
@@ -333,7 +333,7 @@ class EnemyManager {
     return base[Math.floor(Math.random() * base.length)];
   }
 
-  getTargetPosition(enemy: EnemyLike, direction: number[]): { x: number; y: number } {
+  getTargetPosition(enemy: EnemyState, direction: number[]): { x: number; y: number } {
     const size = this.getRoomSize();
     return {
       x: this.clamp(enemy.x + direction[0], 0, size - 1),
@@ -341,7 +341,7 @@ class EnemyManager {
     };
   }
 
-  canEnterTile(roomIndex: number, x: number, y: number, game: GameData, enemies: EnemyLike[], movingIndex: number): boolean {
+  canEnterTile(roomIndex: number, x: number, y: number, game: GameData, enemies: EnemyState[], movingIndex: number): boolean {
     const room = game.rooms[roomIndex];
     if (!room) return false;
     if (this.isBorderTile(roomIndex, x, y)) return false;
@@ -373,7 +373,7 @@ class EnemyManager {
     return false;
   }
 
-  isOccupied(enemies: EnemyLike[], movingIndex: number, roomIndex: number, x: number, y: number): boolean {
+  isOccupied(enemies: EnemyState[], movingIndex: number, roomIndex: number, x: number, y: number): boolean {
     return enemies.some((other, index) => index !== movingIndex && other.roomIndex === roomIndex && other.x === x && other.y === y);
   }
 
@@ -407,11 +407,11 @@ class EnemyManager {
     return EnemyDefinitions.normalizeType(type);
   }
 
-  getEnemyDefinition(type: string): EnemyDefinitionLike | null {
+  getEnemyDefinition(type: string): EnemyDefinitionData | null {
     return EnemyDefinitions.getEnemyDefinition(type);
   }
 
-  enemyHasEyes(enemy: EnemyLike): boolean {
+  enemyHasEyes(enemy: EnemyState): boolean {
     if (!enemy) return true;
     const definition = this.getEnemyDefinition(enemy.type);
     if (!definition) return true;
@@ -419,7 +419,7 @@ class EnemyManager {
     return true;
   }
 
-  canAssassinate(enemy: EnemyLike): boolean {
+  canAssassinate(enemy: EnemyState): boolean {
     const stealth = this.gameState.hasSkill?.('stealth');
     if (!stealth || !enemy) return false;
     const damage = this.getEnemyDamage(enemy.type);
@@ -528,7 +528,7 @@ class EnemyManager {
     return Math.random() < normalized;
   }
 
-  getDefeatVariableConfig(enemy: EnemyLike): { variableId: string; persist: boolean; message: string | null } | null {
+  getDefeatVariableConfig(enemy: EnemyState): { variableId: string; persist: boolean; message: string | null } | null {
     if (!enemy) return null;
     const definition = this.getEnemyDefinition(enemy.type);
     const baseConfig =
@@ -559,7 +559,7 @@ class EnemyManager {
     return { variableId, persist, message };
   }
 
-  tryTriggerDefeatVariable(enemy: EnemyLike): boolean {
+  tryTriggerDefeatVariable(enemy: EnemyState): boolean {
     const config = this.getDefeatVariableConfig(enemy);
     if (!config) return false;
     const [updated] = this.gameState.setVariableValue(config.variableId, true, config.persist);

@@ -1,54 +1,35 @@
+import type { GameState } from '../GameState';
 import { TextResources } from '../TextResources';
 
-type GameStateLike = {
-  game: { roomSize: number };
-  isGameOver: () => boolean;
-  isLevelUpCelebrationActive?: () => boolean;
-  isLevelUpOverlayActive?: () => boolean;
-  isPickupOverlayActive?: () => boolean;
-  getDialog: () => { active: boolean; page: number; maxPages: number };
-  setDialogPage: (page: number) => void;
-  getPlayer: () => PlayerLike;
-  getRoomCoords: (roomIndex: number) => { row: number; col: number };
-  getRoomIndex: (row: number, col: number) => number | null;
-  getGame: () => { rooms: RoomLike[]; sprites?: NpcLike[] };
-  getObjectAt: (roomIndex: number, x: number, y: number) => GameObjectLike | null;
-  isVariableOn: (variableId: string) => boolean;
-  hasSkill?: (skillId: string) => boolean;
-  consumeKey: () => boolean;
-  getKeys: () => number;
-  setPlayerPosition: (x: number, y: number, roomIndex: number | null) => void;
-};
-
-type TileManagerLike = {
-  getTileMap: (roomIndex: number) => TileMapLike | null;
+type TileManagerApi = {
+  getTileMap: (roomIndex: number) => TileMapState | null;
   getTile: (tileId: string | number) => TileDefinition | null;
 };
 
-type RendererLike = {
+type RendererApi = {
   draw: () => void;
   captureGameplayFrame: () => unknown;
   startRoomTransition: (payload: Record<string, unknown>) => boolean;
   flashEdge: (direction: string, payload: Record<string, unknown>) => void;
 };
 
-type DialogManagerLike = {
+type DialogManagerApi = {
   closeDialog: () => void;
   showDialog: (text: string, meta?: Record<string, unknown>) => void;
 };
 
-type InteractionManagerLike = {
+type InteractionManagerApi = {
   handlePlayerInteractions: () => void;
-  getNpcDialogText?: (npc: NpcLike) => string;
-  getNpcDialogMeta?: (npc: NpcLike) => Record<string, unknown> | undefined;
+  getNpcDialogText?: (npc: NpcState) => string;
+  getNpcDialogMeta?: (npc: NpcState) => Record<string, unknown> | undefined;
 };
 
-type EnemyManagerLike = {
+type EnemyManagerApi = {
   collideAt: (roomIndex: number, x: number, y: number) => boolean;
   checkCollisionAt: (x: number, y: number) => void;
 };
 
-type PlayerLike = {
+type PlayerState = {
   roomIndex: number;
   x: number;
   y: number;
@@ -56,11 +37,11 @@ type PlayerLike = {
   lastRoomChangeTime?: number | null;
 };
 
-type RoomLike = {
+type RoomState = {
   walls?: boolean[][];
 };
 
-type NpcLike = {
+type NpcState = {
   placed?: boolean;
   roomIndex: number;
   x: number;
@@ -68,7 +49,7 @@ type NpcLike = {
   text?: string;
 };
 
-type GameObjectLike = {
+type GameObjectState = {
   isVariableDoor?: boolean;
   variableId?: string;
   isLockedDoor?: boolean;
@@ -82,7 +63,7 @@ type TileDefinition = {
   name?: string;
 };
 
-type TileMapLike = {
+type TileMapState = {
   ground?: (string | number | null)[][];
   overlay?: (string | number | null)[][];
 };
@@ -98,12 +79,12 @@ const formatMovementText = (key: string, params: Record<string, unknown> = {}, f
 };
 
 class MovementManager {
-  gameState: GameStateLike;
-  tileManager: TileManagerLike;
-  renderer: RendererLike;
-  dialogManager: DialogManagerLike;
-  interactionManager: InteractionManagerLike;
-  enemyManager: EnemyManagerLike;
+  gameState: GameState;
+  tileManager: TileManagerApi;
+  renderer: RendererApi;
+  dialogManager: DialogManagerApi;
+  interactionManager: InteractionManagerApi;
+  enemyManager: EnemyManagerApi;
   transitioning: boolean;
 
   constructor({
@@ -114,12 +95,12 @@ class MovementManager {
     interactionManager,
     enemyManager,
   }: {
-    gameState: GameStateLike;
-    tileManager: TileManagerLike;
-    renderer: RendererLike;
-    dialogManager: DialogManagerLike;
-    interactionManager: InteractionManagerLike;
-    enemyManager: EnemyManagerLike;
+    gameState: GameState;
+    tileManager: TileManagerApi;
+    renderer: RendererApi;
+    dialogManager: DialogManagerApi;
+    interactionManager: InteractionManagerApi;
+    enemyManager: EnemyManagerApi;
   }) {
     this.gameState = gameState;
     this.tileManager = tileManager;
@@ -398,7 +379,7 @@ class MovementManager {
     this.renderer.draw();
   }
 
-  findNpcAt(roomIndex: number, x: number, y: number): NpcLike | null {
+  findNpcAt(roomIndex: number, x: number, y: number): NpcState | null {
     const sprites = this.gameState?.getGame()?.sprites || [];
     return (
       sprites.find((npc) => npc.placed && npc.roomIndex === roomIndex && npc.x === x && npc.y === y) ||

@@ -43,7 +43,7 @@ const createEngine = () => {
   return new GameEngineCtor(canvas)
 }
 
-type GameEngineLike = {
+type GameEngineApi = {
   tileManager: { ensureDefaultTiles: { mock: { calls: unknown[] } }; lastGetRoom?: number; lastSet?: unknown };
   npcManager: { ensureDefaultNPCs: { mock: { calls: unknown[] } } };
   renderer: {
@@ -103,7 +103,7 @@ type GameEngineLike = {
   getSprites: () => unknown[];
 };
 
-type GameEngineCtor = new (canvas: HTMLCanvasElement) => GameEngineLike;
+type GameEngineCtor = new (canvas: HTMLCanvasElement) => GameEngineApi;
 
 describe('GameEngine business rules (legacy)', () => {
   it('bootstraps subsystems and initializes intro state', () => {

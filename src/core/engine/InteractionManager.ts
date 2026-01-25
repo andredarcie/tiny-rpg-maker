@@ -1,7 +1,7 @@
 import { ObjectDefinitions, OBJECT_TYPES } from '../ObjectDefinitions';
 import { TextResources } from '../TextResources';
 
-type DialogManagerLike = {
+type DialogManagerApi = {
   showDialog: (text: string, meta?: Record<string, unknown>) => void;
 };
 
@@ -11,7 +11,7 @@ type PlayerPosition = {
   y: number;
 };
 
-type ItemLike = {
+type ItemState = {
   roomIndex: number;
   x: number;
   y: number;
@@ -19,7 +19,7 @@ type ItemLike = {
   text?: string;
 };
 
-type GameObjectLike = {
+type GameObjectState = {
   type: string;
   roomIndex: number;
   x: number;
@@ -29,7 +29,7 @@ type GameObjectLike = {
   on?: boolean;
 };
 
-type NpcLike = {
+type NpcState = {
   placed?: boolean;
   roomIndex: number;
   x: number;
@@ -41,7 +41,7 @@ type NpcLike = {
   conditionalRewardVariableId?: string | null;
 };
 
-type ExitLike = {
+type ExitState = {
   roomIndex: number;
   x: number;
   y: number;
@@ -50,17 +50,17 @@ type ExitLike = {
   targetY: number;
 };
 
-type RoomLike = Record<string, unknown>;
+type RoomState = Record<string, unknown>;
 
-type GameStateLike = {
+type GameStateApi = {
   getGame: () => {
-    items: ItemLike[];
-    sprites: NpcLike[];
-    exits: ExitLike[];
-    rooms: RoomLike[];
+    items: ItemState[];
+    sprites: NpcState[];
+    exits: ExitState[];
+    rooms: RoomState[];
   };
   getPlayer: () => PlayerPosition;
-  getObjectsForRoom?: (roomIndex: number) => GameObjectLike[];
+  getObjectsForRoom?: (roomIndex: number) => GameObjectState[];
   getPlayerEndText: (roomIndex: number) => string;
   setActiveEndingText?: (text: string) => void;
   normalizeVariableId?: (id: string | null) => string | null;
@@ -86,11 +86,11 @@ type Options = {
 };
 
 class InteractionManager {
-  gameState: GameStateLike;
-  dialogManager: DialogManagerLike;
+  gameState: GameStateApi;
+  dialogManager: DialogManagerApi;
   options?: Options;
 
-  constructor(gameState: GameStateLike, dialogManager: DialogManagerLike, options: Options = {}) {
+  constructor(gameState: GameStateApi, dialogManager: DialogManagerApi, options: Options = {}) {
     this.gameState = gameState;
     this.dialogManager = dialogManager;
     this.options = options;
@@ -110,7 +110,7 @@ class InteractionManager {
     this.checkRoomExits(game.exits, game.rooms, player);
   }
 
-  checkItems(items: ItemLike[], player: PlayerPosition): void {
+  checkItems(items: ItemState[], player: PlayerPosition): void {
     if (!Array.isArray(items)) return;
     for (const item of items) {
       const sameTile = item.roomIndex === player.roomIndex && item.x === player.x && item.y === player.y;
@@ -136,7 +136,7 @@ class InteractionManager {
     }
   }
 
-  handleCollectibleObject(object: GameObjectLike): boolean {
+  handleCollectibleObject(object: GameObjectState): boolean {
     if (object.collected) {
       return false;
     }
@@ -258,7 +258,7 @@ class InteractionManager {
     return value || fallback || '';
   }
 
-  handleSwitch(object: GameObjectLike): boolean {
+  handleSwitch(object: GameObjectState): boolean {
     const OT = this.types;
     if (object.type !== OT.SWITCH) return false;
     object.on = !object.on;
@@ -275,7 +275,7 @@ class InteractionManager {
     return true;
   }
 
-  handlePlayerEnd(object: GameObjectLike): boolean {
+  handlePlayerEnd(object: GameObjectState): boolean {
     const OT = this.types;
     if (object.type !== OT.PLAYER_END) return false;
     const endingText = this.gameState.getPlayerEndText(object.roomIndex);
@@ -284,7 +284,7 @@ class InteractionManager {
     return true;
   }
 
-  checkNpcs(npcs: NpcLike[], player: PlayerPosition): void {
+  checkNpcs(npcs: NpcState[], player: PlayerPosition): void {
     for (const npc of npcs) {
       if (!npc.placed) continue;
       const sameTile = npc.roomIndex === player.roomIndex && npc.x === player.x && npc.y === player.y;
@@ -297,7 +297,7 @@ class InteractionManager {
     }
   }
 
-  getNpcDialogText(npc: NpcLike): string {
+  getNpcDialogText(npc: NpcState): string {
     const rawConditionId = npc?.conditionVariableId || null;
     const isBardCondition = rawConditionId === 'skill:bard';
     const conditionId = isBardCondition ? null : this.gameState.normalizeVariableId?.(rawConditionId) ?? null;
@@ -322,7 +322,7 @@ class InteractionManager {
     return npc.text || 'Hello!';
   }
 
-  getNpcDialogMeta(npc: NpcLike): Record<string, unknown> | undefined {
+  getNpcDialogMeta(npc: NpcState): Record<string, unknown> | undefined {
     const rawConditionId = npc?.conditionVariableId || null;
     const isBardCondition = rawConditionId === 'skill:bard';
     const conditionId = isBardCondition ? null : this.gameState.normalizeVariableId?.(rawConditionId) ?? null;
@@ -345,7 +345,7 @@ class InteractionManager {
     return undefined;
   }
 
-  checkRoomExits(exits: ExitLike[], rooms: RoomLike[], player: PlayerPosition): void {
+  checkRoomExits(exits: ExitState[], rooms: RoomState[], player: PlayerPosition): void {
     if (!Array.isArray(exits)) return;
     for (const exit of exits) {
       const sameTile = exit.roomIndex === player.roomIndex && exit.x === player.x && exit.y === player.y;

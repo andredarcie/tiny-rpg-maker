@@ -1,21 +1,21 @@
 
 import { EnemyDefinitions } from '../EnemyDefinitions';
 class StateEnemyManager {
-    constructor(game, state, worldManager) {
+    constructor(game: unknown, state: unknown, worldManager: unknown) {
         this.game = game;
         this.state = state;
         this.worldManager = worldManager;
     }
 
-    setGame(game) {
+    setGame(game: unknown) {
         this.game = game;
     }
 
-    setState(state) {
+    setState(state: unknown) {
         this.state = state;
     }
 
-    setWorldManager(worldManager) {
+    setWorldManager(worldManager: unknown) {
         this.worldManager = worldManager;
     }
 
@@ -95,7 +95,7 @@ class StateEnemyManager {
         this.state.enemies = this.state.enemies.filter((enemy) => enemy.id !== enemyId);
     }
 
-    setEnemyPosition(enemyId, x, y, roomIndex = null) {
+    setEnemyPosition(enemyId: string | number, x: number, y: number, roomIndex: number | null = null) {
         const enemy = this.getEnemies().find((entry) => entry.id === enemyId);
         if (!enemy) return;
         enemy.lastX = enemy.x;
@@ -106,7 +106,7 @@ class StateEnemyManager {
         }
     }
 
-    setEnemyVariable(enemyId, variableId = null) {
+    setEnemyVariable(enemyId: string | number, variableId: string | null = null) {
         const normalized = this.normalizeEnemyVariableId(variableId);
         let changed = false;
 

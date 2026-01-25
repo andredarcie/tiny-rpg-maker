@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { GameStateLike, TileDefinition, TileFrame, TileMap } from '../core/tileTypes';
+import type { GameStateApi, TileDefinition, TileFrame, TileMap } from '../core/tileTypes';
 import { TileManager } from '../core/TileManager';
 
 const makeFrame = (value: string): TileFrame =>
   Array.from({ length: 8 }, () => Array.from({ length: 8 }, () => value));
 
-const createGameState = (overrides?: Partial<GameStateLike>): GameStateLike => ({
+const createGameState = (overrides?: Partial<GameStateApi>): GameStateApi => ({
   game: {
     tileset: {
       tiles: [],

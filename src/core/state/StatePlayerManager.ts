@@ -1,6 +1,13 @@
 
 class StatePlayerManager {
-    constructor(state, worldManager, skillManager = null) {
+    maxLevel: number;
+    baseMaxLives: number;
+    experienceBase: number;
+    experienceGrowth: number;
+    maxKeys: number;
+    roomChangeDamageCooldown: number;
+
+    constructor(state: unknown, worldManager: unknown, skillManager: unknown = null) {
         this.state = state;
         this.worldManager = worldManager;
         this.skillManager = skillManager;

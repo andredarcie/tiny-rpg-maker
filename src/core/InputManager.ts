@@ -4,18 +4,18 @@ type DialogState = {
   maxPages: number;
 };
 
-type GameStateLike = {
+type GameStateApi = {
   getDialog: () => DialogState;
   setDialogPage: (page: number) => void;
 };
 
-type RendererLike = {
+type RendererApi = {
   draw: () => void;
 };
 
-type GameEngineLike = {
-  gameState: GameStateLike;
-  renderer: RendererLike;
+type GameEngineApi = {
+  gameState: GameStateApi;
+  renderer: RendererApi;
   tryMove: (dx: number, dy: number) => void;
   closeDialog: () => void;
   isGameOver?: () => boolean;
@@ -43,10 +43,10 @@ type TouchStart = {
  * InputManager wires keyboard and editor pointer interactions.
  */
 class InputManager {
-  private gameEngine: GameEngineLike;
+  private gameEngine: GameEngineApi;
   private touchStart: TouchStart | null;
 
-  constructor(gameEngine: GameEngineLike) {
+  constructor(gameEngine: GameEngineApi) {
     this.gameEngine = gameEngine;
     this.touchStart = null;
     this.setupEventListeners();

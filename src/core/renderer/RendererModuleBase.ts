@@ -1,4 +1,4 @@
-type RendererLike = {
+type RendererApi = {
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D | null;
     gameState: Record<string, unknown>;
@@ -11,9 +11,9 @@ type RendererLike = {
 };
 
 class RendererModuleBase {
-    renderer: RendererLike;
+    renderer: RendererApi;
 
-    constructor(renderer: RendererLike) {
+    constructor(renderer: RendererApi) {
         this.renderer = renderer;
     }
 

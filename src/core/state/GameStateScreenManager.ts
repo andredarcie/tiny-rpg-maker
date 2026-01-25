@@ -1,6 +1,10 @@
 
 class GameStateScreenManager {
-    constructor(gameState) {
+    canResetAfterGameOver: boolean;
+    lastEndingText: string;
+    gameOverResetTimer: ReturnType<typeof setTimeout> | null;
+
+    constructor(gameState: unknown) {
         this.gameState = gameState;
         this.canResetAfterGameOver = false;
         this.lastEndingText = '';

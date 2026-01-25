@@ -1,5 +1,5 @@
 
-type EditorVariableManagerLike = {
+type EditorVariableManagerApi = {
     domCache: any;
     gameEngine: any;
     renderService: { renderObjects: () => void };
@@ -10,9 +10,9 @@ type EditorVariableManagerLike = {
 };
 
 class EditorVariableService {
-    manager: EditorVariableManagerLike;
+    manager: EditorVariableManagerApi;
 
-    constructor(editorManager: EditorVariableManagerLike) {
+    constructor(editorManager: EditorVariableManagerApi) {
         this.manager = editorManager;
     }
 

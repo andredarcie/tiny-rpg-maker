@@ -2,19 +2,19 @@ import { EnemyDefinitions } from '../EnemyDefinitions';
 import { OBJECT_TYPES } from '../ObjectDefinitions';
 
 class RendererEntityRenderer {
-    gameState: GameStateLike;
-    tileManager: TileManagerLike;
-    spriteFactory: SpriteFactoryLike;
-    canvasHelper: CanvasHelperLike;
-    paletteManager: PaletteManagerLike;
+    gameState: GameStateApi;
+    tileManager: TileManagerApi;
+    spriteFactory: SpriteFactoryApi;
+    canvasHelper: CanvasHelperApi;
+    paletteManager: PaletteManagerApi;
     viewportOffsetY?: number;
 
     constructor(
-        gameState: GameStateLike,
-        tileManager: TileManagerLike,
-        spriteFactory: SpriteFactoryLike,
-        canvasHelper: CanvasHelperLike,
-        paletteManager: PaletteManagerLike
+        gameState: GameStateApi,
+        tileManager: TileManagerApi,
+        spriteFactory: SpriteFactoryApi,
+        canvasHelper: CanvasHelperApi,
+        paletteManager: PaletteManagerApi
     ) {
         this.gameState = gameState;
         this.tileManager = tileManager;
@@ -217,14 +217,14 @@ class RendererEntityRenderer {
 
 type Sprite = (string | null)[][];
 
-type PlayerLike = {
+type PlayerState = {
     roomIndex: number;
     x: number;
     y: number;
     lastX?: number;
 };
 
-type NpcLike = {
+type NpcState = {
     placed?: boolean;
     roomIndex: number;
     x: number;
@@ -232,7 +232,7 @@ type NpcLike = {
     type: string;
 };
 
-type GameObjectLike = {
+type GameObjectState = {
     roomIndex: number;
     x: number;
     y: number;
@@ -248,14 +248,14 @@ type GameObjectLike = {
     isCollectible?: boolean;
 };
 
-type ItemLike = {
+type ItemState = {
     roomIndex: number;
     x: number;
     y: number;
     collected?: boolean;
 };
 
-type EnemyLike = {
+type EnemyState = {
     roomIndex: number;
     x: number;
     y: number;
@@ -264,20 +264,20 @@ type EnemyLike = {
 };
 
 type GameData = {
-    objects: GameObjectLike[];
-    items: ItemLike[];
-    sprites: NpcLike[];
+    objects: GameObjectState[];
+    items: ItemState[];
+    sprites: NpcState[];
 };
 
-type GameStateLike = {
+type GameStateApi = {
     getGame: () => GameData;
-    getPlayer: () => PlayerLike;
-    getEnemies?: () => EnemyLike[];
+    getPlayer: () => PlayerState;
+    getEnemies?: () => EnemyState[];
     isVariableOn?: (id: string) => boolean;
     hasSkill?: (skillId: string) => boolean;
 };
 
-type SpriteFactoryLike = {
+type SpriteFactoryApi = {
     getObjectSprites: () => Record<string, Sprite>;
     getNpcSprites: () => Record<string, Sprite>;
     getEnemySprite: (type: string | null) => Sprite | null;
@@ -285,18 +285,18 @@ type SpriteFactoryLike = {
     turnSpriteHorizontally: (sprite: Sprite) => Sprite;
 };
 
-type CanvasHelperLike = {
+type CanvasHelperApi = {
     getTilePixelSize: () => number;
     drawSprite: (ctx: CanvasRenderingContext2D, sprite: Sprite | null, x: number, y: number, step: number) => void;
 };
 
-type PaletteManagerLike = {
+type PaletteManagerApi = {
     getColor: (index: number) => string;
 };
 
-type TileManagerLike = Record<string, unknown>;
+type TileManagerApi = Record<string, unknown>;
 
-type EnemyDefinitionLike = {
+type EnemyDefinitionData = {
     damage?: number;
 };
 

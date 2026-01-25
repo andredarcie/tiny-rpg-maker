@@ -9,15 +9,15 @@ type DialogGameState = {
     getDialog: () => DialogState;
 };
 
-type PaletteManagerLike = {
+type PaletteManagerApi = {
     getColor: (index: number) => string;
 };
 
 class RendererDialogRenderer {
     gameState: DialogGameState;
-    paletteManager: PaletteManagerLike;
+    paletteManager: PaletteManagerApi;
 
-    constructor(gameState: DialogGameState, paletteManager: PaletteManagerLike) {
+    constructor(gameState: DialogGameState, paletteManager: PaletteManagerApi) {
         this.gameState = gameState;
         this.paletteManager = paletteManager;
     }

@@ -14,15 +14,62 @@ import { StatePlayerManager } from './state/StatePlayerManager';
 import { StateSkillManager } from './state/StateSkillManager';
 import { StateVariableManager } from './state/StateVariableManager';
 import { StateWorldManager } from './state/StateWorldManager';
+import type { TileMap, Tileset } from './tileTypes';
+import type {
+    AnyRecord,
+    EnemyDefinition,
+    GameDefinition,
+    LevelUpCelebrationHideOptions,
+    LevelUpCelebrationOptions,
+    LevelUpCelebrationState,
+    LevelUpOverlayState,
+    LevelUpResult,
+    PickupOverlayOptions,
+    PickupOverlayState,
+    PlayerRuntimeState,
+    ReviveSnapshot,
+    RuntimeState,
+    TestSettings
+} from '../types/gameState';
 /**
  * GameState stores the persistent game definition and runtime state.
  */
 class GameState {
+    game: GameDefinition;
+    state: RuntimeState;
+    testSettings: TestSettings;
+    worldManager: StateWorldManager;
+    variableManager: StateVariableManager;
+    objectManager: StateObjectManager;
+    enemyManager: StateEnemyManager;
+    skillManager: StateSkillManager;
+    playerManager: StatePlayerManager;
+    dialogManager: StateDialogManager;
+    itemManager: StateItemManager;
+    worldFacade: GameStateWorldFacade;
+    playerFacade: GameStatePlayerFacade;
+    screenManager: GameStateScreenManager;
+    dataManager: StateDataManager;
+    dataFacade: GameStateDataFacade;
+    playing: boolean;
+    lifecycle: GameStateLifecycle;
+    reviveSnapshot: ReviveSnapshot | null;
+    editorMode: boolean;
+
     constructor() {
         const worldRows = 3;
         const worldCols = 3;
         const roomSize = 8;
         const totalRooms = worldRows * worldCols;
+
+        const tileMaps: TileMap[] = Array.from({ length: totalRooms }, () =>
+            StateWorldManager.createEmptyTileMap(roomSize) as TileMap
+        );
+        const tileset: Tileset = {
+            tiles: [],
+            maps: tileMaps,
+            map: tileMaps[0] || StateWorldManager.createEmptyTileMap(roomSize)
+        };
 
         this.game = {
             title: "My Tiny RPG Game",
@@ -41,12 +88,8 @@ class GameState {
             objects: [],
             variables: [],
             exits: [],
-            tileset: {
-                tiles: [],
-                maps: Array.from({ length: totalRooms }, () => StateWorldManager.createEmptyTileMap(roomSize))
-            }
-        };
-        this.game.tileset.map = this.game.tileset.maps[0];
+            tileset
+        } as GameDefinition;
 
         this.state = {
             player: {
@@ -87,11 +130,11 @@ class GameState {
                 active: false,
                 level: null,
                 startTime: 0,
-                timeoutId: 0,
+                timeoutId: null,
                 durationMs: 3000
             },
             skillRuntime: null
-        };
+        } as RuntimeState;
         this.testSettings = this.createDefaultTestSettings();
 
         this.worldManager = new StateWorldManager(this.game, roomSize);
@@ -128,63 +171,63 @@ class GameState {
         });
     }
 
-    createEmptyRoom(size, index = 0, cols = 1) {
+    createEmptyRoom(size: number, index = 0, cols = 1): AnyRecord {
         return this.worldFacade.createEmptyRoom(size, index, cols);
     }
 
-    createWorldRooms(rows, cols, size) {
+    createWorldRooms(rows: number, cols: number, size: number): AnyRecord[] {
         return this.worldFacade.createWorldRooms(rows, cols, size);
     }
 
-    createEmptyTileMap(size) {
+    createEmptyTileMap(size: number): TileMap {
         return this.worldFacade.createEmptyTileMap(size);
     }
 
-    getGame() {
+    getGame(): GameDefinition {
         return this.game;
     }
 
-    getState() {
+    getState(): RuntimeState {
         return this.state;
     }
 
-    getCurrentRoom() {
+    getCurrentRoom(): AnyRecord {
         const index = this.worldManager.clampRoomIndex(this.state.player.roomIndex);
         this.state.player.roomIndex = index;
         return this.game.rooms[index];
     }
 
-    getPlayer() {
-        return this.playerFacade.getPlayer();
+    getPlayer(): PlayerRuntimeState | null {
+        return this.playerFacade.getPlayer() as PlayerRuntimeState | null;
     }
 
-    getSkills() {
+    getSkills(): string[] {
         return this.skillManager.getOwnedSkills();
     }
 
-    hasSkill(skillId) {
+    hasSkill(skillId: string): boolean {
         return this.skillManager.hasSkill(skillId);
     }
 
-    getPendingLevelUpChoices() {
+    getPendingLevelUpChoices(): number {
         return this.skillManager.getPendingSelections();
     }
 
-    getMaxPlayerLevel() {
+    getMaxPlayerLevel(): number {
         return this.playerManager?.maxLevel ?? 1;
     }
 
-    isLevelUpOverlayActive() {
+    isLevelUpOverlayActive(): boolean {
         return this.skillManager.isOverlayActive();
     }
 
-    getLevelUpOverlay() {
+    getLevelUpOverlay(): LevelUpOverlayState {
         return this.skillManager.getOverlay();
     }
 
-    startLevelUpSelectionIfNeeded() {
+    startLevelUpSelectionIfNeeded(): void {
         if (this.isLevelUpCelebrationActive()) {
-            return null;
+            return;
         }
         if (this.skillManager.hasPendingSelections() && !this.skillManager.isOverlayActive()) {
             const started = this.skillManager.startLevelSelection();
@@ -194,18 +237,18 @@ class GameState {
         }
     }
 
-    queueLevelUpChoices(count = 1, latestLevel = null) {
+    queueLevelUpChoices(count = 1, latestLevel: number | null = null): number {
         this.skillManager.queueLevelUps(count, latestLevel);
         this.startLevelUpSelectionIfNeeded();
         return this.skillManager.getPendingSelections();
     }
 
-    moveLevelUpCursor(delta = 0) {
+    moveLevelUpCursor(delta = 0): number {
         const cursor = this.skillManager.moveCursor(delta);
         return cursor;
     }
 
-    selectLevelUpSkill(index = null) {
+    selectLevelUpSkill(index: number | null = null): AnyRecord | null {
         if (!this.skillManager.isOverlayActive()) {
             return null;
         }
@@ -227,35 +270,35 @@ class GameState {
         return choice;
     }
 
-    consumeRecentReviveFlag() {
+    consumeRecentReviveFlag(): boolean {
         return this.skillManager.consumeRecentReviveFlag();
     }
 
-    getDialog() {
+    getDialog(): AnyRecord {
         return this.dialogManager.getDialog();
     }
 
-    setPlayerPosition(x, y, roomIndex = null) {
+    setPlayerPosition(x: number, y: number, roomIndex: number | null = null) {
         this.playerFacade.setPlayerPosition(x, y, roomIndex);
     }
 
-    setDialog(active, text = "", meta = null) {
+    setDialog(active: boolean, text: string = "", meta: AnyRecord | null = null): void {
         this.dialogManager.setDialog(active, text, meta);
     }
 
-    setDialogPage(page) {
+    setDialogPage(page: number): void {
         this.dialogManager.setPage(page);
     }
 
-    setEditorMode(active = false) {
+    setEditorMode(active = false): void {
         this.editorMode = Boolean(active);
     }
 
-    isEditorModeActive() {
+    isEditorModeActive(): boolean {
         return Boolean(this.editorMode);
     }
 
-    createDefaultTestSettings() {
+    createDefaultTestSettings(): TestSettings {
         return {
             startLevel: 1,
             skills: [],
@@ -263,7 +306,7 @@ class GameState {
         };
     }
 
-    getTestSettings() {
+    getTestSettings(): TestSettings {
         if (!this.testSettings) {
             this.testSettings = this.createDefaultTestSettings();
         }
@@ -276,30 +319,33 @@ class GameState {
         };
     }
 
-    setTestSettings(settings = {}) {
+    setTestSettings(settings: Partial<TestSettings> = {}): TestSettings {
         const current = this.getTestSettings();
         const maxLevel = this.playerManager?.maxLevel ?? 10;
-        const startLevel = Number.isFinite(settings.startLevel)
-            ? Math.max(1, Math.min(maxLevel, Math.floor(settings.startLevel)))
+        const requestedStart = settings.startLevel;
+        const startLevel = typeof requestedStart === 'number' && Number.isFinite(requestedStart)
+            ? Math.max(1, Math.min(maxLevel, Math.floor(requestedStart)))
             : current.startLevel;
 
-        const allSkills = typeof SkillDefinitions !== 'undefined'
+        const allSkills = (typeof SkillDefinitions !== 'undefined'
             ? SkillDefinitions.getAll?.() || []
-            : [];
-        const validSkillIds = new Set(allSkills.map((skill) => skill.id));
-        const requestedSkills = Array.isArray(settings.skills)
+            : []) as Array<{ id: string }>;
+        const validSkillIds = new Set(
+            allSkills.map((skill) => skill.id).filter((id): id is string => typeof id === 'string')
+        );
+        const requestedSkills: string[] = Array.isArray(settings.skills)
             ? settings.skills
                 .map((id) => (typeof id === 'string' ? id : null))
-                .filter((id) => id && validSkillIds.has(id))
+                .filter((id): id is string => typeof id === 'string' && validSkillIds.has(id))
             : current.skills;
-        const skills = Array.from(new Set(requestedSkills));
+        const skills = Array.from(new Set<string>(requestedSkills));
         const godMode = settings.godMode !== undefined ? Boolean(settings.godMode) : current.godMode;
 
         this.testSettings = { startLevel, skills, godMode };
         return this.getTestSettings();
     }
 
-    applyTestSettingsRuntime() {
+    applyTestSettingsRuntime(): void {
         const settings = this.getTestSettings();
         const startLevel = Number.isFinite(settings.startLevel) ? settings.startLevel : 1;
         if (this.playerManager?.setLevel) {
@@ -312,7 +358,7 @@ class GameState {
         this.playerManager?.setGodMode?.(settings.godMode);
     }
 
-    resetGame() {
+    resetGame(): void {
         this.screenManager.reset();
         this.skillManager.resetRuntime();
         this.playerFacade.resetPlayer();
@@ -330,71 +376,71 @@ class GameState {
         this.resumeGame('game-over');
     }
 
-    exportGameData() {
+    exportGameData(): unknown {
         return this.dataFacade.exportGameData();
     }
 
-    importGameData(data) {
+    importGameData(data: unknown): void {
         this.dataFacade.importGameData(data);
     }
 
-    normalizeRooms(rooms, totalRooms, cols) {
+    normalizeRooms(rooms: unknown, totalRooms: number, cols: number): unknown {
         return this.worldFacade.normalizeRooms(rooms, totalRooms, cols);
     }
 
-    normalizeTileMaps(source, totalRooms) {
+    normalizeTileMaps(source: unknown, totalRooms: number): unknown {
         return this.worldFacade.normalizeTileMaps(source, totalRooms);
     }
 
-    normalizeObjects(objects) {
+    normalizeObjects(objects: unknown): unknown {
         return this.objectManager.normalizeObjects(objects);
     }
 
-    cloneEnemies(enemies) {
+    cloneEnemies(enemies: unknown): unknown {
         return this.enemyManager.cloneEnemies(enemies);
     }
 
-    generateObjectId(type, roomIndex) {
+    generateObjectId(type: string, roomIndex: number): string {
         return this.objectManager.generateObjectId(type, roomIndex);
     }
 
-    getObjects() {
+    getObjects(): unknown {
         return this.objectManager.getObjects();
     }
 
-    getObjectsForRoom(roomIndex) {
+    getObjectsForRoom(roomIndex: number): unknown {
         return this.objectManager.getObjectsForRoom(roomIndex);
     }
 
-    getObjectAt(roomIndex, x, y) {
+    getObjectAt(roomIndex: number, x: number, y: number): unknown {
         return this.objectManager.getObjectAt(roomIndex, x, y);
     }
 
-    setObjectPosition(type, roomIndex, x, y) {
+    setObjectPosition(type: string, roomIndex: number, x: number, y: number): unknown {
         return this.objectManager.setObjectPosition(type, roomIndex, x, y);
     }
 
-    removeObject(type, roomIndex) {
+    removeObject(type: string, roomIndex: number): void {
         this.objectManager.removeObject(type, roomIndex);
     }
 
-    setObjectVariable(type, roomIndex, variableId) {
+    setObjectVariable(type: string, roomIndex: number, variableId: string | null) {
         return this.objectManager.setObjectVariable(type, roomIndex, variableId);
     }
 
-    setPlayerEndText(roomIndex, text) {
+    setPlayerEndText(roomIndex: number, text: string): string {
         return this.objectManager.setPlayerEndText(roomIndex, text);
     }
 
-    getPlayerEndText(roomIndex = null) {
+    getPlayerEndText(roomIndex: number | null = null): string {
         return this.objectManager.getPlayerEndText(roomIndex);
     }
 
-    setActiveEndingText(text = '') {
+    setActiveEndingText(text = ''): string {
         return this.screenManager.setActiveEndingText(text);
     }
 
-    getActiveEndingText() {
+    getActiveEndingText(): string {
         return this.screenManager.getActiveEndingText();
     }
 
@@ -444,93 +490,93 @@ class GameState {
         return this.playerFacade.consumeLastDamageReduction();
     }
 
-    ensureDefaultVariables() {
+    ensureDefaultVariables(): unknown {
         return this.variableManager.ensureDefaultVariables();
     }
 
-    cloneVariables(list) {
+    cloneVariables(list: unknown[]): unknown {
         return this.variableManager.cloneVariables(list);
     }
 
-    normalizeVariables(source) {
+    normalizeVariables(source: unknown): unknown {
         return this.variableManager.normalizeVariables(source);
     }
 
-    getVariableDefinitions() {
+    getVariableDefinitions(): unknown {
         return this.variableManager.getVariableDefinitions();
     }
 
-    getVariables() {
+    getVariables(): unknown {
         return this.variableManager.getVariables();
     }
 
-    normalizeVariableId(variableId) {
+    normalizeVariableId(variableId: string | number | null | undefined): string | null {
         return this.variableManager.normalizeVariableId(variableId);
     }
 
-    getVariable(variableId) {
+    getVariable(variableId: string | number | null | undefined): unknown {
         return this.variableManager.getVariable(variableId);
     }
 
-    isVariableOn(variableId) {
+    isVariableOn(variableId: string | number | null | undefined): boolean {
         return this.variableManager.isVariableOn(variableId);
     }
 
-    setVariableValue(variableId, value, persist = false) {
+    setVariableValue(variableId: string | number, value: unknown, persist = false): [boolean, boolean] {
         const success = this.variableManager.setVariableValue(variableId, value, persist);
         let openedMagicDoor = false;
         if (success) {
-            openedMagicDoor = this.objectManager.checkOpenedMagicDoor(variableId, value)
+            openedMagicDoor = this.objectManager.checkOpenedMagicDoor(variableId, value);
             this.objectManager.syncSwitchState?.(variableId, value);
         }
         return [success, openedMagicDoor];
     }
 
-    getEnemies() {
+    getEnemies(): EnemyDefinition[] {
         return this.enemyManager.getEnemies();
     }
 
-    getEnemyDefinitions() {
+    getEnemyDefinitions(): EnemyDefinition[] {
         return this.enemyManager.getEnemyDefinitions();
     }
 
-    clampRoomIndex(value) {
+    clampRoomIndex(value: number): number {
         return this.worldManager.clampRoomIndex(value);
     }
 
-    clampCoordinate(value) {
+    clampCoordinate(value: number): number {
         return this.worldManager.clampCoordinate(value);
     }
 
-    getWorldRows() {
+    getWorldRows(): number {
         return this.worldManager.getWorldRows();
     }
 
-    getWorldCols() {
+    getWorldCols(): number {
         return this.worldManager.getWorldCols();
     }
 
-    getRoomCoords(index) {
+    getRoomCoords(index: number): { row: number; col: number } {
         return this.worldManager.getRoomCoords(index);
     }
 
-    getRoomIndex(row, col) {
+    getRoomIndex(row: number, col: number): number | null {
         return this.worldManager.getRoomIndex(row, col);
     }
 
-    addEnemy(enemy) {
+    addEnemy(enemy: EnemyDefinition): string | null {
         return this.enemyManager.addEnemy(enemy);
     }
 
-    removeEnemy(enemyId) {
+    removeEnemy(enemyId: string | number): void {
         this.enemyManager.removeEnemy(enemyId);
     }
 
-    setEnemyPosition(enemyId, x, y, roomIndex = null) {
+    setEnemyPosition(enemyId: string | number, x: number, y: number, roomIndex: number | null = null): void {
         this.enemyManager.setEnemyPosition(enemyId, x, y, roomIndex);
     }
 
-    setEnemyVariable(enemyId, variableId = null) {
+    setEnemyVariable(enemyId: string | number, variableId: string | null = null): boolean {
         const normalized = this.normalizeVariableId(variableId);
         return this.enemyManager.setEnemyVariable(enemyId, normalized);
     }
@@ -567,28 +613,29 @@ class GameState {
         return this.playerFacade.getExperienceToNext();
     }
 
-    addExperience(amount = 0) {
+    addExperience(amount = 0): LevelUpResult | null {
         const result = this.playerFacade.addExperience(amount);
         return this.processLevelUpResult(result);
     }
 
-    handleEnemyDefeated(experienceReward = 0) {
+    handleEnemyDefeated(experienceReward = 0): LevelUpResult | null {
         const result = this.playerFacade.handleEnemyDefeated(experienceReward);
         return this.processLevelUpResult(result);
     }
 
-    processLevelUpResult(result = null) {
+    processLevelUpResult(result: LevelUpResult | null = null): LevelUpResult | null {
         if (result?.leveledUp) {
-            this.showLevelUpCelebration(result.level);
-            const levels = Number.isFinite(result.levelsGained)
-                ? Math.max(1, Math.floor(result.levelsGained))
-                : 1;
-            this.queueLevelUpChoices(levels, result.level);
+            this.showLevelUpCelebration(result.level ?? null);
+            const levelCount =
+                typeof result.levelsGained === 'number' && Number.isFinite(result.levelsGained)
+                    ? Math.max(1, Math.floor(result.levelsGained))
+                    : 1;
+            this.queueLevelUpChoices(levelCount, result.level ?? null);
         }
         return result;
     }
 
-    getPickupOverlay() {
+    getPickupOverlay(): PickupOverlayState {
         if (!this.state.pickupOverlay) {
             this.state.pickupOverlay = {
                 active: false,
@@ -601,7 +648,7 @@ class GameState {
         return this.state.pickupOverlay;
     }
 
-    showPickupOverlay(options = {}) {
+    showPickupOverlay(options: PickupOverlayOptions = {}): void {
         const overlay = this.getPickupOverlay();
         overlay.active = true;
         overlay.name = options.name || options.title || '';
@@ -611,7 +658,7 @@ class GameState {
         this.pauseGame('pickup-overlay');
     }
 
-    hidePickupOverlay() {
+    hidePickupOverlay(): void {
         const overlay = this.getPickupOverlay();
         if (!overlay.active) return;
         overlay.active = false;
@@ -630,46 +677,49 @@ class GameState {
         this.resumeGame('pickup-overlay');
     }
 
-    isPickupOverlayActive() {
+    isPickupOverlayActive(): boolean {
         return Boolean(this.getPickupOverlay().active);
     }
 
-    getLevelUpCelebration() {
+    getLevelUpCelebration(): LevelUpCelebrationState {
         if (!this.state.levelUpCelebration) {
             this.state.levelUpCelebration = {
                 active: false,
                 level: null,
                 startTime: 0,
-                timeoutId: 0,
+                timeoutId: null,
                 durationMs: 3000
             };
         }
         return this.state.levelUpCelebration;
     }
 
-    showLevelUpCelebration(level = null, options = {}) {
+    showLevelUpCelebration(level: number | null = null, options: LevelUpCelebrationOptions = {}): void {
         const overlay = this.getLevelUpCelebration();
-        const numericLevel = Number.isFinite(level) ? Math.max(1, Math.floor(level)) : this.getLevel();
+        const numericLevel =
+            typeof level === 'number' && Number.isFinite(level) ? Math.max(1, Math.floor(level)) : this.getLevel();
         overlay.active = true;
         overlay.level = numericLevel;
         overlay.startTime = this.getNow();
-        overlay.durationMs = Number.isFinite(options.durationMs)
-            ? Math.max(300, Math.floor(options.durationMs))
-            : (overlay.durationMs || 3000);
-        if (overlay.timeoutId) {
+        const durationSetting = options.durationMs;
+        overlay.durationMs =
+            typeof durationSetting === 'number' && Number.isFinite(durationSetting)
+                ? Math.max(300, Math.floor(durationSetting))
+                : overlay.durationMs || 3000;
+        if (overlay.timeoutId !== null) {
             clearTimeout(overlay.timeoutId);
-            overlay.timeoutId = 0;
+            overlay.timeoutId = null;
         }
         const duration = overlay.durationMs || 3000;
         overlay.timeoutId = setTimeout(() => this.hideLevelUpCelebration(), duration);
         this.pauseGame('level-up-celebration');
     }
 
-    hideLevelUpCelebration({ skipResume = false } = {}) {
+    hideLevelUpCelebration({ skipResume = false }: LevelUpCelebrationHideOptions = {}): void {
         const overlay = this.getLevelUpCelebration();
-        if (overlay.timeoutId) {
+        if (overlay.timeoutId !== null) {
             clearTimeout(overlay.timeoutId);
-            overlay.timeoutId = 0;
+            overlay.timeoutId = null;
         }
         const wasActive = overlay.active;
         overlay.active = false;
@@ -682,23 +732,23 @@ class GameState {
         }
     }
 
-    isLevelUpCelebrationActive() {
+    isLevelUpCelebrationActive(): boolean {
         return Boolean(this.getLevelUpCelebration().active);
     }
 
-    getNow() {
+    getNow(): number {
         if (typeof performance !== 'undefined' && performance.now) {
             return performance.now();
         }
         return Date.now();
     }
 
-    enableGameOverInteraction() {
+    enableGameOverInteraction(): void {
         this.screenManager.clearGameOverCooldown?.();
         this.screenManager.canResetAfterGameOver = true;
     }
 
-    prepareNecromancerRevive() {
+    prepareNecromancerRevive(): boolean {
         if (!this.skillManager.hasPendingManualRevive?.()) {
             return false;
         }
@@ -706,11 +756,11 @@ class GameState {
         return Boolean(this.reviveSnapshot);
     }
 
-    hasNecromancerReviveReady() {
+    hasNecromancerReviveReady(): boolean {
         return Boolean(this.skillManager.hasPendingManualRevive?.() && this.reviveSnapshot);
     }
 
-    reviveFromNecromancer() {
+    reviveFromNecromancer(): boolean {
         if (!this.hasNecromancerReviveReady()) return false;
         const restored = this.restoreReviveSnapshot(this.reviveSnapshot);
         this.reviveSnapshot = null;
@@ -728,18 +778,18 @@ class GameState {
             this.state.player.currentLives = maxLives;
             this.state.player.lives = maxLives;
         }
-        this.lifecycle.setGameOver(false, null);
+        this.lifecycle.setGameOver(false);
         this.lifecycle.resumeGame('game-over');
         this.screenManager.clearGameOverCooldown?.();
         return true;
     }
 
-    clearNecromancerRevive() {
+    clearNecromancerRevive(): void {
         this.reviveSnapshot = null;
         this.skillManager.clearManualReviveFlag?.();
     }
 
-    captureReviveSnapshot() {
+    captureReviveSnapshot(): ReviveSnapshot | null {
         try {
             const gameCopy = this.safeClone(this.game);
             const stateCopy = this.safeClone(this.state);
@@ -750,7 +800,7 @@ class GameState {
         }
     }
 
-    restoreReviveSnapshot(snapshot = null) {
+    restoreReviveSnapshot(snapshot: ReviveSnapshot | null = null): boolean {
         if (!snapshot?.game || !snapshot?.state) return false;
         try {
             this.assignData(this.game, snapshot.game);
@@ -766,7 +816,7 @@ class GameState {
         }
     }
 
-    assignData(target, source) {
+    assignData(target: AnyRecord | null | undefined, source: AnyRecord | null | undefined): void {
         if (!target || !source) return;
         Object.keys(target).forEach((key) => {
             delete target[key];
@@ -776,34 +826,34 @@ class GameState {
         });
     }
 
-    safeClone(value) {
+    safeClone<T>(value: T): T {
         if (typeof structuredClone === 'function') {
             return structuredClone(value);
         }
         return JSON.parse(JSON.stringify(value));
     }
 
-    pauseGame(reason = 'manual') {
+    pauseGame(reason = 'manual'): void {
         this.lifecycle.pauseGame(reason);
     }
 
-    resumeGame(reason = 'manual') {
+    resumeGame(reason = 'manual'): void {
         this.lifecycle.resumeGame(reason);
     }
 
-    setGameOver(active = true, reason = 'defeat') {
+    setGameOver(active = true, reason = 'defeat'): void {
         this.lifecycle.setGameOver(active, reason);
     }
 
-    isGameOver() {
+    isGameOver(): boolean {
         return this.lifecycle.isGameOver();
     }
 
-    getGameOverReason() {
+    getGameOverReason(): string | null {
         return this.lifecycle.getGameOverReason();
     }
 
-    get canResetAfterGameOver() {
+    get canResetAfterGameOver(): boolean {
         return this.screenManager.canResetAfterGameOver;
     }
 }

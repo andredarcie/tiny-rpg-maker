@@ -8,13 +8,13 @@ const EditorObjectTypes = OBJECT_TYPES;
 const PLAYER_END_TYPE = EditorObjectTypes.PLAYER_END;
 const DOOR_VARIABLE_TYPE = EditorObjectTypes.DOOR_VARIABLE;
 
-type ObjectDefinitionLike = {
+type ObjectDefinitionView = {
     type: string;
     name?: string;
     nameKey?: string;
 };
 
-type EditorObjectLike = {
+type EditorObject = {
     id?: string;
     type: string;
     roomIndex: number;
@@ -33,7 +33,7 @@ class EditorObjectRenderer extends EditorRendererBase {
         if (!container) return;
         container.innerHTML = '';
 
-        const definitions = EditorConstants.OBJECT_DEFINITIONS as ObjectDefinitionLike[];
+        const definitions = EditorConstants.OBJECT_DEFINITIONS as ObjectDefinitionView[];
         if (!Array.isArray(definitions) || !definitions.length) return;
 
         const selectedType = this.manager.selectedObjectType;
@@ -82,10 +82,10 @@ class EditorObjectRenderer extends EditorRendererBase {
         container.innerHTML = '';
 
         const objects = (this.gameEngine.getObjectsForRoom(this.state.activeRoomIndex) ||
-            []) as EditorObjectLike[];
-        const definitions = EditorConstants.OBJECT_DEFINITIONS as ObjectDefinitionLike[];
+            []) as EditorObject[];
+        const definitions = EditorConstants.OBJECT_DEFINITIONS as ObjectDefinitionView[];
 
-        objects.forEach((object: EditorObjectLike) => {
+        objects.forEach((object: EditorObject) => {
             const card = document.createElement('div');
             card.className = 'object-card';
             card.dataset.type = object.type;
@@ -258,7 +258,7 @@ class EditorObjectRenderer extends EditorRendererBase {
         renderer.drawObjectSprite(ctx, type, 0, 0, step);
     }
 
-    getObjectLabel(type: string, definitions: ObjectDefinitionLike[]): string {
+    getObjectLabel(type: string, definitions: ObjectDefinitionView[]): string {
         const def = definitions.find((entry) => entry.type === type);
         if (def?.nameKey) {
             return this.t(def.nameKey, def?.name || type);

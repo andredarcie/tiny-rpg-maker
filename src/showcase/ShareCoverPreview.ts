@@ -11,7 +11,7 @@ type ShareCoverOptions = {
 
 type TilePixels = (string | null)[][];
 
-type ShareMapLike = {
+type ShareMapData = {
   ground?: (number | null)[][];
   overlay?: (number | null)[][];
 };
@@ -19,7 +19,7 @@ type ShareMapLike = {
 type ShareGameData = {
   title?: string;
   author?: string;
-  tileset?: { map?: ShareMapLike | null } | null;
+  tileset?: { map?: ShareMapData | null } | null;
 };
 
 class ShareCoverPreview {
@@ -125,7 +125,7 @@ class ShareCoverPreview {
         ctx.fillRect(0, 0, this.width, this.height);
     }
 
-    drawMapPreview(map: ShareMapLike | undefined = {}): void {
+    drawMapPreview(map: ShareMapData | undefined = {}): void {
         const ctx = this.ctx;
         if (!ctx) return;
         const ground = Array.isArray(map?.ground) ? map.ground : [];

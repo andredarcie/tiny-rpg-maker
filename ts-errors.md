@@ -1,89 +1,8 @@
-src/__tests__/engine/EnemyManager.test.ts(46,34): error TS2345: Argument of type '(_key: string, _params: Record<string, unknown>, fallback?: string | undefined) => string' is not assignable to parameter of type '(key: any, params?: {} | undefined, fallback?: string | undefined) => any'.
-  Types of parameters '_params' and 'params' are incompatible.
-    Type '{} | undefined' is not assignable to type 'Record<string, unknown>'.
-      Type 'undefined' is not assignable to type 'Record<string, unknown>'.
-src/__tests__/engine/EnemyManager.test.ts(47,37): error TS2345: Argument of type '(type: string) => string' is not assignable to parameter of type '(type: EnemyTypeInput) => string'.
-  Types of parameters 'type' and 'type' are incompatible.
-    Type 'EnemyTypeInput' is not assignable to type 'string'.
-      Type 'undefined' is not assignable to type 'string'.
-src/__tests__/engine/EnemyManager.test.ts(48,47): error TS2740: Type '{ damage: number; }' is missing the following properties from type 'EnemyDefinition': type, id, name, nameKey, and 5 more.
-src/__tests__/engine/EnemyManager.test.ts(55,38): error TS2345: Argument of type '{ playing: boolean; getEnemyDefinitions: Mock<() => never[]>; getEnemies: Mock<() => never[]>; addEnemy: Mock<() => string>; removeEnemy: Mock<Procedure>; getGame: Mock<...>; ... 7 more ...; setVariableValue: Mock<...>; }' is not assignable to parameter of type 'GameStateLike'.
+src/__tests__/engine/EnemyManager.test.ts(96,17): error TS2774: This condition will always return true since this function is always defined. Did you mean to call it instead?
+src/__tests__/engine/EnemyManager.test.ts(208,43): error TS2345: Argument of type '{ playing: boolean; game: { roomSize: number; }; getEnemyDefinitions: Mock<() => never[]>; getEnemies: Mock<() => { id: string; type: string; roomIndex: number; x: number; y: number; lastX: number; }[]>; ... 23 more ...; setPlayerPosition: (x: number, y: number, roomIndex: number | null) => void; }' is not assignable to parameter of type 'GameStateLike'.
   The types returned by 'setVariableValue(...)' are incompatible between these types.
     Type 'boolean[]' is not assignable to type '[boolean, (boolean | undefined)?]'.
       Target requires 1 element(s) but source may have fewer.
-src/__tests__/engine/EnemyManager.test.ts(57,33): error TS2345: Argument of type '{ type: string; }' is not assignable to parameter of type 'EnemyLike'.
-  Type '{ type: string; }' is missing the following properties from type 'EnemyLike': x, y
-src/__tests__/engine/EnemyManager.test.ts(65,38): error TS2345: Argument of type '{ playing: boolean; getEnemyDefinitions: Mock<() => never[]>; getEnemies: Mock<() => never[]>; addEnemy: Mock<() => string>; removeEnemy: Mock<Procedure>; getGame: Mock<...>; ... 7 more ...; setVariableValue: Mock<...>; }' is not assignable to parameter of type 'GameStateLike'.
-  The types returned by 'setVariableValue(...)' are incompatible between these types.
-    Type 'boolean[]' is not assignable to type '[boolean, (boolean | undefined)?]'.
-      Target requires 1 element(s) but source may have fewer.
-src/__tests__/engine/EnemyManager.test.ts(72,38): error TS2345: Argument of type '{ playing: boolean; getEnemyDefinitions: Mock<() => never[]>; getEnemies: Mock<() => never[]>; addEnemy: Mock<() => string>; removeEnemy: Mock<Procedure>; getGame: Mock<...>; ... 7 more ...; setVariableValue: Mock<...>; }' is not assignable to parameter of type 'GameStateLike'.
-  The types returned by 'setVariableValue(...)' are incompatible between these types.
-    Type 'boolean[]' is not assignable to type '[boolean, (boolean | undefined)?]'.
-      Target requires 1 element(s) but source may have fewer.
-src/__tests__/engine/EnemyManager.test.ts(79,38): error TS2345: Argument of type '{ playing: boolean; getEnemyDefinitions: Mock<() => never[]>; getEnemies: Mock<() => never[]>; addEnemy: Mock<() => string>; removeEnemy: Mock<Procedure>; getGame: Mock<...>; ... 7 more ...; setVariableValue: Mock<...>; }' is not assignable to parameter of type 'GameStateLike'.
-  The types returned by 'setVariableValue(...)' are incompatible between these types.
-    Type 'boolean[]' is not assignable to type '[boolean, (boolean | undefined)?]'.
-      Target requires 1 element(s) but source may have fewer.
-src/__tests__/engine/EnemyManager.test.ts(82,17): error TS2774: This condition will always return true since this function is always defined. Did you mean to call it instead?
-src/__tests__/engine/EnemyManager.test.ts(103,47): error TS2740: Type '{ activateVariableOnDefeat: { variableId: string; message: string; }; }' is missing the following properties from type 'EnemyDefinition': type, id, name, nameKey, and 6 more.
-src/__tests__/engine/EnemyManager.test.ts(107,38): error TS2345: Argument of type '{ playing: boolean; getEnemyDefinitions: Mock<() => never[]>; getEnemies: Mock<() => never[]>; addEnemy: Mock<() => string>; removeEnemy: Mock<Procedure>; getGame: Mock<...>; ... 7 more ...; setVariableValue: Mock<...>; }' is not assignable to parameter of type 'GameStateLike'.
-  The types returned by 'setVariableValue(...)' are incompatible between these types.
-    Type 'boolean[]' is not assignable to type '[boolean, (boolean | undefined)?]'.
-      Target requires 1 element(s) but source may have fewer.
-src/__tests__/engine/EnemyManager.test.ts(109,53): error TS2345: Argument of type '{ type: string; }' is not assignable to parameter of type 'EnemyLike'.
-  Type '{ type: string; }' is missing the following properties from type 'EnemyLike': x, y
-src/__tests__/engine/EnemyManager.test.ts(122,38): error TS2345: Argument of type '{ getEnemies: Mock<() => { id: string; type: string; roomIndex: number; x: number; y: number; }[]>; isPlayerOnDamageCooldown: Mock<() => boolean>; playing: boolean; getEnemyDefinitions: Mock<...>; ... 9 more ...; setVariableValue: Mock<...>; }' is not assignable to parameter of type 'GameStateLike'.
-  The types returned by 'setVariableValue(...)' are incompatible between these types.
-    Type 'boolean[]' is not assignable to type '[boolean, (boolean | undefined)?]'.
-      Target requires 1 element(s) but source may have fewer.
-src/__tests__/engine/EnemyManager.test.ts(193,43): error TS2345: Argument of type '{ playing: boolean; game: { roomSize: number; }; getEnemyDefinitions: Mock<() => never[]>; getEnemies: Mock<() => { id: string; type: string; roomIndex: number; x: number; y: number; lastX: number; }[]>; ... 23 more ...; setPlayerPosition: (x: number, y: number, roomIndex: number | null) => void; }' is not assignable to parameter of type 'GameStateLike'.
-  The types returned by 'setVariableValue(...)' are incompatible between these types.
-    Type 'boolean[]' is not assignable to type '[boolean, (boolean | undefined)?]'.
-      Target requires 1 element(s) but source may have fewer.
-src/__tests__/engine/InteractionManager.test.ts(38,41): error TS2345: Argument of type '(type: string) => { name: string; }' is not assignable to parameter of type '(type: any) => { type: string; id: string; name: string; nameKey: string; behavior: { order: number; tags: string[]; swordDurability?: undefined; }; sprite: SpriteMatrix; spriteOn?: undefined; } | { ...; } | { ...; } | null'.
-  Type '{ name: string; }' is not assignable to type '{ type: string; id: string; name: string; nameKey: string; behavior: { order: number; tags: string[]; swordDurability?: undefined; }; sprite: SpriteMatrix; spriteOn?: undefined; } | { ...; } | { ...; } | null'.
-    Type '{ name: string; }' is missing the following properties from type '{ type: string; id: string; name: string; nameKey: string; behavior: { order: number; swordDurability: number; tags: string[]; }; sprite: SpriteMatrix; spriteOn?: undefined; }': type, id, nameKey, behavior, sprite
-src/__tests__/engine/InteractionManager.test.ts(41,34): error TS2345: Argument of type '(_key: string, _params: Record<string, unknown>, fallback?: string | undefined) => string' is not assignable to parameter of type '(key: any, params?: {} | undefined, fallback?: string | undefined) => any'.
-  Types of parameters '_params' and 'params' are incompatible.
-    Type '{} | undefined' is not assignable to type 'Record<string, unknown>'.
-      Type 'undefined' is not assignable to type 'Record<string, unknown>'.
-src/__tests__/engine/InteractionManager.test.ts(46,44): error TS2345: Argument of type '{ getGame: () => { items: never[]; sprites: never[]; exits: never[]; rooms: never[]; }; getPlayer: () => { roomIndex: number; x: number; y: number; }; getObjectsForRoom: () => never[]; getPlayerEndText: () => string; setActiveEndingText: Mock<...>; ... 15 more ...; getRoomIndex: Mock<...>; }' is not assignable to parameter of type 'GameStateLike'.
-  Types of property 'setVariableValue' are incompatible.
-    Type 'Mock<() => boolean[]>' is not assignable to type '((id: string, value: boolean, persist?: boolean | undefined) => [boolean, (boolean | undefined)?]) | undefined'.
-      Type 'Mock<() => boolean[]>' is not assignable to type '(id: string, value: boolean, persist?: boolean | undefined) => [boolean, (boolean | undefined)?]'.
-        Type 'boolean[]' is not assignable to type '[boolean, (boolean | undefined)?]'.
-          Target requires 1 element(s) but source may have fewer.
-src/__tests__/engine/InteractionManager.test.ts(49,53): error TS2345: Argument of type '{ type: string; collected: boolean; }' is not assignable to parameter of type 'GameObjectLike'.
-  Type '{ type: string; collected: boolean; }' is missing the following properties from type 'GameObjectLike': roomIndex, x, y
-src/__tests__/engine/InteractionManager.test.ts(61,44): error TS2345: Argument of type '{ getGame: () => { items: never[]; sprites: never[]; exits: never[]; rooms: never[]; }; getPlayer: () => { roomIndex: number; x: number; y: number; }; getObjectsForRoom: () => never[]; getPlayerEndText: () => string; setActiveEndingText: Mock<...>; ... 15 more ...; getRoomIndex: Mock<...>; }' is not assignable to parameter of type 'GameStateLike'.
-  Types of property 'setVariableValue' are incompatible.
-    Type 'Mock<() => boolean[]>' is not assignable to type '((id: string, value: boolean, persist?: boolean | undefined) => [boolean, (boolean | undefined)?]) | undefined'.
-      Type 'Mock<() => boolean[]>' is not assignable to type '(id: string, value: boolean, persist?: boolean | undefined) => [boolean, (boolean | undefined)?]'.
-        Type 'boolean[]' is not assignable to type '[boolean, (boolean | undefined)?]'.
-          Target requires 1 element(s) but source may have fewer.
-src/__tests__/engine/InteractionManager.test.ts(64,42): error TS2345: Argument of type '{ type: string; on: boolean; variableId: string; }' is not assignable to parameter of type 'GameObjectLike'.
-  Type '{ type: string; on: boolean; variableId: string; }' is missing the following properties from type 'GameObjectLike': roomIndex, x, y
-src/__tests__/engine/InteractionManager.test.ts(75,44): error TS2345: Argument of type '{ getGame: () => { items: never[]; sprites: never[]; exits: never[]; rooms: never[]; }; getPlayer: () => { roomIndex: number; x: number; y: number; }; getObjectsForRoom: () => never[]; getPlayerEndText: () => string; setActiveEndingText: Mock<...>; ... 15 more ...; getRoomIndex: Mock<...>; }' is not assignable to parameter of type 'GameStateLike'.
-  Types of property 'setVariableValue' are incompatible.
-    Type 'Mock<() => boolean[]>' is not assignable to type '((id: string, value: boolean, persist?: boolean | undefined) => [boolean, (boolean | undefined)?]) | undefined'.
-      Type 'Mock<() => boolean[]>' is not assignable to type '(id: string, value: boolean, persist?: boolean | undefined) => [boolean, (boolean | undefined)?]'.
-        Type 'boolean[]' is not assignable to type '[boolean, (boolean | undefined)?]'.
-          Target requires 1 element(s) but source may have fewer.
-src/__tests__/engine/InteractionManager.test.ts(77,43): error TS2345: Argument of type '{ conditionVariableId: string; conditionText: string; text: string; }' is not assignable to parameter of type 'NpcLike'.
-  Type '{ conditionVariableId: string; conditionText: string; text: string; }' is missing the following properties from type 'NpcLike': roomIndex, x, y
-src/__tests__/engine/InteractionManager.test.ts(89,44): error TS2345: Argument of type '{ getGame: () => { items: never[]; sprites: never[]; exits: never[]; rooms: never[]; }; getPlayer: () => { roomIndex: number; x: number; y: number; }; getObjectsForRoom: () => never[]; getPlayerEndText: () => string; setActiveEndingText: Mock<...>; ... 15 more ...; getRoomIndex: Mock<...>; }' is not assignable to parameter of type 'GameStateLike'.
-  Types of property 'setVariableValue' are incompatible.
-    Type 'Mock<() => boolean[]>' is not assignable to type '((id: string, value: boolean, persist?: boolean | undefined) => [boolean, (boolean | undefined)?]) | undefined'.
-      Type 'Mock<() => boolean[]>' is not assignable to type '(id: string, value: boolean, persist?: boolean | undefined) => [boolean, (boolean | undefined)?]'.
-        Type 'boolean[]' is not assignable to type '[boolean, (boolean | undefined)?]'.
-          Target requires 1 element(s) but source may have fewer.
-src/__tests__/engine/MovementManager.test.ts(59,34): error TS2345: Argument of type '(_key: string, _params: Record<string, unknown>, fallback?: string | undefined) => string' is not assignable to parameter of type '(key: any, params?: {} | undefined, fallback?: string | undefined) => any'.
-  Types of parameters '_params' and 'params' are incompatible.
-    Type '{} | undefined' is not assignable to type 'Record<string, unknown>'.
-      Type 'undefined' is not assignable to type 'Record<string, unknown>'.
-src/__tests__/engine/MovementManager.test.ts(98,5): error TS2322: Type '(skill: string) => skill is "water-walker"' is not assignable to type '() => boolean'.
-  Target signature provides too few arguments. Expected 1 or more, but got 0.
 src/__tests__/GameEngine.test.ts(36,20): error TS2352: Conversion of type 'typeof GameEngine' to type 'GameEngineCtor' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
   Types of construct signatures are incompatible.
     Type 'new (canvas: HTMLCanvasElement) => GameEngine' is not assignable to type 'new (canvas: HTMLCanvasElement) => GameEngineLike'.
@@ -127,39 +46,44 @@ src/__tests__/state/StateObjectManager.test.ts(34,28): error TS2339: Property 'r
 src/__tests__/TileManager.test.ts(103,9): error TS2774: This condition will always return true since this function is always defined. Did you mean to call it instead?
 src/__tests__/TileManager.test.ts(122,14): error TS2790: The operand of a 'delete' operator must be optional.
 src/__tests__/TileManager.test.ts(240,21): error TS2339: Property 'animated' does not exist on type 'TileDefinition'.
-src/core/GameEngine.ts(39,40): error TS2345: Argument of type 'GameState' is not assignable to parameter of type 'GameStateLike'.
-  Property 'game' is missing in type 'GameState' but required in type 'GameStateLike'.
-src/core/GameEngine.ts(42,42): error TS2345: Argument of type 'GameState' is not assignable to parameter of type 'RendererGameState'.
-  Type 'GameState' is not assignable to type 'Record<string, unknown>'.
-    Index signature for type 'string' is missing in type 'GameState'.
-src/core/GameEngine.ts(43,44): error TS2345: Argument of type 'GameState' is not assignable to parameter of type 'GameStateLike'.
-  Types of property 'setDialog' are incompatible.
-    Type '(active: any, text?: string, meta?: null) => void' is not assignable to type '(active: boolean, text?: string | undefined, meta?: DialogMeta | null | undefined) => void'.
-      Types of parameters 'meta' and 'meta' are incompatible.
-        Type 'DialogMeta | null | undefined' is not assignable to type 'null | undefined'.
-          Type 'DialogMeta' is not assignable to type 'null | undefined'.
-src/core/GameEngine.ts(44,54): error TS2345: Argument of type 'GameState' is not assignable to parameter of type 'GameStateLike'.
-  Types of property 'getPlayerEndText' are incompatible.
-    Type '(roomIndex?: null) => any' is not assignable to type '(roomIndex: number) => string'.
-      Types of parameters 'roomIndex' and 'roomIndex' are incompatible.
-        Type 'number' is not assignable to type 'null | undefined'.
-src/core/GameEngine.ts(47,42): error TS2345: Argument of type 'GameState' is not assignable to parameter of type 'GameStateLike'.
-  Property 'playing' is missing in type 'GameState' but required in type 'GameStateLike'.
-src/core/GameEngine.ts(52,7): error TS2741: Property 'game' is missing in type 'GameState' but required in type 'GameStateLike'.
-src/core/GameEngine.ts(53,7): error TS2322: Type 'TileManager' is not assignable to type 'TileManagerLike'.
-  The types returned by 'getTile(...)' are incompatible between these types.
-    Type 'TileDefinition | undefined' is not assignable to type 'TileDefinition | null'.
-      Type 'undefined' is not assignable to type 'TileDefinition | null'.
-src/core/GameEngine.ts(138,54): error TS2345: Argument of type 'number | null' is not assignable to parameter of type 'null | undefined'.
-  Type 'number' is not assignable to type 'null | undefined'.
-src/core/GameEngine.ts(376,44): error TS2345: Argument of type 'number | null' is not assignable to parameter of type 'null | undefined'.
-  Type 'number' is not assignable to type 'null | undefined'.
-src/core/GameEngine.ts(394,41): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Partial<TileDefinition>'.
-src/core/GameEngine.ts(417,39): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'EnemyLike'.
-src/core/GameEngine.ts(421,35): error TS2345: Argument of type 'string | number' is not assignable to parameter of type 'string'.
-  Type 'number' is not assignable to type 'string'.
-src/core/GameEngine.ts(432,62): error TS2345: Argument of type 'string | number | null' is not assignable to parameter of type 'null | undefined'.
-  Type 'string' is not assignable to type 'null | undefined'.
+src/core/GameEngine.ts(152,22): error TS2352: Conversion of type 'GameState' to type 'GameStateLike' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  The types returned by 'setVariableValue(...)' are incompatible between these types.
+    Type 'any[]' is not comparable to type '[boolean, unknown?]'.
+      Target requires 1 element(s) but source may have fewer.
+src/core/GameEngine.ts(153,40): error TS2345: Argument of type 'GameStateLike' is not assignable to parameter of type 'import("C:/repos/tiny-rpg-maker/src/core/tileTypes").GameStateLike'.
+  Property 'game' is missing in type 'GameStateLike' but required in type 'import("C:/repos/tiny-rpg-maker/src/core/tileTypes").GameStateLike'.
+src/core/GameEngine.ts(156,58): error TS2345: Argument of type 'TileManagerLike' is not assignable to parameter of type 'TileManagerLike'.
+  Type 'TileManagerLike' is missing the following properties from type 'TileManagerLike': getAnimationFrameCount, advanceAnimationFrame
+src/core/GameEngine.ts(157,44): error TS2345: Argument of type 'GameStateLike' is not assignable to parameter of type 'GameStateLike'.
+  Type 'GameStateLike' is missing the following properties from type 'GameStateLike': setDialog, getDialog
+src/core/GameEngine.ts(158,54): error TS2345: Argument of type 'GameStateLike' is not assignable to parameter of type 'GameStateLike'.
+  Type 'GameStateLike' is missing the following properties from type 'GameStateLike': setPlayerPosition, getRoomIndex
+src/core/GameEngine.ts(161,42): error TS2345: Argument of type 'GameStateLike' is not assignable to parameter of type 'GameStateLike'.
+  Type 'GameStateLike' is missing the following properties from type 'GameStateLike': playing, getEnemyDefinitions, getEnemies, addEnemy, and 6 more.
+src/core/GameEngine.ts(166,7): error TS2740: Type 'GameStateLike' is missing the following properties from type 'GameStateLike': game, getDialog, setDialogPage, getRoomCoords, and 4 more.
+src/core/GameEngine.ts(167,7): error TS2741: Property 'getTile' is missing in type 'TileManagerLike' but required in type 'TileManagerLike'.
+src/core/GameEngine.ts(168,7): error TS2739: Type 'RendererLike' is missing the following properties from type 'RendererLike': captureGameplayFrame, startRoomTransition, flashEdge
+src/core/GameEngine.ts(171,7): error TS2741: Property 'collideAt' is missing in type 'EnemyManagerLike' but required in type 'EnemyManagerLike'.
+src/core/GameEngine.ts(173,25): error TS2352: Conversion of type 'InputManager' to type 'InputManagerLike' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'InputManager'.
+src/core/GameEngine.ts(173,42): error TS2345: Argument of type 'this' is not assignable to parameter of type 'GameEngineLike'.
+  Type 'GameEngine' is not assignable to type 'GameEngineLike'.
+    Types of property 'gameState' are incompatible.
+      Type 'GameStateLike' is missing the following properties from type 'GameStateLike': getDialog, setDialogPage
+src/core/GameEngine.ts(224,5): error TS2322: Type 'boolean | undefined' is not assignable to type 'boolean'.
+  Type 'undefined' is not assignable to type 'boolean'.
+src/core/GameEngine.ts(234,5): error TS2322: Type 'boolean | undefined' is not assignable to type 'boolean'.
+  Type 'undefined' is not assignable to type 'boolean'.
+src/core/GameEngine.ts(246,58): error TS18049: 'overlay' is possibly 'null' or 'undefined'.
+src/core/GameEngine.ts(280,48): error TS2322: Type 'number | undefined' is not assignable to type 'number | null'.
+  Type 'undefined' is not assignable to type 'number | null'.
+src/core/GameEngine.ts(320,46): error TS2322: Type 'number | undefined' is not assignable to type 'number | null'.
+  Type 'undefined' is not assignable to type 'number | null'.
+src/core/GameEngine.ts(432,24): error TS2722: Cannot invoke an object which is possibly 'undefined'.
+src/core/GameEngine.ts(466,24): error TS2722: Cannot invoke an object which is possibly 'undefined'.
+src/core/GameEngine.ts(490,46): error TS2345: Argument of type 'number | null' is not assignable to parameter of type 'number'.
+  Type 'null' is not assignable to type 'number'.
+src/core/GameEngine.ts(512,24): error TS2722: Cannot invoke an object which is possibly 'undefined'.
 src/core/GameState.ts(27,14): error TS2339: Property 'game' does not exist on type 'GameState'.
 src/core/GameState.ts(49,14): error TS2339: Property 'game' does not exist on type 'GameState'.
 src/core/GameState.ts(49,38): error TS2339: Property 'game' does not exist on type 'GameState'.
@@ -2002,4 +1926,14 @@ src/editor/modules/renderers/EditorNpcRenderer.ts(138,53): error TS2345: Argumen
   Type 'undefined' is not assignable to type 'EditorNpcLike | null'.
 src/editor/modules/renderers/EditorObjectRenderer.ts(41,56): error TS7006: Parameter 'object' implicitly has an 'any' type.
 src/editor/modules/renderers/EditorObjectRenderer.ts(131,34): error TS2339: Property 'worldRenderer' does not exist on type 'EditorRendererServiceLike'.
-src/main.ts(65,9): error TS2322: Type 'boolean' is not assignable to type 'void'.
+src/main.ts(31,45): error TS7017: Element implicitly has an 'any' type because type 'typeof globalThis' has no index signature.
+src/main.ts(47,24): error TS7006: Parameter 'data' implicitly has an 'any' type.
+src/main.ts(51,20): error TS7006: Parameter 'tileId' implicitly has an 'any' type.
+src/main.ts(51,28): error TS7006: Parameter 'data' implicitly has an 'any' type.
+src/main.ts(52,20): error TS7006: Parameter 'x' implicitly has an 'any' type.
+src/main.ts(52,23): error TS7006: Parameter 'y' implicitly has an 'any' type.
+src/main.ts(52,26): error TS7006: Parameter 'tileId' implicitly has an 'any' type.
+src/main.ts(57,28): error TS7006: Parameter 'variableId' implicitly has an 'any' type.
+src/main.ts(57,40): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/main.ts(59,19): error TS7006: Parameter 'npc' implicitly has an 'any' type.
+src/main.ts(61,46): error TS2339: Property 'resetNPCs' does not exist on type 'NpcManagerLike'.

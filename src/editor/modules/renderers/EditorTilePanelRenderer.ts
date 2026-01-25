@@ -1,7 +1,7 @@
 
 import { EditorRendererBase } from './EditorRendererBase';
 
-type TileDefinitionLike = {
+type TileDefinitionView = {
     id: number | string;
     name?: string;
     category?: string;
@@ -12,9 +12,9 @@ class EditorTilePanelRenderer extends EditorRendererBase {
         const tileList = this.dom.tileList;
         if (!tileList) return;
 
-        const tiles = this.gameEngine.getTiles() as TileDefinitionLike[];
-        const groups = new Map<string, TileDefinitionLike[]>();
-        tiles.forEach((tile: TileDefinitionLike) => {
+        const tiles = this.gameEngine.getTiles() as TileDefinitionView[];
+        const groups = new Map<string, TileDefinitionView[]>();
+        tiles.forEach((tile: TileDefinitionView) => {
             const category = tile.category || 'Diversos';
             if (!groups.has(category)) {
                 groups.set(category, []);
@@ -32,10 +32,10 @@ class EditorTilePanelRenderer extends EditorRendererBase {
             return ia - ib;
         });
 
-        const orderedTiles: TileDefinitionLike[] = [];
+        const orderedTiles: TileDefinitionView[] = [];
         categories.forEach((category: string) => {
             const categoryTiles = groups.get(category) || [];
-            categoryTiles.forEach((tile: TileDefinitionLike) => orderedTiles.push(tile));
+            categoryTiles.forEach((tile: TileDefinitionView) => orderedTiles.push(tile));
         });
 
         tileList.innerHTML = '';
@@ -43,7 +43,7 @@ class EditorTilePanelRenderer extends EditorRendererBase {
         const grid = document.createElement('div');
         grid.className = 'tile-grid';
 
-        orderedTiles.forEach((tile: TileDefinitionLike) => {
+        orderedTiles.forEach((tile: TileDefinitionView) => {
             const card = document.createElement('button');
             card.type = 'button';
             card.className = 'tile-card';
@@ -70,7 +70,7 @@ class EditorTilePanelRenderer extends EditorRendererBase {
 
     updateSelectedTilePreview(): void {
         const preview = this.dom.selectedTilePreview;
-        const tile = (this.gameEngine.getTiles() as TileDefinitionLike[]).find((entry) => entry.id === this.manager.selectedTileId);
+        const tile = (this.gameEngine.getTiles() as TileDefinitionView[]).find((entry) => entry.id === this.manager.selectedTileId);
         if (!preview || !tile) return;
         this.gameEngine.renderer.drawTileOnCanvas(preview, tile);
         if (this.dom.tileSummary) {

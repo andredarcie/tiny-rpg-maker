@@ -252,7 +252,7 @@ class StateObjectManager {
         );
     }
 
-    setObjectVariable(type, roomIndex, variableId) {
+    setObjectVariable(type: string, roomIndex: number, variableId: string | null) {
         const handledByDefinition = ObjectDefinitions.requiresVariable(type);
         if (!handledByDefinition) return null;
         const targetRoom = this.worldManager.clampRoomIndex(roomIndex ?? 0);
@@ -309,7 +309,7 @@ class StateObjectManager {
         return this.applyObjectBehavior(marker);
     }
 
-    getPlayerEndObject(roomIndex = null) {
+    getPlayerEndObject(roomIndex: number | null = null) {
         const objects = this.getObjects();
         if (roomIndex === null || roomIndex === undefined) {
             return objects.find((object) => object.type === StateObjectManager.PLAYER_END_TYPE) || null;
@@ -320,12 +320,12 @@ class StateObjectManager {
         ) || null;
     }
 
-    getPlayerEndText(roomIndex = null) {
+    getPlayerEndText(roomIndex: number | null = null) {
         const entry = this.getPlayerEndObject(roomIndex);
         return typeof entry?.endingText === 'string' ? entry.endingText : '';
     }
 
-    setPlayerEndText(roomIndex, text) {
+    setPlayerEndText(roomIndex: number, text: string) {
         const entry = this.getPlayerEndObject(roomIndex);
         if (!entry) return '';
         const normalized = this.normalizePlayerEndText(text);

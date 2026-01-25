@@ -621,7 +621,7 @@ const TextResources = {
         });
     },
 
-    apply(root = (typeof document !== 'undefined' ? document : null)) {
+    apply(root = document) {
         if (!root || typeof root.querySelectorAll !== 'function') return;
         root.querySelectorAll('[data-text-key]').forEach((el) => {
             const key = el.getAttribute('data-text-key');

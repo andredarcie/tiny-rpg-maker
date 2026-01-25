@@ -1,14 +1,14 @@
 
 import { EditorRendererBase } from './EditorRendererBase';
 
-type NpcDefinitionLike = {
+type NpcDefinitionView = {
     type: string;
     variant?: string;
     name?: string;
     nameKey?: string;
 };
 
-type EditorNpcLike = {
+type EditorNpc = {
     id?: string;
     type: string;
     roomIndex: number;
@@ -32,16 +32,16 @@ class EditorNpcRenderer extends EditorRendererBase {
         this.updateVariantButtons();
         const game = this.gameEngine.getGame();
         const filter = this.manager.state.npcVariantFilter || 'human';
-        const definitions = (this.gameEngine.npcManager?.getDefinitions?.() ?? []) as NpcDefinitionLike[];
+        const definitions = (this.gameEngine.npcManager?.getDefinitions?.() ?? []) as NpcDefinitionView[];
         const filteredDefinitions = definitions
-            .filter((def: NpcDefinitionLike) => {
+            .filter((def: NpcDefinitionView) => {
                 const variant = def.variant || 'human';
                 return variant === filter;
             });
-        const npcs = this.gameEngine.getSprites() as EditorNpcLike[];
+        const npcs = this.gameEngine.getSprites() as EditorNpc[];
 
         list.innerHTML = '';
-        filteredDefinitions.forEach((def: NpcDefinitionLike) => {
+        filteredDefinitions.forEach((def: NpcDefinitionView) => {
             const npc = npcs.find((entry) => entry.type === def.type) || null;
             const card = document.createElement('div');
             card.className = 'npc-card';
@@ -93,7 +93,7 @@ class EditorNpcRenderer extends EditorRendererBase {
         this.updateNpcForm();
     }
 
-    drawNpcPreview(canvas: HTMLCanvasElement, definition: NpcDefinitionLike): void {
+    drawNpcPreview(canvas: HTMLCanvasElement, definition: NpcDefinitionView): void {
         if (!(canvas instanceof HTMLCanvasElement)) return;
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
@@ -116,7 +116,7 @@ class EditorNpcRenderer extends EditorRendererBase {
 
     updateNpcForm(): void {
         const selectedNpcId = this.manager.selectedNpcId;
-        const npc = (this.gameEngine.getSprites() as EditorNpcLike[]).find((entry) => entry.id === selectedNpcId);
+        const npc = (this.gameEngine.getSprites() as EditorNpc[]).find((entry) => entry.id === selectedNpcId);
         const {
             npcEditor,
             npcText,
@@ -168,7 +168,7 @@ class EditorNpcRenderer extends EditorRendererBase {
         }
     }
 
-    getNpcName(definition: NpcDefinitionLike | null): string {
+    getNpcName(definition: NpcDefinitionView | null): string {
         if (!definition) return this.t('npc.defaultName', 'NPC');
         const fallback = definition.name || this.t('npc.defaultName', 'NPC');
         if (definition.nameKey) {
@@ -177,7 +177,7 @@ class EditorNpcRenderer extends EditorRendererBase {
         return fallback;
     }
 
-    getNpcDialogueText(npc: EditorNpcLike | null): string {
+    getNpcDialogueText(npc: EditorNpc | null): string {
         if (!npc) return '';
         if (npc.textKey) {
             return this.t(npc.textKey, npc.text || '');

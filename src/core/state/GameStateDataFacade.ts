@@ -1,6 +1,7 @@
+import type { GameState } from "../GameState";
 
 class GameStateDataFacade {
-    constructor(gameState, dataManager) {
+    constructor(gameState : GameState, dataManager) {
         this.gameState = gameState;
         this.dataManager = dataManager;
     }

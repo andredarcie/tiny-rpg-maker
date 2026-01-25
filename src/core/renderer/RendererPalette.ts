@@ -1,12 +1,12 @@
 import { PICO8_COLORS } from '../TileDefinitions';
 import { RendererConstants } from './RendererConstants';
 
-type GameStateLike = Record<string, unknown> | null;
+type GameStateApi = Record<string, unknown> | null;
 
 class RendererPalette {
-    gameState: GameStateLike;
+    gameState: GameStateApi;
 
-    constructor(gameState: GameStateLike) {
+    constructor(gameState: GameStateApi) {
         this.gameState = gameState;
     }
 

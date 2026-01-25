@@ -22,7 +22,7 @@ export type Tileset = {
   map: TileMap;
 };
 
-export type GameStateLike = {
+export type GameStateApi = {
   game: {
     tileset: Tileset;
     roomSize?: number;

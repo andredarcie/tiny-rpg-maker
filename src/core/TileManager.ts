@@ -1,16 +1,16 @@
-import type { GameStateLike, TileDefinition, TileFrame, TileId, TileMap, TileMapLayer } from './tileTypes';
+import type { GameStateApi, TileDefinition, TileFrame, TileId, TileMap, TileMapLayer } from './tileTypes';
 import { TILE_PRESETS_SOURCE } from './tilePresets';
 
 // TileManager owns tile preset loading, tileset initialization, and tile map mutation.
 // It keeps the game state wired with tiles and room maps, provides helpers
 // for editing tiles (collision, names, frames), and tracks animation frame state for renderers.
 class TileManager {
-  gameState: GameStateLike;
+  gameState: GameStateApi;
   presets: TileDefinition[];
   animationFrameIndex: number;
   maxAnimationFrames: number;
 
-  constructor(gameState: GameStateLike) {
+  constructor(gameState: GameStateApi) {
     this.gameState = gameState;
     this.presets = this.buildPresetTiles();
     this.animationFrameIndex = 0;

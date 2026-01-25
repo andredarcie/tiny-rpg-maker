@@ -6,7 +6,7 @@ type DialogMeta = {
   rewardAllowed?: boolean;
 };
 
-type GameStateLike = {
+type GameStateApi = {
   pauseGame: (reason: string) => void;
   resumeGame: (reason: string) => void;
   setDialog: (active: boolean, text?: string, meta?: DialogMeta | null) => void;
@@ -14,17 +14,17 @@ type GameStateLike = {
   setVariableValue?: (id: string, value: boolean) => [boolean, boolean];
 };
 
-type RendererLike = {
+type RendererApi = {
   draw: () => void;
   setIconOverPlayer: (icon: string) => void;
 };
 
 class DialogManager {
-  gameState: GameStateLike;
-  renderer: RendererLike;
+  gameState: GameStateApi;
+  renderer: RendererApi;
   pendingDialogAction: DialogMeta | null;
 
-  constructor(gameState: GameStateLike, renderer: RendererLike) {
+  constructor(gameState: GameStateApi, renderer: RendererApi) {
     this.gameState = gameState;
     this.renderer = renderer;
     this.pendingDialogAction = null;

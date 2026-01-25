@@ -1,5 +1,5 @@
 
-type EditorManagerLike = {
+type EditorManagerApi = {
     domCache: any;
     state: any;
     gameEngine: any;
@@ -15,9 +15,9 @@ type EditorManagerLike = {
 };
 
 class EditorWorldService {
-    manager: EditorManagerLike;
+    manager: EditorManagerApi;
 
-    constructor(editorManager: EditorManagerLike) {
+    constructor(editorManager: EditorManagerApi) {
         this.manager = editorManager;
     }
 

@@ -1,9 +1,9 @@
 
 import { EditorRendererBase } from './EditorRendererBase';
 
-type CanvasObjectLike = { type: string; roomIndex: number; x: number; y: number };
-type CanvasNpcLike = { type: string; roomIndex: number; x: number; y: number; placed?: boolean };
-type CanvasEnemyLike = { type: string; roomIndex: number; x: number; y: number; id?: string };
+type CanvasObject = { type: string; roomIndex: number; x: number; y: number };
+type CanvasNpc = { type: string; roomIndex: number; x: number; y: number; placed?: boolean };
+type CanvasEnemy = { type: string; roomIndex: number; x: number; y: number; id?: string };
 
 class EditorCanvasRenderer extends EditorRendererBase {
     renderEditor(): void {
@@ -59,7 +59,7 @@ class EditorCanvasRenderer extends EditorRendererBase {
         const step = tileSize / 8;
 
         const objects = (this.gameEngine.getObjectsForRoom(roomIndex) ||
-            []) as CanvasObjectLike[];
+            []) as CanvasObject[];
         for (const object of objects) {
             this.gameEngine.renderer.drawObjectSprite(
                 ctx,
@@ -70,8 +70,8 @@ class EditorCanvasRenderer extends EditorRendererBase {
             );
         }
 
-        const npcs = (this.gameEngine.getSprites() as CanvasNpcLike[]).filter(
-            (npc: CanvasNpcLike) => npc.roomIndex === roomIndex && npc.placed,
+        const npcs = (this.gameEngine.getSprites() as CanvasNpc[]).filter(
+            (npc: CanvasNpc) => npc.roomIndex === roomIndex && npc.placed,
         );
         for (const npc of npcs) {
             const sprite = this.gameEngine.renderer.npcSprites[npc.type] ||
@@ -85,8 +85,8 @@ class EditorCanvasRenderer extends EditorRendererBase {
             );
         }
 
-        const enemies = (this.gameEngine.getActiveEnemies() as CanvasEnemyLike[]).filter(
-            (enemy: CanvasEnemyLike) => enemy.roomIndex === roomIndex,
+        const enemies = (this.gameEngine.getActiveEnemies() as CanvasEnemy[]).filter(
+            (enemy: CanvasEnemy) => enemy.roomIndex === roomIndex,
         );
         const renderer = this.gameEngine.renderer;
         const enemySprites = renderer.enemySprites || {};

@@ -1,18 +1,18 @@
 import { OBJECT_TYPES } from '../ObjectDefinitions';
 
 class RendererHudRenderer {
-    gameState: GameStateLike;
-    entityRenderer: EntityRendererLike;
-    paletteManager: PaletteManagerLike;
+    gameState: GameStateApi;
+    entityRenderer: EntityRendererApi;
+    paletteManager: PaletteManagerApi;
     padding: number;
     gap: number;
     backgroundColor: string;
     viewportOffsetY: number;
-    canvasHelper: CanvasHelperLike;
+    canvasHelper: CanvasHelperApi;
     healthIconDefinitions: Record<string, (number | null)[][]>;
     objectSprites: Record<string, (string | null)[][]>;
 
-    constructor(gameState: GameStateLike, entityRenderer: EntityRendererLike, paletteManager: PaletteManagerLike) {
+    constructor(gameState: GameStateApi, entityRenderer: EntityRendererApi, paletteManager: PaletteManagerApi) {
         this.gameState = gameState;
         this.entityRenderer = entityRenderer;
         this.paletteManager = paletteManager;
@@ -316,7 +316,7 @@ type HealthOptions = {
     heartSize?: number;
 };
 
-type GameStateLike = {
+type GameStateApi = {
     isGameOver: () => boolean;
     getMaxLives?: () => number;
     getLives?: () => number;
@@ -332,12 +332,12 @@ type GameStateLike = {
     getExperience?: () => number;
 };
 
-type EntityRendererLike = {
-    canvasHelper: CanvasHelperLike;
+type EntityRendererApi = {
+    canvasHelper: CanvasHelperApi;
     spriteFactory?: { getObjectSprites?: () => Record<string, (string | null)[][]> };
 };
 
-type CanvasHelperLike = {
+type CanvasHelperApi = {
     getTilePixelSize?: () => number;
     drawSprite: (
         ctx: CanvasRenderingContext2D,
@@ -348,7 +348,7 @@ type CanvasHelperLike = {
     ) => void;
 };
 
-type PaletteManagerLike = {
+type PaletteManagerApi = {
     getColor: (index: number) => string;
 };
 
