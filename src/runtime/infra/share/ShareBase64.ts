@@ -1,6 +1,13 @@
+type BufferLike = {
+    from(value: ArrayLike<number> | string, encoding?: string): {
+        toString(encoding?: string): string;
+    };
+};
+
+declare const Buffer: BufferLike | undefined;
 
 class ShareBase64 {
-    static toBase64Url(bytes) {
+    static toBase64Url(bytes: Uint8Array | ArrayLike<number> | null | undefined): string {
         if (!bytes || !bytes.length) return '';
         if (typeof Buffer !== 'undefined') {
             return Buffer.from(bytes)
@@ -19,7 +26,7 @@ class ShareBase64 {
             .replace(/=+$/g, '');
     }
 
-    static fromBase64Url(text) {
+    static fromBase64Url(text?: string): Uint8Array {
         if (!text) return new Uint8Array(0);
         const cleaned = String(text).replace(/[\s\r\n]+/g, '');
         if (!cleaned) return new Uint8Array(0);
@@ -46,7 +53,7 @@ class ShareBase64 {
         }
     }
 
-    static logInvalidInput(input, error) {
+    static logInvalidInput(input: string, error?: unknown) {
         console.warn('[TinyRPG] Invalid base64 segment ignored.', { input, error });
     }
 }

@@ -7,6 +7,7 @@ Tiny RPG Studio is a browser-native RPG maker. Paint tiles, build rooms, drop NP
 - Shareable games: one URL encodes the full game state.
 - Lightweight runtime: fast load, no heavy framework dependencies.
 - Editor tools for tiles, NPCs, enemies, objects, variables, and worlds.
+- PWA-ready: installable experience with offline-ready caching and manifest support via Vite.
 
 ## Requirements
 - Node.js 18+ (recommended)
@@ -74,3 +75,6 @@ When exporting, the app can open a new tab and generate a static HTML payload.
 
 ## License
 See the repository license file.
+
+## Progressive Web App
+- The Vite build now includes a manifest and service worker (powered by `vite-plugin-pwa`), so Tiny RPG Studio can be installed like a normal app and keep working offline once cached.

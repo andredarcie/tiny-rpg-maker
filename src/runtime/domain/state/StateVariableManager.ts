@@ -1,14 +1,39 @@
 
+import type { GameDefinition, RuntimeState, VariableDefinition } from '../../../types/gameState';
 import { TextResources } from '../../adapters/TextResources';
-const getVariableText = (key, fallback = '') => {
+
+const getVariableText = (key: string, fallback = ''): string => {
     const value = TextResources.get(key, fallback);
     return value || fallback || key || '';
 };
 
-const createVariablePreset = (id, order, nameKey, fallbackName, color) =>
-    Object.freeze({ id, order, nameKey, fallbackName, color });
+type VariablePreset = {
+    id: string;
+    order: number;
+    nameKey: string;
+    fallbackName: string;
+    color: string;
+};
 
-const STATE_VARIABLE_PRESETS = Object.freeze([
+type StateVariableEntry = VariableDefinition & {
+    order: number;
+    name: string;
+    color: string;
+};
+
+type VariableSource = Partial<StateVariableEntry> & {
+    value?: unknown;
+};
+
+const createVariablePreset = (
+    id: string,
+    order: number,
+    nameKey: string,
+    fallbackName: string,
+    color: string
+) => Object.freeze({ id, order, nameKey, fallbackName, color });
+
+const STATE_VARIABLE_PRESETS: ReadonlyArray<VariablePreset> = Object.freeze([
     createVariablePreset('var-1', 1, 'variables.names.var1', '', '#000000'),
     createVariablePreset('var-2', 2, 'variables.names.var2', '', '#1D2B53'),
     createVariablePreset('var-3', 3, 'variables.names.var3', '', '#7E2553'),
@@ -21,33 +46,41 @@ const STATE_VARIABLE_PRESETS = Object.freeze([
 ]);
 
 class StateVariableManager {
-    constructor(game, state, presets = STATE_VARIABLE_PRESETS) {
+    private game: GameDefinition | null;
+    private state: RuntimeState | null;
+    private readonly presets: ReadonlyArray<VariablePreset>;
+
+    constructor(
+        game: GameDefinition | null = null,
+        state: RuntimeState | null = null,
+        presets: ReadonlyArray<VariablePreset> = STATE_VARIABLE_PRESETS
+    ) {
         this.game = game;
         this.state = state;
         this.presets = presets;
     }
 
-    setGame(game) {
+    setGame(game: GameDefinition | null): void {
         this.game = game;
     }
 
-    setState(state) {
+    setState(state: RuntimeState | null): void {
         this.state = state;
     }
 
-    ensureDefaultVariables() {
+    ensureDefaultVariables(): StateVariableEntry[] {
         if (!this.game) return [];
         this.game.variables = this.normalizeVariables(this.game.variables);
-        return this.game.variables;
+        return this.game.variables as StateVariableEntry[];
     }
 
-    resetRuntime() {
+    resetRuntime(): StateVariableEntry[] {
         if (!this.state) return [];
         this.state.variables = this.cloneVariables(this.game?.variables);
-        return this.state.variables;
+        return this.state.variables as StateVariableEntry[];
     }
 
-    cloneVariables(list) {
+    cloneVariables(list: StateVariableEntry[] | null | undefined): StateVariableEntry[] {
         return (list || []).map((entry) => ({
             id: entry.id,
             order: entry.order,
@@ -57,9 +90,13 @@ class StateVariableManager {
         }));
     }
 
-    normalizeVariables(source) {
+    normalizeVariables(source: unknown): StateVariableEntry[] {
         const incoming = Array.isArray(source) ? source : [];
-        const byId = new Map(incoming.map((entry) => [entry?.id, entry]));
+        const byId = new Map<string | undefined, VariableSource>();
+        for (const entry of incoming) {
+            const variable = entry as VariableSource;
+            byId.set(variable?.id, variable);
+        }
         return this.presets.map((preset) => {
             const current = byId.get(preset.id) || {};
             return {
@@ -74,15 +111,15 @@ class StateVariableManager {
         });
     }
 
-    getVariableDefinitions() {
-        return this.game?.variables ?? [];
+    getVariableDefinitions(): StateVariableEntry[] {
+        return (this.game?.variables ?? []) as StateVariableEntry[];
     }
 
-    getVariables() {
-        return this.state?.variables ?? [];
+    getVariables(): StateVariableEntry[] {
+        return (this.state?.variables ?? []) as StateVariableEntry[];
     }
 
-    normalizeVariableId(variableId) {
+    normalizeVariableId(variableId: string | number | null | undefined): string | null {
         if (typeof variableId !== 'string') return null;
         // Allow special skill-based conditions (e.g., bard dialogue)
         const allowedSpecials = new Set(['skill:bard']);
@@ -90,78 +127,74 @@ class StateVariableManager {
         return this.getVariableDefinitions().some((variable) => variable.id === variableId) ? variableId : null;
     }
 
-    getVariable(variableId) {
+    getVariable(variableId: string | number | null | undefined): StateVariableEntry | null {
         if (!variableId) return null;
         return this.getVariables().find((variable) => variable.id === variableId) || null;
     }
 
-    isVariableOn(variableId) {
+    isVariableOn(variableId: string | number | null | undefined): boolean {
         const entry = this.getVariable(variableId);
         return entry ? Boolean(entry.value) : false;
     }
 
-    setVariableValue(variableId, value, persist = false) {
+    setVariableValue(variableId: string | number, value: unknown, persist = false): boolean {
         let updated = false;
+        const nextValue = Boolean(value);
         this.getVariables().forEach((variable) => {
-            if (variable.id === variableId) {
-                const next = Boolean(value);
-                if (variable.value !== next) {
-                    variable.value = next;
-                    updated = true;
-                }
+            if (variable.id === variableId && variable.value !== nextValue) {
+                variable.value = nextValue;
+                updated = true;
             }
         });
         if (persist) {
             this.getVariableDefinitions().forEach((variable) => {
-                if (variable.id === variableId) {
-                    const next = Boolean(value);
-                    if (variable.value !== next) {
-                        variable.value = next;
-                        updated = true;
-                    }
+                if (variable.id === variableId && variable.value !== nextValue) {
+                    variable.value = nextValue;
+                    updated = true;
                 }
             });
         }
         return updated;
     }
 
-    getFirstVariableId() {
+    getFirstVariableId(): string | null {
         return this.getVariableDefinitions()?.[0]?.id ?? this.presets?.[0]?.id ?? null;
     }
 
-    getPresetDefaultName(preset) {
+    getPresetDefaultName(preset?: VariablePreset | null): string {
         if (!preset) return '';
-        const fallback = preset.fallbackName || preset.name || '';
+        const fallback = preset.fallbackName || '';
         if (preset.nameKey) {
             return getVariableText(preset.nameKey, fallback);
         }
         return fallback;
     }
 
-    getPresetTranslationSet(preset) {
-        const names = new Set();
+    getPresetTranslationSet(preset?: VariablePreset | null): Set<string> {
+        const names = new Set<string>();
         if (!preset) return names;
-        const maybeAdd = (value) => {
+        const maybeAdd = (value?: string) => {
             if (typeof value === 'string' && value.trim()) {
                 names.add(value.trim());
             }
         };
         maybeAdd(preset.fallbackName);
-        maybeAdd(preset.name);
-        const bundles = TextResources?.bundles || (typeof TEXT_BUNDLES !== 'undefined' ? TEXT_BUNDLES : {});
+        const bundles =
+            TextResources?.bundles ?? (typeof TEXT_BUNDLES !== 'undefined' ? TEXT_BUNDLES : undefined);
         if (preset.nameKey && bundles) {
             Object.values(bundles).forEach((bundle) => {
                 if (!bundle) return;
-                maybeAdd(bundle[preset.nameKey]);
+                const translation = bundle[preset.nameKey];
+                maybeAdd(translation);
             });
         }
         maybeAdd(this.getPresetDefaultName(preset));
         return names;
     }
 
-    refreshPresetNames() {
+    refreshPresetNames(): void {
         const presetsById = new Map(this.presets.map((preset) => [preset.id, preset]));
-        const apply = (list) => {
+        const apply = (list: StateVariableEntry[] | null | undefined) => {
             if (!Array.isArray(list)) return;
             list.forEach((variable) => {
                 const preset = presetsById.get(variable.id);
@@ -175,11 +208,11 @@ class StateVariableManager {
                 }
             });
         };
-        apply(this.game?.variables);
-        apply(this.state?.variables);
+        apply(this.game?.variables as StateVariableEntry[]);
+        apply(this.state?.variables as StateVariableEntry[]);
     }
 
-    static get PRESETS() {
+    static get PRESETS(): ReadonlyArray<VariablePreset> {
         return STATE_VARIABLE_PRESETS;
     }
 }
