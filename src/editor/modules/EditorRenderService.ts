@@ -8,8 +8,38 @@ import { EditorNpcRenderer } from './renderers/EditorNpcRenderer';
 import { EditorObjectRenderer } from './renderers/EditorObjectRenderer';
 import { EditorTilePanelRenderer } from './renderers/EditorTilePanelRenderer';
 import { EditorWorldRenderer } from './renderers/EditorWorldRenderer';
+import type { EditorManager } from '../EditorManager';
+import type { VariableDefinition } from '../../types/gameState';
+import type { SkillDefinitionData } from '../../runtime/domain/entities/Skill';
+
+type VariableEntry = VariableDefinition & { name?: string; color?: string };
+
+type SpriteData = {
+    conditionVariableId?: string | null;
+    conditionalVariableId?: string | null;
+    rewardVariableId?: string | null;
+    activateVariableId?: string | null;
+    onCompleteVariableId?: string | null;
+    conditionalRewardVariableId?: string | null;
+    alternativeRewardVariableId?: string | null;
+};
+
+type EnemyData = {
+    defeatVariableId?: string | null;
+};
+
+type ObjectData = {
+    variableId?: string | null;
+};
+
+type SkillData = SkillDefinitionData & {
+    name?: string;
+    description?: string;
+    icon?: string;
+};
+
 class EditorRenderService {
-    manager: any;
+    manager: EditorManager;
     canvasRenderer: EditorCanvasRenderer;
     tilePanelRenderer: EditorTilePanelRenderer;
     npcRenderer: EditorNpcRenderer;
@@ -18,7 +48,7 @@ class EditorRenderService {
     objectRenderer: EditorObjectRenderer;
     handleTileAnimationFrame: () => void;
 
-    constructor(editorManager: any) {
+    constructor(editorManager: EditorManager) {
         this.manager = editorManager;
         this.canvasRenderer = new EditorCanvasRenderer(this);
         this.tilePanelRenderer = new EditorTilePanelRenderer(this);
@@ -78,7 +108,7 @@ class EditorRenderService {
             return palette[raw as number] ?? palette[0];
         }
         if (typeof raw !== 'string') return palette[0];
-        const normalize = (value: any) => String(value || '').replace('#', '').trim().toUpperCase();
+        const normalize = (value: string | number | null) => String(value || '').replace('#', '').trim().toUpperCase();
         const target = normalize(raw);
         const idx = palette.findIndex((color: string) => normalize(color) === target);
         if (idx !== -1) return palette[idx];
@@ -144,7 +174,7 @@ class EditorRenderService {
         const variables = this.gameEngine?.getVariableDefinitions?.() ?? [];
         const usedSet = this.collectVariableUsage();
         const usedCount = variables.reduce(
-            (count: number, variable: any) => count + (usedSet.has(variable.id) ? 1 : 0),
+            (count: number, variable: VariableEntry) => count + (usedSet.has(variable.id) ? 1 : 0),
             0
         );
         const usageText = this.tf(
@@ -175,13 +205,13 @@ class EditorRenderService {
             return;
         }
 
-        variables.forEach((variable: any) => {
+        variables.forEach((variable: VariableEntry) => {
             const item = document.createElement('div');
             item.className = 'project-variable-item';
 
             const color = document.createElement('span');
             color.className = 'project-variable-color';
-            color.style.background = String(this.resolvePicoColor(variable.color));
+            color.style.background = String(this.resolvePicoColor(variable.color ?? null));
 
             const name = document.createElement('span');
             name.className = 'project-variable-name';
@@ -247,7 +277,7 @@ class EditorRenderService {
             title.textContent = label;
             group.appendChild(title);
 
-            items.forEach((skill: any) => {
+            items.forEach((skill: SkillData) => {
                 const item = document.createElement('div');
                 item.className = 'project-skill-item';
 
@@ -281,7 +311,7 @@ class EditorRenderService {
         const used = new Set();
         const game = this.gameEngine?.getGame?.() || {};
         const variables = this.gameEngine?.getVariableDefinitions?.() ?? [];
-        const validIds = new Set(variables.map((variable: any) => variable.id));
+        const validIds = new Set(variables.map((variable: VariableEntry) => variable.id));
         const addIfValid = (id: string | null | undefined) => {
             if (typeof id !== 'string') return;
             const normalized = id.trim();
@@ -291,7 +321,7 @@ class EditorRenderService {
         };
 
         const sprites = Array.isArray(game.sprites) ? game.sprites : [];
-        sprites.forEach((npc: any) => {
+        sprites.forEach((npc: SpriteData) => {
             [
                 npc.conditionVariableId,
                 npc.conditionalVariableId,
@@ -304,10 +334,10 @@ class EditorRenderService {
         });
 
         const enemies = Array.isArray(game.enemies) ? game.enemies : [];
-        enemies.forEach((enemy: any) => addIfValid(enemy.defeatVariableId));
+        enemies.forEach((enemy: EnemyData) => addIfValid(enemy.defeatVariableId));
 
         const objects = Array.isArray(game.objects) ? game.objects : [];
-        objects.forEach((object: any) => addIfValid(object.variableId));
+        objects.forEach((object: ObjectData) => addIfValid(object.variableId));
 
         return used;
     }
@@ -328,19 +358,19 @@ class EditorRenderService {
         return levelMap;
     }
 
-    groupSkillsByLevel(skills: any[], levelMap: Map<string, number>) {
-        const buckets = new Map();
-        skills.forEach((skill: any) => {
+    groupSkillsByLevel(skills: SkillData[], levelMap: Map<string, number>) {
+        const buckets = new Map<number | 'other', SkillData[]>();
+        skills.forEach((skill: SkillData) => {
             const level = levelMap.get(skill.id) ?? null;
-            const key = Number.isFinite(level) ? level : 'other';
+            const key: number | 'other' = Number.isFinite(level) ? level as number : 'other';
             if (!buckets.has(key)) {
                 buckets.set(key, []);
             }
-            buckets.get(key).push(skill);
+            buckets.get(key)!.push(skill);
         });
-        const sortedKeys = Array.from(buckets.keys()).sort((a: any, b: any) => {
-            const na = Number.isFinite(a) ? a : Infinity;
-            const nb = Number.isFinite(b) ? b : Infinity;
+        const sortedKeys = Array.from(buckets.keys()).sort((a: number | 'other', b: number | 'other') => {
+            const na = typeof a === 'number' ? a : Infinity;
+            const nb = typeof b === 'number' ? b : Infinity;
             return na - nb;
         });
         return sortedKeys.map((key) => ({
@@ -411,7 +441,7 @@ class EditorRenderService {
                 return;
             }
 
-            skills.forEach((skill: any) => {
+            skills.forEach((skill: SkillData) => {
                 const wrapper = document.createElement('label');
                 wrapper.className = 'project-test__skill';
 

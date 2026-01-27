@@ -12,6 +12,23 @@ import type { TileDefinition } from '../domain/definitions/tileTypes';
 
 type IntroData = { title: string; author: string };
 
+type NpcInput = {
+  id?: string;
+  type?: string;
+  name?: string;
+  roomIndex?: number;
+  x?: number;
+  y?: number;
+};
+
+type EnemyInput = {
+  id?: string;
+  type: string;
+  roomIndex?: number;
+  x: number;
+  y: number;
+};
+
 type GameData = {
   title?: string;
   author?: string;
@@ -410,7 +427,7 @@ export class GameEngine {
   }
 
   addSprite(npc: unknown): unknown {
-    return this.npcManager.addNPC(npc as any);
+    return this.npcManager.addNPC(npc as NpcInput);
   }
 
   // Enemy helpers
@@ -423,7 +440,7 @@ export class GameEngine {
   }
 
   addEnemy(enemy: unknown): unknown {
-    return this.enemyManager.addEnemy(enemy as any);
+    return this.enemyManager.addEnemy(enemy as EnemyInput);
   }
 
   removeEnemy(enemyId: string | number): void {

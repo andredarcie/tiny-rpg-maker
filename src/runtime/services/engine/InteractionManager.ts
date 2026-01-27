@@ -380,4 +380,5 @@ class InteractionManager {
   }
 }
 
+export type { ExitState };
 export { InteractionManager };

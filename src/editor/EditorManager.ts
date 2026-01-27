@@ -155,7 +155,7 @@ class EditorManager {
         }
 
         this.syncUI();
-        const game = this.gameEngine.getGame() as any;
+        const game = this.gameEngine.getGame() as { start?: { roomIndex?: number }; rooms?: unknown[] };
         const startRoomIndex = game?.start?.roomIndex ?? 0;
         const totalRooms = game?.rooms?.length || 1;
         this.activeRoomIndex = Math.max(0, Math.min(totalRooms - 1, startRoomIndex));
@@ -255,7 +255,7 @@ class EditorManager {
         this.uiController.setTestStartLevel(level);
     }
 
-    setTestSkills(skills: any) {
+    setTestSkills(skills: string[]) {
         this.uiController.setTestSkills(skills);
     }
 
@@ -272,15 +272,15 @@ class EditorManager {
     }
 
     // Tile painting delegation
-    startMapPaint(ev: any) {
+    startMapPaint(ev: PointerEvent) {
         this.tileService.startPaint(ev);
     }
 
-    continueMapPaint(ev: any) {
+    continueMapPaint(ev: PointerEvent) {
         this.tileService.continuePaint(ev);
     }
 
-    finishMapPaint(ev: any) {
+    finishMapPaint(ev: PointerEvent) {
         this.tileService.finishPaint(ev);
     }
 
@@ -333,7 +333,7 @@ class EditorManager {
         this.objectService.removeObject(type, roomIndex);
     }
 
-    toggleVariableDefault(variableId: string, nextValue: any = null) {
+    toggleVariableDefault(variableId: string, nextValue: boolean | null = null) {
         this.variableService.toggle(variableId, nextValue);
     }
 
@@ -351,7 +351,7 @@ class EditorManager {
         this.shareService.saveGame();
     }
 
-    loadGameFile(ev: any) {
+    loadGameFile(ev: Event) {
         this.shareService.loadGameFile(ev);
     }
 
@@ -382,18 +382,18 @@ class EditorManager {
     }
 
     // Restore & import logic
-    restore(data: any, options: { skipHistory?: boolean } = {}) {
+    restore(data: Record<string, unknown>, options: { skipHistory?: boolean } = {}) {
         const { skipHistory = false } = options;
         this.gameEngine.importGameData(data);
         this.gameEngine.tileManager.ensureDefaultTiles();
 
         const tiles = this.gameEngine.getTiles() as TileDefinition[];
-        if (tiles.length && !tiles.find((t: any) => t.id === this.selectedTileId)) {
+        if (tiles.length && !tiles.find((t: TileDefinition) => t.id === this.selectedTileId)) {
             this.selectedTileId = tiles[0].id ?? null;
         }
 
-        const npcs = this.gameEngine.getSprites() as any[];
-        if (!npcs.find((npc: any) => npc.id === this.selectedNpcId)) {
+        const npcs = this.gameEngine.getSprites() as { id: string; type: string }[];
+        if (!npcs.find((npc: { id: string }) => npc.id === this.selectedNpcId)) {
             this.selectedNpcId = null;
             this.selectedNpcType = null;
             this.placingNpc = false;
@@ -403,7 +403,7 @@ class EditorManager {
         const normalizedType = EnemyDefinitions.normalizeType(this.selectedEnemyType);
         if (normalizedType !== this.selectedEnemyType) {
             this.selectedEnemyType = normalizedType;
-        } else if (!definitions.some((entry: any) => entry.type === this.selectedEnemyType)) {
+        } else if (!definitions.some((entry: { type: string }) => entry.type === this.selectedEnemyType)) {
             this.selectedEnemyType = definitions[0]?.type || 'giant-rat';
         }
 
@@ -428,7 +428,7 @@ class EditorManager {
         this.uiController.refreshNpcLocalizedText();
     }
 
-    handleKey(ev: any) {
+    handleKey(ev: KeyboardEvent) {
         this.interactionController.handleKey(ev);
     }
 
@@ -446,7 +446,7 @@ class EditorManager {
                     walls: Array.from({ length: 8 }, () => Array(8).fill(false))
                 }
             ],
-            start: { x: 1, y: 1, roomIndex: 0 } as any, // Cast to any to avoid partial compatibility issues for now
+            start: { x: 1, y: 1, roomIndex: 0 },
             sprites: [],
             items: [],
             exits: [],

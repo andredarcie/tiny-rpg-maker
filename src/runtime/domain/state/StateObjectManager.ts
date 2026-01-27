@@ -3,6 +3,19 @@ import { ITEM_TYPES, type ItemType } from '../constants/itemTypes';
 import { itemCatalog } from '../services/ItemCatalog';
 const PLAYER_END_TEXT_LIMIT = 40;
 
+type RawObjectInput = {
+    type?: string;
+    roomIndex?: number;
+    x?: number;
+    y?: number;
+    id?: string;
+    variableId?: string | null;
+    collected?: boolean;
+    opened?: boolean;
+    on?: boolean;
+    endingText?: string;
+};
+
 type ObjectEntry = {
     id: string;
     type: ItemType;
@@ -124,11 +137,12 @@ class StateObjectManager {
         const playerEndRooms = new Set();
         return objects
             .map((object) => {
-                const sourceType = typeof (object as any)?.type === 'string' ? (object as any).type : null;
+                const raw = object as RawObjectInput;
+                const sourceType = typeof raw?.type === 'string' ? raw.type : null;
                 if (!sourceType || !allowedTypes.has(sourceType as ItemType)) return null;
                 const type = sourceType as ItemType;
                 if (!this.worldManager) return null;
-                const roomIndex = this.worldManager.clampRoomIndex((object as any)?.roomIndex ?? 0);
+                const roomIndex = this.worldManager.clampRoomIndex(raw?.roomIndex ?? 0);
                 if (type === StateObjectManager.PLAYER_START_TYPE) {
                     if (playerStartIncluded) return null;
                     playerStartIncluded = true;
@@ -137,16 +151,16 @@ class StateObjectManager {
                     if (playerEndRooms.has(roomIndex)) return null;
                     playerEndRooms.add(roomIndex);
                 }
-                const x = this.worldManager.clampCoordinate((object as any)?.x ?? 0);
-                const y = this.worldManager.clampCoordinate((object as any)?.y ?? 0);
-                const rawId = (object as any)?.id;
+                const x = this.worldManager.clampCoordinate(raw?.x ?? 0);
+                const y = this.worldManager.clampCoordinate(raw?.y ?? 0);
+                const rawId = raw?.id;
                 const id = typeof rawId === 'string' && rawId.trim()
                     ? rawId.trim()
                     : this.generateObjectId(type, roomIndex);
                 const fallbackVariableId = this.variableManager?.getFirstVariableId?.() ?? null;
                 const needsVariable = itemCatalog.requiresVariable(type);
                 const normalizedVariable = needsVariable
-                    ? (this.variableManager?.normalizeVariableId?.((object as any)?.variableId) ?? fallbackVariableId)
+                    ? (this.variableManager?.normalizeVariableId?.(raw?.variableId) ?? fallbackVariableId)
                     : null;
 
                 const base: ObjectEntry = {
@@ -155,15 +169,15 @@ class StateObjectManager {
                     roomIndex,
                     x,
                     y,
-                    collected: StateObjectManager.isCollectibleType(type) ? Boolean((object as any)?.collected) : false,
-                    opened: type === OT.DOOR ? Boolean((object as any)?.opened) : false,
+                    collected: StateObjectManager.isCollectibleType(type) ? Boolean(raw?.collected) : false,
+                    opened: type === OT.DOOR ? Boolean(raw?.opened) : false,
                     variableId: normalizedVariable
                 };
                 if (type === StateObjectManager.SWITCH_TYPE) {
-                    base.on = Boolean((object as any)?.on);
+                    base.on = Boolean(raw?.on);
                 }
                 if (type === StateObjectManager.PLAYER_END_TYPE) {
-                    base.endingText = this.normalizePlayerEndText((object as any)?.endingText);
+                    base.endingText = this.normalizePlayerEndText(raw?.endingText);
                 }
                 return this.applyObjectBehavior(base);
             })
@@ -421,4 +435,5 @@ class StateObjectManager {
     }
 }
 
+export type { ObjectEntry };
 export { StateObjectManager };

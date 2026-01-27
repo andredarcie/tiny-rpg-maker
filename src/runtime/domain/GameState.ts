@@ -15,10 +15,11 @@ import { StateVariableManager } from './state/StateVariableManager';
 import { StateWorldManager } from './state/StateWorldManager';
 import type { TileMap, Tileset } from './definitions/tileTypes';
 import type {
-    AnyRecord,
+    DialogMeta,
     DialogState,
     EnemyDefinition,
     GameDefinition,
+    LevelUpChoice,
     LevelUpCelebrationHideOptions,
     LevelUpCelebrationOptions,
     LevelUpCelebrationState,
@@ -28,6 +29,7 @@ import type {
     PickupOverlayState,
     PlayerRuntimeState,
     ReviveSnapshot,
+    RoomDefinition,
     RuntimeState,
     TestSettings
 } from '../../types/gameState';
@@ -169,11 +171,11 @@ class GameState {
         });
     }
 
-    createEmptyRoom(size: number, index = 0, cols = 1): AnyRecord {
+    createEmptyRoom(size: number, index = 0, cols = 1): RoomDefinition {
         return this.worldFacade.createEmptyRoom(size, index, cols);
     }
 
-    createWorldRooms(rows: number, cols: number, size: number): AnyRecord[] {
+    createWorldRooms(rows: number, cols: number, size: number): RoomDefinition[] {
         return this.worldFacade.createWorldRooms(rows, cols, size);
     }
 
@@ -189,7 +191,7 @@ class GameState {
         return this.state;
     }
 
-    getCurrentRoom(): AnyRecord {
+    getCurrentRoom(): RoomDefinition {
         const index = this.worldManager.clampRoomIndex(this.state.player.roomIndex);
         this.state.player.roomIndex = index;
         return this.game.rooms[index];
@@ -246,7 +248,7 @@ class GameState {
         return cursor;
     }
 
-    selectLevelUpSkill(index: number | null = null): AnyRecord | null {
+    selectLevelUpSkill(index: number | null = null): LevelUpChoice | null {
         if (!this.skillManager.isOverlayActive()) {
             return null;
         }
@@ -280,7 +282,7 @@ class GameState {
         this.playerManager.setPosition(x, y, roomIndex);
     }
 
-    setDialog(active: boolean, text: string = "", meta: AnyRecord | null = null): void {
+    setDialog(active: boolean, text: string = "", meta: DialogMeta | null = null): void {
         this.dialogManager.setDialog(active, text, meta);
     }
 
@@ -814,7 +816,7 @@ class GameState {
         }
     }
 
-    assignData(target: AnyRecord | null | undefined, source: AnyRecord | null | undefined): void {
+    assignData(target: Record<string, unknown> | null | undefined, source: Record<string, unknown> | null | undefined): void {
         if (!target || !source) return;
         Object.keys(target).forEach((key) => {
             delete target[key];

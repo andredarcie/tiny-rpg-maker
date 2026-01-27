@@ -34,7 +34,18 @@ class StateSkillManager {
             };
         }
         if (!this.state.skillRuntime) {
-            this.state.skillRuntime = {};
+            this.state.skillRuntime = {
+                owned: [],
+                bonusMaxLives: 0,
+                xpBoost: 0,
+                pendingSelections: 0,
+                necromancerCharges: 0,
+                pendingManualRevive: false,
+                recentRevive: false,
+                carryoverSkills: [],
+                currentChoicePool: [],
+                pendingLevelQueue: []
+            };
         }
         const runtime = this.state.skillRuntime;
         runtime.owned = Array.isArray(runtime.owned)
@@ -72,7 +83,11 @@ class StateSkillManager {
             return { active: false, choices: [], cursor: 0 };
         }
         if (!this.state.levelUpOverlay) {
-            this.state.levelUpOverlay = {};
+            this.state.levelUpOverlay = {
+                active: false,
+                choices: [],
+                cursor: 0
+            };
         }
         const overlay = this.state.levelUpOverlay;
         overlay.active = Boolean(overlay.active);
@@ -251,7 +266,7 @@ class StateSkillManager {
         const choices = queue
             .slice(0, choiceCount)
             .map((id: string) => SkillDefinitions.getById(id))
-            .filter(Boolean);
+            .filter((skill): skill is { id: string; nameKey?: string } => skill !== null);
         return choices;
     }
 

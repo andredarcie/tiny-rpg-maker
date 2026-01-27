@@ -2,7 +2,8 @@
 import { EditorConstants } from '../EditorConstants';
 import { RendererConstants } from '../../../runtime/adapters/renderer/RendererConstants';
 import { EditorRendererBase } from './EditorRendererBase';
-type EnemyRecord = Record<string, any>;
+import type { EnemyDefinitionData } from '../../../runtime/domain/entities/Enemy';
+import type { EnemyDefinition } from '../../../types/gameState';
 
 class EditorEnemyRenderer extends EditorRendererBase {
     renderEnemies(): void {
@@ -12,24 +13,24 @@ class EditorEnemyRenderer extends EditorRendererBase {
 
         const activeRoom = this.state.activeRoomIndex;
         const enemies = (this.gameEngine
-            .getActiveEnemies() as EnemyRecord[])
-            .filter((enemy: EnemyRecord) => enemy.roomIndex === activeRoom);
+            .getActiveEnemies() as EnemyDefinition[])
+            .filter((enemy: EnemyDefinition) => enemy.roomIndex === activeRoom);
         this.renderEnemyOverlay(enemies, activeRoom);
         if (!enemies.length) return;
 
-        const definitions = EditorConstants.ENEMY_DEFINITIONS as EnemyRecord[];
-        const definitionMap = new Map<string, EnemyRecord>();
-        definitions.forEach((entry: EnemyRecord) => {
+        const definitions = EditorConstants.ENEMY_DEFINITIONS as EnemyDefinitionData[];
+        const definitionMap = new Map<string, EnemyDefinitionData>();
+        definitions.forEach((entry: EnemyDefinitionData) => {
             definitionMap.set(entry.type, entry);
             if (Array.isArray(entry.aliases)) {
                 entry.aliases.forEach((alias: string) => definitionMap.set(alias, entry));
             }
         });
 
-        const bosses = enemies.filter((enemy: EnemyRecord) => definitionMap.get(enemy.type)?.boss);
+        const bosses = enemies.filter((enemy: EnemyDefinition) => definitionMap.get(enemy.type)?.boss);
         if (!bosses.length) return;
 
-        bosses.forEach((enemy: EnemyRecord) => {
+        bosses.forEach((enemy: EnemyDefinition) => {
             const definition = definitionMap.get(enemy.type) ?? null;
             const item = document.createElement('div');
             item.className = 'enemy-item';
@@ -74,14 +75,14 @@ class EditorEnemyRenderer extends EditorRendererBase {
         if (!container) return;
         container.innerHTML = '';
 
-        const definitions = EditorConstants.ENEMY_DEFINITIONS as EnemyRecord[];
+        const definitions = EditorConstants.ENEMY_DEFINITIONS as EnemyDefinitionData[];
         if (!definitions.length) return;
 
         const selectedType = this.manager.selectedEnemyType;
 
         this.renderEnemyCountProgress(container.parentElement || container, container);
 
-        definitions.forEach((definition: EnemyRecord) => {
+        definitions.forEach((definition: EnemyDefinitionData) => {
             const card = document.createElement('div');
             card.className = 'enemy-card';
             card.dataset.type = definition.type;
@@ -123,7 +124,7 @@ class EditorEnemyRenderer extends EditorRendererBase {
         });
     }
 
-    drawEnemyPreview(canvas: HTMLCanvasElement, definition: EnemyRecord): void {
+    drawEnemyPreview(canvas: HTMLCanvasElement, definition: EnemyDefinitionData): void {
         if (!(canvas instanceof HTMLCanvasElement)) return;
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
@@ -155,7 +156,7 @@ class EditorEnemyRenderer extends EditorRendererBase {
         }
     }
 
-    getEnemyDisplayName(definition: EnemyRecord | null, fallback = ''): string {
+    getEnemyDisplayName(definition: EnemyDefinitionData | null, fallback = ''): string {
         const defaultName = this.t('enemy.defaultName', 'Inimigo');
         const fallbackName = definition?.name || fallback || defaultName;
         const localized = definition?.nameKey
@@ -212,7 +213,7 @@ class EditorEnemyRenderer extends EditorRendererBase {
     }
 
     getEnemyCountProgress(): { currentCount: number; totalCount: number; ratio: number } {
-        const enemies = (this.gameEngine?.getActiveEnemies?.() ?? []) as EnemyRecord[];
+        const enemies = (this.gameEngine?.getActiveEnemies?.() ?? []) as EnemyDefinition[];
         const currentCount = enemies.length;
 
         const game =
@@ -229,14 +230,14 @@ class EditorEnemyRenderer extends EditorRendererBase {
         return { currentCount, totalCount, ratio };
     }
 
-    renderEnemyOverlay(enemies: EnemyRecord[], roomIndex: number): void {
+    renderEnemyOverlay(enemies: EnemyDefinition[], roomIndex: number): void {
         const canvas = this.dom.editorCanvas;
         if (!canvas) return;
         const wrapper = canvas.parentElement;
         if (!wrapper) return;
 
         const roomEnemies = Array.isArray(enemies)
-            ? enemies.filter((enemy: EnemyRecord) => enemy.roomIndex === roomIndex)
+            ? enemies.filter((enemy: EnemyDefinition) => enemy.roomIndex === roomIndex)
             : [];
 
         let overlay = wrapper.querySelector('.enemy-overlay');
@@ -267,7 +268,7 @@ class EditorEnemyRenderer extends EditorRendererBase {
 
         overlay.innerHTML = '';
 
-        roomEnemies.forEach((enemy: EnemyRecord) => {
+        roomEnemies.forEach((enemy: EnemyDefinition) => {
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'enemy-overlay-remove';

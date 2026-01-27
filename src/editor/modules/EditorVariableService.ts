@@ -1,4 +1,7 @@
 import { EditorManager } from '../EditorManager';
+import type { VariableDefinition } from '../../types/gameState';
+
+type VariableEntry = VariableDefinition & { name?: string; color?: string };
 
 class EditorVariableService {
     manager: EditorManager;
@@ -17,7 +20,7 @@ class EditorVariableService {
 
     toggle(variableId: string, nextValue: boolean | null = null) {
         if (!variableId || !this.gameEngine.setVariableDefault) return;
-        const current = ((this.gameEngine.getVariableDefinitions?.() ?? []) as any[]).find((entry: any) => entry.id === variableId);
+        const current = ((this.gameEngine.getVariableDefinitions?.() ?? []) as VariableEntry[]).find((entry: VariableEntry) => entry.id === variableId);
         const targetValue = nextValue !== null ? Boolean(nextValue) : !Boolean(current?.value);
         const changed = this.gameEngine.setVariableDefault(variableId, targetValue);
         if (!changed) return;

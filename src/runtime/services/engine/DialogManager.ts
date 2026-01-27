@@ -74,4 +74,5 @@ class DialogManager {
   }
 }
 
+export type { DialogMeta };
 export { DialogManager };

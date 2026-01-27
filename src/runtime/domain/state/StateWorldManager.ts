@@ -1,15 +1,6 @@
 
-import type { AnyRecord, GameDefinition } from '../../../types/gameState';
+import type { GameDefinition, RoomDefinition } from '../../../types/gameState';
 import type { TileMap } from '../definitions/tileTypes';
-
-type RoomEntry = {
-    size: number;
-    bg: number;
-    tiles: number[][];
-    walls: boolean[][];
-    worldX: number;
-    worldY: number;
-} & AnyRecord;
 
 class StateWorldManager {
     game: GameDefinition;
@@ -28,7 +19,7 @@ class StateWorldManager {
         return this.game?.roomSize ?? this.defaultRoomSize;
     }
 
-    static createEmptyRoom(size: number, index = 0, cols = 1): RoomEntry {
+    static createEmptyRoom(size: number, index = 0, cols = 1): RoomDefinition {
         const col = index % cols;
         const row = Math.floor(index / cols);
         return {
@@ -41,17 +32,17 @@ class StateWorldManager {
         };
     }
 
-    createEmptyRoom(size = this.roomSize, index = 0, cols = 1): RoomEntry {
+    createEmptyRoom(size = this.roomSize, index = 0, cols = 1): RoomDefinition {
         return StateWorldManager.createEmptyRoom(size, index, cols);
     }
 
-    static createWorldRooms(rows: number, cols: number, size: number): RoomEntry[] {
+    static createWorldRooms(rows: number, cols: number, size: number): RoomDefinition[] {
         return Array.from({ length: rows * cols }, (_, index) =>
             StateWorldManager.createEmptyRoom(size, index, cols)
         );
     }
 
-    createWorldRooms(rows: number, cols: number, size = this.roomSize): RoomEntry[] {
+    createWorldRooms(rows: number, cols: number, size = this.roomSize): RoomDefinition[] {
         return StateWorldManager.createWorldRooms(rows, cols, size);
     }
 
@@ -66,9 +57,9 @@ class StateWorldManager {
         return StateWorldManager.createEmptyTileMap(size);
     }
 
-    normalizeRooms(rooms: AnyRecord[] | null | undefined, totalRooms: number, cols: number): RoomEntry[] {
+    normalizeRooms(rooms: Partial<RoomDefinition>[] | null | undefined, totalRooms: number, cols: number): RoomDefinition[] {
         const size = this.roomSize;
-        const filled: RoomEntry[] = Array.from({ length: totalRooms }, (_, index) =>
+        const filled: RoomDefinition[] = Array.from({ length: totalRooms }, (_, index) =>
             StateWorldManager.createEmptyRoom(size, index, cols)
         );
         if (!Array.isArray(rooms)) return filled;
@@ -98,7 +89,7 @@ class StateWorldManager {
         const emptyMaps = Array.from({ length: totalRooms }, () => StateWorldManager.createEmptyTileMap(size));
         if (!source) return emptyMaps;
 
-        const assignMap = (target: TileMap, map: any) => {
+        const assignMap = (target: TileMap, map: Partial<TileMap>) => {
             target.ground = Array.from({ length: size }, (_, y) =>
                 Array.from({ length: size }, (_, x) => map?.ground?.[y]?.[x] ?? null)
             );
@@ -108,7 +99,7 @@ class StateWorldManager {
         };
 
         if (Array.isArray(source)) {
-            source.forEach((map, index) => {
+            source.forEach((map: Partial<TileMap>, index: number) => {
                 if (index >= emptyMaps.length) return;
                 if (map?.ground || map?.overlay) {
                     assignMap(emptyMaps[index], map);
@@ -117,8 +108,9 @@ class StateWorldManager {
             return emptyMaps;
         }
 
-        if ((source as any)?.ground || (source as any)?.overlay) {
-            assignMap(emptyMaps[0], source as any);
+        const singleMap = source as Partial<TileMap>;
+        if (singleMap?.ground || singleMap?.overlay) {
+            assignMap(emptyMaps[0], singleMap);
         }
         return emptyMaps;
     }

@@ -371,4 +371,5 @@ class NPCManager {
     }
 }
 
+export type { NPCInstance };
 export { NPCManager };

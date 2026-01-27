@@ -151,8 +151,8 @@ describe('Renderer', () => {
       }
     } as typeof Event;
     globalThis.CustomEvent = class CustomEvent extends globalThis.Event {
-      detail: Record<string, any>;
-      constructor(type: string, params?: { detail?: Record<string, any> }) {
+      detail: Record<string, unknown>;
+      constructor(type: string, params?: { detail?: Record<string, unknown> }) {
         super(type);
         this.detail = params?.detail ?? {};
       }

@@ -47,7 +47,7 @@ class EditorDomCache {
     projectTestGodMode: HTMLInputElement | null;
 
     constructor(root: Document | HTMLElement | null = typeof document !== 'undefined' ? document : null) {
-        this.root = root || (null as any); // fallback for strict mode if needed, though properties can be null
+        this.root = root || (null as unknown as Document); // fallback for strict mode if needed, though properties can be null
         if (!root) {
             this.editorCanvas = null;
             this.mapPosition = null;

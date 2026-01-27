@@ -2,8 +2,13 @@
 import { FirebaseShareTracker } from '../../runtime/infra/share/FirebaseShareTracker';
 import { ShareUtils } from '../../runtime/infra/share/ShareUtils';
 import { TextResources } from '../../runtime/adapters/TextResources';
+import type { EditorManager } from '../EditorManager';
+
 class EditorShareService {
-    constructor(editorManager) {
+    manager: EditorManager;
+    shareTracker: FirebaseShareTracker | null;
+
+    constructor(editorManager: EditorManager) {
         this.manager = editorManager;
         this.shareTracker = this.createShareTracker();
     }
@@ -12,7 +17,7 @@ class EditorShareService {
         return TextResources;
     }
 
-    t(key, fallback = '') {
+    t(key: string, fallback = ''): string {
         const resource = this.text;
         const value = resource?.get?.(key, fallback);
         if (value) return value;
@@ -35,7 +40,7 @@ class EditorShareService {
         return url;
     }
 
-    updateShareUrlField(url) {
+    updateShareUrlField(url: string | null) {
         const input = this.manager?.dom?.shareUrlInput;
         if (!input) return;
         input.value = url || '';
@@ -61,17 +66,17 @@ class EditorShareService {
         }
     }
 
-    createShareTracker() {
+    createShareTracker(): FirebaseShareTracker | null {
         if (FirebaseShareTracker.fromGlobal) {
             return FirebaseShareTracker.fromGlobal();
         }
-        const config = globalThis.TinyRPGFirebaseConfig ?? null;
-        const collection = globalThis.TinyRPGFirebaseCollection ?? null;
+        const config = (globalThis as Record<string, unknown>).TinyRPGFirebaseConfig ?? null;
+        const collection = (globalThis as Record<string, unknown>).TinyRPGFirebaseCollection ?? null;
         if (!config) return null;
-        return new FirebaseShareTracker(config, { collection });
+        return new FirebaseShareTracker(config as Record<string, unknown>, { collection: collection as string | null });
     }
 
-    async trackShareUrl(url) {
+    async trackShareUrl(url: string) {
         if (!this.shareTracker?.trackShareUrl) return;
         console.info('[TinyRPG] Tracking share URL...', { url });
         const ok = await this.shareTracker.trackShareUrl(url, { source: 'editor' });
@@ -93,13 +98,14 @@ class EditorShareService {
         URL.revokeObjectURL(url);
     }
 
-    loadGameFile(ev) {
-        const file = ev.target?.files?.[0];
+    loadGameFile(ev: Event) {
+        const target = ev.target as HTMLInputElement;
+        const file = target?.files?.[0];
         if (!file) return;
         const reader = new FileReader();
         reader.onload = () => {
             try {
-                const data = JSON.parse(reader.result);
+                const data = JSON.parse(reader.result as string);
                 this.manager.restore(data, { skipHistory: true });
                 this.manager.history.pushCurrentState();
             } catch {
@@ -107,7 +113,7 @@ class EditorShareService {
             }
         };
         reader.readAsText(file);
-        ev.target.value = '';
+        target.value = '';
     }
 }
 

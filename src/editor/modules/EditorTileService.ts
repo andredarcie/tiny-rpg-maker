@@ -1,8 +1,10 @@
 
-class EditorTileService {
-    manager: any;
+import type { EditorManager } from '../EditorManager';
 
-    constructor(editorManager: any) {
+class EditorTileService {
+    manager: EditorManager;
+
+    constructor(editorManager: EditorManager) {
         this.manager = editorManager;
     }
 

@@ -1,5 +1,5 @@
 
-import type { AnyRecord, DialogState, RuntimeState } from '../../../types/gameState';
+import type { DialogMeta, DialogState, RuntimeState } from '../../../types/gameState';
 
 class StateDialogManager {
     state: RuntimeState | null;
@@ -20,7 +20,7 @@ class StateDialogManager {
         return this.dialog ?? { active: false, text: '', page: 1, maxPages: 1, meta: null };
     }
 
-    setDialog(active: boolean, text: string = "", meta: AnyRecord | null = null) {
+    setDialog(active: boolean, text: string = "", meta: DialogMeta | null = null) {
         const dialog = this.dialog;
         if (!dialog) return;
         if (!active) {

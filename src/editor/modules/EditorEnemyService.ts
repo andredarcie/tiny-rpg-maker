@@ -2,13 +2,16 @@
 import { EnemyDefinitions } from '../../runtime/domain/definitions/EnemyDefinitions';
 import { TextResources } from '../../runtime/adapters/TextResources';
 import { EditorConstants } from './EditorConstants';
+import type { EditorManager } from '../EditorManager';
+import type { EnemyDefinition } from '../../types/gameState';
+import type { EnemyDefinitionData } from '../../runtime/domain/entities/Enemy';
 
 class EditorEnemyService {
-    manager: any;
+    manager: EditorManager;
     editorIndicator: HTMLElement | null;
     editorIndicatorTimeout: ReturnType<typeof setTimeout> | null;
 
-    constructor(editorManager: any) {
+    constructor(editorManager: EditorManager) {
         this.manager = editorManager;
         this.editorIndicator = null;
         this.editorIndicatorTimeout = null;
@@ -55,14 +58,15 @@ class EditorEnemyService {
 
     placeEnemyAt(coord: { x: number; y: number }) {
         const roomIndex = this.state.activeRoomIndex;
-        const existing = (this.gameEngine.getEnemyDefinitions?.() ?? []).find((enemy: any) =>
+        const enemyDefs = (this.gameEngine.getEnemyDefinitions?.() ?? []) as EnemyDefinition[];
+        const existing = enemyDefs.find((enemy: EnemyDefinition) =>
             enemy.roomIndex === roomIndex && enemy.x === coord.x && enemy.y === coord.y
         );
         if (existing) {
             return;
         }
-        const enemies = this.gameEngine.getActiveEnemies?.() ?? [];
-        const currentRoomCount = enemies.reduce((count: number, enemy: any) => (
+        const enemies = (this.gameEngine.getActiveEnemies?.() ?? []) as EnemyDefinition[];
+        const currentRoomCount = enemies.reduce((count: number, enemy: EnemyDefinition) => (
             enemy.roomIndex === roomIndex ? count + 1 : count
         ), 0);
         if (currentRoomCount >= 6) {
@@ -186,8 +190,8 @@ class EditorEnemyService {
             return definition;
         }
         const definitions = EditorConstants.ENEMY_DEFINITIONS;
-        return definitions.find((entry: any) => entry.type === target) ||
-            definitions.find((entry: any) => Array.isArray(entry.aliases) && entry.aliases.includes(target)) ||
+        return definitions.find((entry: EnemyDefinitionData) => entry.type === target) ||
+            (target ? definitions.find((entry: EnemyDefinitionData) => Array.isArray(entry.aliases) && entry.aliases.includes(target)) : null) ||
             null;
     }
 

@@ -2,7 +2,7 @@ import { EditorManager } from '../EditorManager';
 import { EditorManagerModule } from './EditorManagerModule';
 
 class EditorEventBinder extends EditorManagerModule {
-    manager: EditorManager;
+    declare manager: EditorManager;
     bind() {
         const {
             btnNpcDelete,
@@ -61,29 +61,31 @@ class EditorEventBinder extends EditorManagerModule {
 
         titleInput?.addEventListener('input', () => manager.updateGameMetadata());
         authorInput?.addEventListener('input', () => manager.updateGameMetadata());
-        projectTestStartLevel?.addEventListener('change', (ev: any) => {
-            const value = Number(ev.target.value);
+        projectTestStartLevel?.addEventListener('change', (ev: Event) => {
+            const target = ev.target as HTMLSelectElement;
+            const value = Number(target.value);
             manager.setTestStartLevel(value);
         });
-        projectTestGodMode?.addEventListener('change', (ev: any) => {
-            manager.setGodMode(ev.target.checked);
+        projectTestGodMode?.addEventListener('change', (ev: Event) => {
+            const target = ev.target as HTMLInputElement;
+            manager.setGodMode(target.checked);
         });
         shareUrlInput?.addEventListener('focus', () => shareUrlInput.select());
         shareUrlInput?.addEventListener('click', () => shareUrlInput.select());
-        projectTestSkillList?.addEventListener('change', (ev: any) => {
-            const target = ev.target;
+        projectTestSkillList?.addEventListener('change', (ev: Event) => {
+            const target = ev.target as HTMLElement;
             if (!target || target.tagName !== 'INPUT') return;
             const skills = Array.from(projectTestSkillList.querySelectorAll('input[type="checkbox"][data-skill-id]'))
-                .filter((input) => (input as any).checked)
-                .map((input) => (input as any).dataset.skillId)
-                .filter(Boolean);
+                .filter((input) => (input as HTMLInputElement).checked)
+                .map((input) => (input as HTMLInputElement).dataset.skillId)
+                .filter(Boolean) as string[];
             manager.setTestSkills(skills);
         });
         npcText?.addEventListener('input', () => npcService.updateNpcText(npcText.value));
         npcConditionalText?.addEventListener('input', () => npcService.updateNpcConditionalText(npcConditionalText.value));
-        npcConditionalVariable?.addEventListener('change', (ev: any) => npcService.handleConditionVariableChange(ev.target.value));
-        npcRewardVariable?.addEventListener('change', (ev: any) => npcService.handleRewardVariableChange(ev.target.value));
-        npcConditionalRewardVariable?.addEventListener('change', (ev: any) => npcService.handleConditionalRewardVariableChange(ev.target.value));
+        npcConditionalVariable?.addEventListener('change', (ev: Event) => npcService.handleConditionVariableChange((ev.target as HTMLSelectElement).value));
+        npcRewardVariable?.addEventListener('change', (ev: Event) => npcService.handleRewardVariableChange((ev.target as HTMLSelectElement).value));
+        npcConditionalRewardVariable?.addEventListener('change', (ev: Event) => npcService.handleConditionalRewardVariableChange((ev.target as HTMLSelectElement).value));
         if (Array.isArray(npcVariantButtons)) {
             npcVariantButtons.forEach((button) => {
                 button.addEventListener('click', () => {
@@ -94,10 +96,11 @@ class EditorEventBinder extends EditorManagerModule {
             });
         }
 
-        fileInput?.addEventListener('change', (ev: any) => shareService.loadGameFile(ev));
+        fileInput?.addEventListener('change', (ev: Event) => shareService.loadGameFile(ev));
 
-        tileList?.addEventListener('click', (ev: any) => {
-            const button = ev.target.closest('[data-tile-id]');
+        tileList?.addEventListener('click', (ev: Event): void => {
+            const target = ev.target as HTMLElement;
+            const button = target.closest('[data-tile-id]') as HTMLElement | null;
             if (!button) return;
             const tileId = Number(button.dataset.tileId);
             if (!Number.isFinite(tileId)) return;
@@ -112,8 +115,9 @@ class EditorEventBinder extends EditorManagerModule {
             this.renderService.renderTileList();
         });
 
-        npcsList?.addEventListener('click', (ev: any) => {
-            const card = ev.target.closest('.npc-card');
+        npcsList?.addEventListener('click', (ev: Event) => {
+            const target = ev.target as HTMLElement;
+            const card = target.closest('.npc-card') as HTMLElement | null;
             if (!card) return;
             const type = card.dataset.type || null;
             const id = card.dataset.id || null;
@@ -122,8 +126,9 @@ class EditorEventBinder extends EditorManagerModule {
             npcService.updateNpcSelection(type, id);
         });
 
-        objectTypes?.addEventListener('click', (ev: any) => {
-            const card = ev.target.closest('.object-type-card');
+        objectTypes?.addEventListener('click', (ev: Event) => {
+            const target = ev.target as HTMLElement;
+            const card = target.closest('.object-type-card') as HTMLElement | null;
             if (!card) return;
             const type = card.dataset.type || null;
             if (!type) return;
@@ -132,10 +137,11 @@ class EditorEventBinder extends EditorManagerModule {
             objectService.selectObjectType(type);
         });
 
-        objectsList?.addEventListener('click', (ev: any) => {
-            const button = ev.target.closest('.object-remove');
+        objectsList?.addEventListener('click', (ev: Event) => {
+            const target = ev.target as HTMLElement;
+            const button = target.closest('.object-remove') as HTMLElement | null;
             if (!button) return;
-            const card = button.closest('.object-card');
+            const card = button.closest('.object-card') as HTMLElement | null;
             if (!card) return;
             const type = card.dataset.type;
             const room = Number(card.dataset.roomIndex);
@@ -143,8 +149,9 @@ class EditorEventBinder extends EditorManagerModule {
             objectService.removeObject(type, room);
         });
 
-        enemyTypes?.addEventListener('click', (ev: any) => {
-            const card = ev.target.closest('.enemy-card');
+        enemyTypes?.addEventListener('click', (ev: Event) => {
+            const target = ev.target as HTMLElement;
+            const card = target.closest('.enemy-card') as HTMLElement | null;
             if (!card) return;
             const type = card.dataset.type || null;
             if (!type) return;
@@ -153,25 +160,27 @@ class EditorEventBinder extends EditorManagerModule {
             enemyService.selectEnemyType(type);
         });
 
-        enemiesList?.addEventListener('click', (ev: any) => {
-            const button = ev.target.closest('[data-remove-enemy]');
+        enemiesList?.addEventListener('click', (ev: Event) => {
+            const target = ev.target as HTMLElement;
+            const button = target.closest('[data-remove-enemy]') as HTMLElement | null;
             if (!button) return;
             const enemyId = button.dataset.removeEnemy;
             if (!enemyId) return;
             enemyService.removeEnemy(enemyId);
         });
 
-        enemiesList?.addEventListener('change', (ev: any) => {
-            const target = ev.target;
+        enemiesList?.addEventListener('change', (ev: Event) => {
+            const target = ev.target as HTMLSelectElement;
             if (!target || target.tagName !== 'SELECT') return;
-            const enemyId = (target as any).dataset.enemyVariable;
+            const enemyId = target.dataset.enemyVariable;
             if (!enemyId) return;
-            const value = (target as any).value || '';
+            const value = target.value || '';
             enemyService.handleEnemyVariableChange(enemyId, value);
         });
 
-        worldGrid?.addEventListener('click', (ev: any) => {
-            const cell = ev.target.closest('[data-room-index]');
+        worldGrid?.addEventListener('click', (ev: Event) => {
+            const target = ev.target as HTMLElement;
+            const cell = target.closest('[data-room-index]') as HTMLElement | null;
             if (!cell) return;
             const index = Number(cell.dataset.roomIndex);
             worldService.setActiveRoom(index);
@@ -188,8 +197,8 @@ class EditorEventBinder extends EditorManagerModule {
         }
 
         if (editorCanvas) {
-            editorCanvas.addEventListener('pointerdown', (ev: any) => tileService.startPaint(ev));
-            editorCanvas.addEventListener('pointermove', (ev: any) => tileService.continuePaint(ev));
+            editorCanvas.addEventListener('pointerdown', (ev: PointerEvent) => tileService.startPaint(ev));
+            editorCanvas.addEventListener('pointermove', (ev: PointerEvent) => tileService.continuePaint(ev));
         }
 
         if (Array.isArray(mobileNavButtons)) {
@@ -202,10 +211,10 @@ class EditorEventBinder extends EditorManagerModule {
             });
         }
 
-        globalThis.addEventListener?.('pointerup', (ev: any) => tileService.finishPaint(ev));
+        globalThis.addEventListener?.('pointerup', (ev: PointerEvent) => tileService.finishPaint(ev));
 
-        document.addEventListener('keydown', (ev: any) => manager.handleKey(ev));
-        globalThis.addEventListener?.('resize', (ev: any) => {
+        document.addEventListener('keydown', (ev: KeyboardEvent) => manager.handleKey(ev));
+        globalThis.addEventListener?.('resize', () => {
             manager.handleCanvasResize();
             manager.updateMobilePanels();
         });

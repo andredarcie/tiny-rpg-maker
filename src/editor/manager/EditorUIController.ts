@@ -1,6 +1,15 @@
 
 import { TextResources } from '../../runtime/adapters/TextResources';
 import { EditorManagerModule } from './EditorManagerModule';
+import type { NpcDefinitionData } from '../../runtime/domain/entities/Npc';
+
+type SpriteInstance = {
+    id: string;
+    type: string;
+    name?: string;
+    text?: string;
+    textKey?: string | null;
+};
 
 class EditorUIController extends EditorManagerModule {
     updateGameMetadata() {
@@ -110,11 +119,11 @@ class EditorUIController extends EditorManagerModule {
     }
 
     refreshNpcLocalizedText() {
-        const sprites = this.gameEngine?.getSprites?.() as any[];
+        const sprites = this.gameEngine?.getSprites?.() as SpriteInstance[];
         if (!Array.isArray(sprites)) return;
-        const definitions = (this.gameEngine?.npcManager?.getDefinitions?.() || []) as any[];
-        const byType = new Map(definitions.map((def: any) => [def.type, def]));
-        sprites.forEach((npc: any) => {
+        const definitions = (this.gameEngine?.npcManager?.getDefinitions?.() || []) as NpcDefinitionData[];
+        const byType = new Map(definitions.map((def: NpcDefinitionData) => [def.type, def]));
+        sprites.forEach((npc: SpriteInstance) => {
             const def = npc?.type ? byType.get(npc.type) : null;
             if (def?.nameKey) {
                 npc.name = TextResources.get?.(def.nameKey, def.name || npc.name || '') || npc.name || '';

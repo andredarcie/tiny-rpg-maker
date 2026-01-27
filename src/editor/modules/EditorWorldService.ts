@@ -1,23 +1,10 @@
 
-type EditorManagerApi = {
-    domCache: any;
-    state: any;
-    gameEngine: any;
-    npcService: { clearSelection: () => void };
-    enemyService: { deactivatePlacement: () => void };
-    renderService: {
-        renderWorldGrid: () => void;
-        renderObjects: () => void;
-        renderEditor: () => void;
-        renderEnemies: () => void;
-    };
-    renderObjectCatalog: () => void;
-};
+import type { EditorManager } from '../EditorManager';
 
 class EditorWorldService {
-    manager: EditorManagerApi;
+    manager: EditorManager;
 
-    constructor(editorManager: EditorManagerApi) {
+    constructor(editorManager: EditorManager) {
         this.manager = editorManager;
     }
 

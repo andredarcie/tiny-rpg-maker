@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir C:repostiny-rpg-maker /b)",
+      "Bash(npx tsc:*)",
+      "Bash(npm test)"
+    ]
+  }
+}

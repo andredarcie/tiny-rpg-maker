@@ -1,10 +1,16 @@
 
 import { itemCatalog } from '../../runtime/domain/services/ItemCatalog';
 import { EditorConstants } from './EditorConstants';
-class EditorObjectService {
-    manager: any;
+import type { EditorManager } from '../EditorManager';
 
-    constructor(editorManager: any) {
+type ObjectDefinition = {
+    type: string;
+};
+
+class EditorObjectService {
+    manager: EditorManager;
+
+    constructor(editorManager: EditorManager) {
         this.manager = editorManager;
     }
 
@@ -128,11 +134,11 @@ class EditorObjectService {
         }, 400);
     }
 
-    normalizeType(type: any) {
+    normalizeType(type: string | null | undefined): string | null {
         if (typeof type !== 'string' || !type.length) return null;
         const definitions = EditorConstants.OBJECT_DEFINITIONS;
         if (Array.isArray(definitions) && definitions.length) {
-            const normalized = definitions.find((entry: any) => entry.type === type)?.type || null;
+            const normalized = definitions.find((entry: ObjectDefinition) => entry.type === type)?.type || null;
             if (normalized) return normalized;
         }
         const fallbackTypes = new Set(itemCatalog.getPlaceableTypes());
