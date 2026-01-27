@@ -570,7 +570,8 @@ class GameState {
     }
 
     removeEnemy(enemyId: string | number): void {
-        this.enemyManager.removeEnemy(enemyId);
+        const id = typeof enemyId === 'string' ? enemyId : String(enemyId);
+        this.enemyManager.removeEnemy(id);
     }
 
     setEnemyPosition(enemyId: string | number, x: number, y: number, roomIndex: number | null = null): void {

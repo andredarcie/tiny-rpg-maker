@@ -72,7 +72,9 @@ class EditorTilePanelRenderer extends EditorRendererBase {
         const preview = this.dom.selectedTilePreview;
         const tile = (this.gameEngine.getTiles() as TileDefinitionView[]).find((entry) => entry.id === this.manager.selectedTileId);
         if (!preview || !tile) return;
-        this.gameEngine.renderer.drawTileOnCanvas(preview, tile);
+        if (preview instanceof HTMLCanvasElement) {
+            this.gameEngine.renderer.drawTileOnCanvas(preview, tile);
+        }
         if (this.dom.tileSummary) {
             this.dom.tileSummary.textContent = tile.name || this.tf('tiles.summaryFallback', { id: tile.id });
         }

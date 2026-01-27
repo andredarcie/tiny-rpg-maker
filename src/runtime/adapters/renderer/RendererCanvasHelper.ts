@@ -36,7 +36,7 @@ class RendererCanvasHelper {
     }
 
     resolveTilePixels(tile: TileDefinition | null, frameOverride: number | null = null) {
-        if (this.tileManager?.getTilePixels) {
+        if (this.tileManager?.getTilePixels && tile) {
             return this.tileManager.getTilePixels(tile, frameOverride);
         }
         if (Array.isArray(tile?.frames) && tile.frames.length) {

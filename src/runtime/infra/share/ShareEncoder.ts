@@ -24,8 +24,9 @@ class ShareEncoder {
     static buildShareCode(gameData: ShareGameData | null | undefined) {
         const OT = ITEM_TYPES;
         const roomCount = ShareConstants.WORLD_ROOM_COUNT;
-        const groundMatrices = ShareMatrixCodec.collectGroundMatrices(gameData, roomCount);
-        const overlayMatrices = ShareMatrixCodec.collectOverlayMatrices(gameData, roomCount);
+        const data = gameData as Parameters<typeof ShareMatrixCodec.collectGroundMatrices>[0];
+        const groundMatrices = ShareMatrixCodec.collectGroundMatrices(data, roomCount);
+        const overlayMatrices = ShareMatrixCodec.collectOverlayMatrices(data, roomCount);
         const start = ShareDataNormalizer.normalizeStart(gameData?.start ?? {});
         const sprites = ShareDataNormalizer.normalizeSprites(gameData?.sprites);
         const enemies = ShareDataNormalizer.normalizeEnemies(gameData?.enemies);
@@ -48,7 +49,7 @@ class ShareEncoder {
         }));
         const magicDoorVariableNibbles = magicDoorEntries.map((entry) => entry.variableNibble ?? 0);
         const variables = Array.isArray(gameData?.variables) ? gameData.variables : [];
-        const variableCode = ShareVariableCodec.encodeVariables(variables);
+        const variableCode = ShareVariableCodec.encodeVariables(variables as Parameters<typeof ShareVariableCodec.encodeVariables>[0]);
 
         const groundSegments = groundMatrices.map((matrix) => ShareMatrixCodec.encodeGround(matrix));
         const hasGround = groundSegments.some((segment) => Boolean(segment));

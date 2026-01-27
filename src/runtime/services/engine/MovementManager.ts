@@ -226,7 +226,8 @@ class MovementManager {
 
     const enteringNewRoom = targetRoomIndex !== roomIndex;
 
-    const targetRoom = this.gameState.getGame().rooms?.[targetRoomIndex] as RoomState | undefined;
+    const game = this.gameState.getGame() as { rooms?: RoomState[] };
+    const targetRoom = game.rooms?.[targetRoomIndex] as RoomState | undefined;
     if (!targetRoom) {
       if (enteringNewRoom) {
         this.flashBlockedEdge(direction, { x: targetX, y: targetY });

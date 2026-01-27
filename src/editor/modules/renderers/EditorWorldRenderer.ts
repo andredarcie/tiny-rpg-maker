@@ -18,7 +18,7 @@ class EditorWorldRenderer extends EditorRendererBase {
         const startIndex = game.start?.roomIndex ?? 0;
 
         grid.innerHTML = '';
-        grid.style.setProperty('--world-cols', cols);
+        grid.style.setProperty('--world-cols', String(cols));
 
         for (let row = 0; row < rows; row++) {
             for (let col = 0; col < cols; col++) {

@@ -129,12 +129,14 @@ class RendererEntityRenderer {
         const px = player.x * tileSize;
         const py = player.y * tileSize;
         let sprite = this.spriteFactory.getPlayerSprite()
-        sprite = this.adjustSpriteHorizontally(player.x, player.lastX ?? player.x, sprite);
-        const fadeStealth = this.shouldFadePlayerForStealth();
-        if (fadeStealth) ctx.save();
-        if (fadeStealth) ctx.globalAlpha = 0.45;
-        this.canvasHelper.drawSprite(ctx, sprite, px, py, step);
-        if (fadeStealth) ctx.restore();
+        if (sprite) {
+            sprite = this.adjustSpriteHorizontally(player.x, player.lastX ?? player.x, sprite);
+            const fadeStealth = this.shouldFadePlayerForStealth();
+            if (fadeStealth) ctx.save();
+            if (fadeStealth) ctx.globalAlpha = 0.45;
+            this.canvasHelper.drawSprite(ctx, sprite, px, py, step);
+            if (fadeStealth) ctx.restore();
+        }
     }
 
     drawTileIconOnPlayer(ctx: CanvasRenderingContext2D, tileId: string) {

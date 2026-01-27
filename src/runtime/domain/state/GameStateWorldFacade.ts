@@ -25,7 +25,7 @@ class GameStateWorldFacade {
     }
 
     normalizeRooms(rooms: unknown, totalRooms: number, cols: number): RoomDefinition[] {
-        return this.worldManager.normalizeRooms(rooms, totalRooms, cols);
+        return this.worldManager.normalizeRooms(rooms as Partial<RoomDefinition>[] | null | undefined, totalRooms, cols);
     }
 
     normalizeTileMaps(source: unknown, totalRooms: number): TileMap[] {

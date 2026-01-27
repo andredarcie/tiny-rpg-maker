@@ -31,7 +31,7 @@ class EditorShareService {
             return null;
         }
         const gameData = this.manager.gameEngine.exportGameData();
-        const url = ShareUtils.buildShareUrl(gameData);
+        const url = ShareUtils.buildShareUrl(gameData as Record<string, unknown> | null | undefined);
         try {
             globalThis.history?.replaceState?.(null, '', url);
         } catch {

@@ -139,7 +139,7 @@ class EditorObjectRenderer extends EditorRendererBase {
                 status.className = 'object-status';
                 const isOn = object.type === EditorObjectTypes.SWITCH
                     ? Boolean(object.on)
-                    : Boolean(this.gameEngine.isVariableOn?.(object.variableId));
+                    : Boolean(this.gameEngine.isVariableOn?.(object.variableId || ''));
                 status.textContent = this.tf('objects.switch.stateLabel', {
                     state: isOn ? this.t('objects.state.on') : this.t('objects.state.off')
                 });
