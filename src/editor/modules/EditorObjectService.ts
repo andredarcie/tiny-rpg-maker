@@ -2,7 +2,9 @@
 import { itemCatalog } from '../../runtime/domain/services/ItemCatalog';
 import { EditorConstants } from './EditorConstants';
 class EditorObjectService {
-    constructor(editorManager) {
+    manager: any;
+
+    constructor(editorManager: any) {
         this.manager = editorManager;
     }
 
@@ -18,7 +20,7 @@ class EditorObjectService {
         return this.manager.gameEngine;
     }
 
-    togglePlacement(type, forceOff = false) {
+    togglePlacement(type: string | null, forceOff: boolean = false) {
         const normalizedType = this.normalizeType(type ?? this.state.placingObjectType ?? this.manager.selectedObjectType);
         if (forceOff) {
             if (!this.state.placingObjectType) return;
@@ -46,7 +48,7 @@ class EditorObjectService {
         this.manager.renderObjectCatalog();
     }
 
-    placeObjectAt(type, coord, roomIndex) {
+    placeObjectAt(type: string, coord: { x: number; y: number }, roomIndex: number) {
         const object = this.gameEngine.setObjectPosition(type, roomIndex, coord.x, coord.y);
         if (!object) return;
         this.manager.renderService.renderObjects();
@@ -58,7 +60,7 @@ class EditorObjectService {
         this.manager.history.pushCurrentState();
     }
 
-    removeObject(type, roomIndex) {
+    removeObject(type: string, roomIndex: number) {
         if (this.state.placingObjectType === type) {
             this.togglePlacement(type, true);
         }
@@ -72,7 +74,7 @@ class EditorObjectService {
         this.manager.history.pushCurrentState();
     }
 
-    selectObjectType(type) {
+    selectObjectType(type: string | null) {
         const normalized = this.normalizeType(type);
         if (!normalized) return;
         if (this.manager.selectedObjectType !== normalized) {
@@ -81,7 +83,7 @@ class EditorObjectService {
         this.activatePlacement(normalized);
     }
 
-    activatePlacement(type = null) {
+    activatePlacement(type: string | null = null) {
         const targetType = this.normalizeType(type ?? this.manager.selectedObjectType);
         if (!targetType) return;
         this.manager.npcService?.clearSelection?.();
@@ -97,7 +99,7 @@ class EditorObjectService {
         this.manager.renderObjectCatalog();
     }
 
-    clearSelection({ render = true } = {}) {
+    clearSelection({ render = true }: { render?: boolean } = {}) {
         const hadSelection = Boolean(this.manager.selectedObjectType || this.state.placingObjectType);
         if (!hadSelection) return false;
         this.state.placingObjectType = null;
@@ -111,7 +113,7 @@ class EditorObjectService {
         return true;
     }
 
-    updatePlayerEndText(roomIndex, text) {
+    updatePlayerEndText(roomIndex: number, text: string) {
         this.gameEngine.setPlayerEndText(roomIndex, text);
         this.manager.updateJSON();
         this.schedulePlayerEndTextHistory();
@@ -126,11 +128,11 @@ class EditorObjectService {
         }, 400);
     }
 
-    normalizeType(type) {
+    normalizeType(type: any) {
         if (typeof type !== 'string' || !type.length) return null;
         const definitions = EditorConstants.OBJECT_DEFINITIONS;
         if (Array.isArray(definitions) && definitions.length) {
-            const normalized = definitions.find((entry) => entry.type === type)?.type || null;
+            const normalized = definitions.find((entry: any) => entry.type === type)?.type || null;
             if (normalized) return normalized;
         }
         const fallbackTypes = new Set(itemCatalog.getPlaceableTypes());

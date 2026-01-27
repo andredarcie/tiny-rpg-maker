@@ -1,6 +1,7 @@
 
 import { TextResources } from '../../runtime/adapters/TextResources';
 import { EditorManagerModule } from './EditorManagerModule';
+
 class EditorUIController extends EditorManagerModule {
     updateGameMetadata() {
         const game = this.gameEngine.getGame();
@@ -37,14 +38,14 @@ class EditorUIController extends EditorManagerModule {
         this.renderService.renderTestTools();
     }
 
-    setTestStartLevel(level) {
+    setTestStartLevel(level: number) {
         const maxLevel = this.gameEngine.getMaxPlayerLevel?.() ?? 1;
         const numeric = Number.isFinite(level) ? Math.max(1, Math.min(maxLevel, Math.floor(level))) : 1;
         this.gameEngine.updateTestSettings?.({ startLevel: numeric });
         this.renderService.renderTestTools();
     }
 
-    setTestSkills(skills) {
+    setTestSkills(skills: string[]) {
         const normalized = Array.isArray(skills)
             ? Array.from(new Set(skills.filter((id) => typeof id === 'string' && id)))
             : [];
@@ -52,7 +53,7 @@ class EditorUIController extends EditorManagerModule {
         this.renderService.renderTestTools();
     }
 
-    setGodMode(active = false) {
+    setGodMode(active: boolean = false) {
         this.gameEngine.updateTestSettings?.({ godMode: Boolean(active) });
         this.renderService.renderTestTools();
     }
@@ -68,7 +69,7 @@ class EditorUIController extends EditorManagerModule {
         this.updateJSON();
     }
 
-    setActiveMobilePanel(panel) {
+    setActiveMobilePanel(panel: string) {
         if (!panel) return;
         if (this.state.activeMobilePanel === panel) {
             this.updateMobilePanels();
@@ -109,11 +110,11 @@ class EditorUIController extends EditorManagerModule {
     }
 
     refreshNpcLocalizedText() {
-        const sprites = this.gameEngine?.getSprites?.();
+        const sprites = this.gameEngine?.getSprites?.() as any[];
         if (!Array.isArray(sprites)) return;
-        const definitions = this.gameEngine?.npcManager?.getDefinitions?.() || [];
-        const byType = new Map(definitions.map((def) => [def.type, def]));
-        sprites.forEach((npc) => {
+        const definitions = (this.gameEngine?.npcManager?.getDefinitions?.() || []) as any[];
+        const byType = new Map(definitions.map((def: any) => [def.type, def]));
+        sprites.forEach((npc: any) => {
             const def = npc?.type ? byType.get(npc.type) : null;
             if (def?.nameKey) {
                 npc.name = TextResources.get?.(def.nameKey, def.name || npc.name || '') || npc.name || '';
@@ -124,12 +125,12 @@ class EditorUIController extends EditorManagerModule {
         });
     }
 
-    normalizeTitle(raw) {
+    normalizeTitle(raw: string | null) {
         const text = String(raw || '').slice(0, 18).replace(/\s+/g, ' ').trim();
         return text || 'Tiny RPG Studio';
     }
 
-    normalizeAuthor(raw) {
+    normalizeAuthor(raw: string | null) {
         const text = String(raw || '').slice(0, 18).replace(/\s+/g, ' ').trim();
         return text;
     }

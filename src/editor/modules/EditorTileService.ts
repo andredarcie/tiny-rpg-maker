@@ -1,6 +1,8 @@
 
 class EditorTileService {
-    constructor(editorManager) {
+    manager: any;
+
+    constructor(editorManager: any) {
         this.manager = editorManager;
     }
 
@@ -12,7 +14,7 @@ class EditorTileService {
         return this.manager.state;
     }
 
-    startPaint(ev) {
+    startPaint(ev: PointerEvent) {
         const canvas = this.dom.editorCanvas;
         if (!canvas) return;
         ev.preventDefault();
@@ -23,12 +25,12 @@ class EditorTileService {
         this.applyPaint(ev);
     }
 
-    continuePaint(ev) {
+    continuePaint(ev: PointerEvent) {
         if (!this.state.mapPainting) return;
         this.applyPaint(ev);
     }
 
-    finishPaint(ev) {
+    finishPaint(ev: PointerEvent) {
         if (!this.state.mapPainting) return;
         this.state.mapPainting = false;
         const canvas = this.dom.editorCanvas;
@@ -45,7 +47,7 @@ class EditorTileService {
         this.manager.history.pushCurrentState();
     }
 
-    applyPaint(ev) {
+    applyPaint(ev: PointerEvent) {
         const coord = this.getTileFromEvent(ev);
         if (!coord) return;
         const roomIndex = this.state.activeRoomIndex;
@@ -72,7 +74,7 @@ class EditorTileService {
         this.manager.gameEngine.draw();
     }
 
-    clearSelection({ render = true } = {}) {
+    clearSelection({ render = true }: { render?: boolean } = {}) {
         const hadSelection = this.state.selectedTileId !== null && this.state.selectedTileId !== undefined;
         if (!hadSelection) return false;
         this.state.selectedTileId = null;
@@ -83,7 +85,7 @@ class EditorTileService {
         return true;
     }
 
-    getTileFromEvent(ev) {
+    getTileFromEvent(ev: PointerEvent) {
         const canvas = this.dom.editorCanvas;
         if (!canvas) return null;
         const rect = canvas.getBoundingClientRect();

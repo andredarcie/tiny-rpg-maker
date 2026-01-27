@@ -1,18 +1,9 @@
-
-type EditorVariableManagerApi = {
-    domCache: any;
-    gameEngine: any;
-    renderService: { renderObjects: () => void };
-    npcService: { updateNpcSelection: (type: unknown, id: unknown) => void };
-    state: { selectedNpcType: unknown; selectedNpcId: unknown };
-    updateJSON: () => void;
-    history: { pushCurrentState: () => void };
-};
+import { EditorManager } from '../EditorManager';
 
 class EditorVariableService {
-    manager: EditorVariableManagerApi;
+    manager: EditorManager;
 
-    constructor(editorManager: EditorVariableManagerApi) {
+    constructor(editorManager: EditorManager) {
         this.manager = editorManager;
     }
 
@@ -26,7 +17,7 @@ class EditorVariableService {
 
     toggle(variableId: string, nextValue: boolean | null = null) {
         if (!variableId || !this.gameEngine.setVariableDefault) return;
-        const current = (this.gameEngine.getVariableDefinitions?.() ?? []).find((entry) => entry.id === variableId);
+        const current = ((this.gameEngine.getVariableDefinitions?.() ?? []) as any[]).find((entry: any) => entry.id === variableId);
         const targetValue = nextValue !== null ? Boolean(nextValue) : !Boolean(current?.value);
         const changed = this.gameEngine.setVariableDefault(variableId, targetValue);
         if (!changed) return;

@@ -1,7 +1,9 @@
 
 import { TextResources } from '../../runtime/adapters/TextResources';
 class EditorNpcService {
-    constructor(editorManager) {
+    manager: any;
+
+    constructor(editorManager: any) {
         this.manager = editorManager;
     }
 
@@ -9,7 +11,7 @@ class EditorNpcService {
         return TextResources;
     }
 
-    t(key, fallback = '') {
+    t(key: string, fallback = '') {
         const resource = this.text;
         const value = resource?.get?.(key, fallback);
         if (value) return value;
@@ -34,11 +36,11 @@ class EditorNpcService {
         const sprites = this.gameEngine.getSprites();
         const definitions = this.gameEngine.npcManager?.getDefinitions?.() ?? [];
         const available = definitions
-            .map((def) => ({
+            .map((def: any) => ({
                 def,
-                npc: sprites.find((entry) => entry.type === def.type) || null
+                npc: sprites.find((entry: any) => entry.type === def.type) || null
             }))
-            .find((entry) => !entry.npc?.placed);
+            .find((entry: any) => !entry.npc?.placed);
 
         if (!available) {
             alert(this.t('alerts.npc.full'));
@@ -97,7 +99,7 @@ class EditorNpcService {
         }
     }
 
-    clearSelection({ render = true } = {}) {
+    clearSelection({ render = true }: { render?: boolean } = {}) {
         const hadSelection = Boolean(
             this.state.selectedNpcId ||
             this.state.selectedNpcType ||
@@ -127,14 +129,14 @@ class EditorNpcService {
         this.manager.history.pushCurrentState();
     }
 
-    updateNpcSelection(type, id) {
+    updateNpcSelection(type: string | null, id: string | null) {
         if (!id) {
             this.clearSelection();
             return;
         }
         this.state.selectedNpcType = type;
         this.state.selectedNpcId = id;
-        const npc = this.gameEngine.getSprites().find((entry) => entry.id === id) || null;
+        const npc = this.gameEngine.getSprites().find((entry: any) => entry.id === id) || null;
         const hasConditionalData = Boolean(
             npc?.conditionText ||
             npc?.conditionVariableId ||
@@ -145,7 +147,7 @@ class EditorNpcService {
         this.activatePlacement();
     }
 
-    placeNpcAt(coord) {
+    placeNpcAt(coord: { x: number; y: number }) {
         if (!this.state.selectedNpcId) {
             alert(this.t('alerts.npc.selectFirst'));
             this.deactivatePlacement();
@@ -170,7 +172,7 @@ class EditorNpcService {
         this.manager.history.pushCurrentState();
     }
 
-    populateVariableSelect(selectElement, selectedId = '', options = {}) {
+    populateVariableSelect(selectElement: HTMLSelectElement | null, selectedId = '', options: any = {}) {
         if (!selectElement) return;
         const variables = this.gameEngine.getVariableDefinitions();
         const includeBardSkill = Boolean(options.includeBardSkill);
@@ -188,7 +190,7 @@ class EditorNpcService {
             selectElement.appendChild(bardOption);
         }
 
-        variables.forEach((variable) => {
+        variables.forEach((variable: any) => {
             const option = document.createElement('option');
             option.value = variable.id;
             option.textContent = variable.name || variable.id;
@@ -198,9 +200,9 @@ class EditorNpcService {
         selectElement.value = selectedId || '';
     }
 
-    updateNpcText(text) {
+    updateNpcText(text: string) {
         if (!this.state.selectedNpcId) return;
-        const npc = this.gameEngine.getSprites().find((entry) => entry.id === this.state.selectedNpcId);
+        const npc = this.gameEngine.getSprites().find((entry: any) => entry.id === this.state.selectedNpcId);
         if (!npc) return;
 
         npc.text = text;
@@ -210,9 +212,9 @@ class EditorNpcService {
         this.scheduleNpcTextUpdate();
     }
 
-    updateNpcConditionalText(text) {
+    updateNpcConditionalText(text: string) {
         if (!this.state.selectedNpcId) return;
-        const npc = this.gameEngine.getSprites().find((entry) => entry.id === this.state.selectedNpcId);
+        const npc = this.gameEngine.getSprites().find((entry: any) => entry.id === this.state.selectedNpcId);
         if (!npc) return;
         npc.conditionText = text;
         this.manager.renderService.renderNpcs();
@@ -229,9 +231,9 @@ class EditorNpcService {
         }, 400);
     }
 
-    handleConditionVariableChange(variableId) {
+    handleConditionVariableChange(variableId: string) {
         if (!this.state.selectedNpcId) return;
-        const npc = this.gameEngine.getSprites().find((entry) => entry.id === this.state.selectedNpcId);
+        const npc = this.gameEngine.getSprites().find((entry: any) => entry.id === this.state.selectedNpcId);
         if (!npc) return;
         npc.conditionVariableId = variableId || null;
         this.manager.renderService.renderNpcs();
@@ -240,9 +242,9 @@ class EditorNpcService {
         this.manager.history.pushCurrentState();
     }
 
-    handleRewardVariableChange(variableId) {
+    handleRewardVariableChange(variableId: string) {
         if (!this.state.selectedNpcId) return;
-        const npc = this.gameEngine.getSprites().find((entry) => entry.id === this.state.selectedNpcId);
+        const npc = this.gameEngine.getSprites().find((entry: any) => entry.id === this.state.selectedNpcId);
         if (!npc) return;
         npc.rewardVariableId = variableId || null;
         this.manager.renderService.renderNpcs();
@@ -251,9 +253,9 @@ class EditorNpcService {
         this.manager.history.pushCurrentState();
     }
 
-    handleConditionalRewardVariableChange(variableId) {
+    handleConditionalRewardVariableChange(variableId: string) {
         if (!this.state.selectedNpcId) return;
-        const npc = this.gameEngine.getSprites().find((entry) => entry.id === this.state.selectedNpcId);
+        const npc = this.gameEngine.getSprites().find((entry: any) => entry.id === this.state.selectedNpcId);
         if (!npc) return;
         npc.conditionalRewardVariableId = variableId || null;
         this.manager.renderService.renderNpcs();
@@ -262,7 +264,7 @@ class EditorNpcService {
         this.manager.history.pushCurrentState();
     }
 
-    setVariantFilter(variant) {
+    setVariantFilter(variant: string) {
         const allowed = ['human', 'elf', 'dwarf', 'fixed'];
         const normalized = allowed.includes(variant) ? variant : 'human';
         if (this.state.npcVariantFilter === normalized) return;

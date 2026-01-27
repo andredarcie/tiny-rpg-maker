@@ -1,6 +1,9 @@
+import type { EditorManager } from '../EditorManager';
 
 class EditorManagerModule {
-    constructor(manager) {
+    manager: EditorManager;
+
+    constructor(manager: EditorManager) {
         this.manager = manager;
     }
 

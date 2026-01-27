@@ -1,17 +1,9 @@
-
-type EditorRendererServiceApi = {
-  manager: any;
-  dom: any;
-  state: any;
-  gameEngine: any;
-  t: (key: string, fallback?: string) => string;
-  tf: (key: string, params?: Record<string, unknown>, fallback?: string) => string;
-};
+import { EditorRenderService } from '../EditorRenderService';
 
 class EditorRendererBase {
-    service: EditorRendererServiceApi;
+    service: EditorRenderService;
 
-    constructor(service: EditorRendererServiceApi) {
+    constructor(service: EditorRenderService) {
         this.service = service;
     }
 
@@ -35,7 +27,7 @@ class EditorRendererBase {
         return this.service.t(key, fallback);
     }
 
-    tf(key: string, params: Record<string, unknown> = {}, fallback = ''): string {
+    tf(key: string, params: Record<string, string | number> = {}, fallback = ''): string {
         return this.service.tf(key, params, fallback);
     }
 }

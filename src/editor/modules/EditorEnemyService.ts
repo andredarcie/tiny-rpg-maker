@@ -2,8 +2,13 @@
 import { EnemyDefinitions } from '../../runtime/domain/definitions/EnemyDefinitions';
 import { TextResources } from '../../runtime/adapters/TextResources';
 import { EditorConstants } from './EditorConstants';
+
 class EditorEnemyService {
-    constructor(editorManager) {
+    manager: any;
+    editorIndicator: HTMLElement | null;
+    editorIndicatorTimeout: ReturnType<typeof setTimeout> | null;
+
+    constructor(editorManager: any) {
         this.manager = editorManager;
         this.editorIndicator = null;
         this.editorIndicatorTimeout = null;
@@ -48,16 +53,16 @@ class EditorEnemyService {
         }
     }
 
-    placeEnemyAt(coord) {
+    placeEnemyAt(coord: { x: number; y: number }) {
         const roomIndex = this.state.activeRoomIndex;
-        const existing = (this.gameEngine.getEnemyDefinitions?.() ?? []).find((enemy) =>
+        const existing = (this.gameEngine.getEnemyDefinitions?.() ?? []).find((enemy: any) =>
             enemy.roomIndex === roomIndex && enemy.x === coord.x && enemy.y === coord.y
         );
         if (existing) {
             return;
         }
         const enemies = this.gameEngine.getActiveEnemies?.() ?? [];
-        const currentRoomCount = enemies.reduce((count, enemy) => (
+        const currentRoomCount = enemies.reduce((count: number, enemy: any) => (
             enemy.roomIndex === roomIndex ? count + 1 : count
         ), 0);
         if (currentRoomCount >= 6) {
@@ -85,7 +90,7 @@ class EditorEnemyService {
         this.manager.history.pushCurrentState();
     }
 
-    removeEnemy(enemyId) {
+    removeEnemy(enemyId: string) {
         this.gameEngine.removeEnemy(enemyId);
         this.manager.renderService.renderEnemies();
         this.manager.renderService.renderEnemyCatalog();
@@ -96,7 +101,7 @@ class EditorEnemyService {
         this.manager.history.pushCurrentState();
     }
 
-    handleEnemyVariableChange(enemyId, variableId) {
+    handleEnemyVariableChange(enemyId: string, variableId: string | null) {
         const normalizedId = typeof variableId === 'string' && variableId.trim().length
             ? variableId
             : null;
@@ -108,7 +113,7 @@ class EditorEnemyService {
         this.manager.history.pushCurrentState();
     }
 
-    selectEnemyType(type) {
+    selectEnemyType(type: string) {
         const definition = this.getEnemyDefinition(type);
         if (!definition) return;
         if (this.state.selectedEnemyType !== definition.type) {
@@ -118,7 +123,7 @@ class EditorEnemyService {
         this.activatePlacement();
     }
 
-    clearSelection({ render = true } = {}) {
+    clearSelection({ render = true }: { render?: boolean } = {}) {
         const hadSelection = Boolean(this.manager.selectedEnemyType || this.state.placingEnemy);
         if (!hadSelection) return false;
         this.manager.selectedEnemyType = null;
@@ -172,7 +177,7 @@ class EditorEnemyService {
         return 'Max enemies reached';
     }
 
-    getEnemyDefinition(type = null) {
+    getEnemyDefinition(type: string | null = null) {
         const target = typeof type === 'string' && type.length > 0
             ? type
             : this.state.selectedEnemyType;
@@ -181,8 +186,8 @@ class EditorEnemyService {
             return definition;
         }
         const definitions = EditorConstants.ENEMY_DEFINITIONS;
-        return definitions.find((entry) => entry.type === target) ||
-            definitions.find((entry) => Array.isArray(entry.aliases) && entry.aliases.includes(target)) ||
+        return definitions.find((entry: any) => entry.type === target) ||
+            definitions.find((entry: any) => Array.isArray(entry.aliases) && entry.aliases.includes(target)) ||
             null;
     }
 

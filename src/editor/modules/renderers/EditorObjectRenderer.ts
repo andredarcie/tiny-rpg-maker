@@ -37,7 +37,7 @@ class EditorObjectRenderer extends EditorRendererBase {
         if (!Array.isArray(definitions) || !definitions.length) return;
 
         const selectedType = this.manager.selectedObjectType;
-        const placedObjects = this.gameEngine.getObjectsForRoom(this.state.activeRoomIndex) || [];
+        const placedObjects = (this.gameEngine.getObjectsForRoom(this.state.activeRoomIndex) || []) as EditorObject[];
         const placedTypes = new Set(placedObjects.map((object) => object.type));
 
         definitions.forEach((definition) => {

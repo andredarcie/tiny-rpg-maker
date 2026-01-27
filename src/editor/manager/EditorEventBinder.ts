@@ -1,6 +1,8 @@
-
+import { EditorManager } from '../EditorManager';
 import { EditorManagerModule } from './EditorManagerModule';
+
 class EditorEventBinder extends EditorManagerModule {
+    manager: EditorManager;
     bind() {
         const {
             btnNpcDelete,
@@ -59,29 +61,29 @@ class EditorEventBinder extends EditorManagerModule {
 
         titleInput?.addEventListener('input', () => manager.updateGameMetadata());
         authorInput?.addEventListener('input', () => manager.updateGameMetadata());
-        projectTestStartLevel?.addEventListener('change', (ev) => {
+        projectTestStartLevel?.addEventListener('change', (ev: any) => {
             const value = Number(ev.target.value);
             manager.setTestStartLevel(value);
         });
-        projectTestGodMode?.addEventListener('change', (ev) => {
+        projectTestGodMode?.addEventListener('change', (ev: any) => {
             manager.setGodMode(ev.target.checked);
         });
         shareUrlInput?.addEventListener('focus', () => shareUrlInput.select());
         shareUrlInput?.addEventListener('click', () => shareUrlInput.select());
-        projectTestSkillList?.addEventListener('change', (ev) => {
+        projectTestSkillList?.addEventListener('change', (ev: any) => {
             const target = ev.target;
             if (!target || target.tagName !== 'INPUT') return;
             const skills = Array.from(projectTestSkillList.querySelectorAll('input[type="checkbox"][data-skill-id]'))
-                .filter((input) => input.checked)
-                .map((input) => input.dataset.skillId)
+                .filter((input) => (input as any).checked)
+                .map((input) => (input as any).dataset.skillId)
                 .filter(Boolean);
             manager.setTestSkills(skills);
         });
         npcText?.addEventListener('input', () => npcService.updateNpcText(npcText.value));
         npcConditionalText?.addEventListener('input', () => npcService.updateNpcConditionalText(npcConditionalText.value));
-        npcConditionalVariable?.addEventListener('change', (ev) => npcService.handleConditionVariableChange(ev.target.value));
-        npcRewardVariable?.addEventListener('change', (ev) => npcService.handleRewardVariableChange(ev.target.value));
-        npcConditionalRewardVariable?.addEventListener('change', (ev) => npcService.handleConditionalRewardVariableChange(ev.target.value));
+        npcConditionalVariable?.addEventListener('change', (ev: any) => npcService.handleConditionVariableChange(ev.target.value));
+        npcRewardVariable?.addEventListener('change', (ev: any) => npcService.handleRewardVariableChange(ev.target.value));
+        npcConditionalRewardVariable?.addEventListener('change', (ev: any) => npcService.handleConditionalRewardVariableChange(ev.target.value));
         if (Array.isArray(npcVariantButtons)) {
             npcVariantButtons.forEach((button) => {
                 button.addEventListener('click', () => {
@@ -92,9 +94,9 @@ class EditorEventBinder extends EditorManagerModule {
             });
         }
 
-        fileInput?.addEventListener('change', (ev) => shareService.loadGameFile(ev));
+        fileInput?.addEventListener('change', (ev: any) => shareService.loadGameFile(ev));
 
-        tileList?.addEventListener('click', (ev) => {
+        tileList?.addEventListener('click', (ev: any) => {
             const button = ev.target.closest('[data-tile-id]');
             if (!button) return;
             const tileId = Number(button.dataset.tileId);
@@ -110,7 +112,7 @@ class EditorEventBinder extends EditorManagerModule {
             this.renderService.renderTileList();
         });
 
-        npcsList?.addEventListener('click', (ev) => {
+        npcsList?.addEventListener('click', (ev: any) => {
             const card = ev.target.closest('.npc-card');
             if (!card) return;
             const type = card.dataset.type || null;
@@ -120,7 +122,7 @@ class EditorEventBinder extends EditorManagerModule {
             npcService.updateNpcSelection(type, id);
         });
 
-        objectTypes?.addEventListener('click', (ev) => {
+        objectTypes?.addEventListener('click', (ev: any) => {
             const card = ev.target.closest('.object-type-card');
             if (!card) return;
             const type = card.dataset.type || null;
@@ -130,7 +132,7 @@ class EditorEventBinder extends EditorManagerModule {
             objectService.selectObjectType(type);
         });
 
-        objectsList?.addEventListener('click', (ev) => {
+        objectsList?.addEventListener('click', (ev: any) => {
             const button = ev.target.closest('.object-remove');
             if (!button) return;
             const card = button.closest('.object-card');
@@ -141,7 +143,7 @@ class EditorEventBinder extends EditorManagerModule {
             objectService.removeObject(type, room);
         });
 
-        enemyTypes?.addEventListener('click', (ev) => {
+        enemyTypes?.addEventListener('click', (ev: any) => {
             const card = ev.target.closest('.enemy-card');
             if (!card) return;
             const type = card.dataset.type || null;
@@ -151,7 +153,7 @@ class EditorEventBinder extends EditorManagerModule {
             enemyService.selectEnemyType(type);
         });
 
-        enemiesList?.addEventListener('click', (ev) => {
+        enemiesList?.addEventListener('click', (ev: any) => {
             const button = ev.target.closest('[data-remove-enemy]');
             if (!button) return;
             const enemyId = button.dataset.removeEnemy;
@@ -159,16 +161,16 @@ class EditorEventBinder extends EditorManagerModule {
             enemyService.removeEnemy(enemyId);
         });
 
-        enemiesList?.addEventListener('change', (ev) => {
+        enemiesList?.addEventListener('change', (ev: any) => {
             const target = ev.target;
             if (!target || target.tagName !== 'SELECT') return;
-            const enemyId = target.dataset.enemyVariable;
+            const enemyId = (target as any).dataset.enemyVariable;
             if (!enemyId) return;
-            const value = target.value || '';
+            const value = (target as any).value || '';
             enemyService.handleEnemyVariableChange(enemyId, value);
         });
 
-        worldGrid?.addEventListener('click', (ev) => {
+        worldGrid?.addEventListener('click', (ev: any) => {
             const cell = ev.target.closest('[data-room-index]');
             if (!cell) return;
             const index = Number(cell.dataset.roomIndex);
@@ -186,8 +188,8 @@ class EditorEventBinder extends EditorManagerModule {
         }
 
         if (editorCanvas) {
-            editorCanvas.addEventListener('pointerdown', (ev) => tileService.startPaint(ev));
-            editorCanvas.addEventListener('pointermove', (ev) => tileService.continuePaint(ev));
+            editorCanvas.addEventListener('pointerdown', (ev: any) => tileService.startPaint(ev));
+            editorCanvas.addEventListener('pointermove', (ev: any) => tileService.continuePaint(ev));
         }
 
         if (Array.isArray(mobileNavButtons)) {
@@ -200,11 +202,11 @@ class EditorEventBinder extends EditorManagerModule {
             });
         }
 
-        globalThis.addEventListener?.('pointerup', (ev) => tileService.finishPaint(ev));
+        globalThis.addEventListener?.('pointerup', (ev: any) => tileService.finishPaint(ev));
 
-        document.addEventListener('keydown', (ev) => manager.handleKey(ev));
-        globalThis.addEventListener?.('resize', (ev) => {
-            manager.handleCanvasResize(ev);
+        document.addEventListener('keydown', (ev: any) => manager.handleKey(ev));
+        globalThis.addEventListener?.('resize', (ev: any) => {
+            manager.handleCanvasResize();
             manager.updateMobilePanels();
         });
         document.addEventListener('editor-tab-activated', () =>

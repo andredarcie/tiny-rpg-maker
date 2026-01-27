@@ -1,5 +1,7 @@
 
 import { EnemyDefinitions } from '../runtime/domain/definitions/EnemyDefinitions';
+import { GameEngine } from '../runtime/services/GameEngine';
+import type { TileDefinition } from '../runtime/domain/definitions/tileTypes';
 import { EditorConstants } from './modules/EditorConstants';
 import { EditorDomCache } from './modules/EditorDomCache';
 import { EditorEnemyService } from './modules/EditorEnemyService';
@@ -15,8 +17,27 @@ import { EditorWorldService } from './modules/EditorWorldService';
 import { EditorEventBinder } from './manager/EditorEventBinder';
 import { EditorInteractionController } from './manager/EditorInteractionController';
 import { EditorUIController } from './manager/EditorUIController';
+
 class EditorManager {
-    constructor(gameEngine) {
+    gameEngine: GameEngine;
+    state: EditorState;
+    domCache: EditorDomCache;
+    editorCanvas: HTMLCanvasElement | null;
+    ectx: CanvasRenderingContext2D | null;
+    history: EditorHistoryManager;
+    renderService: EditorRenderService;
+    tileService: EditorTileService;
+    shareService: EditorShareService;
+    npcService: EditorNpcService;
+    enemyService: EditorEnemyService;
+    objectService: EditorObjectService;
+    variableService: EditorVariableService;
+    worldService: EditorWorldService;
+    uiController: EditorUIController;
+    eventBinder: EditorEventBinder;
+    interactionController: EditorInteractionController;
+
+    constructor(gameEngine: GameEngine) {
         this.gameEngine = gameEngine;
         this.state = new EditorState();
         this.domCache = new EditorDomCache(typeof document !== 'undefined' ? document : null);
@@ -51,70 +72,70 @@ class EditorManager {
     get selectedTileId() {
         return this.state.selectedTileId;
     }
-    set selectedTileId(value) {
+    set selectedTileId(value: string | number | null) {
         this.state.selectedTileId = value;
     }
 
     get selectedNpcId() {
         return this.state.selectedNpcId;
     }
-    set selectedNpcId(value) {
+    set selectedNpcId(value: string | null) {
         this.state.selectedNpcId = value;
     }
 
     get selectedNpcType() {
         return this.state.selectedNpcType;
     }
-    set selectedNpcType(value) {
+    set selectedNpcType(value: string | null) {
         this.state.selectedNpcType = value;
     }
 
     get activeRoomIndex() {
         return this.state.activeRoomIndex;
     }
-    set activeRoomIndex(value) {
+    set activeRoomIndex(value: number) {
         this.state.activeRoomIndex = value;
     }
 
     get placingNpc() {
         return this.state.placingNpc;
     }
-    set placingNpc(value) {
+    set placingNpc(value: boolean) {
         this.state.placingNpc = value;
     }
 
     get placingEnemy() {
         return this.state.placingEnemy;
     }
-    set placingEnemy(value) {
+    set placingEnemy(value: boolean) {
         this.state.placingEnemy = value;
     }
 
     get placingObjectType() {
         return this.state.placingObjectType;
     }
-    set placingObjectType(value) {
+    set placingObjectType(value: string | null) {
         this.state.placingObjectType = value;
     }
 
     get selectedObjectType() {
         return this.state.selectedObjectType;
     }
-    set selectedObjectType(value) {
+    set selectedObjectType(value: string | null) {
         this.state.selectedObjectType = value;
     }
 
     get selectedEnemyType() {
         return this.state.selectedEnemyType;
     }
-    set selectedEnemyType(value) {
+    set selectedEnemyType(value: string | null) {
         this.state.selectedEnemyType = value;
     }
 
     get mapPainting() {
         return this.state.mapPainting;
     }
-    set mapPainting(value) {
+    set mapPainting(value: boolean) {
         this.state.mapPainting = value;
     }
 
@@ -128,14 +149,15 @@ class EditorManager {
 
     initialize() {
         this.gameEngine.tileManager.ensureDefaultTiles();
-        const tiles = this.gameEngine.getTiles();
+        const tiles = this.gameEngine.getTiles() as TileDefinition[];
         if (tiles.length > 0) {
-            this.selectedTileId = tiles[0].id;
+            this.selectedTileId = tiles[0].id ?? null;
         }
 
         this.syncUI();
-        const startRoomIndex = this.gameEngine.getGame()?.start?.roomIndex ?? 0;
-        const totalRooms = this.gameEngine.getGame()?.rooms?.length || 1;
+        const game = this.gameEngine.getGame() as any;
+        const startRoomIndex = game?.start?.roomIndex ?? 0;
+        const totalRooms = game?.rooms?.length || 1;
         this.activeRoomIndex = Math.max(0, Math.min(totalRooms - 1, startRoomIndex));
         this.gameEngine.npcManager?.ensureDefaultNPCs?.();
 
@@ -229,19 +251,19 @@ class EditorManager {
         this.uiController.toggleTestPanel();
     }
 
-    setTestStartLevel(level) {
+    setTestStartLevel(level: number) {
         this.uiController.setTestStartLevel(level);
     }
 
-    setTestSkills(skills) {
+    setTestSkills(skills: any) {
         this.uiController.setTestSkills(skills);
     }
 
-    setGodMode(active) {
+    setGodMode(active: boolean) {
         this.uiController.setGodMode(active);
     }
 
-    setActiveMobilePanel(panel) {
+    setActiveMobilePanel(panel: string) {
         this.uiController.setActiveMobilePanel(panel);
     }
 
@@ -250,15 +272,15 @@ class EditorManager {
     }
 
     // Tile painting delegation
-    startMapPaint(ev) {
+    startMapPaint(ev: any) {
         this.tileService.startPaint(ev);
     }
 
-    continueMapPaint(ev) {
+    continueMapPaint(ev: any) {
         this.tileService.continuePaint(ev);
     }
 
-    finishMapPaint(ev) {
+    finishMapPaint(ev: any) {
         this.tileService.finishPaint(ev);
     }
 
@@ -303,20 +325,20 @@ class EditorManager {
         this.npcService.handleConditionalRewardVariableChange(select.value);
     }
 
-    removeEnemy(enemyId) {
+    removeEnemy(enemyId: string) {
         this.enemyService.removeEnemy(enemyId);
     }
 
-    removeObject(type, roomIndex) {
+    removeObject(type: string, roomIndex: number) {
         this.objectService.removeObject(type, roomIndex);
     }
 
-    toggleVariableDefault(variableId, nextValue = null) {
+    toggleVariableDefault(variableId: string, nextValue: any = null) {
         this.variableService.toggle(variableId, nextValue);
     }
 
     // World delegation
-    setActiveRoom(index) {
+    setActiveRoom(index: number) {
         this.worldService.setActiveRoom(index);
     }
 
@@ -329,7 +351,7 @@ class EditorManager {
         this.shareService.saveGame();
     }
 
-    loadGameFile(ev) {
+    loadGameFile(ev: any) {
         this.shareService.loadGameFile(ev);
     }
 
@@ -360,18 +382,18 @@ class EditorManager {
     }
 
     // Restore & import logic
-    restore(data, options = {}) {
+    restore(data: any, options: { skipHistory?: boolean } = {}) {
         const { skipHistory = false } = options;
         this.gameEngine.importGameData(data);
         this.gameEngine.tileManager.ensureDefaultTiles();
 
-        const tiles = this.gameEngine.getTiles();
-        if (tiles.length && !tiles.find((t) => t.id === this.selectedTileId)) {
-            this.selectedTileId = tiles[0].id;
+        const tiles = this.gameEngine.getTiles() as TileDefinition[];
+        if (tiles.length && !tiles.find((t: any) => t.id === this.selectedTileId)) {
+            this.selectedTileId = tiles[0].id ?? null;
         }
 
-        const npcs = this.gameEngine.getSprites();
-        if (!npcs.find((npc) => npc.id === this.selectedNpcId)) {
+        const npcs = this.gameEngine.getSprites() as any[];
+        if (!npcs.find((npc: any) => npc.id === this.selectedNpcId)) {
             this.selectedNpcId = null;
             this.selectedNpcType = null;
             this.placingNpc = false;
@@ -381,7 +403,7 @@ class EditorManager {
         const normalizedType = EnemyDefinitions.normalizeType(this.selectedEnemyType);
         if (normalizedType !== this.selectedEnemyType) {
             this.selectedEnemyType = normalizedType;
-        } else if (!definitions.some((entry) => entry.type === this.selectedEnemyType)) {
+        } else if (!definitions.some((entry: any) => entry.type === this.selectedEnemyType)) {
             this.selectedEnemyType = definitions[0]?.type || 'giant-rat';
         }
 
@@ -394,7 +416,7 @@ class EditorManager {
     }
 
     // Canvas & keyboard handling
-    handleCanvasResize(force = false) {
+    handleCanvasResize(force: boolean = false) {
         this.interactionController.handleCanvasResize(force);
     }
 
@@ -406,7 +428,7 @@ class EditorManager {
         this.uiController.refreshNpcLocalizedText();
     }
 
-    handleKey(ev) {
+    handleKey(ev: any) {
         this.interactionController.handleKey(ev);
     }
 
@@ -424,7 +446,7 @@ class EditorManager {
                     walls: Array.from({ length: 8 }, () => Array(8).fill(false))
                 }
             ],
-            start: { x: 1, y: 1, roomIndex: 0 },
+            start: { x: 1, y: 1, roomIndex: 0 } as any, // Cast to any to avoid partial compatibility issues for now
             sprites: [],
             items: [],
             exits: [],

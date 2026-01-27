@@ -9,7 +9,16 @@ import { EditorObjectRenderer } from './renderers/EditorObjectRenderer';
 import { EditorTilePanelRenderer } from './renderers/EditorTilePanelRenderer';
 import { EditorWorldRenderer } from './renderers/EditorWorldRenderer';
 class EditorRenderService {
-    constructor(editorManager) {
+    manager: any;
+    canvasRenderer: EditorCanvasRenderer;
+    tilePanelRenderer: EditorTilePanelRenderer;
+    npcRenderer: EditorNpcRenderer;
+    enemyRenderer: EditorEnemyRenderer;
+    worldRenderer: EditorWorldRenderer;
+    objectRenderer: EditorObjectRenderer;
+    handleTileAnimationFrame: () => void;
+
+    constructor(editorManager: any) {
         this.manager = editorManager;
         this.canvasRenderer = new EditorCanvasRenderer(this);
         this.tilePanelRenderer = new EditorTilePanelRenderer(this);
@@ -28,7 +37,7 @@ class EditorRenderService {
         return TextResources;
     }
 
-    t(key, fallback = '') {
+    t(key: string, fallback = '') {
         const resource = this.textResources;
         const value = resource?.get?.(key, fallback);
         if (value) return value;
@@ -36,14 +45,14 @@ class EditorRenderService {
         return key || '';
     }
 
-    tf(key, params = {}, fallback = '') {
+    tf(key: string, params: Record<string, string | number> = {}, fallback = '') {
         const resource = this.textResources;
         if (resource?.format) {
             return resource.format(key, params, fallback);
         }
         const template = this.t(key, fallback);
         if (!template) return '';
-        return template.replace(/\{(\w+)\}/g, (_, token) => (params[token] ?? ''));
+        return template.replace(/\{(\w+)\}/g, (_, token) => String(params[token] ?? ''));
     }
 
     get dom() {
@@ -62,16 +71,16 @@ class EditorRenderService {
         return PICO8_COLORS || [];
     }
 
-    resolvePicoColor(raw) {
+    resolvePicoColor(raw: string | number | null) {
         const palette = this.picoPalette;
         if (!palette.length) return raw || '#000000';
         if (Number.isInteger(raw)) {
-            return palette[raw] ?? palette[0];
+            return palette[raw as number] ?? palette[0];
         }
         if (typeof raw !== 'string') return palette[0];
-        const normalize = (value) => String(value || '').replace('#', '').trim().toUpperCase();
+        const normalize = (value: any) => String(value || '').replace('#', '').trim().toUpperCase();
         const target = normalize(raw);
-        const idx = palette.findIndex((color) => normalize(color) === target);
+        const idx = palette.findIndex((color: string) => normalize(color) === target);
         if (idx !== -1) return palette[idx];
         return palette[0];
     }
@@ -117,7 +126,7 @@ class EditorRenderService {
         this.worldRenderer.renderMapNavigation();
     }
 
-    updateMapPosition(col, row) {
+    updateMapPosition(col: number, row: number) {
         this.worldRenderer.updateMapPosition(col, row);
     }
 
@@ -135,7 +144,7 @@ class EditorRenderService {
         const variables = this.gameEngine?.getVariableDefinitions?.() ?? [];
         const usedSet = this.collectVariableUsage();
         const usedCount = variables.reduce(
-            (count, variable) => count + (usedSet.has(variable.id) ? 1 : 0),
+            (count: number, variable: any) => count + (usedSet.has(variable.id) ? 1 : 0),
             0
         );
         const usageText = this.tf(
@@ -166,13 +175,13 @@ class EditorRenderService {
             return;
         }
 
-        variables.forEach((variable) => {
+        variables.forEach((variable: any) => {
             const item = document.createElement('div');
             item.className = 'project-variable-item';
 
             const color = document.createElement('span');
             color.className = 'project-variable-color';
-            color.style.background = this.resolvePicoColor(variable.color);
+            color.style.background = String(this.resolvePicoColor(variable.color));
 
             const name = document.createElement('span');
             name.className = 'project-variable-name';
@@ -238,7 +247,7 @@ class EditorRenderService {
             title.textContent = label;
             group.appendChild(title);
 
-            items.forEach((skill) => {
+            items.forEach((skill: any) => {
                 const item = document.createElement('div');
                 item.className = 'project-skill-item';
 
@@ -272,8 +281,8 @@ class EditorRenderService {
         const used = new Set();
         const game = this.gameEngine?.getGame?.() || {};
         const variables = this.gameEngine?.getVariableDefinitions?.() ?? [];
-        const validIds = new Set(variables.map((variable) => variable.id));
-        const addIfValid = (id) => {
+        const validIds = new Set(variables.map((variable: any) => variable.id));
+        const addIfValid = (id: string | null | undefined) => {
             if (typeof id !== 'string') return;
             const normalized = id.trim();
             if (normalized && validIds.has(normalized)) {
@@ -282,7 +291,7 @@ class EditorRenderService {
         };
 
         const sprites = Array.isArray(game.sprites) ? game.sprites : [];
-        sprites.forEach((npc) => {
+        sprites.forEach((npc: any) => {
             [
                 npc.conditionVariableId,
                 npc.conditionalVariableId,
@@ -295,10 +304,10 @@ class EditorRenderService {
         });
 
         const enemies = Array.isArray(game.enemies) ? game.enemies : [];
-        enemies.forEach((enemy) => addIfValid(enemy.defeatVariableId));
+        enemies.forEach((enemy: any) => addIfValid(enemy.defeatVariableId));
 
         const objects = Array.isArray(game.objects) ? game.objects : [];
-        objects.forEach((object) => addIfValid(object.variableId));
+        objects.forEach((object: any) => addIfValid(object.variableId));
 
         return used;
     }
@@ -309,7 +318,7 @@ class EditorRenderService {
         Object.entries(entries).forEach(([levelKey, ids]) => {
             const level = Number(levelKey);
             if (!Number.isFinite(level)) return;
-            (Array.isArray(ids) ? ids : []).forEach((id) => {
+            (Array.isArray(ids) ? ids : []).forEach((id: string) => {
                 if (typeof id !== 'string') return;
                 if (!levelMap.has(id) || level < levelMap.get(id)) {
                     levelMap.set(id, level);
@@ -319,9 +328,9 @@ class EditorRenderService {
         return levelMap;
     }
 
-    groupSkillsByLevel(skills, levelMap) {
+    groupSkillsByLevel(skills: any[], levelMap: Map<string, number>) {
         const buckets = new Map();
-        skills.forEach((skill) => {
+        skills.forEach((skill: any) => {
             const level = levelMap.get(skill.id) ?? null;
             const key = Number.isFinite(level) ? level : 'other';
             if (!buckets.has(key)) {
@@ -329,7 +338,7 @@ class EditorRenderService {
             }
             buckets.get(key).push(skill);
         });
-        const sortedKeys = Array.from(buckets.keys()).sort((a, b) => {
+        const sortedKeys = Array.from(buckets.keys()).sort((a: any, b: any) => {
             const na = Number.isFinite(a) ? a : Infinity;
             const nb = Number.isFinite(b) ? b : Infinity;
             return na - nb;
@@ -402,7 +411,7 @@ class EditorRenderService {
                 return;
             }
 
-            skills.forEach((skill) => {
+            skills.forEach((skill: any) => {
                 const wrapper = document.createElement('label');
                 wrapper.className = 'project-test__skill';
 

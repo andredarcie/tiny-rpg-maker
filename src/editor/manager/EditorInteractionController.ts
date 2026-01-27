@@ -1,7 +1,8 @@
 
 import { EditorManagerModule } from './EditorManagerModule';
+
 class EditorInteractionController extends EditorManagerModule {
-    handleCanvasResize(force = false) {
+    handleCanvasResize(force: boolean = false) {
         const canvas = this.manager.editorCanvas;
         if (!canvas) return;
         const container = canvas.parentElement;
@@ -25,7 +26,7 @@ class EditorInteractionController extends EditorManagerModule {
         this.renderService.renderEnemies();
     }
 
-    handleKey(ev) {
+    handleKey(ev: KeyboardEvent) {
         if (ev.defaultPrevented) return;
         if (ev.key === 'Escape') {
             if (this.state.placingNpc || this.manager.selectedNpcId || this.manager.selectedNpcType) {
