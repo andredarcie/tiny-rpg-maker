@@ -151,6 +151,10 @@ class ShareDataNormalizer {
             const conditionalRewardId = typeof npc?.conditionalRewardVariableId === 'string'
                 ? npc.conditionalRewardVariableId
                 : (typeof npc?.alternativeRewardVariableId === 'string' ? npc.alternativeRewardVariableId : null);
+            const hasConditionId = typeof conditionId === 'string' && ShareConstants.VARIABLE_IDS.includes(conditionId);
+            const hasRewardId = typeof rewardId === 'string' && ShareConstants.VARIABLE_IDS.includes(rewardId);
+            const hasConditionalRewardId =
+                typeof conditionalRewardId === 'string' && ShareConstants.VARIABLE_IDS.includes(conditionalRewardId);
             normalized.push({
                 type,
                 id: def.id,
@@ -162,12 +166,12 @@ class ShareDataNormalizer {
                 textKey: typeof npc?.textKey === 'string' && npc.textKey.length
                     ? npc.textKey
                     : (def.defaultTextKey || null),
-                conditionVariableId: ShareConstants.VARIABLE_IDS.includes(conditionId) ? conditionId : null,
+                conditionVariableId: hasConditionId ? conditionId : null,
                 conditionText: typeof npc?.conditionText === 'string'
                     ? npc.conditionText
                     : (typeof npc?.conditionalText === 'string' ? npc.conditionalText : ''),
-                rewardVariableId: ShareConstants.VARIABLE_IDS.includes(rewardId) ? rewardId : null,
-                conditionalRewardVariableId: ShareConstants.VARIABLE_IDS.includes(conditionalRewardId) ? conditionalRewardId : null
+                rewardVariableId: hasRewardId ? rewardId : null,
+                conditionalRewardVariableId: hasConditionalRewardId ? conditionalRewardId : null
             });
             seen.add(type);
         }

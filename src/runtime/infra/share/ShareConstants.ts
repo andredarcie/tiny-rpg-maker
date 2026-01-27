@@ -2,6 +2,9 @@
 import { EnemyDefinitions } from '../../domain/definitions/EnemyDefinitions';
 import { NPCDefinitions } from '../../domain/definitions/NPCDefinitions';
 class ShareConstants {
+    static _supportedVersions?: Set<number>;
+    static _npcDefinitions?: unknown[];
+    static _enemyDefinitions?: unknown[];
     static get VERSION_1() { return 1; }
     static get VERSION_2() { return 2; }
     static get VERSION_3() { return 3; }

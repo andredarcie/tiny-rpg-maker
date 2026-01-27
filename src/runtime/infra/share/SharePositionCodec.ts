@@ -2,15 +2,20 @@
 import { ShareBase64 } from './ShareBase64';
 import { ShareConstants } from './ShareConstants';
 import { ShareMath } from './ShareMath';
+
+type PositionEntry = { roomIndex?: number; x?: number; y?: number };
+type NpcEntry = { type?: string };
+type EnemyEntry = { type?: string; typeIndex?: number };
+
 class SharePositionCodec {
-    static positionToByte(entry) {
+    static positionToByte(entry: PositionEntry) {
         const room = ShareMath.clamp(Number(entry?.roomIndex), 0, ShareConstants.MAX_ROOM_INDEX, 0) & 0x0f;
         const y = ShareMath.clamp(Number(entry?.y), 0, ShareConstants.MATRIX_SIZE - 1, 0) & 0x07;
         const x = ShareMath.clamp(Number(entry?.x), 0, ShareConstants.MATRIX_SIZE - 1, 0) & 0x07;
         return ((room & 0x03) << 6) | (y << 3) | x;
     }
 
-    static byteToPosition(byte) {
+    static byteToPosition(byte: number) {
         return {
             x: byte & 0x07,
             y: (byte >> 3) & 0x07,
@@ -18,10 +23,13 @@ class SharePositionCodec {
         };
     }
 
-    static encodePositions(entries) {
+    static encodePositions(entries: PositionEntry[]) {
         if (!entries.length) return '';
         const maxRoomIndex = entries.reduce(
-            (max, entry) => Math.max(max, ShareMath.clamp(Number(entry?.roomIndex), 0, ShareConstants.MAX_ROOM_INDEX, 0)),
+            (max: number, entry: PositionEntry) => Math.max(
+                max,
+                ShareMath.clamp(Number(entry?.roomIndex), 0, ShareConstants.MAX_ROOM_INDEX, 0)
+            ),
             0
         );
         const useWide = maxRoomIndex > 3;
@@ -45,11 +53,11 @@ class SharePositionCodec {
         return ShareBase64.toBase64Url(bytes);
     }
 
-    static decodePositions(text) {
+    static decodePositions(text?: string | null): PositionEntry[] {
         if (!text) return [];
         if (text[0] === ShareConstants.POSITION_WIDE_PREFIX) {
             const bytes = ShareBase64.fromBase64Url(text.slice(1));
-            const positions = [];
+            const positions: PositionEntry[] = [];
             for (let i = 0; i < bytes.length; i += 2) {
                 const low = bytes[i] ?? 0;
                 const high = bytes[i + 1] ?? 0;
@@ -66,9 +74,9 @@ class SharePositionCodec {
         return Array.from(bytes, (byte) => SharePositionCodec.byteToPosition(byte));
     }
 
-    static encodeNpcTypeIndexes(sprites) {
+    static encodeNpcTypeIndexes(sprites: NpcEntry[]) {
         if (!sprites.length) return '';
-        const defs = ShareConstants.NPC_DEFINITIONS;
+        const defs = ShareConstants.NPC_DEFINITIONS as Array<{ type?: string }>;
         const bytes = new Uint8Array(sprites.length);
         let hasNonSequential = false;
         for (let i = 0; i < sprites.length; i++) {
@@ -83,19 +91,22 @@ class SharePositionCodec {
         return ShareBase64.toBase64Url(bytes);
     }
 
-    static decodeNpcTypeIndexes(text) {
+    static decodeNpcTypeIndexes(text?: string | null): number[] {
         if (!text) return [];
         return Array.from(ShareBase64.fromBase64Url(text), (byte) => byte);
     }
 
-    static encodeEnemyTypeIndexes(enemies) {
+    static encodeEnemyTypeIndexes(enemies: EnemyEntry[]) {
         if (!enemies.length) return '';
-        const defs = ShareConstants.ENEMY_DEFINITIONS;
+        const defs = ShareConstants.ENEMY_DEFINITIONS as Array<{ type?: string }>;
         if (!Array.isArray(defs) || !defs.length) return '';
         const bytes = new Uint8Array(enemies.length);
         for (let i = 0; i < enemies.length; i++) {
             const enemy = enemies[i] || {};
-            let index = Number.isInteger(enemy.typeIndex) ? enemy.typeIndex : -1;
+            let index =
+                typeof enemy.typeIndex === 'number' && Number.isInteger(enemy.typeIndex)
+                    ? enemy.typeIndex
+                    : -1;
             if (index < 0 || index >= defs.length) {
                 const type = typeof enemy.type === 'string' ? enemy.type : null;
                 index = type ? defs.findIndex((def) => def.type === type) : -1;
@@ -105,7 +116,7 @@ class SharePositionCodec {
         return ShareBase64.toBase64Url(bytes);
     }
 
-    static decodeEnemyTypeIndexes(text, expectedLength = 0) {
+    static decodeEnemyTypeIndexes(text: string | null | undefined, expectedLength = 0): number[] {
         if (!text) {
             return Array.from({ length: expectedLength }, () => 255);
         }

@@ -80,8 +80,12 @@ class StateVariableManager {
         return this.state.variables as StateVariableEntry[];
     }
 
-    cloneVariables(list: StateVariableEntry[] | null | undefined): StateVariableEntry[] {
-        return (list || []).map((entry) => ({
+    cloneVariables(list: StateVariableEntry[] | VariableDefinition[] | null | undefined): StateVariableEntry[] {
+        const normalized = Array.isArray(list) &&
+            list.every((entry) => Boolean((entry as StateVariableEntry)?.order) && Boolean((entry as StateVariableEntry)?.name))
+            ? (list as StateVariableEntry[])
+            : this.normalizeVariables(list);
+        return normalized.map((entry) => ({
             id: entry.id,
             order: entry.order,
             name: entry.name,
@@ -179,8 +183,7 @@ class StateVariableManager {
             }
         };
         maybeAdd(preset.fallbackName);
-        const bundles =
-            TextResources?.bundles ?? (typeof TEXT_BUNDLES !== 'undefined' ? TEXT_BUNDLES : undefined);
+        const bundles = TextResources?.bundles;
         if (preset.nameKey && bundles) {
             Object.values(bundles).forEach((bundle) => {
                 if (!bundle) return;

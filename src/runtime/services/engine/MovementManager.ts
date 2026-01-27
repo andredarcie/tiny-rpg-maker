@@ -1,5 +1,32 @@
-import type { GameState } from '../../domain/GameState';
 import { TextResources } from '../../adapters/TextResources';
+
+type PlayerState = {
+  roomIndex: number;
+  x: number;
+  y: number;
+  lastX?: number;
+  lastRoomChangeTime?: number | null;
+};
+
+type GameStateApi = {
+  game: { roomSize: number };
+  isGameOver: () => boolean;
+  isLevelUpCelebrationActive?: () => boolean;
+  isLevelUpOverlayActive?: () => boolean;
+  isPickupOverlayActive?: () => boolean;
+  getDialog: () => { active: boolean; page: number; maxPages: number };
+  setDialogPage: (page: number) => void;
+  getPlayer: () => PlayerState | null;
+  getRoomCoords: (roomIndex: number) => { row: number; col: number };
+  getRoomIndex: (row: number, col: number) => number | null;
+  getGame: () => { sprites?: NpcState[] };
+  getObjectAt: (roomIndex: number, x: number, y: number) => GameObjectState | null;
+  setPlayerPosition: (x: number, y: number, roomIndex: number | null) => void;
+  consumeKey: () => boolean;
+  getKeys: () => number;
+  isVariableOn: (id: string) => boolean;
+  hasSkill?: (skillId: string) => boolean;
+};
 
 type TileManagerApi = {
   getTileMap: (roomIndex: number) => TileMapState | null;
@@ -64,13 +91,17 @@ const getMovementText = (key: string, fallback = ''): string => {
   return value || fallback || '';
 };
 
-const formatMovementText = (key: string, params: Record<string, unknown> = {}, fallback = ''): string => {
+const formatMovementText = (
+  key: string,
+  params: Record<string, string | number | boolean> = {},
+  fallback = '',
+): string => {
   const value = TextResources.format(key, params, fallback);
   return value || fallback || '';
 };
 
 class MovementManager {
-  gameState: GameState;
+  gameState: GameStateApi;
   tileManager: TileManagerApi;
   renderer: RendererApi;
   dialogManager: DialogManagerApi;
@@ -86,7 +117,7 @@ class MovementManager {
     interactionManager,
     enemyManager,
   }: {
-    gameState: GameState;
+    gameState: GameStateApi;
     tileManager: TileManagerApi;
     renderer: RendererApi;
     dialogManager: DialogManagerApi;
@@ -134,6 +165,9 @@ class MovementManager {
     }
 
     const player = this.gameState.getPlayer();
+    if (!player) {
+      return;
+    }
     const direction = this.getDirectionFromDelta(dx, dy);
     const roomIndex = player.roomIndex;
     const previousPosition = {
@@ -304,7 +338,9 @@ class MovementManager {
     }
     this.interactionManager.handlePlayerInteractions();
     const currentPlayer = this.gameState.getPlayer();
-    this.enemyManager.checkCollisionAt(currentPlayer.x, currentPlayer.y);
+    if (currentPlayer) {
+      this.enemyManager.checkCollisionAt(currentPlayer.x, currentPlayer.y);
+    }
 
     if (supportsTransition && fromFrame) {
       this.renderer.draw();
@@ -375,7 +411,7 @@ class MovementManager {
   }
 
   findNpcAt(roomIndex: number, x: number, y: number): NpcState | null {
-    const sprites = this.gameState?.getGame()?.sprites || [];
+    const sprites = (this.gameState?.getGame()?.sprites || []) as NpcState[];
     return (
       sprites.find((npc) => npc.placed && npc.roomIndex === roomIndex && npc.x === x && npc.y === y) ||
       null

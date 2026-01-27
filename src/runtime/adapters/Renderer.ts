@@ -19,11 +19,11 @@ type RendererGameState = {
     isLevelUpOverlayActive?: () => boolean;
     isGameOver: () => boolean;
     isEditorModeActive?: () => boolean;
-} & Record<string, unknown>;
+};
 
 type RendererEngine = {
     isIntroVisible?: () => boolean;
-} & Record<string, unknown>;
+};
 
 type TileManagerApi = {
     getAnimationFrameCount: () => number;

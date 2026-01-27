@@ -16,6 +16,7 @@ import { StateWorldManager } from './state/StateWorldManager';
 import type { TileMap, Tileset } from './definitions/tileTypes';
 import type {
     AnyRecord,
+    DialogState,
     EnemyDefinition,
     GameDefinition,
     LevelUpCelebrationHideOptions,
@@ -271,7 +272,7 @@ class GameState {
         return this.skillManager.consumeRecentReviveFlag();
     }
 
-    getDialog(): AnyRecord {
+    getDialog(): DialogState {
         return this.dialogManager.getDialog();
     }
 

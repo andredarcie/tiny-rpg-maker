@@ -140,7 +140,7 @@ function parseSequentialId(id: string | null): number | null {
 }
 
 function ensureCounterAbove(value: number | null) {
-    if (Number.isFinite(value) && value >= nextNpcId) {
+    if (typeof value === 'number' && Number.isFinite(value) && value >= nextNpcId) {
         nextNpcId = value + 1;
     }
 }
@@ -277,6 +277,9 @@ class NPCManager {
             roomIndex: 0,
             x: 1,
             y: 1,
+            initialX: 1,
+            initialY: 1,
+            initialRoomIndex: 0,
             placed: false,
             conditionVariableId: null,
             conditionText: '',

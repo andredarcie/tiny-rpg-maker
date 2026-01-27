@@ -1,7 +1,7 @@
 
 import { ShareBase64 } from './ShareBase64';
 class ShareTextCodec {
-    static encodeUtf8(value) {
+    static encodeUtf8(value: string): Uint8Array {
         if (typeof TextEncoder !== 'undefined') {
             return new TextEncoder().encode(value);
         }
@@ -13,23 +13,24 @@ class ShareTextCodec {
         return bytes;
     }
 
-    static decodeUtf8(bytes) {
+    static decodeUtf8(bytes: Uint8Array | ArrayLike<number>): string {
         if (typeof TextDecoder !== 'undefined') {
-            return new TextDecoder().decode(bytes);
+            return new TextDecoder().decode(bytes as Uint8Array);
         }
         let binary = '';
-        for (let i = 0; i < bytes.length; i++) {
-            binary += String.fromCharCode(bytes[i]);
+        const length = 'length' in bytes ? bytes.length : 0;
+        for (let i = 0; i < length; i++) {
+            binary += String.fromCharCode((bytes as ArrayLike<number>)[i] ?? 0);
         }
         return decodeURIComponent(escape(binary));
     }
 
-    static encodeText(value) {
+    static encodeText(value: string): string {
         if (!value) return '';
         return ShareBase64.toBase64Url(ShareTextCodec.encodeUtf8(value));
     }
 
-    static decodeText(text, fallback = '') {
+    static decodeText(text: string | null | undefined, fallback = ''): string {
         if (!text) return fallback;
         try {
             return ShareTextCodec.decodeUtf8(ShareBase64.fromBase64Url(text));
@@ -39,13 +40,13 @@ class ShareTextCodec {
         }
     }
 
-    static encodeTextArray(values) {
+    static encodeTextArray(values: string[]): string {
         if (!values.length) return '';
         const json = JSON.stringify(values);
         return ShareBase64.toBase64Url(ShareTextCodec.encodeUtf8(json));
     }
 
-    static decodeTextArray(text) {
+    static decodeTextArray(text: string | null | undefined): string[] {
         if (!text) return [];
         try {
             const json = ShareTextCodec.decodeUtf8(ShareBase64.fromBase64Url(text));

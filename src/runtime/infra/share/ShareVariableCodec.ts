@@ -61,7 +61,7 @@ class ShareVariableCodec {
 
     static encodeVariableNibbleArray(values: VariableNibbleInput[] | undefined | null): string {
         if (!Array.isArray(values) || !values.length) return '';
-        const hasData = values.some((entry) => Number.isFinite(entry) && entry > 0);
+        const hasData = values.some((entry) => typeof entry === 'number' && Number.isFinite(entry) && entry > 0);
         if (!hasData) return '';
         return ShareBase64.toBase64Url(ShareVariableCodec.packNibbles(values.map((entry) => Number(entry) & 0x0f)));
     }

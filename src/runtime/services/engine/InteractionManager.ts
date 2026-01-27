@@ -53,14 +53,16 @@ type ExitState = {
 
 type RoomState = Record<string, unknown>;
 
+type GameData = {
+  items?: unknown[];
+  sprites?: unknown[];
+  exits?: unknown[];
+  rooms?: unknown[];
+} & Record<string, unknown>;
+
 type GameStateApi = {
-  getGame: () => {
-    items: ItemState[];
-    sprites: NpcState[];
-    exits: ExitState[];
-    rooms: RoomState[];
-  };
-  getPlayer: () => PlayerPosition;
+  getGame: () => GameData;
+  getPlayer: () => PlayerPosition | null;
   getObjectsForRoom?: (roomIndex: number) => GameObjectState[];
   getPlayerEndText: (roomIndex: number) => string;
   setActiveEndingText?: (text: string) => void;
@@ -78,7 +80,7 @@ type GameStateApi = {
   getSwordType?: () => string | null;
   addDamageShield?: (durability: number, type: string) => void;
   showPickupOverlay?: (payload: Record<string, unknown>) => void;
-  setPlayerPosition: (x: number, y: number, roomIndex: number) => void;
+  setPlayerPosition: (x: number, y: number, roomIndex: number | null) => void;
   getRoomIndex: (row: number, col: number) => number | null;
 };
 
@@ -104,11 +106,17 @@ class InteractionManager {
   handlePlayerInteractions(): void {
     const game = this.gameState.getGame();
     const player = this.gameState.getPlayer();
+    if (!player) return;
 
-    this.checkItems(game.items, player);
+    const items = Array.isArray(game.items) ? (game.items as ItemState[]) : [];
+    const sprites = Array.isArray(game.sprites) ? (game.sprites as NpcState[]) : [];
+    const exits = Array.isArray(game.exits) ? (game.exits as ExitState[]) : [];
+    const rooms = Array.isArray(game.rooms) ? (game.rooms as RoomState[]) : [];
+
+    this.checkItems(items, player);
     this.checkObjects(player);
-    this.checkNpcs(game.sprites, player);
-    this.checkRoomExits(game.exits, game.rooms, player);
+    this.checkNpcs(sprites, player);
+    this.checkRoomExits(exits, rooms, player);
   }
 
   checkItems(items: ItemState[], player: PlayerPosition): void {
@@ -201,15 +209,15 @@ class InteractionManager {
     }
   }
 
-  getSwordDurability(type: string): number {
+  getSwordDurability(type: ItemType): number {
     const durability = itemCatalog.getSwordDurability(type);
-    if (Number.isFinite(durability)) {
+    if (typeof durability === 'number' && Number.isFinite(durability)) {
       return Math.max(0, durability);
     }
     return 0;
   }
 
-  getSwordPriority(type: string): number {
+  getSwordPriority(type: ItemType | string): number {
     const OT = this.types;
     const priorityMap: Record<string, number> = {
       [OT.SWORD_WOOD]: 1,
@@ -219,14 +227,14 @@ class InteractionManager {
     return priorityMap[type] || 0;
   }
 
-  shouldPickupSword(type: string): boolean {
+  shouldPickupSword(type: ItemType): boolean {
     const currentType = this.gameState.getSwordType?.() || null;
     const currentPriority = this.getSwordPriority(currentType || '');
     const newPriority = this.getSwordPriority(type);
     return newPriority > currentPriority;
   }
 
-  showPickupOverlay(type: string, effect: (() => void) | null = null): void {
+  showPickupOverlay(type: ItemType, effect: (() => void) | null = null): void {
     const overlayName = this.getObjectDisplayName(type);
     this.gameState.showPickupOverlay?.({
       name: overlayName,
@@ -236,7 +244,7 @@ class InteractionManager {
     });
   }
 
-  getObjectDisplayName(type: string): string {
+  getObjectDisplayName(type: ItemType): string {
     const definition = itemCatalog.getItemDefinition(type);
     if (!definition) {
       return type || '';
@@ -254,7 +262,11 @@ class InteractionManager {
     return value || fallback || '';
   }
 
-  formatInteractionText(key: string, params: Record<string, unknown> = {}, fallback = ''): string {
+  formatInteractionText(
+    key: string,
+    params: Record<string, string | number | boolean> = {},
+    fallback = '',
+  ): string {
     const value = TextResources.format(key, params, fallback);
     return value || fallback || '';
   }

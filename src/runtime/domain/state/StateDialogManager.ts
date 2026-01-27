@@ -1,21 +1,23 @@
 
-import type { AnyRecord } from '../../../types/gameState';
+import type { AnyRecord, DialogState, RuntimeState } from '../../../types/gameState';
 
 class StateDialogManager {
-    constructor(state: unknown) {
+    state: RuntimeState | null;
+
+    constructor(state: RuntimeState | null) {
         this.state = state;
     }
 
-    setState(state: unknown) {
+    setState(state: RuntimeState | null) {
         this.state = state;
     }
 
     get dialog() {
-        return this.state?.dialog;
+        return this.state?.dialog ?? null;
     }
 
-    getDialog() {
-        return this.dialog;
+    getDialog(): DialogState {
+        return this.dialog ?? { active: false, text: '', page: 1, maxPages: 1, meta: null };
     }
 
     setDialog(active: boolean, text: string = "", meta: AnyRecord | null = null) {

@@ -1,5 +1,22 @@
 
+import type { PlayerRuntimeState, RuntimeState } from '../../../types/gameState';
+
+type WorldManagerApi = {
+    clampCoordinate: (value: number) => number;
+    clampRoomIndex: (value: number) => number;
+};
+
+type SkillManagerApi = {
+    hasSkill?: (skillId: string) => boolean;
+    attemptRevive?: (player: PlayerRuntimeState) => void;
+    getBonusMaxLives?: () => number;
+    getXpBoost?: () => number;
+};
+
 class StatePlayerManager {
+    state: RuntimeState | null;
+    worldManager: WorldManagerApi;
+    skillManager: SkillManagerApi | null;
     maxLevel: number;
     baseMaxLives: number;
     experienceBase: number;
@@ -7,7 +24,7 @@ class StatePlayerManager {
     maxKeys: number;
     roomChangeDamageCooldown: number;
 
-    constructor(state: unknown, worldManager: unknown, skillManager: unknown = null) {
+    constructor(state: RuntimeState | null, worldManager: WorldManagerApi, skillManager: SkillManagerApi | null = null) {
         this.state = state;
         this.worldManager = worldManager;
         this.skillManager = skillManager;
@@ -19,27 +36,27 @@ class StatePlayerManager {
         this.roomChangeDamageCooldown = 1000;
     }
 
-    setState(state) {
+    setState(state: RuntimeState | null) {
         this.state = state;
     }
 
-    setWorldManager(worldManager) {
+    setWorldManager(worldManager: WorldManagerApi) {
         this.worldManager = worldManager;
     }
 
-    setSkillManager(skillManager) {
+    setSkillManager(skillManager: SkillManagerApi | null) {
         this.skillManager = skillManager;
     }
 
     get player() {
-        return this.state?.player;
+        return this.state?.player ?? null;
     }
 
-    getPlayer() {
+    getPlayer(): PlayerRuntimeState | null {
         return this.player;
     }
 
-    setPosition(x, y, roomIndex = null) {
+    setPosition(x: number, y: number, roomIndex: number | null = null) {
         if (!this.player) return;
         this.player.lastX = this.player.x;
         this.player.x = this.worldManager.clampCoordinate(x);
@@ -50,7 +67,7 @@ class StatePlayerManager {
         this.ensurePlayerStats();
     }
 
-    reset(start) {
+    reset(start: { x: number; y: number; roomIndex: number } | null) {
         const fallback = start || { x: 1, y: 1, roomIndex: 0 };
         this.setPosition(fallback.x, fallback.y, fallback.roomIndex);
         if (!this.player) return;
@@ -150,10 +167,11 @@ class StatePlayerManager {
 
     isOnDamageCooldown() {
         const now = Date.now();
-        return this.player.lastRoomChangeTime && now - this.player.lastRoomChangeTime < this.roomChangeDamageCooldown;
+        const lastChange = this.player?.lastRoomChangeTime;
+        return typeof lastChange === 'number' && now - lastChange < this.roomChangeDamageCooldown;
     }
 
-    addDamageShield(amount = 1, swordType = null) {
+    addDamageShield(amount = 1, swordType: string | null = null) {
         if (!this.player) return 0;
         const numeric = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
         if (numeric <= 0) return this.player.damageShield ?? 0;
@@ -212,13 +230,13 @@ class StatePlayerManager {
         return this.player?.level ?? 1;
     }
 
-    calculateMaxLives(level) {
+    calculateMaxLives(level: number) {
         const numericLevel = Number.isFinite(level) ? Math.floor(level) : 1;
         const bonus = this.skillManager?.getBonusMaxLives?.() || 0;
         return this.baseMaxLives + Math.max(0, numericLevel - 1) + bonus;
     }
 
-    clampLevel(level) {
+    clampLevel(level: number) {
         const numeric = Number.isFinite(level) ? Math.floor(level) : 1;
         return Math.max(1, Math.min(this.maxLevel, numeric));
     }
@@ -278,7 +296,7 @@ class StatePlayerManager {
         return this.player?.experience ?? 0;
     }
 
-    getExperienceForNextLevel(level) {
+    getExperienceForNextLevel(level: number) {
         const clamped = this.clampLevel(level);
         if (clamped >= this.maxLevel) return 0;
         const value = Math.floor(this.experienceBase * Math.pow(this.experienceGrowth, clamped - 1));

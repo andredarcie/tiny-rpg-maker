@@ -8,6 +8,7 @@ import { NPCManager } from './NPCManager';
 import { Renderer } from '../adapters/Renderer';
 import { TextResources } from '../adapters/TextResources';
 import { TileManager } from './TileManager';
+import type { TileDefinition } from '../domain/definitions/tileTypes';
 
 type IntroData = { title: string; author: string };
 
@@ -17,127 +18,17 @@ type GameData = {
   rooms?: unknown[];
 };
 
-type LevelUpOverlay = {
-  active?: boolean;
-  cursor?: number;
-  choices?: unknown[];
-};
-
-type LevelUpLayout = {
-  rects?: { x: number; y: number; width: number; height: number }[];
-};
-
-type GameStateApi = {
-  getGame: () => GameData;
-  getPlayer?: () => { roomIndex?: number };
-  resetGame: () => void;
-  exportGameData: () => unknown;
-  importGameData: (data: unknown) => void;
-  getTestSettings?: () => { startLevel: number; skills: unknown[]; godMode: boolean };
-  setTestSettings?: (settings: Record<string, unknown>) => void;
-  getMaxPlayerLevel?: () => number;
-  getState: () => unknown;
-  getVariableDefinitions: () => unknown;
-  getVariables: () => unknown;
-  setVariableValue: (variableId: string | number, value: unknown, isDefault?: boolean) => [boolean, unknown?];
-  isVariableOn: (variableId: string | number) => boolean;
-  getObjects: () => unknown;
-  getObjectsForRoom: (roomIndex: number) => unknown;
-  setObjectPosition: (type: string, roomIndex: number, x: number, y: number) => unknown;
-  setObjectVariable?: (type: string, roomIndex: number, variableId: string | number) => unknown;
-  setPlayerEndText?: (roomIndex: number, text: string) => string;
-  getPlayerEndText?: (roomIndex: number) => string;
-  removeObject: (type: string, roomIndex: number) => void;
-  getKeys: () => number;
-  setEnemyVariable?: (enemyId: string | number, variableId: string | number | null) => boolean;
-  isGameOver: () => boolean;
-  canResetAfterGameOver?: boolean;
-  hasNecromancerReviveReady?: () => boolean;
-  reviveFromNecromancer?: () => boolean;
-  prepareNecromancerRevive?: () => void;
-  pauseGame?: (reason: string) => void;
-  resumeGame?: (reason: string) => void;
-  setGameOver?: (isOver: boolean, reason?: string) => void;
-  isPickupOverlayActive?: () => boolean;
-  hidePickupOverlay?: () => void;
-  isLevelUpCelebrationActive?: () => boolean;
-  hideLevelUpCelebration?: () => void;
-  isLevelUpOverlayActive?: () => boolean;
-  moveLevelUpCursor?: (delta: number) => void;
-  getLevelUpOverlay?: () => LevelUpOverlay | null;
-  selectLevelUpSkill?: (index?: number | null) => { nameKey?: string; id?: string } | null;
-  getPendingLevelUpChoices?: () => number;
-};
-
-type TileManagerApi = {
-  ensureDefaultTiles: () => void;
-  getTiles: () => unknown;
-  getTileMap: (roomIndex: number) => unknown;
-  getPresetTileNames: () => string[];
-  updateTile: (tileId: string | number, data: unknown) => void;
-  setMapTile: (x: number, y: number, tileId: string | number, roomIndex: number) => void;
-};
-
-type NpcManagerApi = {
-  ensureDefaultNPCs?: () => void;
-  getNPCs: () => unknown;
-  addNPC: (npc: unknown) => unknown;
-};
-
-type RendererApi = {
-  draw: () => void;
-  setIntroData: (data: IntroData) => void;
-  overlayRenderer?: {
-    getLevelUpCardLayout?: (options: {
-      width: number;
-      height: number;
-      choicesLength: number;
-      hasPendingText: boolean;
-    }) => LevelUpLayout | null;
-  };
-};
-
-type DialogManagerApi = {
-  showDialog: (text: string, options?: Record<string, unknown>) => void;
-  reset: () => void;
-  completeDialog: () => void;
-  closeDialog: () => void;
-};
-
-type InteractionManagerApi = {
-  handlePlayerInteractions: () => void;
-};
-
-type EnemyManagerApi = {
-  getEnemyDefinitions: () => unknown;
-  getActiveEnemies: () => unknown;
-  addEnemy: (enemy: unknown) => unknown;
-  removeEnemy: (enemyId: string | number) => void;
-  generateEnemyId: () => string;
-  start: () => void;
-  stop: () => void;
-  tick: () => void;
-  handleEnemyCollision: (enemyIndex: number) => void;
-  checkCollisionAt: (x: number, y: number) => void;
-};
-
-type MovementManagerApi = {
-  tryMove: (dx: number, dy: number) => void;
-};
-
-type InputManagerApi = Record<string, unknown>;
-
 export class GameEngine {
   canvas: HTMLCanvasElement;
-  gameState: GameStateApi;
-  tileManager: TileManagerApi;
-  npcManager: NpcManagerApi;
-  renderer: RendererApi;
-  dialogManager: DialogManagerApi;
-  interactionManager: InteractionManagerApi;
-  enemyManager: EnemyManagerApi;
-  movementManager: MovementManagerApi;
-  inputManager: InputManagerApi;
+  gameState: GameState;
+  tileManager: TileManager;
+  npcManager: NPCManager;
+  renderer: Renderer;
+  dialogManager: DialogManager;
+  interactionManager: InteractionManager;
+  enemyManager: EnemyManager;
+  movementManager: MovementManager;
+  inputManager: InputManager;
   awaitingRestart: boolean;
   introVisible: boolean;
   introStartTime: number;
@@ -149,19 +40,19 @@ export class GameEngine {
     this.canvas = canvas;
 
     // Boot core subsystems
-    this.gameState = new GameState() as GameStateApi;
-    this.tileManager = new TileManager(this.gameState) as TileManagerApi;
-    this.npcManager = new NPCManager(this.gameState) as NpcManagerApi;
-    this.npcManager.ensureDefaultNPCs?.();
-    this.renderer = new Renderer(canvas, this.gameState, this.tileManager, this.npcManager, this) as RendererApi;
-    this.dialogManager = new DialogManager(this.gameState, this.renderer) as DialogManagerApi;
+    this.gameState = new GameState();
+    this.tileManager = new TileManager(this.gameState);
+    this.npcManager = new NPCManager(this.gameState);
+    this.npcManager.ensureDefaultNPCs();
+    this.renderer = new Renderer(canvas, this.gameState, this.tileManager, this.npcManager, this);
+    this.dialogManager = new DialogManager(this.gameState, this.renderer);
     this.interactionManager = new InteractionManager(this.gameState, this.dialogManager, {
       onPlayerVictory: () => this.handleGameCompletion(),
-    }) as InteractionManagerApi;
+    });
     this.enemyManager = new EnemyManager(this.gameState, this.renderer, this.tileManager, {
       onPlayerDefeated: () => this.handlePlayerDefeat(),
       dialogManager: this.dialogManager,
-    }) as EnemyManagerApi;
+    });
     this.movementManager = new MovementManager({
       gameState: this.gameState,
       tileManager: this.tileManager,
@@ -169,8 +60,8 @@ export class GameEngine {
       dialogManager: this.dialogManager,
       interactionManager: this.interactionManager,
       enemyManager: this.enemyManager,
-    }) as MovementManagerApi;
-    this.inputManager = new InputManager(this) as InputManagerApi;
+    });
+    this.inputManager = new InputManager(this);
     this.awaitingRestart = false;
     this.introVisible = false;
     this.introStartTime = 0;
@@ -210,8 +101,8 @@ export class GameEngine {
     this.dialogManager.closeDialog();
   }
 
-  isPickupOverlayActive(): boolean | undefined {
-    return this.gameState.isPickupOverlayActive?.();
+  isPickupOverlayActive(): boolean {
+    return Boolean(this.gameState.isPickupOverlayActive?.());
   }
 
   dismissPickupOverlay(): void {
@@ -221,7 +112,7 @@ export class GameEngine {
   }
 
   isLevelUpCelebrationActive(): boolean {
-    return this.gameState.isLevelUpCelebrationActive?.();
+    return Boolean(this.gameState.isLevelUpCelebrationActive?.());
   }
 
   dismissLevelUpCelebration(): void {
@@ -231,7 +122,7 @@ export class GameEngine {
   }
 
   isLevelUpOverlayActive(): boolean {
-    return this.gameState.isLevelUpOverlayActive?.();
+    return Boolean(this.gameState.isLevelUpOverlayActive?.());
   }
 
   moveLevelUpCursor(delta = 0): void {
@@ -243,7 +134,10 @@ export class GameEngine {
   confirmLevelUpSelection(): void {
     if (!this.isLevelUpOverlayActive()) return;
     const overlay = this.gameState.getLevelUpOverlay?.();
-    const selection = Number.isFinite(overlay?.cursor) ? overlay.cursor : 0;
+    const selection =
+      overlay && typeof overlay.cursor === 'number' && Number.isFinite(overlay.cursor)
+        ? overlay.cursor
+        : 0;
     this.chooseLevelUpSkill(selection);
   }
 
@@ -277,7 +171,7 @@ export class GameEngine {
     if (!choices.length) return null;
     const rect = this.canvas?.getBoundingClientRect?.();
     if (!rect || !Number.isFinite(clientX) || !Number.isFinite(clientY)) {
-      return Number.isFinite(overlay.cursor) ? overlay.cursor : 0;
+      return typeof overlay.cursor === 'number' && Number.isFinite(overlay.cursor) ? overlay.cursor : 0;
     }
     const scaleX = this.canvas.width / (rect.width || 1);
     const scaleY = this.canvas.height / (rect.height || 1);
@@ -317,7 +211,7 @@ export class GameEngine {
       });
       return bestIndex;
     }
-    return Number.isFinite(overlay.cursor) ? overlay.cursor : 0;
+    return typeof overlay.cursor === 'number' && Number.isFinite(overlay.cursor) ? overlay.cursor : 0;
   }
 
   resetGame(): void {
@@ -475,7 +369,8 @@ export class GameEngine {
   }
 
   setObjectVariable(type: string, roomIndex: number, variableId: string | number): unknown {
-    const updated = this.gameState.setObjectVariable?.(type, roomIndex, variableId);
+    const normalizedVariableId = typeof variableId === 'string' ? variableId : null;
+    const updated = this.gameState.setObjectVariable(type, roomIndex, normalizedVariableId);
     this.renderer.draw();
     return updated;
   }
@@ -504,7 +399,7 @@ export class GameEngine {
     return this.npcManager.getNPCs();
   }
 
-  updateTile(tileId: string | number, data: unknown): void {
+  updateTile(tileId: string | number, data: Partial<TileDefinition>): void {
     this.tileManager.updateTile(tileId, data);
   }
 
@@ -515,7 +410,7 @@ export class GameEngine {
   }
 
   addSprite(npc: unknown): unknown {
-    return this.npcManager.addNPC(npc);
+    return this.npcManager.addNPC(npc as any);
   }
 
   // Enemy helpers
@@ -528,11 +423,11 @@ export class GameEngine {
   }
 
   addEnemy(enemy: unknown): unknown {
-    return this.enemyManager.addEnemy(enemy);
+    return this.enemyManager.addEnemy(enemy as any);
   }
 
   removeEnemy(enemyId: string | number): void {
-    this.enemyManager.removeEnemy(enemyId);
+    this.enemyManager.removeEnemy(String(enemyId));
   }
 
   generateEnemyId(): string {
@@ -543,7 +438,8 @@ export class GameEngine {
     if (typeof this.gameState.setEnemyVariable !== 'function') {
       return false;
     }
-    const changed = this.gameState.setEnemyVariable(enemyId, variableId);
+    const normalizedVariableId = typeof variableId === 'string' ? variableId : null;
+    const changed = this.gameState.setEnemyVariable(enemyId, normalizedVariableId);
     if (changed) {
       this.renderer.draw();
     }

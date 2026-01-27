@@ -6,8 +6,22 @@ import { ShareMatrixCodec } from './ShareMatrixCodec';
 import { SharePositionCodec } from './SharePositionCodec';
 import { ShareTextCodec } from './ShareTextCodec';
 import { ShareVariableCodec } from './ShareVariableCodec';
+
+type ShareGameData = {
+    title?: unknown;
+    author?: unknown;
+    start?: unknown;
+    sprites?: unknown[];
+    enemies?: unknown[];
+    objects?: unknown[];
+    variables?: unknown[];
+    rooms?: unknown[];
+    tileset?: unknown;
+    world?: unknown;
+};
+
 class ShareEncoder {
-    static buildShareCode(gameData) {
+    static buildShareCode(gameData: ShareGameData | null | undefined) {
         const OT = ITEM_TYPES;
         const roomCount = ShareConstants.WORLD_ROOM_COUNT;
         const groundMatrices = ShareMatrixCodec.collectGroundMatrices(gameData, roomCount);

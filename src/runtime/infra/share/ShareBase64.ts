@@ -1,5 +1,5 @@
 type BufferLike = {
-    from(value: ArrayLike<number> | string, encoding?: string): {
+    from(value: ArrayLike<number> | string, encoding?: string): ArrayLike<number> & {
         toString(encoding?: string): string;
     };
 };

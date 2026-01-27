@@ -1,6 +1,7 @@
 import { EnemyDefinitions } from '../../domain/definitions/EnemyDefinitions';
 import { ITEM_TYPES } from '../../domain/constants/itemTypes';
 import { TextResources } from '../../adapters/TextResources';
+import type { EnemyDefinition } from '../../../types/gameState';
 
 type GameStateApi = {
   playing: boolean;
@@ -21,7 +22,7 @@ type GameStateApi = {
   prepareNecromancerRevive?: () => void;
   isVariableOn: (id: string) => boolean;
   normalizeVariableId: (id: string | null) => string | null;
-  setVariableValue: (id: string, value: boolean, persist?: boolean) => [boolean, boolean?];
+  setVariableValue: (id: string, value: boolean, persist?: boolean) => Array<boolean | undefined>;
   getObjectAt?: (roomIndex: number, x: number, y: number) => GameObjectState | null;
   hasSkill?: (skillId: string) => boolean;
 };
@@ -59,7 +60,9 @@ type GameData = {
   rooms: RoomState[];
 };
 
-type EnemyState = {
+type EnemyState = EnemyDefinition;
+
+type EnemyInput = {
   id?: string;
   type: string;
   roomIndex?: number;
@@ -106,7 +109,7 @@ const getEnemyLocaleText = (key: string, fallback = ''): string => {
 
 const formatEnemyLocaleText = (
   key: string,
-  params: Record<string, unknown> = {},
+  params: Record<string, string | number | boolean> = {},
   fallback = '',
 ): string => {
   const value = TextResources.format(key, params, fallback);
@@ -144,7 +147,7 @@ class EnemyManager {
     return this.gameState.getEnemies();
   }
 
-  addEnemy(enemy: EnemyState): string | null {
+  addEnemy(enemy: EnemyInput): string | null {
     const id = enemy.id || this.generateEnemyId();
     const type = this.normalizeEnemyType(enemy.type);
     const addedId = this.gameState.addEnemy({
@@ -153,7 +156,7 @@ class EnemyManager {
       roomIndex: enemy.roomIndex ?? 0,
       x: enemy.x ?? 0,
       y: enemy.y ?? 0,
-      lastX: enemy.x ?? 0,
+      lastX: enemy.lastX ?? enemy.x ?? 0,
       defeatVariableId: enemy.defeatVariableId ?? null,
     });
     if (!addedId) {

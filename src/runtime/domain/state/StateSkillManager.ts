@@ -1,12 +1,18 @@
 
 import { SkillDefinitions } from '../definitions/SkillDefinitions';
+import type { RuntimeState } from '../../../types/gameState';
+
+type PlayerLevelState = { level?: number };
+
 class StateSkillManager {
-    constructor(state: unknown) {
+    state: RuntimeState | null;
+
+    constructor(state: RuntimeState | null) {
         this.state = state;
         this.resetRuntime();
     }
 
-    setState(state: unknown) {
+    setState(state: RuntimeState | null) {
         this.state = state;
         this.ensureRuntime();
         this.ensureOverlay();
@@ -32,7 +38,7 @@ class StateSkillManager {
         }
         const runtime = this.state.skillRuntime;
         runtime.owned = Array.isArray(runtime.owned)
-            ? Array.from(new Set(runtime.owned.filter((id) => typeof id === 'string' && id)))
+            ? Array.from(new Set(runtime.owned.filter((id: unknown) => typeof id === 'string' && id))) as string[]
             : [];
         runtime.bonusMaxLives = Number.isFinite(runtime.bonusMaxLives)
             ? Math.max(0, Math.floor(runtime.bonusMaxLives))
@@ -47,15 +53,15 @@ class StateSkillManager {
         runtime.pendingManualRevive = Boolean(runtime.pendingManualRevive);
         runtime.recentRevive = Boolean(runtime.recentRevive);
         runtime.carryoverSkills = Array.isArray(runtime.carryoverSkills)
-            ? Array.from(new Set(runtime.carryoverSkills.filter((id) => typeof id === 'string' && id)))
+            ? Array.from(new Set(runtime.carryoverSkills.filter((id: unknown) => typeof id === 'string' && id))) as string[]
             : [];
         runtime.currentChoicePool = Array.isArray(runtime.currentChoicePool)
-            ? Array.from(new Set(runtime.currentChoicePool.filter((id) => typeof id === 'string' && id)))
+            ? Array.from(new Set(runtime.currentChoicePool.filter((id: unknown) => typeof id === 'string' && id))) as string[]
             : [];
         runtime.pendingLevelQueue = Array.isArray(runtime.pendingLevelQueue)
             ? runtime.pendingLevelQueue
-                  .map((lvl) => (Number.isFinite(lvl) ? Math.max(1, Math.floor(lvl)) : null))
-                  .filter((lvl) => lvl !== null)
+                  .map((lvl: unknown) => (typeof lvl === 'number' && Number.isFinite(lvl) ? Math.max(1, Math.floor(lvl)) : null))
+                  .filter((lvl: number | null): lvl is number => lvl !== null)
             : [];
         runtime.pendingSelections = runtime.pendingLevelQueue.length;
         return runtime;
@@ -160,11 +166,13 @@ class StateSkillManager {
             return runtime.pendingSelections;
         }
 
-        const baseLevel = Number.isFinite(this.state?.player?.level)
-            ? Math.max(1, Math.floor(this.state.player.level))
+        const baseLevel = typeof (this.state?.player as PlayerLevelState | undefined)?.level === 'number'
+            ? Math.max(1, Math.floor((this.state?.player as PlayerLevelState).level ?? 1))
             : 1;
-        const finalLevel = Number.isFinite(latestLevel) ? Math.max(1, Math.floor(latestLevel)) : null;
-        const levelsCrossed = [];
+        const finalLevel = typeof latestLevel === 'number' && Number.isFinite(latestLevel)
+            ? Math.max(1, Math.floor(latestLevel))
+            : null;
+        const levelsCrossed: number[] = [];
 
         if (finalLevel !== null) {
             const start = Math.max(1, finalLevel - numeric + 1);
@@ -204,9 +212,11 @@ class StateSkillManager {
         const runtime = this.ensureRuntime();
         const safetyCap = Math.max(1, runtime.pendingLevelQueue.length || 1);
         for (let i = 0; i < safetyCap; i++) {
-            const levelForChoice =
-                runtime.pendingLevelQueue.shift() ||
-                (Number.isFinite(this.state?.player?.level) ? Math.max(1, Math.floor(this.state.player.level)) : 1);
+            const queuedLevel = runtime.pendingLevelQueue.shift();
+            const fallbackLevel = typeof (this.state?.player as PlayerLevelState | undefined)?.level === 'number'
+                ? Math.max(1, Math.floor((this.state?.player as PlayerLevelState).level ?? 1))
+                : 1;
+            const levelForChoice = typeof queuedLevel === 'number' ? queuedLevel : fallbackLevel;
             const choices = this.pickChoices(2, levelForChoice);
             if (choices.length) {
                 overlay.active = true;
@@ -224,12 +234,12 @@ class StateSkillManager {
         return null;
     }
 
-    pickChoices(count = 2, levelOverride = null) {
+    pickChoices(count = 2, levelOverride: number | null = null) {
         const runtime = this.ensureRuntime();
-        const playerLevel = Number.isFinite(levelOverride)
+        const playerLevel = typeof levelOverride === 'number' && Number.isFinite(levelOverride)
             ? Math.max(1, Math.floor(levelOverride))
-            : Number.isFinite(this.state?.player?.level)
-            ? Math.max(1, Math.floor(this.state.player.level))
+            : typeof (this.state?.player as PlayerLevelState | undefined)?.level === 'number'
+            ? Math.max(1, Math.floor((this.state?.player as PlayerLevelState).level ?? 1))
             : 1;
         const queue = SkillDefinitions.buildQueueForLevel(playerLevel, runtime.carryoverSkills, runtime.owned);
         runtime.currentChoicePool = queue;
@@ -240,7 +250,7 @@ class StateSkillManager {
         const choiceCount = Math.max(1, Math.min(count, queue.length));
         const choices = queue
             .slice(0, choiceCount)
-            .map((id) => SkillDefinitions.getById(id))
+            .map((id: string) => SkillDefinitions.getById(id))
             .filter(Boolean);
         return choices;
     }
@@ -262,7 +272,9 @@ class StateSkillManager {
     completeSelection(index: number | null = null) {
         const overlay = this.ensureOverlay();
         if (!overlay.active) return null;
-        const effectiveIndex = Number.isFinite(index) ? Math.max(0, Math.min(overlay.choices.length - 1, Math.floor(index))) : overlay.cursor;
+        const effectiveIndex = typeof index === 'number' && Number.isFinite(index)
+            ? Math.max(0, Math.min(overlay.choices.length - 1, Math.floor(index)))
+            : overlay.cursor;
         const choice = overlay.choices[effectiveIndex] || null;
 
         overlay.active = false;
@@ -275,7 +287,7 @@ class StateSkillManager {
         const runtime = this.ensureRuntime();
         const chosenId = choice?.id || null;
         const pool = Array.isArray(runtime.currentChoicePool) ? runtime.currentChoicePool : [];
-        runtime.carryoverSkills = pool.filter((id) => id && id !== chosenId && !runtime.owned.includes(id));
+        runtime.carryoverSkills = pool.filter((id: string) => id && id !== chosenId && !runtime.owned.includes(id));
         runtime.currentChoicePool = [];
         runtime.pendingSelections = runtime.pendingLevelQueue.length;
         return choice;
@@ -289,7 +301,7 @@ class StateSkillManager {
         return this.ensureOverlay();
     }
 
-    attemptRevive(player = null) {
+    attemptRevive(player: unknown | null = null) {
         if (!player || !this.hasSkill('necromancer')) return false;
         const runtime = this.ensureRuntime();
         if (runtime.necromancerCharges <= 0) return false;

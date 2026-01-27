@@ -8,19 +8,19 @@ import { ShareUrlHelper } from './ShareUrlHelper';
 'use strict';
 
 class ShareUtils {
-    static buildShareUrl(gameData) {
+    static buildShareUrl(gameData: Record<string, unknown> | null | undefined) {
         return ShareUrlHelper.buildShareUrl(gameData);
     }
 
-    static extractGameDataFromLocation(location) {
+    static extractGameDataFromLocation(location: { hash?: string } | null | undefined) {
         return ShareUrlHelper.extractGameDataFromLocation(location);
     }
 
-    static encode(gameData) {
+    static encode(gameData: Record<string, unknown> | null | undefined) {
         return ShareEncoder.buildShareCode(gameData);
     }
 
-    static decode(code) {
+    static decode(code: string | null | undefined) {
         return ShareDecoder.decodeShareCode(code);
     }
 }

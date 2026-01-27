@@ -300,7 +300,7 @@ class ShareMatrixCodec {
             }
             return matrices;
         }
-        return [ShareMatrixCodec.decodeGround(text, version)];
+        return [ShareMatrixCodec.decodeGround(text ?? '', version)];
     }
 
     static decodeWorldOverlay(
@@ -347,7 +347,12 @@ class ShareMatrixCodec {
             for (let x = 0; x < size; x++) {
                 const value = matrix?.[y]?.[x];
                 if (value === null || value === undefined) continue;
-                if (Number.isFinite(value) && value > legacyMax) {
+                const numeric = typeof value === 'number'
+                    ? value
+                    : typeof value === 'string'
+                    ? Number(value)
+                    : NaN;
+                if (Number.isFinite(numeric) && numeric > legacyMax) {
                     return true;
                 }
             }

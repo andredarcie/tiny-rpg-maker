@@ -6,12 +6,15 @@ import { ShareMatrixCodec } from './ShareMatrixCodec';
 import { SharePositionCodec } from './SharePositionCodec';
 import { ShareTextCodec } from './ShareTextCodec';
 import { ShareVariableCodec } from './ShareVariableCodec';
+
+type SharePayload = Record<string, string>;
+
 class ShareDecoder {
-    static decodeShareCode(code) {
+    static decodeShareCode(code?: string | null): Record<string, unknown> | null {
         const OT = ITEM_TYPES;
         if (!code) return null;
         const segments = code.split('.');
-        const payload = {};
+        const payload: SharePayload = {};
         for (const segment of segments) {
             if (!segment) continue;
             const key = segment[0];
@@ -72,7 +75,7 @@ class ShareDecoder {
         const playerEndPositions = version >= ShareConstants.PLAYER_END_VERSION
             ? SharePositionCodec.decodePositions(payload.z || '')
             : [];
-        let playerEndMessages = [];
+        let playerEndMessages: string[] = [];
         if (version >= ShareConstants.PLAYER_END_TEXT_ARRAY_VERSION) {
             playerEndMessages = ShareTextCodec.decodeTextArray(payload.E || '');
         } else if (version >= ShareConstants.PLAYER_END_TEXT_VERSION) {
@@ -93,9 +96,15 @@ class ShareDecoder {
             : [];
         const title = (ShareTextCodec.decodeText(payload.n, ShareConstants.DEFAULT_TITLE) || ShareConstants.DEFAULT_TITLE).slice(0, 18);
         const author = (ShareTextCodec.decodeText(payload.y, '') || '').slice(0, 18);
-        const buildNpcId = (index) => `npc-${index + 1}`;
+        const buildNpcId = (index: number) => `npc-${index + 1}`;
 
-        const defs = ShareConstants.NPC_DEFINITIONS;
+        const defs = ShareConstants.NPC_DEFINITIONS as Array<{
+            id?: string;
+            type?: string;
+            name?: string;
+            defaultText?: string;
+            defaultTextKey?: string;
+        }>;
         const canUseDefinitions = defs.length > 0 && (npcTypeIndexes.length > 0 || npcPositions.length <= defs.length);
         const sprites = [];
         if (canUseDefinitions) {
@@ -145,7 +154,7 @@ class ShareDecoder {
         }
 
         const defaultEnemyType = ShareDataNormalizer.normalizeEnemyType();
-        const enemyDefinitions = ShareConstants.ENEMY_DEFINITIONS;
+        const enemyDefinitions = ShareConstants.ENEMY_DEFINITIONS as Array<{ type?: string }>;
         const enemies = enemyPositions.map((pos, index) => {
             const nibble = enemyVariableNibbles[index] ?? 0;
             return {

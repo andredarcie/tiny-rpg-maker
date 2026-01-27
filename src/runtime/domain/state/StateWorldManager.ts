@@ -1,11 +1,26 @@
 
+import type { AnyRecord, GameDefinition } from '../../../types/gameState';
+import type { TileMap } from '../definitions/tileTypes';
+
+type RoomEntry = {
+    size: number;
+    bg: number;
+    tiles: number[][];
+    walls: boolean[][];
+    worldX: number;
+    worldY: number;
+} & AnyRecord;
+
 class StateWorldManager {
-    constructor(game, defaultRoomSize = 8) {
+    game: GameDefinition;
+    defaultRoomSize: number;
+
+    constructor(game: GameDefinition, defaultRoomSize = 8) {
         this.game = game;
         this.defaultRoomSize = defaultRoomSize;
     }
 
-    setGame(game) {
+    setGame(game: GameDefinition) {
         this.game = game;
     }
 
@@ -13,7 +28,7 @@ class StateWorldManager {
         return this.game?.roomSize ?? this.defaultRoomSize;
     }
 
-    static createEmptyRoom(size, index = 0, cols = 1) {
+    static createEmptyRoom(size: number, index = 0, cols = 1): RoomEntry {
         const col = index % cols;
         const row = Math.floor(index / cols);
         return {
@@ -26,34 +41,34 @@ class StateWorldManager {
         };
     }
 
-    createEmptyRoom(size = this.roomSize, index = 0, cols = 1) {
+    createEmptyRoom(size = this.roomSize, index = 0, cols = 1): RoomEntry {
         return StateWorldManager.createEmptyRoom(size, index, cols);
     }
 
-    static createWorldRooms(rows, cols, size) {
+    static createWorldRooms(rows: number, cols: number, size: number): RoomEntry[] {
         return Array.from({ length: rows * cols }, (_, index) =>
             StateWorldManager.createEmptyRoom(size, index, cols)
         );
     }
 
-    createWorldRooms(rows, cols, size = this.roomSize) {
+    createWorldRooms(rows: number, cols: number, size = this.roomSize): RoomEntry[] {
         return StateWorldManager.createWorldRooms(rows, cols, size);
     }
 
-    static createEmptyTileMap(size) {
+    static createEmptyTileMap(size: number): TileMap {
         return {
             ground: Array.from({ length: size }, () => Array(size).fill(null)),
             overlay: Array.from({ length: size }, () => Array(size).fill(null))
         };
     }
 
-    createEmptyTileMap(size = this.roomSize) {
+    createEmptyTileMap(size = this.roomSize): TileMap {
         return StateWorldManager.createEmptyTileMap(size);
     }
 
-    normalizeRooms(rooms, totalRooms, cols) {
+    normalizeRooms(rooms: AnyRecord[] | null | undefined, totalRooms: number, cols: number): RoomEntry[] {
         const size = this.roomSize;
-        const filled = Array.from({ length: totalRooms }, (_, index) =>
+        const filled: RoomEntry[] = Array.from({ length: totalRooms }, (_, index) =>
             StateWorldManager.createEmptyRoom(size, index, cols)
         );
         if (!Array.isArray(rooms)) return filled;
@@ -78,12 +93,12 @@ class StateWorldManager {
         return filled;
     }
 
-    normalizeTileMaps(source, totalRooms) {
+    normalizeTileMaps(source: unknown, totalRooms: number): TileMap[] {
         const size = this.roomSize;
         const emptyMaps = Array.from({ length: totalRooms }, () => StateWorldManager.createEmptyTileMap(size));
         if (!source) return emptyMaps;
 
-        const assignMap = (target, map) => {
+        const assignMap = (target: TileMap, map: any) => {
             target.ground = Array.from({ length: size }, (_, y) =>
                 Array.from({ length: size }, (_, x) => map?.ground?.[y]?.[x] ?? null)
             );
@@ -102,13 +117,13 @@ class StateWorldManager {
             return emptyMaps;
         }
 
-        if (source?.ground || source?.overlay) {
-            assignMap(emptyMaps[0], source);
+        if ((source as any)?.ground || (source as any)?.overlay) {
+            assignMap(emptyMaps[0], source as any);
         }
         return emptyMaps;
     }
 
-    clampRoomIndex(value) {
+    clampRoomIndex(value: number | string | null | undefined): number {
         const rooms = this.game?.rooms ?? [];
         const max = Math.max(0, rooms.length - 1);
         const numeric = Number(value);
@@ -116,29 +131,29 @@ class StateWorldManager {
         return Math.max(0, Math.min(max, Math.floor(numeric)));
     }
 
-    clampCoordinate(value) {
+    clampCoordinate(value: number | string | null | undefined): number {
         const size = this.roomSize;
         const numeric = Number(value);
         if (!Number.isFinite(numeric)) return 0;
         return Math.max(0, Math.min(size - 1, Math.floor(numeric)));
     }
 
-    getWorldRows() {
+    getWorldRows(): number {
         return this.game?.world?.rows || 1;
     }
 
-    getWorldCols() {
+    getWorldCols(): number {
         return this.game?.world?.cols || 1;
     }
 
-    getRoomCoords(index) {
+    getRoomCoords(index: number): { row: number; col: number } {
         const cols = this.getWorldCols();
         const row = Math.floor(index / cols);
         const col = index % cols;
         return { row, col };
     }
 
-    getRoomIndex(row, col) {
+    getRoomIndex(row: number, col: number): number | null {
         const rows = this.getWorldRows();
         const cols = this.getWorldCols();
         if (row < 0 || row >= rows || col < 0 || col >= cols) return null;

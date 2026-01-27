@@ -88,8 +88,8 @@ class TileManager {
     return this.gameState.game.tileset.tiles;
   }
 
-  getTile(tileId: TileId): TileDefinition | undefined {
-    return this.gameState.game.tileset.tiles.find((t) => t.id === tileId);
+  getTile(tileId: TileId): TileDefinition | null {
+    return this.gameState.game.tileset.tiles.find((t) => t.id === tileId) || null;
   }
 
   updateTile(tileId: TileId, data: Partial<TileDefinition>): void {
@@ -182,7 +182,9 @@ class TileManager {
       ? [tile.pixels]
       : [];
     if (!frames.length) return null;
-    const index = Number.isFinite(frameOverride) ? frameOverride : this.getAnimationFrameIndex();
+    const index = typeof frameOverride === 'number' && Number.isFinite(frameOverride)
+      ? frameOverride
+      : this.getAnimationFrameIndex();
     const safeIndex = ((Math.floor(index) % frames.length) + frames.length) % frames.length;
     return frames[safeIndex];
   }

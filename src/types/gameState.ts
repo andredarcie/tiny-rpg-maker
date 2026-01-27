@@ -14,6 +14,7 @@ export type PlayerRuntimeState = {
     y: number;
     lastX: number;
     roomIndex: number;
+    lastRoomChangeTime?: number | null;
     level: number;
     maxLives: number;
     currentLives: number;

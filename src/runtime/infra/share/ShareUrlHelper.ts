@@ -9,14 +9,14 @@ class ShareUrlHelper {
         return '';
     }
 
-    static buildShareUrl(gameData) {
+    static buildShareUrl(gameData: Record<string, unknown> | null | undefined) {
         const code = ShareEncoder.buildShareCode(gameData);
         const base = ShareUrlHelper.getBaseUrl();
         if (!code) return base;
         return `${base}#${code}`;
     }
 
-    static extractGameDataFromLocation(location) {
+    static extractGameDataFromLocation(location: { hash?: string } | null | undefined) {
         if (!location) return null;
         const hash = location.hash || '';
         if (!hash || hash.length <= 1) return null;
