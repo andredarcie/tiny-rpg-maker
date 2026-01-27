@@ -1,17 +1,21 @@
 import type { GameState } from "../GameState";
+import type { StateDataManager } from "./StateDataManager";
 
 class GameStateDataFacade {
-    constructor(gameState : GameState, dataManager) {
+    gameState: GameState;
+    dataManager: StateDataManager;
+
+    constructor(gameState: GameState, dataManager: StateDataManager) {
         this.gameState = gameState;
         this.dataManager = dataManager;
     }
 
-    exportGameData() {
+    exportGameData(): unknown {
         return this.dataManager.exportGameData();
     }
 
-    importGameData(data) {
-        this.dataManager.importGameData(data);
+    importGameData(data: unknown): void {
+        this.dataManager.importGameData(data as Parameters<StateDataManager['importGameData']>[0]);
         this.gameState.enemyManager.setGame(this.gameState.game);
         this.gameState.itemManager.setGame(this.gameState.game);
         this.gameState.objectManager.setGame(this.gameState.game);

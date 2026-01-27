@@ -1,8 +1,15 @@
-
 import { getTinyRpgApi } from '../../runtime/infra/TinyRpgApi';
 import { ShareUtils } from '../../runtime/infra/share/ShareUtils';
 import { TextResources } from '../../runtime/adapters/TextResources';
+import { ShareConstants } from '../../runtime/infra/share/ShareConstants';
+
+type GameExportData = {
+    title?: string;
+};
+
 class EditorExportService {
+    btn: HTMLElement | null;
+
     constructor() {
         this.btn = typeof document !== 'undefined' ? document.getElementById('btn-generate-html') : null;
         if (this.btn) {
@@ -22,29 +29,31 @@ class EditorExportService {
                 return;
             }
 
-            const code = ShareUtils?.encode ? ShareUtils.encode(gameData) : '';
+            const code = ShareUtils?.encode ? ShareUtils.encode(gameData as Record<string, unknown>) : '';
             const downloadError = 'Unable to download project assets. Please run Tiny RPG Studio from an HTTP/HTTPS server (not file://) to export HTML.';
 
             let cssText = '';
-            const linkEl = document.querySelector('link[rel="stylesheet"][href]');
+            const linkEl = document.querySelector<HTMLLinkElement>('link[rel="stylesheet"][href]');
             if (linkEl) {
                 const href = linkEl.getAttribute('href');
-                try {
-                    const resp = await fetch(href);
-                    if (resp.ok) {
-                        cssText = await resp.text();
-                    } else {
+                if (href) {
+                    try {
+                        const resp = await fetch(href as RequestInfo);
+                        if (resp.ok) {
+                            cssText = await resp.text();
+                        } else {
+                            alert(downloadError);
+                            return;
+                        }
+                    } catch {
                         alert(downloadError);
                         return;
                     }
-                } catch {
-                    alert(downloadError);
-                    return;
                 }
             }
 
-            const scripts = {};
-            const skippedScripts = [];
+            const scripts: Record<string, string> = {};
+            const skippedScripts: string[] = [];
             let bundleSource = '';
             const bundleSrc = 'export.bundle.js';
             try {
@@ -145,7 +154,7 @@ class EditorExportService {
                 'js/main.js',
                 'js/editor/modules/EditorExportService.js'
             ];
-            const legacyScriptSrcs = [];
+            const legacyScriptSrcs: (string | null)[] = [];
             if (!bundleSource) try {
                 const legacyResp = await fetch(legacyIndexPath);
                 if (legacyResp.ok) {
@@ -155,24 +164,25 @@ class EditorExportService {
                         ...Array.from(doc.querySelectorAll('script[src]'))
                             .filter((script) => script.getAttribute('type') !== 'module')
                             .map((s) => s.getAttribute('src'))
-                            .filter((src) =>
-                                src &&
-                                (src.startsWith('js/') || src.startsWith('./js/')) &&
-                                !src.includes('/editor/')
-                            )
+                            .filter((src): src is string => {
+                                if (!src) return false;
+                                return (src.startsWith('js/') || src.startsWith('./js/')) &&
+                                    !src.includes('/editor/');
+                            })
                     );
                 }
             } catch {
                 // fallback handled below
             }
 
-            const scriptSrcs = (legacyScriptSrcs.length && legacyScriptSrcs.some((src) => src.includes('js/main.js'))
-                ? legacyScriptSrcs
+            const scriptSrcs = (legacyScriptSrcs.length && legacyScriptSrcs.some((src) => src && src.includes('js/main.js'))
+                ? legacyScriptSrcs.filter((src): src is string => Boolean(src))
                 : fallbackScriptSrcs);
             for (const src of scriptSrcs) {
                 if (bundleSource) break;
+                if (!src) continue;
                 try {
-                    const resp = await fetch(src);
+                    const resp = await fetch(src as RequestInfo);
                     if (resp.ok) {
                         const text = await resp.text();
                         const hasModuleSyntax = /^(?:\s*import\s+[\w*{]|\s*export\s+)/m.test(text);
@@ -196,7 +206,7 @@ class EditorExportService {
                 alert('game-container not found');
                 return;
             }
-            const containerClone = gameContainer.cloneNode(true);
+            const containerClone = gameContainer.cloneNode(true) as HTMLElement;
 
             const allScripts = Object.values(scripts).join('');
 
@@ -234,16 +244,15 @@ class EditorExportService {
                 </body>
             </html>`;
 
-            const rawTitle = typeof gameData?.title === 'string' ? gameData.title : '';
+            const exportData = gameData as GameExportData;
+            const rawTitle = typeof exportData?.title === 'string' ? exportData.title : '';
             const safeTitle = rawTitle
                 .normalize('NFD')
                 .replace(/[\u0300-\u036f]/g, '')
                 .replace(/[^a-zA-Z0-9]+/g, '-')
                 .replace(/^-+|-+$/g, '')
                 .toLowerCase();
-            const versionValue = typeof ShareConstants !== 'undefined' && ShareConstants?.VERSION
-                ? ShareConstants.VERSION
-                : 1;
+            const versionValue = ShareConstants?.VERSION ?? 1;
             const filename = `${safeTitle || 'tiny-rpg'}-v${versionValue}.html`;
             const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
             const url = URL.createObjectURL(blob);

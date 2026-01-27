@@ -44,7 +44,7 @@ class EditorWorldService {
     moveActiveRoom(direction: string | null | undefined) {
         if (!direction) return;
         const normalized = String(direction).toLowerCase();
-        const game = this.gameEngine.getGame();
+        const game = this.gameEngine.getGame() as { world?: { rows?: number; cols?: number }; rooms?: unknown[] };
         const rows = Math.max(1, Number(game.world?.rows) || 1);
         const cols = Math.max(1, Number(game.world?.cols) || 1);
         const totalRooms = Math.max(1, game.rooms?.length || rows * cols);

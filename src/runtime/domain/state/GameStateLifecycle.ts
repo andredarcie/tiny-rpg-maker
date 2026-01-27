@@ -1,21 +1,32 @@
+import type { GameState } from '../GameState';
+import type { GameStateScreenManager } from './GameStateScreenManager';
+
+type LifecycleOptions = {
+    timeToResetAfterGameOver?: number;
+};
 
 class GameStateLifecycle {
-    constructor(gameState, screenManager, options = {}) {
+    gameState: GameState;
+    screenManager: GameStateScreenManager;
+    pauseReasons: Set<string>;
+    timeToResetAfterGameOver: number;
+
+    constructor(gameState: GameState, screenManager: GameStateScreenManager, options: LifecycleOptions = {}) {
         this.gameState = gameState;
         this.screenManager = screenManager;
         this.pauseReasons = new Set();
         this.timeToResetAfterGameOver = Number.isFinite(options.timeToResetAfterGameOver)
-            ? Math.max(0, options.timeToResetAfterGameOver)
+            ? Math.max(0, options.timeToResetAfterGameOver as number)
             : 2000;
     }
 
-    pauseGame(reason = 'manual') {
+    pauseGame(reason = 'manual'): void {
         const label = reason || 'manual';
         this.pauseReasons.add(label);
         this.updatePlayingLock();
     }
 
-    resumeGame(reason = 'manual') {
+    resumeGame(reason: string | null | undefined = 'manual'): void {
         if (reason === null || reason === undefined) {
             this.pauseReasons.clear();
         } else {
@@ -24,11 +35,11 @@ class GameStateLifecycle {
         this.updatePlayingLock();
     }
 
-    updatePlayingLock() {
+    updatePlayingLock(): void {
         this.gameState.playing = this.pauseReasons.size === 0;
     }
 
-    setGameOver(active = true, reason = 'defeat') {
+    setGameOver(active = true, reason = 'defeat'): void {
         const state = this.gameState.state;
         if (!state) return;
         const activeValue = Boolean(active);
@@ -39,11 +50,11 @@ class GameStateLifecycle {
         state.gameOverReason = activeValue ? (reason || 'defeat') : null;
     }
 
-    isGameOver() {
+    isGameOver(): boolean {
         return Boolean(this.gameState.state?.gameOver);
     }
 
-    getGameOverReason() {
+    getGameOverReason(): string {
         return this.gameState.state?.gameOverReason || 'defeat';
     }
 }

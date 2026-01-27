@@ -30,7 +30,7 @@ class EditorNpcRenderer extends EditorRendererBase {
 
         this.gameEngine.npcManager?.ensureDefaultNPCs?.();
         this.updateVariantButtons();
-        const game = this.gameEngine.getGame();
+        const game = this.gameEngine.getGame() as { world?: { cols?: number } };
         const filter = this.manager.state.npcVariantFilter || 'human';
         const definitions = (this.gameEngine.npcManager?.getDefinitions?.() ?? []) as NpcDefinitionView[];
         const filteredDefinitions = definitions
@@ -42,7 +42,7 @@ class EditorNpcRenderer extends EditorRendererBase {
 
         list.innerHTML = '';
         filteredDefinitions.forEach((def: NpcDefinitionView) => {
-            const npc = npcs.find((entry) => entry.type === def.type) || null;
+            const npc = npcs.find((entry) => entry.type === def.type) ?? null;
             const card = document.createElement('div');
             card.className = 'npc-card';
             card.dataset.type = def.type;
@@ -135,7 +135,7 @@ class EditorNpcRenderer extends EditorRendererBase {
 
         if (npcText) {
             npcText.disabled = !hasNpc;
-            npcText.value = this.getNpcDialogueText(npc);
+            npcText.value = this.getNpcDialogueText(npc ?? null);
         }
 
         if (npcConditionalText) {
@@ -152,7 +152,7 @@ class EditorNpcRenderer extends EditorRendererBase {
         if (npcConditionalRewardVariable) npcConditionalRewardVariable.disabled = !hasNpc;
 
         const btnNpcDelete = this.dom.btnNpcDelete;
-        if (btnNpcDelete) {
+        if (btnNpcDelete && 'disabled' in btnNpcDelete) {
             btnNpcDelete.disabled = !hasNpc || !npc?.placed;
         }
 
@@ -186,10 +186,10 @@ class EditorNpcRenderer extends EditorRendererBase {
     }
 
     updateVariantButtons(): void {
-        const buttons = Array.isArray(this.dom.npcVariantButtons) ? this.dom.npcVariantButtons : [];
+        const buttons = (Array.isArray(this.dom.npcVariantButtons) ? this.dom.npcVariantButtons : []) as HTMLButtonElement[];
         if (!buttons.length) return;
         const current = this.manager.state.npcVariantFilter || 'human';
-        buttons.forEach((btn: HTMLButtonElement) => {
+        buttons.forEach((btn) => {
             const match = btn.dataset.npcVariantFilter === current;
             btn.classList.toggle('active', match);
             btn.setAttribute('aria-pressed', match ? 'true' : 'false');

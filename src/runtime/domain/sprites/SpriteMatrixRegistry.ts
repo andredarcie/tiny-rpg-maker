@@ -6,8 +6,8 @@ import { ObjectSpriteMatrices } from './ObjectSprites';
 type SpriteMatrix = (number | null)[][];
 
 class SpriteMatrixRegistry {
-    static get(group, type = 'default') {
-        const registries = {
+    static get(group: string, type = 'default'): SpriteMatrix {
+        const registries: Record<string, Record<string, SpriteMatrix>> = {
             player: PlayerSpriteMatrices,
             npc: NpcSpriteMatrices,
             enemy: EnemySpriteMatrices,

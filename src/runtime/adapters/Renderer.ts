@@ -100,24 +100,24 @@ class Renderer {
         this.tileManager = tileManager;
         this.npcManager = npcManager;
 
-        this.paletteManager = new RendererPalette(gameState);
-        this.spriteFactory = new RendererSpriteFactory(this.paletteManager, gameState);
-        this.canvasHelper = new RendererCanvasHelper(canvas, this.ctx as CanvasRenderingContext2D, tileManager);
-        this.tileRenderer = new RendererTileRenderer(gameState, tileManager, this.paletteManager, this.canvasHelper);
-        this.entityRenderer = new RendererEntityRenderer(gameState, tileManager, this.spriteFactory, this.canvasHelper, this.paletteManager);
+        this.paletteManager = new RendererPalette(gameState as never);
+        this.spriteFactory = new RendererSpriteFactory(this.paletteManager, gameState as never);
+        this.canvasHelper = new RendererCanvasHelper(canvas, this.ctx as CanvasRenderingContext2D, tileManager as never);
+        this.tileRenderer = new RendererTileRenderer(gameState as never, tileManager as never, this.paletteManager, this.canvasHelper);
+        this.entityRenderer = new RendererEntityRenderer(gameState as never, tileManager as never, this.spriteFactory, this.canvasHelper, this.paletteManager);
         this.entityRenderer.setViewportOffset(this.gameplayOffsetY);
-        this.dialogRenderer = new RendererDialogRenderer(gameState, this.paletteManager);
-        this.hudRenderer = new RendererHudRenderer(gameState, this.entityRenderer, this.paletteManager);
-        this.effectsManager = new RendererEffectsManager(this);
-        this.transitionManager = new RendererTransitionManager(this);
-        this.overlayRenderer = new RendererOverlayRenderer(this);
+        this.dialogRenderer = new RendererDialogRenderer(gameState as never, this.paletteManager);
+        this.hudRenderer = new RendererHudRenderer(gameState as never, this.entityRenderer as never, this.paletteManager);
+        this.effectsManager = new RendererEffectsManager(this as never);
+        this.transitionManager = new RendererTransitionManager(this as never);
+        this.overlayRenderer = new RendererOverlayRenderer(this as never);
 
         // Compatibilidade com código existente que acessa sprites diretamente.
         this.playerSprite = this.spriteFactory.getPlayerSprite();
-        this.npcSprites = this.spriteFactory.getNpcSprites();
-        this.enemySprites = this.spriteFactory.getEnemySprites();
+        this.npcSprites = this.spriteFactory.getNpcSprites() as SpriteMap;
+        this.enemySprites = this.spriteFactory.getEnemySprites() as SpriteMap;
         this.enemySprite = this.spriteFactory.getEnemySprite();
-        this.objectSprites = this.spriteFactory.getObjectSprites();
+        this.objectSprites = this.spriteFactory.getObjectSprites() as SpriteMap;
         this.drawIconIdNextFrame = '';
         this.timeIconOverPlayer = 2000;
         this.tileAnimationInterval = 320;
@@ -354,18 +354,18 @@ class Renderer {
     }
 
     buildNpcSprites() {
-        this.npcSprites = this.spriteFactory.getNpcSprites();
+        this.npcSprites = this.spriteFactory.getNpcSprites() as SpriteMap;
         return this.npcSprites;
     }
 
     buildEnemySprite() {
-        this.enemySprites = this.spriteFactory.getEnemySprites();
+        this.enemySprites = this.spriteFactory.getEnemySprites() as SpriteMap;
         this.enemySprite = this.spriteFactory.getEnemySprite();
         return this.enemySprite;
     }
 
     buildObjectSprites() {
-        this.objectSprites = this.spriteFactory.getObjectSprites();
+        this.objectSprites = this.spriteFactory.getObjectSprites() as SpriteMap;
         return this.objectSprites;
     }
 }

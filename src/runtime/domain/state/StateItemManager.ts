@@ -1,14 +1,19 @@
+import type { GameDefinition, ItemInstance } from '../../../types/gameState';
+
+type GameWithItems = GameDefinition & { items: ItemInstance[] };
 
 class StateItemManager {
-    constructor(game) {
-        this.game = game;
+    game: GameWithItems;
+
+    constructor(game: GameDefinition) {
+        this.game = game as GameWithItems;
     }
 
-    setGame(game) {
-        this.game = game;
+    setGame(game: GameDefinition): void {
+        this.game = game as GameWithItems;
     }
 
-    resetItems() {
+    resetItems(): void {
         if (!Array.isArray(this.game?.items)) return;
         this.game.items.forEach((item) => {
             item.collected = false;

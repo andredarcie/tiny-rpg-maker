@@ -178,8 +178,8 @@ class RendererOverlayRenderer extends RendererModuleBase {
         pendingFont = null
     }: LevelUpLayoutOptions = {}) {
         const cardCount = Math.max(1, choicesLength || 1);
-        const computedTitleFont = Number.isFinite(titleFont) ? titleFont : Math.max(8, Math.floor(height / 34));
-        const computedPendingFont = Number.isFinite(pendingFont) ? pendingFont : Math.max(6, Math.floor(height / 58));
+        const computedTitleFont = Number.isFinite(titleFont) ? (titleFont as number) : Math.max(8, Math.floor(height / 34));
+        const computedPendingFont = Number.isFinite(pendingFont) ? (pendingFont as number) : Math.max(6, Math.floor(height / 58));
         const topPadding = Math.floor(height * 0.05);
         const titleY = topPadding;
         let nextY = titleY + computedTitleFont + Math.floor(height * 0.02);
@@ -324,7 +324,7 @@ class RendererOverlayRenderer extends RendererModuleBase {
         const width = gameplayCanvas.width;
         const height = gameplayCanvas.height;
         const now = this.getNow();
-        const startTime = Number.isFinite(overlay.startTime) ? overlay.startTime : now;
+        const startTime = Number.isFinite(overlay.startTime) ? (overlay.startTime as number) : now;
         const elapsed = Math.max(0, (now - startTime) / 1000);
         const minSide = Math.min(width, height);
         const baseSize = Math.floor(minSide * 0.62);

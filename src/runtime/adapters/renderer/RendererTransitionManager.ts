@@ -62,7 +62,7 @@ class RendererTransitionManager extends RendererModuleBase {
     }
 
     get transitionRenderer(): TransitionRendererApi {
-        return this.renderer as TransitionRendererApi;
+        return this.renderer as unknown as TransitionRendererApi;
     }
 
     isActive() {
@@ -78,7 +78,7 @@ class RendererTransitionManager extends RendererModuleBase {
         }
         const direction = options.direction || 'right';
         const duration = Number.isFinite(options.duration)
-            ? Math.max(120, options.duration)
+            ? Math.max(120, options.duration as number)
             : 320;
         const now = performance.now();
 
@@ -129,8 +129,8 @@ class RendererTransitionManager extends RendererModuleBase {
             return 1;
         }
         const now = performance.now();
-        const elapsed = now - this.transition.startTime;
-        return Math.max(0, Math.min(1, elapsed / this.transition.duration));
+        const elapsed = now - (this.transition.startTime ?? now);
+        return Math.max(0, Math.min(1, elapsed / (this.transition.duration ?? 1)));
     }
 
     drawFrame(ctx: CanvasRenderingContext2D, gameplayCanvas: { width: number; height: number }) {
@@ -170,8 +170,12 @@ class RendererTransitionManager extends RendererModuleBase {
         ctx.save();
         ctx.fillStyle = this.transitionPalette.getColor(this.transitionGameState.getCurrentRoom()?.bg ?? 0);
         ctx.fillRect(0, 0, width, height);
-        ctx.drawImage(transition.fromFrame, Math.round(fromX), Math.round(fromY));
-        ctx.drawImage(transition.toFrame, Math.round(toX), Math.round(toY));
+        if (transition.fromFrame) {
+            ctx.drawImage(transition.fromFrame, Math.round(fromX), Math.round(fromY));
+        }
+        if (transition.toFrame) {
+            ctx.drawImage(transition.toFrame, Math.round(toX), Math.round(toY));
+        }
         this.drawTransitionPlayer(ctx, gameplayCanvas, progress);
         ctx.restore();
         if (progress >= 1) {

@@ -1,5 +1,6 @@
 
 class GameStateScreenManager {
+    gameState: unknown;
     canResetAfterGameOver: boolean;
     lastEndingText: string;
     gameOverResetTimer: ReturnType<typeof setTimeout> | null;
@@ -27,7 +28,7 @@ class GameStateScreenManager {
         return this.lastEndingText;
     }
 
-    startGameOverCooldown(duration) {
+    startGameOverCooldown(duration: number): void {
         this.canResetAfterGameOver = false;
         this.clearGameOverCooldown();
         const delay = Number.isFinite(duration) ? Math.max(0, duration) : 0;

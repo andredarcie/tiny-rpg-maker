@@ -49,7 +49,7 @@ class EditorNpcService {
 
     addNpc() {
         this.gameEngine.npcManager?.ensureDefaultNPCs?.();
-        const sprites = this.gameEngine.getSprites();
+        const sprites = this.gameEngine.getSprites() as SpriteInstance[];
         const definitions = this.gameEngine.npcManager?.getDefinitions?.() ?? [];
         const available = definitions
             .map((def: NpcDefinitionData) => ({
@@ -65,7 +65,8 @@ class EditorNpcService {
 
         const npc = available.npc;
         if (!npc) {
-            const created = this.gameEngine.npcManager?.createNPC?.(available.def.type);
+            const manager = this.gameEngine.npcManager as { createNPC?: (type: string) => SpriteInstance | null };
+            const created = manager?.createNPC?.(available.def.type);
             if (!created) {
                 alert(this.t('alerts.npc.createError'));
                 return;
@@ -152,7 +153,8 @@ class EditorNpcService {
         }
         this.state.selectedNpcType = type;
         this.state.selectedNpcId = id;
-        const npc = this.gameEngine.getSprites().find((entry: SpriteInstance) => entry.id === id) || null;
+        const sprites = this.gameEngine.getSprites() as SpriteInstance[];
+        const npc = sprites.find((entry: SpriteInstance) => entry.id === id) || null;
         const hasConditionalData = Boolean(
             npc?.conditionText ||
             npc?.conditionVariableId ||
@@ -190,7 +192,7 @@ class EditorNpcService {
 
     populateVariableSelect(selectElement: HTMLSelectElement | null, selectedId = '', options: { includeBardSkill?: boolean } = {}) {
         if (!selectElement) return;
-        const variables = this.gameEngine.getVariableDefinitions();
+        const variables = (this.gameEngine.getVariableDefinitions() ?? []) as (VariableDefinition & { name?: string })[];
         const includeBardSkill = Boolean(options.includeBardSkill);
         selectElement.innerHTML = '';
 
@@ -218,7 +220,8 @@ class EditorNpcService {
 
     updateNpcText(text: string) {
         if (!this.state.selectedNpcId) return;
-        const npc = this.gameEngine.getSprites().find((entry: SpriteInstance) => entry.id === this.state.selectedNpcId);
+        const sprites = this.gameEngine.getSprites() as SpriteInstance[];
+        const npc = sprites.find((entry: SpriteInstance) => entry.id === this.state.selectedNpcId);
         if (!npc) return;
 
         npc.text = text;
@@ -230,7 +233,8 @@ class EditorNpcService {
 
     updateNpcConditionalText(text: string) {
         if (!this.state.selectedNpcId) return;
-        const npc = this.gameEngine.getSprites().find((entry: SpriteInstance) => entry.id === this.state.selectedNpcId);
+        const sprites = this.gameEngine.getSprites() as SpriteInstance[];
+        const npc = sprites.find((entry: SpriteInstance) => entry.id === this.state.selectedNpcId);
         if (!npc) return;
         npc.conditionText = text;
         this.manager.renderService.renderNpcs();
@@ -249,7 +253,8 @@ class EditorNpcService {
 
     handleConditionVariableChange(variableId: string) {
         if (!this.state.selectedNpcId) return;
-        const npc = this.gameEngine.getSprites().find((entry: SpriteInstance) => entry.id === this.state.selectedNpcId);
+        const sprites = this.gameEngine.getSprites() as SpriteInstance[];
+        const npc = sprites.find((entry: SpriteInstance) => entry.id === this.state.selectedNpcId);
         if (!npc) return;
         npc.conditionVariableId = variableId || null;
         this.manager.renderService.renderNpcs();
@@ -260,7 +265,8 @@ class EditorNpcService {
 
     handleRewardVariableChange(variableId: string) {
         if (!this.state.selectedNpcId) return;
-        const npc = this.gameEngine.getSprites().find((entry: SpriteInstance) => entry.id === this.state.selectedNpcId);
+        const sprites = this.gameEngine.getSprites() as SpriteInstance[];
+        const npc = sprites.find((entry: SpriteInstance) => entry.id === this.state.selectedNpcId);
         if (!npc) return;
         npc.rewardVariableId = variableId || null;
         this.manager.renderService.renderNpcs();
@@ -271,7 +277,8 @@ class EditorNpcService {
 
     handleConditionalRewardVariableChange(variableId: string) {
         if (!this.state.selectedNpcId) return;
-        const npc = this.gameEngine.getSprites().find((entry: SpriteInstance) => entry.id === this.state.selectedNpcId);
+        const sprites = this.gameEngine.getSprites() as SpriteInstance[];
+        const npc = sprites.find((entry: SpriteInstance) => entry.id === this.state.selectedNpcId);
         if (!npc) return;
         npc.conditionalRewardVariableId = variableId || null;
         this.manager.renderService.renderNpcs();

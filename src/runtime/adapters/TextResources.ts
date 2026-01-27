@@ -541,12 +541,17 @@ const TEXT_BUNDLES = {
     }
 };
 
-const TextResources = {
+const TextResources: {
+    defaultLocale: string;
+    locale: string;
+    bundles: Record<string, Record<string, string>>;
+    [key: string]: any;
+} = {
     defaultLocale: 'pt-BR',
     locale: 'pt-BR',
     bundles: TEXT_BUNDLES as Record<string, Record<string, string>>,
 
-    getStrings(locale: string = this.locale): Record<string, string> {
+    getStrings(locale: string = TextResources.locale): Record<string, string> {
         return this.bundles[locale] || this.bundles[this.defaultLocale] || {};
     },
 
@@ -556,7 +561,7 @@ const TextResources = {
         }
         const languages = Array.isArray(navigator.languages) && navigator.languages.length
             ? navigator.languages
-            : [navigator.language || navigator.userLanguage || this.defaultLocale];
+            : [navigator.language || this.defaultLocale];
         for (const lang of languages) {
             if (lang && this.bundles[lang]) {
                 return lang;
@@ -617,7 +622,7 @@ const TextResources = {
     ): string {
         const template = this.get(key, fallback);
         if (!template) return fallback || key || '';
-        return template.replace(/\{(\w+)\}/g, (_, token) => {
+        return template.replace(/\{(\w+)\}/g, (_: string, token: string) => {
             if (Object.prototype.hasOwnProperty.call(params, token)) {
                 const value = params[token];
                 return value === undefined || value === null ? '' : String(value);

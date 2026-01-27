@@ -9,7 +9,7 @@ class RendererHudRenderer {
     backgroundColor: string;
     viewportOffsetY: number;
     canvasHelper: CanvasHelperApi;
-    healthIconDefinitions: Record<string, (number | null)[][]>;
+    healthIconDefinitions: Record<string, (string | null)[][]>;
     objectSprites: Record<string, (string | null)[][]>;
 
     constructor(gameState: GameStateApi, entityRenderer: EntityRendererApi, paletteManager: PaletteManagerApi) {
@@ -94,7 +94,7 @@ class RendererHudRenderer {
         const padding = area.padding ?? this.padding;
         const offsetX = area.x ?? 0;
         const offsetY = area.y ?? 0;
-        const gap = Number.isFinite(area.gap) ? Math.max(0, area.gap) : 2;
+        const gap = Number.isFinite(area.gap) ? Math.max(0, area.gap as number) : 2;
         const maxSlots = Math.min(9, this.gameState.getMaxKeys());
         let keys = this.gameState.getKeys();
         keys = Math.max(0, Math.min(maxSlots, keys));
@@ -169,16 +169,17 @@ class RendererHudRenderer {
         const currentLives = this.gameState.getLives();
         const maxLives = this.gameState.getMaxLives();
 
-        const offsetX = Number.isFinite(options.offsetX) ? options.offsetX : 0;
-        const offsetY = Number.isFinite(options.offsetY) ? options.offsetY : 0;
-        const gap = Number.isFinite(options.gap) ? Math.max(0, options.gap) : 0;
+        const offsetX = Number.isFinite(options.offsetX) ? (options.offsetX as number) : 0;
+        const offsetY = Number.isFinite(options.offsetY) ? (options.offsetY as number) : 0;
+        const gap = Number.isFinite(options.gap) ? Math.max(0, options.gap as number) : 0;
         const heartsPerRow = Number.isFinite(options.heartsPerRow)
-            ? Math.max(1, Math.floor(options.heartsPerRow))
+            ? Math.max(1, Math.floor(options.heartsPerRow as number))
             : 5;
 
-        let iconSize = Number.isFinite(options.heartSize) && options.heartSize > 0
-            ? options.heartSize
-            : this.canvasHelper.getTilePixelSize() / 2;
+        const tilePixelSize = this.canvasHelper.getTilePixelSize?.() ?? 16;
+        let iconSize = Number.isFinite(options.heartSize) && (options.heartSize as number) > 0
+            ? (options.heartSize as number)
+            : tilePixelSize / 2;
         iconSize = Math.max(4, iconSize);
         const step = iconSize / 8;
 
@@ -244,7 +245,7 @@ class RendererHudRenderer {
     }
 
     drawXpBar(ctx: CanvasRenderingContext2D, x: number, y: number) {
-        const xpNeeded = this.gameState.getExperienceToNext?.();
+        const xpNeeded = this.gameState.getExperienceToNext?.() ?? 0;
         if (!Number.isFinite(xpNeeded) || xpNeeded <= 0) {
             return;
         }
@@ -256,8 +257,8 @@ class RendererHudRenderer {
         ctx.moveTo(x, y);
         ctx.lineTo(x+totalBarSize, y);
         ctx.stroke();
-        
-        const currentXp = this.gameState.getExperience();
+
+        const currentXp = this.gameState.getExperience?.() ?? 0;
         if (currentXp == 0) {return;}
         const barSize = (currentXp * totalBarSize / xpNeeded);
 

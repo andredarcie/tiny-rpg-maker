@@ -82,7 +82,7 @@ class EditorRenderService {
         }
         const template = this.t(key, fallback);
         if (!template) return '';
-        return template.replace(/\{(\w+)\}/g, (_, token) => String(params[token] ?? ''));
+        return template.replace(/\{(\w+)\}/g, (_: string, token: string) => String(params[token] ?? ''));
     }
 
     get dom() {
@@ -171,7 +171,7 @@ class EditorRenderService {
         const toggle = this.dom.projectVariablesToggle;
         list.innerHTML = '';
 
-        const variables = this.gameEngine?.getVariableDefinitions?.() ?? [];
+        const variables = (this.gameEngine?.getVariableDefinitions?.() ?? []) as VariableEntry[];
         const usedSet = this.collectVariableUsage();
         const usedCount = variables.reduce(
             (count: number, variable: VariableEntry) => count + (usedSet.has(variable.id) ? 1 : 0),
@@ -272,7 +272,7 @@ class EditorRenderService {
             const title = document.createElement('div');
             title.className = 'project-skill-group-title';
             const label = Number.isFinite(level)
-                ? this.tf('project.skills.level', { value: level }, `Nível ${level}`)
+                ? this.tf('project.skills.level', { value: level as number }, `Nível ${level}`)
                 : this.t('project.skills.level', 'Nível -');
             title.textContent = label;
             group.appendChild(title);
@@ -308,9 +308,13 @@ class EditorRenderService {
     }
 
     collectVariableUsage() {
-        const used = new Set();
-        const game = this.gameEngine?.getGame?.() || {};
-        const variables = this.gameEngine?.getVariableDefinitions?.() ?? [];
+        const used = new Set<string>();
+        const game = (this.gameEngine?.getGame?.() || {}) as {
+            sprites?: SpriteData[];
+            enemies?: EnemyData[];
+            objects?: ObjectData[];
+        };
+        const variables = (this.gameEngine?.getVariableDefinitions?.() ?? []) as VariableEntry[];
         const validIds = new Set(variables.map((variable: VariableEntry) => variable.id));
         const addIfValid = (id: string | null | undefined) => {
             if (typeof id !== 'string') return;

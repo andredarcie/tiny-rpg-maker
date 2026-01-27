@@ -38,7 +38,7 @@ class EditorEnemyRenderer extends EditorRendererBase {
             const label = document.createElement('span');
             const displayName = this.getEnemyDisplayName(definition, enemy.type);
             const damageInfo = Number.isFinite(definition?.damage)
-                ? this.tf('enemies.damageInfo', { value: definition.damage })
+                ? this.tf('enemies.damageInfo', { value: definition?.damage ?? 0 })
                 : '';
             label.textContent = `${displayName} @ (${enemy.x}, ${enemy.y})${damageInfo}`;
 
@@ -139,7 +139,10 @@ class EditorEnemyRenderer extends EditorRendererBase {
 
         if (!sprite && Array.isArray(definition.sprite) && renderer?.spriteFactory?.mapPixels) {
             const palette = renderer.paletteManager?.getPicoPalette?.() || RendererConstants.DEFAULT_PALETTE;
-            sprite = renderer.spriteFactory.mapPixels(definition.sprite, palette);
+            const mapped = renderer.spriteFactory.mapPixels(definition.sprite, palette);
+            if (mapped) {
+                sprite = mapped as (string | null)[][];
+            }
         }
 
         if (!Array.isArray(sprite)) return;
@@ -216,9 +219,8 @@ class EditorEnemyRenderer extends EditorRendererBase {
         const enemies = (this.gameEngine?.getActiveEnemies?.() ?? []) as EnemyDefinition[];
         const currentCount = enemies.length;
 
-        const game =
-            (this.gameEngine && (this.gameEngine.getGame?.() || this.gameEngine.gameState?.getGame?.())) ||
-            {};
+        const game = ((this.gameEngine && (this.gameEngine.getGame?.() || this.gameEngine.gameState?.getGame?.())) ||
+            {}) as { world?: { rows?: number; cols?: number } };
         const rows = Number(game?.world?.rows) || 3;
         const cols = Number(game?.world?.cols) || 3;
         const totalRooms = Math.max(1, rows * cols);
@@ -261,10 +263,11 @@ class EditorEnemyRenderer extends EditorRendererBase {
         const tileSizeX = width / roomSize;
         const tileSizeY = height / roomSize;
 
-        overlay.style.width = `${width}px`;
-        overlay.style.height = `${height}px`;
-        overlay.style.left = `${canvas.offsetLeft}px`;
-        overlay.style.top = `${canvas.offsetTop}px`;
+        const overlayElement = overlay as HTMLElement;
+        overlayElement.style.width = `${width}px`;
+        overlayElement.style.height = `${height}px`;
+        overlayElement.style.left = `${canvas.offsetLeft}px`;
+        overlayElement.style.top = `${canvas.offsetTop}px`;
 
         overlay.innerHTML = '';
 

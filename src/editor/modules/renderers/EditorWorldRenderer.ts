@@ -1,11 +1,18 @@
 
 import { EditorRendererBase } from './EditorRendererBase';
+
+type GameWithWorld = {
+    world?: { rows?: number; cols?: number };
+    start?: { roomIndex?: number };
+    rooms?: unknown[];
+};
+
 class EditorWorldRenderer extends EditorRendererBase {
     renderWorldGrid(): void {
         const grid = this.dom.worldGrid;
         if (!grid) return;
 
-        const game = this.gameEngine.getGame();
+        const game = this.gameEngine.getGame() as GameWithWorld;
         const rows = game.world?.rows || 1;
         const cols = game.world?.cols || 1;
         const startIndex = game.start?.roomIndex ?? 0;
@@ -19,7 +26,7 @@ class EditorWorldRenderer extends EditorRendererBase {
                 const cell = document.createElement('button');
                 cell.type = 'button';
                 cell.className = 'world-cell';
-                cell.dataset.roomIndex = String(index);
+                cell.setAttribute('data-room-index', String(index));
                 if (index === this.state.activeRoomIndex) {
                     cell.classList.add('active');
                 }
@@ -53,8 +60,8 @@ class EditorWorldRenderer extends EditorRendererBase {
     }
 
     renderMapNavigation(): void {
-        const buttons = Array.isArray(this.dom.mapNavButtons) ? this.dom.mapNavButtons : [];
-        const game = this.gameEngine.getGame();
+        const buttons = (Array.isArray(this.dom.mapNavButtons) ? this.dom.mapNavButtons : []) as HTMLButtonElement[];
+        const game = this.gameEngine.getGame() as GameWithWorld;
         const rows = Math.max(1, Number(game.world?.rows) || 1);
         const cols = Math.max(1, Number(game.world?.cols) || 1);
         const totalRooms = Math.max(1, game.rooms?.length || rows * cols);
@@ -79,7 +86,7 @@ class EditorWorldRenderer extends EditorRendererBase {
             return targetIndex >= 0 && targetIndex <= maxIndex;
         };
 
-        buttons.forEach((button: HTMLButtonElement) => {
+        buttons.forEach((button) => {
             const direction = button.dataset.direction;
             let enabled = false;
             switch (direction) {

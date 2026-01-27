@@ -2,7 +2,7 @@ import { EditorManager } from './editor/EditorManager';
 import { EditorExportService } from './editor/modules/EditorExportService';
 import { GameEngine } from './runtime/services/GameEngine';
 import { ShareUtils } from './runtime/infra/share/ShareUtils';
-import { getTinyRpgApi, setTinyRpgApi } from './runtime/infra/TinyRpgApi';
+import { getTinyRpgApi, setTinyRpgApi, type TinyRpgApi } from './runtime/infra/TinyRpgApi';
 import { TextResources } from './runtime/adapters/TextResources';
 
 const getTextResource = (key: string, fallback = ''): string => {
@@ -28,7 +28,7 @@ class TinyRPGApplication {
 
     const gameEngine = new GameEngine(gameCanvas);
     this.loadSharedGameIfAvailable(gameEngine);
-    const isExportMode = Boolean(globalThis.__TINY_RPG_EXPORT_MODE);
+    const isExportMode = Boolean((globalThis as Record<string, unknown>).__TINY_RPG_EXPORT_MODE);
     let editorManager: EditorManager | null = null;
 
     document.addEventListener('game-tab-activated', (ev) => {
@@ -42,21 +42,21 @@ class TinyRPGApplication {
       gameEngine.resetGame();
     });
 
-    const api = {
+    const api: TinyRpgApi = {
       exportGameData: () => gameEngine.exportGameData(),
-      importGameData: (data) => gameEngine.importGameData(data),
+      importGameData: (data: unknown) => gameEngine.importGameData(data),
       getState: () => gameEngine.getState(),
       draw: () => gameEngine.draw(),
       resetGame: () => gameEngine.resetGame(),
-      updateTile: (tileId, data) => gameEngine.updateTile(tileId, data),
-      setMapTile: (x, y, tileId) => gameEngine.setMapTile(x, y, tileId),
+      updateTile: (tileId: string | number, data: unknown) => gameEngine.updateTile(tileId, data as Parameters<typeof gameEngine.updateTile>[1]),
+      setMapTile: (x: number, y: number, tileId: string | number) => gameEngine.setMapTile(x, y, tileId),
       getTiles: () => gameEngine.getTiles(),
       getTileMap: () => gameEngine.getTileMap(),
       getTilePresetNames: () => gameEngine.getTilePresetNames(),
       getVariables: () => gameEngine.getVariableDefinitions(),
-      setVariableDefault: (variableId, value) =>
-        gameEngine.setVariableDefault(variableId, value),
-      addSprite: (npc) => gameEngine.addSprite(npc),
+      setVariableDefault: (variableId: string | number, value: unknown) =>
+        gameEngine.setVariableDefault(typeof variableId === 'string' ? variableId : String(variableId), value),
+      addSprite: (npc: unknown) => gameEngine.addSprite(npc),
       getSprites: () => gameEngine.getSprites(),
       resetNPCs: () => gameEngine.npcManager.resetNPCs(),
       renderAll: () => editorManager?.renderAll?.(),

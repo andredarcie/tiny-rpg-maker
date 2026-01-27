@@ -53,7 +53,7 @@ class RendererEffectsManager extends RendererModuleBase {
         const element = this.combatIndicatorElement;
         if (!element) return;
         const duration = Number.isFinite(options.duration)
-            ? Math.max(0, options.duration)
+            ? Math.max(0, options.duration as number)
             : 600;
 
         if (this.combatIndicatorTimeout) {
@@ -82,7 +82,7 @@ class RendererEffectsManager extends RendererModuleBase {
         const element = this.screenFlashElement;
         if (!element) return;
         const duration = Number.isFinite(options.duration)
-            ? Math.max(16, options.duration)
+            ? Math.max(16, options.duration as number)
             : 140;
         if (typeof options.intensity === 'number' && Number.isFinite(options.intensity)) {
             const clamped = Math.max(0, Math.min(1, options.intensity));
@@ -108,14 +108,14 @@ class RendererEffectsManager extends RendererModuleBase {
         if (typeof direction !== 'string' || !direction.trim()) return;
         const normalizedDirection = direction.trim().toLowerCase();
         const duration = Number.isFinite(options.duration)
-            ? Math.max(32, options.duration)
+            ? Math.max(32, options.duration as number)
             : 220;
         const color = typeof options.color === 'string' && options.color.trim()
             ? options.color.trim()
             : 'rgba(255,255,255,0.35)';
         const clampIndex = (value: number | null | undefined) => {
             if (!Number.isFinite(value)) return null;
-            const idx = Math.floor(value);
+            const idx = Math.floor(value as number);
             return Math.max(0, Math.min(7, idx));
         };
         const tileX = clampIndex(options.tileX);
@@ -143,7 +143,7 @@ class RendererEffectsManager extends RendererModuleBase {
         const highlightSize = tileSize;
         const clampIndex = (value: number | null | undefined, fallback = 0) => {
             if (!Number.isFinite(value)) return Math.max(0, Math.min(7, Math.floor(fallback)));
-            return Math.max(0, Math.min(7, Math.floor(value)));
+            return Math.max(0, Math.min(7, Math.floor(value as number)));
         };
         const player = this.effectsGameState.getPlayer();
         const tileX = clampIndex(state.tileX, player?.x ?? 0);

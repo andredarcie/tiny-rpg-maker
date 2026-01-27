@@ -61,17 +61,17 @@ export class GameEngine {
     this.tileManager = new TileManager(this.gameState);
     this.npcManager = new NPCManager(this.gameState);
     this.npcManager.ensureDefaultNPCs();
-    this.renderer = new Renderer(canvas, this.gameState, this.tileManager, this.npcManager, this);
-    this.dialogManager = new DialogManager(this.gameState, this.renderer);
-    this.interactionManager = new InteractionManager(this.gameState, this.dialogManager, {
+    this.renderer = new Renderer(canvas, this.gameState as never, this.tileManager, this.npcManager as never, this);
+    this.dialogManager = new DialogManager(this.gameState as never, this.renderer);
+    this.interactionManager = new InteractionManager(this.gameState as never, this.dialogManager, {
       onPlayerVictory: () => this.handleGameCompletion(),
     });
-    this.enemyManager = new EnemyManager(this.gameState, this.renderer, this.tileManager, {
+    this.enemyManager = new EnemyManager(this.gameState as never, this.renderer, this.tileManager, {
       onPlayerDefeated: () => this.handlePlayerDefeat(),
       dialogManager: this.dialogManager,
     });
     this.movementManager = new MovementManager({
-      gameState: this.gameState,
+      gameState: this.gameState as never,
       tileManager: this.tileManager,
       renderer: this.renderer,
       dialogManager: this.dialogManager,

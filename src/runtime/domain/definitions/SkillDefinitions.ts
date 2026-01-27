@@ -47,7 +47,7 @@ class SkillDefinitions {
 
     static SKILLS: Skill[] = SkillDefinitions.SKILL_DEFINITION_DATA.map((entry) => new Skill(entry));
 
-    static LEVEL_SKILLS = {
+    static LEVEL_SKILLS: Record<number, string[]> = {
         2: ['necromancer', 'charisma'],
         4: ['stealth'],
         6: ['potion-master'],
@@ -68,7 +68,7 @@ class SkillDefinitions {
         const numeric = Number.isFinite(level) ? Math.max(1, Math.floor(level)) : 1;
         const list = this.LEVEL_SKILLS[numeric] || [];
         if (!Array.isArray(list)) return [];
-        const unique = [];
+        const unique: string[] = [];
         list.forEach((id) => {
             if (typeof id !== 'string' || !id) return;
             if (!this.getById(id)) return;
@@ -79,11 +79,11 @@ class SkillDefinitions {
         return unique;
     }
 
-    static buildQueueForLevel(level: number, carryover: string[] = [], owned: string[] = []) {
+    static buildQueueForLevel(level: number, carryover: string[] = [], owned: string[] = []): string[] {
         const normalizedCarry = Array.isArray(carryover) ? carryover : [];
         const ownedSet = new Set(Array.isArray(owned) ? owned : []);
         const base = this.getSkillsForLevel(level);
-        const queue = [];
+        const queue: string[] = [];
         [...normalizedCarry, ...base].forEach((id) => {
             if (typeof id !== 'string' || !id) return;
             if (ownedSet.has(id)) return;

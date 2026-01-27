@@ -1,12 +1,17 @@
+import type { EditorManager } from '../EditorManager';
 
 class EditorHistoryManager {
-    constructor(editorManager) {
+    editorManager: EditorManager;
+    stack: string[];
+    index: number;
+
+    constructor(editorManager: EditorManager) {
         this.editorManager = editorManager;
         this.stack = [];
         this.index = -1;
     }
 
-    pushSnapshot(snapshot) {
+    pushSnapshot(snapshot: string): void {
         if (this.stack[this.index] === snapshot) return;
         this.stack = this.stack.slice(0, this.index + 1);
         this.stack.push(snapshot);

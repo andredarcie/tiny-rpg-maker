@@ -393,15 +393,15 @@ class GameState {
     }
 
     normalizeObjects(objects: unknown): unknown {
-        return this.objectManager.normalizeObjects(objects);
+        return this.objectManager.normalizeObjects(objects as unknown[] | null | undefined);
     }
 
     cloneEnemies(enemies: unknown): unknown {
-        return this.enemyManager.cloneEnemies(enemies);
+        return this.enemyManager.cloneEnemies(enemies as EnemyDefinition[] | null | undefined);
     }
 
     generateObjectId(type: string, roomIndex: number): string {
-        return this.objectManager.generateObjectId(type, roomIndex);
+        return this.objectManager.generateObjectId(type as Parameters<typeof this.objectManager.generateObjectId>[0], roomIndex);
     }
 
     getObjects(): unknown {
@@ -417,15 +417,15 @@ class GameState {
     }
 
     setObjectPosition(type: string, roomIndex: number, x: number, y: number): unknown {
-        return this.objectManager.setObjectPosition(type, roomIndex, x, y);
+        return this.objectManager.setObjectPosition(type as Parameters<typeof this.objectManager.setObjectPosition>[0], roomIndex, x, y);
     }
 
     removeObject(type: string, roomIndex: number): void {
-        this.objectManager.removeObject(type, roomIndex);
+        this.objectManager.removeObject(type as Parameters<typeof this.objectManager.removeObject>[0], roomIndex);
     }
 
     setObjectVariable(type: string, roomIndex: number, variableId: string | null) {
-        return this.objectManager.setObjectVariable(type, roomIndex, variableId);
+        return this.objectManager.setObjectVariable(type as Parameters<typeof this.objectManager.setObjectVariable>[0], roomIndex, variableId);
     }
 
     setPlayerEndText(roomIndex: number, text: string): string {
@@ -495,7 +495,7 @@ class GameState {
     }
 
     cloneVariables(list: unknown[]): unknown {
-        return this.variableManager.cloneVariables(list);
+        return this.variableManager.cloneVariables(list as Parameters<typeof this.variableManager.cloneVariables>[0]);
     }
 
     normalizeVariables(source: unknown): unknown {
@@ -523,11 +523,12 @@ class GameState {
     }
 
     setVariableValue(variableId: string | number, value: unknown, persist = false): [boolean, boolean] {
-        const success = this.variableManager.setVariableValue(variableId, value, persist);
+        const normalizedId = typeof variableId === 'string' ? variableId : String(variableId);
+        const success = this.variableManager.setVariableValue(normalizedId, value, persist);
         let openedMagicDoor = false;
         if (success) {
-            openedMagicDoor = this.objectManager.checkOpenedMagicDoor(variableId, value);
-            this.objectManager.syncSwitchState?.(variableId, value);
+            openedMagicDoor = this.objectManager.checkOpenedMagicDoor(normalizedId, value);
+            this.objectManager.syncSwitchState?.(normalizedId, value);
         }
         return [success, openedMagicDoor];
     }
@@ -578,7 +579,8 @@ class GameState {
 
     setEnemyVariable(enemyId: string | number, variableId: string | null = null): boolean {
         const normalized = this.normalizeVariableId(variableId);
-        return this.enemyManager.setEnemyVariable(enemyId, normalized);
+        const normalizedEnemyId = typeof enemyId === 'string' ? enemyId : String(enemyId);
+        return this.enemyManager.setEnemyVariable(normalizedEnemyId, normalized);
     }
 
     damagePlayer(amount = 1) {

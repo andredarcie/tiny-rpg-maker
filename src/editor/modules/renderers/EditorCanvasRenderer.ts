@@ -4,6 +4,10 @@ import { EditorRendererBase } from './EditorRendererBase';
 type CanvasObject = { type: string; roomIndex: number; x: number; y: number };
 type CanvasNpc = { type: string; roomIndex: number; x: number; y: number; placed?: boolean };
 type CanvasEnemy = { type: string; roomIndex: number; x: number; y: number; id?: string };
+type TileMapWithLayers = {
+    ground?: (string | number | null)[][];
+    overlay?: (string | number | null)[][];
+};
 
 class EditorCanvasRenderer extends EditorRendererBase {
     renderEditor(): void {
@@ -15,7 +19,7 @@ class EditorCanvasRenderer extends EditorRendererBase {
 
         const tileSize = Math.floor(canvas.width / 8);
         const roomIndex = this.state.activeRoomIndex;
-        const tileMap = this.gameEngine.getTileMap(roomIndex);
+        const tileMap = (this.gameEngine.getTileMap(roomIndex) || {}) as TileMapWithLayers;
         const ground = tileMap?.ground || [];
         const overlay = tileMap?.overlay || [];
 
@@ -55,6 +59,7 @@ class EditorCanvasRenderer extends EditorRendererBase {
 
     drawEntities(tileSize: number): void {
         const ctx = this.manager.ectx;
+        if (!ctx) return;
         const roomIndex = this.state.activeRoomIndex;
         const step = tileSize / 8;
 

@@ -1,27 +1,34 @@
+import type { GameState } from '../GameState';
+import type { StateWorldManager } from './StateWorldManager';
+import type { RoomDefinition } from '../../../types/gameState';
+import type { TileMap } from '../definitions/tileTypes';
 
 class GameStateWorldFacade {
-    constructor(gameState, worldManager) {
+    gameState: GameState;
+    worldManager: StateWorldManager;
+
+    constructor(gameState: GameState, worldManager: StateWorldManager) {
         this.gameState = gameState;
         this.worldManager = worldManager;
     }
 
-    createEmptyRoom(size, index = 0, cols = 1) {
+    createEmptyRoom(size: number, index = 0, cols = 1): RoomDefinition {
         return this.worldManager.createEmptyRoom(size, index, cols);
     }
 
-    createWorldRooms(rows, cols, size) {
+    createWorldRooms(rows: number, cols: number, size: number): RoomDefinition[] {
         return this.worldManager.createWorldRooms(rows, cols, size);
     }
 
-    createEmptyTileMap(size) {
+    createEmptyTileMap(size: number): TileMap {
         return this.worldManager.createEmptyTileMap(size);
     }
 
-    normalizeRooms(rooms, totalRooms, cols) {
+    normalizeRooms(rooms: unknown, totalRooms: number, cols: number): RoomDefinition[] {
         return this.worldManager.normalizeRooms(rooms, totalRooms, cols);
     }
 
-    normalizeTileMaps(source, totalRooms) {
+    normalizeTileMaps(source: unknown, totalRooms: number): TileMap[] {
         return this.worldManager.normalizeTileMaps(source, totalRooms);
     }
 }

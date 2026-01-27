@@ -1,29 +1,66 @@
+import type { GameDefinition, RoomDefinition, VariableDefinition } from '../../../types/gameState';
+import type { StateWorldManager } from './StateWorldManager';
+import type { StateObjectManager, ObjectEntry } from './StateObjectManager';
+import type { StateVariableManager } from './StateVariableManager';
+
+type StateDataManagerOptions = {
+    game: GameDefinition;
+    worldManager: StateWorldManager;
+    objectManager: StateObjectManager;
+    variableManager: StateVariableManager;
+};
+
+type ImportData = {
+    title?: string;
+    author?: string;
+    palette?: string[];
+    roomSize?: number;
+    world?: { rows?: number; cols?: number };
+    rooms?: RoomDefinition[];
+    start?: { x?: number; y?: number; roomIndex?: number };
+    sprites?: unknown[];
+    enemies?: unknown[];
+    items?: unknown[];
+    objects?: ObjectEntry[];
+    variables?: VariableDefinition[];
+    exits?: unknown[];
+    tileset?: {
+        tiles?: unknown[];
+        maps?: unknown;
+        map?: unknown;
+    };
+};
 
 class StateDataManager {
-    constructor({ game, worldManager, objectManager, variableManager }) {
+    game: GameDefinition;
+    worldManager: StateWorldManager;
+    objectManager: StateObjectManager;
+    variableManager: StateVariableManager;
+
+    constructor({ game, worldManager, objectManager, variableManager }: StateDataManagerOptions) {
         this.game = game;
         this.worldManager = worldManager;
         this.objectManager = objectManager;
         this.variableManager = variableManager;
     }
 
-    setGame(game) {
+    setGame(game: GameDefinition): void {
         this.game = game;
     }
 
-    setWorldManager(worldManager) {
+    setWorldManager(worldManager: StateWorldManager): void {
         this.worldManager = worldManager;
     }
 
-    setObjectManager(objectManager) {
+    setObjectManager(objectManager: StateObjectManager): void {
         this.objectManager = objectManager;
     }
 
-    setVariableManager(variableManager) {
+    setVariableManager(variableManager: StateVariableManager): void {
         this.variableManager = variableManager;
     }
 
-    exportGameData() {
+    exportGameData(): ImportData {
         return {
             title: this.game.title,
             author: this.game.author,
@@ -42,7 +79,7 @@ class StateDataManager {
         };
     }
 
-    importGameData(data) {
+    importGameData(data: ImportData | null): { x: number; y: number; roomIndex: number } | null {
         if (!data) return null;
 
         const worldRows = 3;
