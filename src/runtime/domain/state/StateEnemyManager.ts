@@ -43,7 +43,10 @@ class StateEnemyManager {
                 y: this.worldManager.clampCoordinate(enemy.y ?? 0),
                 lastX: this.worldManager.clampCoordinate(enemy.x ?? 0),
                 lives: enemy.lives ?? 1,
-                defeatVariableId: this.normalizeEnemyVariableId(enemy.defeatVariableId)
+                defeatVariableId: this.normalizeEnemyVariableId(enemy.defeatVariableId),
+                playerInVision: Boolean(enemy.playerInVision),
+                alertUntil: typeof enemy.alertUntil === 'number' ? enemy.alertUntil : null,
+                alertStart: typeof enemy.alertStart === 'number' ? enemy.alertStart : null
             });
         });
         return list;
@@ -90,8 +93,14 @@ class StateEnemyManager {
             lastX: this.worldManager.clampCoordinate(enemy.x ?? 0),
             defeatVariableId: this.normalizeEnemyVariableId(enemy.defeatVariableId)
         };
+        const runtimeEntry = {
+            ...entry,
+            playerInVision: false,
+            alertUntil: null,
+            alertStart: null
+        };
         this.game.enemies.push(entry);
-        this.state.enemies.push({ ...entry });
+        this.state.enemies.push(runtimeEntry);
         return entry.id;
     }
 

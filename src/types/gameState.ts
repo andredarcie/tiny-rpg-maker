@@ -49,6 +49,9 @@ export type EnemyDefinition = {
     lastX: number;
     lives?: number;
     defeatVariableId?: string | null;
+    playerInVision?: boolean;
+    alertUntil?: number | null;
+    alertStart?: number | null;
 };
 
 export type VariableDefinition = {

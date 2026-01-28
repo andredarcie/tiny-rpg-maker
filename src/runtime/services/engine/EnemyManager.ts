@@ -63,6 +63,12 @@ type GameData = {
 
 type EnemyState = EnemyDefinition;
 
+enum EnemyMovementResult {
+  None = 'none',
+  Moved = 'moved',
+  Collided = 'collided',
+}
+
 type EnemyInput = {
   id?: string;
   type: string;
@@ -204,13 +210,21 @@ class EnemyManager {
     if (!this.hasMovableEnemies(enemies)) return;
 
     const game = this.gameState.getGame();
+    const player = this.gameState.getPlayer();
+    if (player) {
+      this.evaluateVision(player);
+    }
     let moved = false;
 
     for (let i = 0; i < enemies.length; i++) {
-      const result = this.tryMoveEnemy(enemies, i, game);
-      if (result === 'moved') {
+      const enemy = enemies[i];
+      const result =
+        player && enemy?.playerInVision
+          ? this.tryChaseEnemy(enemy, i, game, player, enemies)
+          : this.tryMoveEnemy(enemies, i, game);
+      if (result === EnemyMovementResult.Moved) {
         moved = true;
-      } else if (result === 'collided') {
+      } else if (result === EnemyMovementResult.Collided) {
         moved = true;
         break;
       }
@@ -314,24 +328,27 @@ class EnemyManager {
     return Array.isArray(enemies) && enemies.length > 0;
   }
 
-  tryMoveEnemy(enemies: EnemyState[], index: number, game: GameData): 'none' | 'moved' | 'collided' {
+  tryMoveEnemy(enemies: EnemyState[], index: number, game: GameData): EnemyMovementResult {
     const enemy = enemies[index];
-    if (!enemy) return 'none';
+    if (!enemy) return EnemyMovementResult.None;
     enemy.type = this.normalizeEnemyType(enemy.type);
+    if (enemy.playerInVision) return EnemyMovementResult.None;
 
     const dir = this.pickRandomDirection();
     const target = this.getTargetPosition(enemy, dir);
     const roomIndex = enemy.roomIndex ?? 0;
 
     if (!this.canEnterTile(roomIndex, target.x, target.y, game, enemies, index)) {
-      return 'none';
+      return EnemyMovementResult.None;
     }
 
     enemy.lastX = enemy.x;
     enemy.x = target.x;
     enemy.y = target.y;
 
-    return this.resolvePostMove(roomIndex, target.x, target.y, index) ? 'collided' : 'moved';
+    return this.resolvePostMove(roomIndex, target.x, target.y, index)
+      ? EnemyMovementResult.Collided
+      : EnemyMovementResult.Moved;
   }
 
   pickRandomDirection(): number[] {
@@ -347,10 +364,110 @@ class EnemyManager {
     };
   }
 
+  private tryChaseEnemy(
+    enemy: EnemyState,
+    index: number,
+    game: GameData,
+    player: PlayerState,
+    enemies: EnemyState[],
+  ): EnemyMovementResult {
+    const directions = this.getChaseDirections(enemy, player);
+    for (const direction of directions) {
+      const target = this.getTargetPosition(enemy, direction);
+      const roomIndex = enemy.roomIndex ?? 0;
+      if (!this.canEnterTile(roomIndex, target.x, target.y, game, enemies, index)) {
+        continue;
+      }
+      enemy.lastX = enemy.x;
+      enemy.x = target.x;
+      enemy.y = target.y;
+      return this.resolvePostMove(roomIndex, target.x, target.y, index)
+        ? EnemyMovementResult.Collided
+        : EnemyMovementResult.Moved;
+    }
+    return EnemyMovementResult.None;
+  }
+
+  moveChasingEnemies(player: PlayerState | null): void {
+    if (!player) return;
+    const enemies = this.getActiveEnemies();
+    const game = this.gameState.getGame();
+    let moved = false;
+    for (let index = 0; index < enemies.length; index += 1) {
+      const enemy = enemies[index];
+      if (!enemy || !enemy.playerInVision) continue;
+      const result = this.tryChaseEnemy(enemy, index, game, player, enemies);
+      if (result === EnemyMovementResult.Moved) {
+        moved = true;
+      } else if (result === EnemyMovementResult.Collided) {
+        moved = true;
+        break;
+      }
+    }
+    if (moved) {
+      this.renderer.draw();
+    }
+  }
+
+  evaluateVision(player: PlayerState | null): void {
+    if (!player) return;
+    const now = this.getNow();
+    const enemies = this.getActiveEnemies();
+    const visionRange = GameConfig.enemy.vision.range;
+    const alertDuration = GameConfig.enemy.vision.alertDuration;
+    for (const enemy of enemies) {
+      if (enemy.roomIndex !== player.roomIndex) {
+        enemy.playerInVision = false;
+        enemy.alertStart = null;
+        enemy.alertUntil = null;
+        continue;
+      }
+      const dx = Math.abs(player.x - enemy.x);
+      const dy = Math.abs(player.y - enemy.y);
+      const inVision = dx <= visionRange && dy <= visionRange;
+      if (inVision) {
+        if (!enemy.playerInVision) {
+          enemy.playerInVision = true;
+          enemy.alertStart = now;
+          enemy.alertUntil = now + alertDuration;
+        }
+      } else {
+        enemy.playerInVision = false;
+        enemy.alertStart = null;
+        enemy.alertUntil = null;
+      }
+    }
+  }
+
+  private getChaseDirections(enemy: EnemyState, player: PlayerState): number[][] {
+    const dx = player.x - enemy.x;
+    const dy = player.y - enemy.y;
+    const candidate: number[][] = [];
+    const signX = Math.sign(dx);
+    const signY = Math.sign(dy);
+
+    if (Math.abs(dx) >= Math.abs(dy)) {
+      if (signX) candidate.push([signX, 0]);
+      if (signY) candidate.push([0, signY]);
+    } else {
+      if (signY) candidate.push([0, signY]);
+      if (signX) candidate.push([signX, 0]);
+    }
+    if (signX && !candidate.some((dir) => dir[0] === signX && dir[1] === 0)) {
+      candidate.push([signX, 0]);
+    }
+    if (signY && !candidate.some((dir) => dir[0] === 0 && dir[1] === signY)) {
+      candidate.push([0, signY]);
+    }
+    if (!candidate.length) {
+      candidate.push([0, 0]);
+    }
+    return candidate;
+  }
+
   canEnterTile(roomIndex: number, x: number, y: number, game: GameData, enemies: EnemyState[], movingIndex: number): boolean {
     const room = game.rooms[roomIndex];
     if (!room) return false;
-    if (this.isBorderTile(roomIndex, x, y)) return false;
     if (room.walls?.[y]?.[x]) return false;
     if (this.isTileBlocked(roomIndex, x, y)) return false;
     if (this.hasBlockingObject(roomIndex, x, y)) return false;
@@ -381,12 +498,6 @@ class EnemyManager {
 
   isOccupied(enemies: EnemyState[], movingIndex: number, roomIndex: number, x: number, y: number): boolean {
     return enemies.some((other, index) => index !== movingIndex && other.roomIndex === roomIndex && other.x === x && other.y === y);
-  }
-
-  isBorderTile(_roomIndex: number, x: number, y: number): boolean {
-    const size = this.getRoomSize();
-    if (size <= 2) return false;
-    return x === 0 || y === 0 || x === size - 1 || y === size - 1;
   }
 
   resolvePostMove(roomIndex: number, x: number, y: number, enemyIndex: number): boolean {
@@ -582,6 +693,13 @@ class EnemyManager {
 
   showMissFeedback(): void {
     this.renderer.showCombatIndicator('Miss', { duration: 500 });
+  }
+
+  getNow() {
+    if (typeof performance !== 'undefined' && performance.now) {
+      return performance.now();
+    }
+    return Date.now();
   }
 }
 

@@ -2,9 +2,17 @@
  * Centralized editor configuration
  *
  * This file contains all constants and configurable values for the editor.
+ * Uses EditorConfigSchema for type safety and validation.
  */
 
-export const EditorConfig = {
+import { EditorConfigSchema } from './EditorConfigSchema';
+
+/**
+ * Validated and immutable editor configuration instance
+ *
+ * All values are validated at instantiation time to ensure correctness.
+ */
+export const EditorConfig = new EditorConfigSchema({
   /**
    * Editor canvas configuration
    */
@@ -58,9 +66,9 @@ export const EditorConfig = {
     /** MIME type for download */
     mimeType: 'text/html',
   },
-} as const;
+});
 
 /**
- * Type helper to access editor configuration values with type safety
+ * Type helper for editor configuration
  */
 export type EditorConfigType = typeof EditorConfig;

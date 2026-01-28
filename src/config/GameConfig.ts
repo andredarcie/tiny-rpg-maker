@@ -2,10 +2,17 @@
  * Centralized game configuration
  *
  * This file contains all constants and configurable values for the game runtime.
- * Configurations are organized by category for easier maintenance.
+ * Uses GameConfigSchema for type safety and validation.
  */
 
-export const GameConfig = {
+import { GameConfigSchema } from './GameConfigSchema';
+
+/**
+ * Validated and immutable game configuration instance
+ *
+ * All values are validated at instantiation time to ensure correctness.
+ */
+export const GameConfig = new GameConfigSchema({
   /**
    * Canvas and rendering configuration
    */
@@ -78,6 +85,12 @@ export const GameConfig = {
     fallbackMissChance: 0.25,
     /** Stealth assassination miss chance (0.0 - 1.0) */
     stealthMissChance: 0.25,
+    vision: {
+      /** Range offset in tiles for enemy awareness (each direction) */
+      range: 2,
+      /** Duration of the alert icon (ms) */
+      alertDuration: 1000,
+    },
   },
 
   /**
@@ -196,11 +209,11 @@ export const GameConfig = {
       '#83769C', // 13 - Indigo
       '#FF77A8', // 14 - Pink
       '#FFCCAA', // 15 - Peach
-    ] as const,
+    ],
   },
-} as const;
+});
 
 /**
- * Type helper to access configuration values with type safety
+ * Type helper for game configuration
  */
 export type GameConfigType = typeof GameConfig;

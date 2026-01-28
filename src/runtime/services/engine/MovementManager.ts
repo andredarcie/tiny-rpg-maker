@@ -55,6 +55,8 @@ type InteractionManagerApi = {
 type EnemyManagerApi = {
   collideAt: (roomIndex: number, x: number, y: number) => boolean;
   checkCollisionAt: (x: number, y: number) => void;
+  evaluateVision?: (player: PlayerState | null) => void;
+  moveChasingEnemies?: (player: PlayerState | null) => void;
 };
 
 type NpcState = {
@@ -342,6 +344,8 @@ class MovementManager {
     const currentPlayer = this.gameState.getPlayer();
     if (currentPlayer) {
       this.enemyManager.checkCollisionAt(currentPlayer.x, currentPlayer.y);
+      this.enemyManager.evaluateVision?.(currentPlayer);
+      this.enemyManager.moveChasingEnemies?.(currentPlayer);
     }
 
     if (supportsTransition && fromFrame) {

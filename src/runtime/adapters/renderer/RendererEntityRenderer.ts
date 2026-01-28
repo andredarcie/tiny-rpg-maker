@@ -1,5 +1,6 @@
 import { EnemyDefinitions } from '../../domain/definitions/EnemyDefinitions';
 import { ITEM_TYPES } from '../../domain/constants/itemTypes';
+import { GameConfig } from '../../../config/GameConfig';
 
 class RendererEntityRenderer {
     gameState: GameStateApi;
@@ -103,12 +104,13 @@ class RendererEntityRenderer {
     }
 
     drawEnemies(ctx: CanvasRenderingContext2D) {
-        const enemies = this.gameState.getEnemies?.() ?? [];
+        const enemies = (this.gameState.getEnemies?.() ?? []) as EnemyState[];
         if (!enemies.length) return;
         const player = this.gameState.getPlayer();
         const tileSize = this.canvasHelper.getTilePixelSize();
         const step = tileSize / 8;
         enemies.forEach((enemy) => {
+            if (!enemy) return;
             if (enemy.roomIndex !== player.roomIndex) return;
             const baseSprite = this.spriteFactory.getEnemySprite(enemy.type);
             if (!baseSprite) return;
@@ -116,6 +118,7 @@ class RendererEntityRenderer {
             const px = enemy.x * tileSize;
             const py = enemy.y * tileSize;
             this.canvasHelper.drawSprite(ctx, sprite, px, py, step);
+            this.drawEnemyAlert(ctx, enemy, px, py, tileSize);
 
             const damage = this.getEnemyDamage(enemy.type);
             this.drawEnemyDamageMarkers(ctx, px, py, tileSize, damage);
@@ -212,6 +215,34 @@ class RendererEntityRenderer {
         }
     }
 
+    drawEnemyAlert(ctx: CanvasRenderingContext2D, enemy: EnemyState, px: number, py: number, tileSize: number) {
+        const alertDuration: number = GameConfig.enemy.vision.alertDuration;
+        const alertStart: number | null = typeof enemy.alertStart === 'number' ? enemy.alertStart : null;
+        const alertUntil: number | null = typeof enemy.alertUntil === 'number' ? enemy.alertUntil : null;
+        if (alertStart === null || alertUntil === null || alertDuration <= 0) return;
+
+        const now = this.getNow();
+        if (now >= alertUntil) return;
+        const progress = Math.max(0, Math.min(1, (now - alertStart) / alertDuration));
+        const iconAlpha = 0.6 + Math.sin(progress * Math.PI) * 0.4;
+
+        const iconSize = Math.max(tileSize * 0.8, tileSize * 0.6);
+        const iconX = px + tileSize / 2;
+        const iconY = py - tileSize * 0.5;
+
+        ctx.save();
+        ctx.globalAlpha = iconAlpha;
+        const iconColor = this.paletteManager.getColor(9) || '#FFD600';
+        ctx.fillStyle = iconColor;
+        const iconFont = `${Math.max(12, Math.round(iconSize))}px "Press Start 2P", monospace`;
+        ctx.font = iconFont;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('!', iconX, iconY);
+        ctx.restore();
+
+    }
+
     cleanupEnemyLabels() {
         // Legacy no-op: labels are now rendered directly on the canvas.
     }
@@ -263,6 +294,9 @@ type EnemyState = {
     y: number;
     lastX?: number;
     type: string;
+    playerInVision?: boolean;
+    alertUntil?: number | null;
+    alertStart?: number | null;
 };
 
 type GameData = {
