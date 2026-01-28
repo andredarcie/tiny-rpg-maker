@@ -8,7 +8,8 @@
       "Bash(npm run build:*)",
       "Bash(wc:*)",
       "Bash(npm run test:unit:*)",
-      "Bash(npm run test:run:*)"
+      "Bash(npm run test:run:*)",
+      "Bash(npm test:*)"
     ]
   }
 }

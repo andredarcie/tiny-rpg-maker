@@ -4,7 +4,15 @@ import { ShareEncoder } from './ShareEncoder';
 class ShareUrlHelper {
     static getBaseUrl() {
         if (globalThis.location) {
-            return `${globalThis.location.origin}${globalThis.location.pathname}`;
+            const isLocalhost = globalThis.location.hostname === 'localhost' ||
+                                globalThis.location.hostname === '127.0.0.1' ||
+                                globalThis.location.hostname === '';
+
+            if (isLocalhost) {
+                return `${globalThis.location.origin}${globalThis.location.pathname}`;
+            }
+
+            return 'https://andredarcie.github.io/tiny-rpg-studio/';
         }
         return '';
     }

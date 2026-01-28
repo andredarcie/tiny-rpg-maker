@@ -12,13 +12,34 @@ describe('ShareUrlHelper', () => {
     globalThis.history.replaceState({}, '', originalHref);
   });
 
-  it('builds share urls using the current base url', () => {
+  it('builds share urls using the current base url in localhost', () => {
     const spy = vi.spyOn(ShareEncoder, 'buildShareCode').mockReturnValue('abc');
 
     globalThis.history.replaceState({}, '', '/share');
     const url = ShareUrlHelper.buildShareUrl({});
 
     expect(url).toBe(`${globalThis.location.origin}/share#abc`);
+
+    spy.mockRestore();
+  });
+
+  it('builds share urls using GitHub Pages URL in production', () => {
+    const spy = vi.spyOn(ShareEncoder, 'buildShareCode').mockReturnValue('abc');
+    const originalLocation = globalThis.location;
+
+    delete (globalThis as { location?: Location }).location;
+    globalThis.location = {
+      ...originalLocation,
+      hostname: 'andredarcie.github.io',
+      origin: 'https://andredarcie.github.io',
+      pathname: '/any-path/',
+    } as Location;
+
+    const url = ShareUrlHelper.buildShareUrl({});
+
+    expect(url).toBe('https://andredarcie.github.io/tiny-rpg-studio/#abc');
+
+    globalThis.location = originalLocation;
 
     spy.mockRestore();
   });
