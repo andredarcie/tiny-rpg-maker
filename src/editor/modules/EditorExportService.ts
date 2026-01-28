@@ -33,14 +33,15 @@ class EditorExportService {
             const downloadError = 'Unable to download project assets. Please run Tiny RPG Studio from an HTTP/HTTPS server (not file://) to export HTML.';
 
             let cssText = '';
-            const linkEl = document.querySelector<HTMLLinkElement>('link[rel="stylesheet"][href]');
-            if (linkEl) {
+            // Get all local CSS files (not external like Google Fonts)
+            const linkEls = Array.from(document.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"][href]'));
+            for (const linkEl of linkEls) {
                 const href = linkEl.getAttribute('href');
-                if (href) {
+                if (href && !href.startsWith('http://') && !href.startsWith('https://')) {
                     try {
                         const resp = await fetch(href as RequestInfo);
                         if (resp.ok) {
-                            cssText = await resp.text();
+                            cssText += await resp.text() + '\n';
                         } else {
                             alert(downloadError);
                             return;
@@ -208,6 +209,10 @@ class EditorExportService {
             }
             const containerClone = gameContainer.cloneNode(true) as HTMLElement;
 
+            // Clone reset button
+            const resetButton = document.getElementById('btn-reset');
+            const resetClone = resetButton ? (resetButton.cloneNode(true) as HTMLElement) : null;
+
             const allScripts = Object.values(scripts).join('');
 
             const html = `<!DOCTYPE html>
@@ -216,9 +221,16 @@ class EditorExportService {
                 <meta charset="utf-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1">
                 <title>Tiny RPG</title>
+                <link rel="preconnect" href="https://fonts.googleapis.com">
+                <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+                <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
                 <style>${cssText}
+                body{background-color:#000}
                 #game-container{position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;background-color:#000;overflow:hidden}
+                .game-controls{display:flex;justify-content:center;margin-top:1rem}
                 canvas{image-rendering:pixelated;image-rendering:crisp-edges}
+                .touch-controls-toggle{display:inline-flex !important;align-items:center;gap:6px}
+                body.touch-controls-visible .touch-controls-toggle{display:none !important}
                 </style>
                 <script>
                 console.log('[TinyRPG Export] Booting exported build');
@@ -231,6 +243,11 @@ class EditorExportService {
                 <body class="game-mode">
                 <div class="app">
                 <main>
+                <div class="tabs">
+                    <div class="tabs-links">
+                        ${resetClone ? resetClone.outerHTML : ''}
+                    </div>
+                </div>
                 <div class="tab-content active" id="tab-game">
                 ${containerClone.outerHTML}
                 </div>

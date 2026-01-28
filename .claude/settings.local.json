@@ -4,7 +4,8 @@
       "Bash(dir C:repostiny-rpg-maker /b)",
       "Bash(npx tsc:*)",
       "Bash(npm test)",
-      "Bash(cut:*)"
+      "Bash(cut:*)",
+      "Bash(npm run build:*)"
     ]
   }
 }
