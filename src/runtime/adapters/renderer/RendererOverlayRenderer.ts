@@ -1,5 +1,6 @@
 import { TextResources } from '../TextResources';
 import { RendererModuleBase } from './RendererModuleBase';
+import { GameConfig } from '../../../config/GameConfig';
 
 const getOverlayText = (key: string, fallback = '') => {
     const value = TextResources.get(key, fallback);
@@ -81,7 +82,9 @@ class RendererOverlayRenderer extends RendererModuleBase {
 
         const renderer = this.overlayRenderer;
         if (renderer?.gameEngine?.canDismissIntroScreen) {
-            const blink = ((Date.now() / 500) % 2) > 1 ? 0.3 : 0.95;
+            const blink = ((Date.now() / GameConfig.animation.blinkInterval) % 2) > 1
+                ? GameConfig.animation.blinkMinOpacity
+                : GameConfig.animation.blinkMaxOpacity;
             ctx.fillStyle = `rgba(100, 181, 246, ${blink.toFixed(2)})`;
             const startLabel = getOverlayText('intro.startAdventure', 'Iniciar aventura');
             ctx.font = `${Math.max(9, Math.floor(height / 20))}px monospace`;
@@ -507,7 +510,7 @@ class RendererOverlayRenderer extends RendererModuleBase {
         if (typeof requestAnimationFrame === 'function') {
             return requestAnimationFrame(fn);
         }
-        return setTimeout(fn, 1000 / 30);
+        return setTimeout(fn, 1000 / GameConfig.animation.overlayFPS);
     }
 
     cancelPickupFrame(id: number) {
@@ -646,7 +649,9 @@ class RendererOverlayRenderer extends RendererModuleBase {
             return;
         }
         ctx.save();
-        const blink = ((Date.now() / 500) % 2) > 1 ? 0.3 : 0.95;
+        const blink = ((Date.now() / GameConfig.animation.blinkInterval) % 2) > 1
+            ? GameConfig.animation.blinkMinOpacity
+            : GameConfig.animation.blinkMaxOpacity;
         ctx.fillStyle = `rgba(100, 181, 246, ${blink.toFixed(2)})`;
         fontSize = Math.max(4, Math.floor(this.canvas.height / 26));
         ctx.font = `${fontSize}px "Press Start 2P", monospace`;

@@ -2,6 +2,7 @@ import { EnemyDefinitions } from '../../domain/definitions/EnemyDefinitions';
 import { ITEM_TYPES } from '../../domain/constants/itemTypes';
 import { TextResources } from '../../adapters/TextResources';
 import type { EnemyDefinition } from '../../../types/gameState';
+import { GameConfig } from '../../../config/GameConfig';
 
 type GameStateApi = {
   playing: boolean;
@@ -132,11 +133,13 @@ class EnemyManager {
     this.renderer = renderer;
     this.tileManager = tileManager;
     this.onPlayerDefeated = options.onPlayerDefeated || (() => {});
-    this.interval = options.interval || 600;
+    this.interval = options.interval || GameConfig.enemy.movementInterval;
     this.enemyMoveTimer = null;
     this.directions = options.directions || this.defaultDirections();
     this.dialogManager = options.dialogManager || null;
-    this.fallbackMissChance = this.normalizeMissChance(options.missChance === undefined ? 0.25 : options.missChance);
+    this.fallbackMissChance = this.normalizeMissChance(
+      options.missChance === undefined ? GameConfig.enemy.fallbackMissChance : options.missChance
+    );
   }
 
   getEnemyDefinitions(): unknown {
@@ -435,7 +438,7 @@ class EnemyManager {
     if (!this.canAssassinate(enemy)) {
       return false;
     }
-    const missed = Math.random() < 0.25;
+    const missed = Math.random() < GameConfig.enemy.stealthMissChance;
     if (missed) {
       this.showStealthMissFeedback();
       return false;

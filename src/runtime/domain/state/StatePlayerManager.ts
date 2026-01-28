@@ -1,5 +1,6 @@
 
 import type { PlayerRuntimeState, RuntimeState } from '../../../types/gameState';
+import { GameConfig } from '../../../config/GameConfig';
 
 type WorldManagerApi = {
     clampCoordinate: (value: number) => number;
@@ -28,12 +29,12 @@ class StatePlayerManager {
         this.state = state;
         this.worldManager = worldManager;
         this.skillManager = skillManager;
-        this.maxLevel = 10;
-        this.baseMaxLives = 3;
-        this.experienceBase = 6;
-        this.experienceGrowth = 1.35;
-        this.maxKeys = 9;
-        this.roomChangeDamageCooldown = 1000;
+        this.maxLevel = GameConfig.player.maxLevel;
+        this.baseMaxLives = GameConfig.player.baseMaxLives;
+        this.experienceBase = GameConfig.player.experienceBase;
+        this.experienceGrowth = GameConfig.player.experienceGrowth;
+        this.maxKeys = GameConfig.player.maxKeys;
+        this.roomChangeDamageCooldown = GameConfig.player.roomChangeDamageCooldown;
     }
 
     setState(state: RuntimeState | null) {

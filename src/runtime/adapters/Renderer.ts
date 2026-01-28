@@ -9,6 +9,7 @@ import { RendererEffectsManager } from './renderer/RendererEffectsManager';
 import { RendererTransitionManager } from './renderer/RendererTransitionManager';
 import { RendererOverlayRenderer } from './renderer/RendererOverlayRenderer';
 import type { TileDefinition } from '../domain/definitions/tileTypes';
+import { GameConfig } from '../../config/GameConfig';
 
 type SpriteMatrix = (string | null)[][];
 type SpriteMap = Record<string, SpriteMatrix>;
@@ -75,11 +76,20 @@ class Renderer {
         gameEngine: RendererEngine | null = null
     ) {
         this.canvas = canvas;
-        const tilePixelSize = Math.max(8, Math.floor(this.canvas.width / 8));
-        this.hudBarHeight = Math.max(28, Math.round(tilePixelSize * 1.75));
-        this.inventoryBarHeight = Math.max(40, Math.round(tilePixelSize * 2));
+        const tilePixelSize = Math.max(
+            GameConfig.canvas.minTileSize,
+            Math.floor(this.canvas.width / GameConfig.world.roomSize)
+        );
+        this.hudBarHeight = Math.max(
+            GameConfig.canvas.minHudHeight,
+            Math.round(tilePixelSize * GameConfig.canvas.hudHeightMultiplier)
+        );
+        this.inventoryBarHeight = Math.max(
+            GameConfig.canvas.minInventoryHeight,
+            Math.round(tilePixelSize * GameConfig.canvas.inventoryHeightMultiplier)
+        );
         this.totalHudHeight = this.hudBarHeight + this.inventoryBarHeight;
-        this.gameplayHeight = tilePixelSize * 8;
+        this.gameplayHeight = tilePixelSize * GameConfig.world.roomSize;
         const desiredHeight = this.gameplayHeight + this.totalHudHeight;
         if (this.canvas.height !== desiredHeight) {
             this.canvas.height = desiredHeight;
@@ -119,8 +129,8 @@ class Renderer {
         this.enemySprite = this.spriteFactory.getEnemySprite();
         this.objectSprites = this.spriteFactory.getObjectSprites() as SpriteMap;
         this.drawIconIdNextFrame = '';
-        this.timeIconOverPlayer = 2000;
-        this.tileAnimationInterval = 320;
+        this.timeIconOverPlayer = GameConfig.animation.iconOverPlayerDuration;
+        this.tileAnimationInterval = GameConfig.animation.tileInterval;
         this.tileAnimationTimer = null;
         this.startTileAnimationLoop();
     }
@@ -295,7 +305,10 @@ class Renderer {
             clearInterval(this.tileAnimationTimer);
             this.tileAnimationTimer = null;
         }
-        const interval = Math.max(60, this.tileAnimationInterval || 0);
+        const interval = Math.max(
+            GameConfig.animation.minInterval,
+            this.tileAnimationInterval || 0
+        );
         this.tileAnimationTimer = setInterval(() => this.tickTileAnimation(), interval);
     }
 

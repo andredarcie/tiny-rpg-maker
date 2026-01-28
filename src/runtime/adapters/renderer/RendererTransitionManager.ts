@@ -1,4 +1,5 @@
 import { RendererModuleBase } from './RendererModuleBase';
+import { GameConfig } from '../../../config/GameConfig';
 
 type TransitionState = {
     active: boolean;
@@ -78,8 +79,8 @@ class RendererTransitionManager extends RendererModuleBase {
         }
         const direction = options.direction || 'right';
         const duration = Number.isFinite(options.duration)
-            ? Math.max(120, options.duration as number)
-            : 320;
+            ? Math.max(GameConfig.transitions.roomMinDuration, options.duration as number)
+            : GameConfig.transitions.roomDuration;
         const now = performance.now();
 
         if (this.transition?.rafId) {

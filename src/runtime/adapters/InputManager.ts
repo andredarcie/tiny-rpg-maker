@@ -1,3 +1,5 @@
+import { GameConfig } from '../../config/GameConfig';
+
 type DialogState = {
   active: boolean;
   page: number;
@@ -255,7 +257,7 @@ class InputManager {
     this.touchStart = null;
 
     const MIN_DISTANCE = 24;
-    const MAX_DURATION = 600;
+    const MAX_DURATION = GameConfig.input.maxDuration;
     if (distance < MIN_DISTANCE || duration > MAX_DURATION) {
       return;
     }

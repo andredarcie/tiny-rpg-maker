@@ -1,6 +1,8 @@
 
 import { EnemyDefinitions } from '../../domain/definitions/EnemyDefinitions';
 import { NPCDefinitions } from '../../domain/definitions/NPCDefinitions';
+import { GameConfig } from '../../../config/GameConfig';
+
 class ShareConstants {
     static _supportedVersions?: Set<number>;
     static _npcDefinitions?: unknown[];
@@ -102,7 +104,7 @@ class ShareConstants {
     }
 
     static get MATRIX_SIZE() {
-        return 8;
+        return GameConfig.world.matrixSize;
     }
 
     static get TILE_COUNT() {
@@ -110,11 +112,11 @@ class ShareConstants {
     }
 
     static get WORLD_ROWS() {
-        return 3;
+        return GameConfig.world.rows;
     }
 
     static get WORLD_COLS() {
-        return 3;
+        return GameConfig.world.cols;
     }
 
     static get WORLD_ROOM_COUNT() {
@@ -130,11 +132,11 @@ class ShareConstants {
     }
 
     static get TILE_LEGACY_MAX() {
-        return 15;
+        return GameConfig.tiles.legacyMax;
     }
 
     static get TILE_VALUE_MAX() {
-        return 255;
+        return GameConfig.tiles.valueMax;
     }
 
     static get GROUND_SPARSE_PREFIX() {
@@ -154,12 +156,7 @@ class ShareConstants {
     }
 
     static get DEFAULT_PALETTE() {
-        return [
-            '#000000', '#1D2B53', '#7E2553', '#008751',
-            '#AB5236', '#5F574F', '#C2C3C7', '#FFF1E8',
-            '#FF004D', '#FFA300', '#FFFF27', '#00E756',
-            '#29ADFF', '#83769C', '#FF77A8', '#FFCCAA'
-        ];
+        return [...GameConfig.palette.colors];
     }
 
     static get VARIABLE_IDS() {

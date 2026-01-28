@@ -1,4 +1,5 @@
 import { ITEM_TYPES } from '../../domain/constants/itemTypes';
+import { GameConfig } from '../../../config/GameConfig';
 
 class RendererHudRenderer {
     gameState: GameStateApi;
@@ -16,9 +17,9 @@ class RendererHudRenderer {
         this.gameState = gameState;
         this.entityRenderer = entityRenderer;
         this.paletteManager = paletteManager;
-        this.padding = 4;
-        this.gap = 6;
-        this.backgroundColor = '#000000';
+        this.padding = GameConfig.hud.padding;
+        this.gap = GameConfig.hud.gap;
+        this.backgroundColor = GameConfig.hud.backgroundColor;
         this.viewportOffsetY = 0;
         this.canvasHelper = entityRenderer.canvasHelper;
         this.healthIconDefinitions = {};

@@ -1,4 +1,5 @@
 import { RendererModuleBase } from './RendererModuleBase';
+import { GameConfig } from '../../../config/GameConfig';
 
 type EdgeFlashState = {
     direction: string;
@@ -54,7 +55,7 @@ class RendererEffectsManager extends RendererModuleBase {
         if (!element) return;
         const duration = Number.isFinite(options.duration)
             ? Math.max(0, options.duration as number)
-            : 600;
+            : GameConfig.effects.combatIndicatorDuration;
 
         if (this.combatIndicatorTimeout) {
             clearTimeout(this.combatIndicatorTimeout);
@@ -82,8 +83,8 @@ class RendererEffectsManager extends RendererModuleBase {
         const element = this.screenFlashElement;
         if (!element) return;
         const duration = Number.isFinite(options.duration)
-            ? Math.max(16, options.duration as number)
-            : 140;
+            ? Math.max(GameConfig.effects.screenFlashMinDuration, options.duration as number)
+            : GameConfig.effects.screenFlashDuration;
         if (typeof options.intensity === 'number' && Number.isFinite(options.intensity)) {
             const clamped = Math.max(0, Math.min(1, options.intensity));
             element.style.setProperty('--screen-flash-opacity', clamped.toString());
@@ -108,8 +109,8 @@ class RendererEffectsManager extends RendererModuleBase {
         if (typeof direction !== 'string' || !direction.trim()) return;
         const normalizedDirection = direction.trim().toLowerCase();
         const duration = Number.isFinite(options.duration)
-            ? Math.max(32, options.duration as number)
-            : 220;
+            ? Math.max(GameConfig.effects.edgeFlashMinDuration, options.duration as number)
+            : GameConfig.effects.edgeFlashDuration;
         const color = typeof options.color === 'string' && options.color.trim()
             ? options.color.trim()
             : 'rgba(255,255,255,0.35)';

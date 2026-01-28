@@ -5,7 +5,10 @@
       "Bash(npx tsc:*)",
       "Bash(npm test)",
       "Bash(cut:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(wc:*)",
+      "Bash(npm run test:unit:*)",
+      "Bash(npm run test:run:*)"
     ]
   }
 }

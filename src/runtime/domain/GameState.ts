@@ -13,6 +13,7 @@ import { StatePlayerManager } from './state/StatePlayerManager';
 import { StateSkillManager } from './state/StateSkillManager';
 import { StateVariableManager } from './state/StateVariableManager';
 import { StateWorldManager } from './state/StateWorldManager';
+import { GameConfig } from '../../config/GameConfig';
 import type { TileMap, Tileset } from './definitions/tileTypes';
 import type {
     DialogMeta,
@@ -58,9 +59,9 @@ class GameState {
     editorMode: boolean;
 
     constructor() {
-        const worldRows = 3;
-        const worldCols = 3;
-        const roomSize = 8;
+        const worldRows = GameConfig.world.rows;
+        const worldCols = GameConfig.world.cols;
+        const roomSize = GameConfig.world.roomSize;
         const totalRooms = worldRows * worldCols;
 
         const tileMaps: TileMap[] = Array.from({ length: totalRooms }, () =>
@@ -82,7 +83,11 @@ class GameState {
                 cols: worldCols
             },
             rooms: StateWorldManager.createWorldRooms(worldRows, worldCols, roomSize),
-            start: { x: 1, y: 1, roomIndex: 0 },
+            start: {
+                x: GameConfig.player.startX,
+                y: GameConfig.player.startY,
+                roomIndex: GameConfig.player.startRoomIndex
+            },
             sprites: [],
             enemies: [],
             items: [],
@@ -94,14 +99,14 @@ class GameState {
 
         this.state = {
             player: {
-                x: 1,
-                y: 1,
-                lastX: 1,
-                roomIndex: 0,
-                level: 1,
-                maxLives: 3,
-                currentLives: 3,
-                lives: 3,
+                x: GameConfig.player.startX,
+                y: GameConfig.player.startY,
+                lastX: GameConfig.player.startX,
+                roomIndex: GameConfig.player.startRoomIndex,
+                level: GameConfig.player.startLevel,
+                maxLives: GameConfig.player.baseMaxLives,
+                currentLives: GameConfig.player.startLives,
+                lives: GameConfig.player.startLives,
                 keys: 0,
                 experience: 0,
                 damageShield: 0,
@@ -132,7 +137,7 @@ class GameState {
                 level: null,
                 startTime: 0,
                 timeoutId: null,
-                durationMs: 3000
+                durationMs: GameConfig.timing.levelUpCelebration
             },
             skillRuntime: null
         } as RuntimeState;
@@ -157,7 +162,9 @@ class GameState {
         });
         this.dataFacade = new GameStateDataFacade(this, this.dataManager);
         this.playing = false;
-        this.lifecycle = new GameStateLifecycle(this, this.screenManager, { timeToResetAfterGameOver: 2000 });
+        this.lifecycle = new GameStateLifecycle(this, this.screenManager, {
+            timeToResetAfterGameOver: GameConfig.timing.resetAfterGameOver
+        });
         this.ensureDefaultVariables();
         this.resetGame();
         this.reviveSnapshot = null;
@@ -691,7 +698,7 @@ class GameState {
                 level: null,
                 startTime: 0,
                 timeoutId: null,
-                durationMs: 3000
+                durationMs: GameConfig.timing.levelUpCelebration
             };
         }
         return this.state.levelUpCelebration;

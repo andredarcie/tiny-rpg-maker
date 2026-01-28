@@ -1,4 +1,5 @@
 import { TextResources } from '../../adapters/TextResources';
+import { GameConfig } from '../../../config/GameConfig';
 
 type PlayerState = {
   roomIndex: number;
@@ -404,7 +405,7 @@ class MovementManager {
   flashBlockedEdge(direction: string, coords: { x?: number; y?: number } | null = null): void {
     if (!direction) return;
     this.renderer.flashEdge(direction, {
-      duration: 240,
+      duration: GameConfig.transitions.blockedMovementDuration,
       tileX: coords?.x,
       tileY: coords?.y,
     });

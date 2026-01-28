@@ -9,6 +9,7 @@ import { Renderer } from '../adapters/Renderer';
 import { TextResources } from '../adapters/TextResources';
 import { TileManager } from './TileManager';
 import type { TileDefinition } from '../domain/definitions/tileTypes';
+import { GameConfig } from '../../config/GameConfig';
 
 type IntroData = { title: string; author: string };
 
@@ -84,7 +85,7 @@ export class GameEngine {
     this.introStartTime = 0;
     this.introData = { title: 'Tiny RPG Studio', author: '' };
     this.canDismissIntroScreen = false;
-    this.timeToResetAfterIntro = 2000;
+    this.timeToResetAfterIntro = GameConfig.timing.resetAfterIntro;
     this.setupIntroScreen();
 
     // Ensure there is at least a ground layer
