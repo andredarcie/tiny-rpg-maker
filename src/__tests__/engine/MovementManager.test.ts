@@ -125,7 +125,7 @@ describe('MovementManager', () => {
       getPlayer: () => player,
       getRoomCoords: () => ({ row: 0, col: 0 }),
       getRoomIndex: (_row: number, col: number) => (col === -1 ? 1 : null),
-      getGame: () => ({ sprites: [] }),
+      getGame: () => ({ sprites: [], rooms: [{}, {}] }),
       setPlayerPosition: (x: number, y: number, roomIndex: number | null) => {
         player.x = x;
         player.y = y;
