@@ -88,7 +88,7 @@ type TileMapState = {
 };
 
 const getMovementText = (key: string, fallback = ''): string => {
-  const value = TextResources.get(key, fallback);
+  const value = TextResources.get(key, fallback) as string;
   return value || fallback || '';
 };
 
@@ -97,7 +97,7 @@ const formatMovementText = (
   params: Record<string, string | number | boolean> = {},
   fallback = '',
 ): string => {
-  const value = TextResources.format(key, params, fallback);
+  const value = TextResources.format(key, params, fallback) as string;
   return value || fallback || '';
 };
 

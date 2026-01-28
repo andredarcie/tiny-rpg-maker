@@ -176,7 +176,7 @@ class EditorEnemyService {
     }
 
     getEnemyLimitMessage() {
-        const message = TextResources?.get?.('enemies.limitReached', '')?.trim?.();
+        const message = TextResources?.get ? (TextResources.get('enemies.limitReached', '') as string).trim() : '';
         if (message) return message;
         return 'Max enemies reached';
     }

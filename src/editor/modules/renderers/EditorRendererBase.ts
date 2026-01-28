@@ -1,4 +1,4 @@
-import { EditorRenderService } from '../EditorRenderService';
+import type { EditorRenderService } from '../EditorRenderService';
 
 class EditorRendererBase {
     service: EditorRenderService;

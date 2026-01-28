@@ -165,7 +165,7 @@ export class GameEngine {
     if (choice) {
       const name = this.getSkillDisplayName(choice);
       const message =
-        TextResources.format('skills.pickupMessage', { name }, '') ||
+        (TextResources.format('skills.pickupMessage', { name }, '') as string) ||
         `Você aprendeu ${name}`;
       this.dialogManager.showDialog?.(message);
     }
@@ -175,7 +175,7 @@ export class GameEngine {
   getSkillDisplayName(choice: { nameKey?: string; id?: string } | null = null): string {
     if (!choice) return 'skill';
     if (choice.nameKey) {
-      const localized = TextResources.get(choice.nameKey, choice.id || 'skill');
+      const localized = TextResources.get(choice.nameKey, choice.id || 'skill') as string;
       if (localized) return localized;
     }
     if (choice.id) return choice.id;

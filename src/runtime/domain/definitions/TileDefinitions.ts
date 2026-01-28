@@ -47,7 +47,7 @@ class TileDefinitions {
     }
 
     static createEmptyLayout() {
-        return Array.from({ length: 8 }, () => Array(8).fill(null));
+        return Array.from({ length: 8 }, () => Array(8).fill(null) as null[]);
     }
 
     static toPixels(layout: (number | null)[][]): TileFrame {

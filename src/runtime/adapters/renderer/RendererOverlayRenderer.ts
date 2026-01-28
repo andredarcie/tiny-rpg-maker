@@ -2,13 +2,13 @@ import { TextResources } from '../TextResources';
 import { RendererModuleBase } from './RendererModuleBase';
 import { GameConfig } from '../../../config/GameConfig';
 
-const getOverlayText = (key: string, fallback = '') => {
-    const value = TextResources.get(key, fallback);
+const getOverlayText = (key: string, fallback = ''): string => {
+    const value = TextResources.get(key, fallback) as string;
     return value || fallback || '';
 };
 
-const formatOverlayText = (key: string, params: Record<string, unknown> = {}, fallback = '') => {
-    const value = TextResources.format(key, params, fallback);
+const formatOverlayText = (key: string, params: Record<string, unknown> = {}, fallback = ''): string => {
+    const value = TextResources.format(key, params, fallback) as string;
     return value || fallback || '';
 };
 

@@ -250,7 +250,7 @@ class InteractionManager {
       return type || '';
     }
     if (definition.nameKey) {
-      const localized = TextResources.get(definition.nameKey, definition.name || type || '');
+      const localized = TextResources.get(definition.nameKey, definition.name || type || '') as string;
       if (localized) return localized;
     }
     if (definition.name) return definition.name;
@@ -258,7 +258,7 @@ class InteractionManager {
   }
 
   getInteractionText(key: string, fallback = ''): string {
-    const value = TextResources.get(key, fallback);
+    const value = TextResources.get(key, fallback) as string;
     return value || fallback || '';
   }
 
@@ -267,7 +267,7 @@ class InteractionManager {
     params: Record<string, string | number | boolean> = {},
     fallback = '',
   ): string {
-    const value = TextResources.format(key, params, fallback);
+    const value = TextResources.format(key, params, fallback) as string;
     return value || fallback || '';
   }
 

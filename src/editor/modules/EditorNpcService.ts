@@ -28,8 +28,8 @@ class EditorNpcService {
     }
 
     t(key: string, fallback = '') {
-        const resource = this.text;
-        const value = resource?.get?.(key, fallback);
+        const resource = this.text as typeof TextResources & { get?: (key: string, fallback: string) => string };
+        const value = resource?.get ? resource.get(key, fallback) : '';
         if (value) return value;
         if (fallback) return fallback;
         return key || '';

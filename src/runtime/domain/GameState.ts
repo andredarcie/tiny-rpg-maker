@@ -840,7 +840,7 @@ class GameState {
         if (typeof structuredClone === 'function') {
             return structuredClone(value);
         }
-        return JSON.parse(JSON.stringify(value));
+        return JSON.parse(JSON.stringify(value)) as T;
     }
 
     pauseGame(reason = 'manual'): void {

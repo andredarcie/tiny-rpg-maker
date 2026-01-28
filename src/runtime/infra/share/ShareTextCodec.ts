@@ -50,7 +50,7 @@ class ShareTextCodec {
         if (!text) return [];
         try {
             const json = ShareTextCodec.decodeUtf8(ShareBase64.fromBase64Url(text));
-            const list = JSON.parse(json);
+            const list: unknown = JSON.parse(json);
             if (!Array.isArray(list)) return [];
             return list.map((entry) => (typeof entry === 'string' ? entry : ''));
         } catch (error) {

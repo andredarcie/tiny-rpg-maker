@@ -75,8 +75,8 @@ describe('TileManager business rules', () => {
     const size = 8;
     gameState.game.tileset.maps = [
       {
-        ground: Array.from({ length: size }, () => Array(size).fill(null)),
-        overlay: Array.from({ length: size }, () => Array(size).fill(null))
+        ground: Array.from({ length: size }, () => Array(size).fill(null) as (string | number | null)[]),
+        overlay: Array.from({ length: size }, () => Array(size).fill(null) as (string | number | null)[])
       }
     ] as TileMap[];
     const manager = new TileManager(gameState);

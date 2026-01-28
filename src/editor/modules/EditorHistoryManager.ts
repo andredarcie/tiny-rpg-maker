@@ -46,7 +46,7 @@ class EditorHistoryManager {
     restoreCurrent() {
         const snapshot = this.stack[this.index];
         if (!snapshot) return;
-        const data = JSON.parse(snapshot);
+        const data: Record<string, unknown> = JSON.parse(snapshot) as Record<string, unknown>;
         this.editorManager.restore(data, { skipHistory: true });
     }
 }

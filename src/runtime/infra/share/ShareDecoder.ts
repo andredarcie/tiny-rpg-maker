@@ -50,7 +50,7 @@ class ShareDecoder {
             : [];
         const enemyVariableNibbles = version >= ShareConstants.ENEMY_VARIABLE_VERSION
             ? ShareVariableCodec.decodeVariableNibbleArray(payload.w || '', enemyPositions.length)
-            : new Array(enemyPositions.length).fill(0);
+            : (new Array(enemyPositions.length).fill(0) as number[]);
         const doorPositions = version >= ShareConstants.OBJECTS_VERSION ? SharePositionCodec.decodePositions(payload.d || '') : [];
         const keyPositions = version >= ShareConstants.OBJECTS_VERSION ? SharePositionCodec.decodePositions(payload.k || '') : [];
         const magicDoorPositions = version >= ShareConstants.MAGIC_DOOR_VERSION ? SharePositionCodec.decodePositions(payload.m || '') : [];
@@ -156,12 +156,12 @@ class ShareDecoder {
         const defaultEnemyType = ShareDataNormalizer.normalizeEnemyType();
         const enemyDefinitions = ShareConstants.ENEMY_DEFINITIONS as Array<{ type?: string }>;
         const enemies = enemyPositions.map((pos, index) => {
-            const nibble = enemyVariableNibbles[index] ?? 0;
+            const nibble: number = enemyVariableNibbles[index] ?? 0;
             return {
                 id: `enemy-${index + 1}`,
                 type: (() => {
-                    const idx = enemyTypeIndexes[index];
-                    if (Number.isFinite(idx) && idx >= 0 && idx < enemyDefinitions.length) {
+                    const idx: number | undefined = enemyTypeIndexes[index];
+                    if (Number.isFinite(idx) && idx !== undefined && idx >= 0 && idx < enemyDefinitions.length) {
                         return ShareDataNormalizer.normalizeEnemyType(enemyDefinitions[idx]?.type);
                     }
                     return defaultEnemyType;

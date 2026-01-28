@@ -3,7 +3,7 @@ import type { GameDefinition, RuntimeState, VariableDefinition } from '../../../
 import { TextResources } from '../../adapters/TextResources';
 
 const getVariableText = (key: string, fallback = ''): string => {
-    const value = TextResources.get(key, fallback);
+    const value = TextResources.get(key, fallback) as string;
     return value || fallback || key || '';
 };
 

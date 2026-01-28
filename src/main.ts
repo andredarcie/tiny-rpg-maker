@@ -6,7 +6,7 @@ import { getTinyRpgApi, setTinyRpgApi, type TinyRpgApi } from './runtime/infra/T
 import { TextResources } from './runtime/adapters/TextResources';
 
 const getTextResource = (key: string, fallback = ''): string => {
-  const value = TextResources.get(key, fallback);
+  const value = TextResources.get(key, fallback) as string;
   return value || fallback || key || '';
 };
 
@@ -232,7 +232,7 @@ class TinyRPGApplication {
     if (!(select instanceof HTMLSelectElement)) return;
 
     const syncSelect = () => {
-      select.value = TextResources.getLocale();
+      select.value = TextResources.getLocale() as string;
     };
 
     syncSelect();
@@ -240,7 +240,7 @@ class TinyRPGApplication {
     select.addEventListener('change', () => {
       const locale = select.value;
       if (!locale) return;
-      const changed = TextResources.setLocale(locale);
+      const changed = TextResources.setLocale(locale) as boolean;
       if (!changed) {
         syncSelect();
       }

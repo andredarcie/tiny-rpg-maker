@@ -143,7 +143,7 @@ describe('Share Encoder/Decoder - Critical Round-Trip Tests', () => {
       const encoded = ShareEncoder.buildShareCode(gameData);
       const decoded = ShareDecoder.decodeShareCode(encoded);
 
-      const npc = decoded?.sprites?.[0];
+      const npc = (decoded?.sprites as Array<Record<string, unknown>> | undefined)?.[0] as Record<string, unknown> | undefined;
       expect(npc?.text).toBe('Initial quest text');
       expect(npc?.conditionText).toBe('Quest completed!');
       expect(npc?.conditionVariableId).toBeTruthy();
@@ -175,7 +175,7 @@ describe('Share Encoder/Decoder - Critical Round-Trip Tests', () => {
       const encoded = ShareEncoder.buildShareCode(gameData);
       const decoded = ShareDecoder.decodeShareCode(encoded);
 
-      const npc = decoded?.sprites?.[0];
+      const npc = (decoded?.sprites as Array<Record<string, unknown>> | undefined)?.[0] as Record<string, unknown> | undefined;
       expect(npc?.text).toBe('Hello');
       expect(npc?.conditionText).toBe('');
     });
@@ -207,7 +207,7 @@ describe('Share Encoder/Decoder - Critical Round-Trip Tests', () => {
       const encoded = ShareEncoder.buildShareCode(gameData);
       const decoded = ShareDecoder.decodeShareCode(encoded);
 
-      const enemy = decoded?.enemies?.[0];
+      const enemy = (decoded?.enemies as Array<Record<string, unknown>> | undefined)?.[0] as Record<string, unknown> | undefined;
       expect(enemy?.defeatVariableId).toBeTruthy();
     });
   });
@@ -238,7 +238,7 @@ describe('Share Encoder/Decoder - Critical Round-Trip Tests', () => {
       const encoded = ShareEncoder.buildShareCode(gameData);
       const decoded = ShareDecoder.decodeShareCode(encoded);
 
-      const door = decoded?.objects?.find((obj: { type: string }) => obj.type === 'door-variable');
+      const door = (decoded?.objects as Array<Record<string, unknown>> | undefined)?.find((obj: Record<string, unknown>) => obj.type === 'door-variable') as Record<string, unknown> | undefined;
       expect(door).toBeDefined();
       expect(door?.variableId).toBeTruthy();
     });
@@ -269,7 +269,7 @@ describe('Share Encoder/Decoder - Critical Round-Trip Tests', () => {
       const encoded = ShareEncoder.buildShareCode(gameData);
       const decoded = ShareDecoder.decodeShareCode(encoded);
 
-      const switchObj = decoded?.objects?.find((obj: { type: string }) => obj.type === 'switch');
+      const switchObj = (decoded?.objects as Array<Record<string, unknown>> | undefined)?.find((obj: Record<string, unknown>) => obj.type === 'switch') as Record<string, unknown> | undefined;
       expect(switchObj).toBeDefined();
       expect(switchObj?.variableId).toBeTruthy();
     });
@@ -373,7 +373,7 @@ describe('Share Encoder/Decoder - Critical Round-Trip Tests', () => {
 
       expect(decoded?.title).toBeTruthy();
       expect(decoded?.author).toBeTruthy();
-      expect(decoded?.sprites?.[0]?.text).toBeTruthy();
+      expect(((decoded?.sprites as Array<Record<string, unknown>> | undefined)?.[0] as Record<string, unknown> | undefined)?.text).toBeTruthy();
     });
   });
 

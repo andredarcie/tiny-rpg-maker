@@ -66,7 +66,7 @@ class EditorExportService {
             } catch {
                 // fallback handled below
             }
-            const locale = TextResources?.getLocale?.() || 'en-US';
+            const locale = (TextResources?.getLocale ? TextResources.getLocale() as string : 'en-US') || 'en-US';
             const legacyIndexPath = 'legacy/index.html';
             const fallbackScriptSrcs = [
                 'js/runtime/adapters/TextResources.js',

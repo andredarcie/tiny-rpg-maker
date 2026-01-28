@@ -1,4 +1,4 @@
-import { EditorManager } from '../EditorManager';
+import type { EditorManager } from '../EditorManager';
 import { EditorManagerModule } from './EditorManagerModule';
 
 class EditorEventBinder extends EditorManagerModule {

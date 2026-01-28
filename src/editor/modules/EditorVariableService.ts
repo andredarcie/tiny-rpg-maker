@@ -1,4 +1,4 @@
-import { EditorManager } from '../EditorManager';
+import type { EditorManager } from '../EditorManager';
 import type { VariableDefinition } from '../../types/gameState';
 
 type VariableEntry = VariableDefinition & { name?: string; color?: string };

@@ -1,6 +1,6 @@
 
 import { EnemyDefinitions } from '../runtime/domain/definitions/EnemyDefinitions';
-import { GameEngine } from '../runtime/services/GameEngine';
+import type { GameEngine } from '../runtime/services/GameEngine';
 import type { TileDefinition } from '../runtime/domain/definitions/tileTypes';
 import { EditorConstants } from './modules/EditorConstants';
 import { EditorDomCache } from './modules/EditorDomCache';
@@ -433,7 +433,7 @@ class EditorManager {
     }
 
     createNewGame() {
-        const emptyLayer = () => Array.from({ length: 8 }, () => Array(8).fill(null));
+        const emptyLayer = () => Array.from({ length: 8 }, () => Array(8).fill(null) as null[]);
         const data = {
             title: 'Novo Jogo',
             palette: ['#0e0f13', '#2e3140', '#f4f4f8'],
@@ -442,8 +442,8 @@ class EditorManager {
                 {
                     size: 8,
                     bg: 0,
-                    tiles: Array.from({ length: 8 }, () => Array(8).fill(0)),
-                    walls: Array.from({ length: 8 }, () => Array(8).fill(false))
+                    tiles: Array.from({ length: 8 }, () => Array(8).fill(0) as number[]),
+                    walls: Array.from({ length: 8 }, () => Array(8).fill(false) as boolean[])
                 }
             ],
             start: { x: 1, y: 1, roomIndex: 0 },

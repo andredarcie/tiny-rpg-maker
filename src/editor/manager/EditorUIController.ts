@@ -111,7 +111,7 @@ class EditorUIController extends EditorManagerModule {
     }
 
     handleLanguageChange() {
-        TextResources.apply();
+        void (TextResources.apply() as unknown);
         this.gameEngine?.gameState?.variableManager?.refreshPresetNames?.();
         this.refreshNpcLocalizedText();
         this.manager.renderAll();
@@ -125,11 +125,11 @@ class EditorUIController extends EditorManagerModule {
         const byType = new Map(definitions.map((def: NpcDefinitionData) => [def.type, def]));
         sprites.forEach((npc: SpriteInstance) => {
             const def = npc?.type ? byType.get(npc.type) : null;
-            if (def?.nameKey) {
-                npc.name = TextResources.get?.(def.nameKey, def.name || npc.name || '') || npc.name || '';
+            if (def?.nameKey && TextResources.get) {
+                npc.name = (TextResources.get(def.nameKey, def.name || npc.name || '') as string) || npc.name || '';
             }
-            if (npc?.textKey) {
-                npc.text = TextResources.get?.(npc.textKey, npc.text || '') || npc.text || '';
+            if (npc?.textKey && TextResources.get) {
+                npc.text = (TextResources.get(npc.textKey, npc.text || '') as string) || npc.text || '';
             }
         });
     }

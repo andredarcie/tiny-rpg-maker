@@ -25,8 +25,8 @@ class StateWorldManager {
         return {
             size,
             bg: 0,
-            tiles: Array.from({ length: size }, () => Array(size).fill(0)),
-            walls: Array.from({ length: size }, () => Array(size).fill(false)),
+            tiles: Array.from({ length: size }, () => Array(size).fill(0) as number[]),
+            walls: Array.from({ length: size }, () => Array(size).fill(false) as boolean[]),
             worldX: col,
             worldY: row
         };
@@ -48,8 +48,8 @@ class StateWorldManager {
 
     static createEmptyTileMap(size: number): TileMap {
         return {
-            ground: Array.from({ length: size }, () => Array(size).fill(null)),
-            overlay: Array.from({ length: size }, () => Array(size).fill(null))
+            ground: Array.from({ length: size }, () => Array(size).fill(null) as (string | number | null)[]),
+            overlay: Array.from({ length: size }, () => Array(size).fill(null) as (string | number | null)[])
         };
     }
 

@@ -65,7 +65,7 @@ type NPCInput = {
 type NormalizedNPCText = { text: string; textKey: string | null };
 
 const getNpcLocaleText = (key: string, fallback = ''): string => {
-    const value = TextResources.get(key, fallback);
+    const value = TextResources.get(key, fallback) as string;
     return value || fallback || key || '';
 };
 

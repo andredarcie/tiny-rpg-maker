@@ -104,7 +104,7 @@ type EnemyDefinitionData = {
 };
 
 const getEnemyLocaleText = (key: string, fallback = ''): string => {
-  const value = TextResources.get(key, fallback);
+  const value = TextResources.get(key, fallback) as string;
   return value || fallback || '';
 };
 
@@ -113,7 +113,7 @@ const formatEnemyLocaleText = (
   params: Record<string, string | number | boolean> = {},
   fallback = '',
 ): string => {
-  const value = TextResources.format(key, params, fallback);
+  const value = TextResources.format(key, params, fallback) as string;
   return value || fallback || '';
 };
 

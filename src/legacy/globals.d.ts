@@ -1,6 +1,6 @@
 type TinyRpgFirebaseHelpers = {
-  addDoc?: (...args: any[]) => Promise<unknown>;
-  collection?: (...args: any[]) => unknown;
+  addDoc?: (...args: unknown[]) => Promise<unknown>;
+  collection?: (...args: unknown[]) => unknown;
   serverTimestamp?: () => unknown;
 };
 
@@ -15,11 +15,11 @@ declare global {
     TinyRPGFirebaseDb?: unknown;
     TinyRPGFirebaseFirestore?: TinyRpgFirebaseHelpers | null;
     firebase?: {
-      initializeApp?: (...args: any[]) => unknown;
+      initializeApp?: (...args: unknown[]) => unknown;
       apps?: unknown[];
       app?: () => unknown;
       firestore?: () => {
-        collection: (...args: any[]) => { add: (...args: any[]) => Promise<unknown> };
+        collection: (...args: unknown[]) => { add: (...args: unknown[]) => Promise<unknown> };
         FieldValue?: { serverTimestamp?: () => unknown };
       };
     } | null;

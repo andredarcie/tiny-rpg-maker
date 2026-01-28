@@ -18,8 +18,8 @@ class EditorShareService {
     }
 
     t(key: string, fallback = ''): string {
-        const resource = this.text;
-        const value = resource?.get?.(key, fallback);
+        const resource = this.text as typeof TextResources & { get?: (key: string, fallback: string) => string };
+        const value = resource?.get ? resource.get(key, fallback) : '';
         if (value) return value;
         if (fallback) return fallback;
         return key || '';
@@ -105,7 +105,7 @@ class EditorShareService {
         const reader = new FileReader();
         reader.onload = () => {
             try {
-                const data = JSON.parse(reader.result as string);
+                const data: Record<string, unknown> = JSON.parse(reader.result as string) as Record<string, unknown>;
                 this.manager.restore(data, { skipHistory: true });
                 this.manager.history.pushCurrentState();
             } catch {

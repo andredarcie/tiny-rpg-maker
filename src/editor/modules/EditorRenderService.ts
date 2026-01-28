@@ -68,15 +68,15 @@ class EditorRenderService {
     }
 
     t(key: string, fallback = '') {
-        const resource = this.textResources;
-        const value = resource?.get?.(key, fallback);
+        const resource = this.textResources as typeof TextResources & { get?: (key: string, fallback: string) => string };
+        const value = resource?.get ? resource.get(key, fallback) : '';
         if (value) return value;
         if (fallback) return fallback;
         return key || '';
     }
 
     tf(key: string, params: Record<string, string | number> = {}, fallback = '') {
-        const resource = this.textResources;
+        const resource = this.textResources as typeof TextResources & { format?: (key: string, params: Record<string, string | number>, fallback: string) => string };
         if (resource?.format) {
             return resource.format(key, params, fallback);
         }
@@ -346,8 +346,8 @@ class EditorRenderService {
         return used;
     }
 
-    buildSkillLevelMap() {
-        const levelMap = new Map();
+    buildSkillLevelMap(): Map<string, number> {
+        const levelMap = new Map<string, number>();
         const entries = SkillDefinitions.LEVEL_SKILLS || {};
         Object.entries(entries).forEach(([levelKey, ids]) => {
             const level = Number(levelKey);

@@ -6,14 +6,14 @@ type FirebaseCompatApp = {
 type FirebaseCompatInstance = {
   apps?: unknown[];
   app?: () => FirebaseCompatApp;
-  initializeApp?: (...args: any[]) => FirebaseCompatApp;
+  initializeApp?: (...args: unknown[]) => FirebaseCompatApp;
   firestore?: () => FirebaseCompatApp;
   FieldValue?: { serverTimestamp?: () => unknown };
 };
 
 type FirebaseModuleHelpers = {
-  addDoc?: (...args: any[]) => Promise<unknown>;
-  collection?: (...args: any[]) => unknown;
+  addDoc?: (...args: unknown[]) => Promise<unknown>;
+  collection?: (...args: unknown[]) => unknown;
   serverTimestamp?: () => unknown;
 };
 

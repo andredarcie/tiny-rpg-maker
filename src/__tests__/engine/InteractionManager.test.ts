@@ -74,7 +74,7 @@ describe('InteractionManager', () => {
     expect(key.collected).toBe(true);
     expect(gameState.showPickupOverlay).toHaveBeenCalled();
 
-    const effect = gameState.showPickupOverlay.mock.calls[0][0].effect;
+    const effect = (gameState.showPickupOverlay.mock.calls[0]?.[0] as { effect?: () => void })?.effect;
     effect?.();
     expect(gameState.addKeys).toHaveBeenCalledWith(1);
   });

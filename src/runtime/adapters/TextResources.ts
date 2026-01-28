@@ -545,7 +545,7 @@ const TextResources: {
     defaultLocale: string;
     locale: string;
     bundles: Record<string, Record<string, string>>;
-    [key: string]: any;
+    [key: string]: unknown;
 } = {
     defaultLocale: 'pt-BR',
     locale: 'pt-BR',
@@ -559,12 +559,13 @@ const TextResources: {
         if (typeof navigator === 'undefined') {
             return this.defaultLocale;
         }
-        const languages = Array.isArray(navigator.languages) && navigator.languages.length
+        const languages: readonly string[] = Array.isArray(navigator.languages) && navigator.languages.length
             ? navigator.languages
             : [navigator.language || this.defaultLocale];
         for (const lang of languages) {
-            if (lang && this.bundles[lang]) {
-                return lang;
+            const langStr = String(lang);
+            if (langStr && this.bundles[langStr]) {
+                return langStr;
             }
             const short = String(lang || '').split('-')[0];
             const match = Object.keys(this.bundles).find((locale) => locale.startsWith(short));
@@ -602,14 +603,16 @@ const TextResources: {
 
     get(key: string | null | undefined, fallback = ''): string {
         if (!key) return fallback || '';
-        const strings = this.getStrings(this.locale);
+        const strings = this.getStrings(this.locale) as Record<string, string>;
         if (Object.prototype.hasOwnProperty.call(strings, key)) {
-            return strings[key];
+            const value = strings[key];
+            return (typeof value === 'string' ? value : fallback) || '';
         }
         if (this.locale !== this.defaultLocale) {
-            const defaultStrings = this.getStrings(this.defaultLocale);
+            const defaultStrings = this.getStrings(this.defaultLocale) as Record<string, string>;
             if (Object.prototype.hasOwnProperty.call(defaultStrings, key)) {
-                return defaultStrings[key];
+                const value = defaultStrings[key];
+                return (typeof value === 'string' ? value : fallback) || '';
             }
         }
         return fallback || key || '';
@@ -620,22 +623,23 @@ const TextResources: {
         params: Record<string, string | number | boolean> = {},
         fallback = ''
     ): string {
-        const template = this.get(key, fallback);
+        const template = this.get(key, fallback) as string;
         if (!template) return fallback || key || '';
-        return template.replace(/\{(\w+)\}/g, (_: string, token: string) => {
+        const result: string = template.replace(/\{(\w+)\}/g, (_: string, token: string) => {
             if (Object.prototype.hasOwnProperty.call(params, token)) {
-                const value = params[token];
+                const value = params[token] as string | number | boolean | undefined;
                 return value === undefined || value === null ? '' : String(value);
             }
             return '';
         });
+        return result;
     },
 
     apply(root: Document | HTMLElement = document): void {
         if (!root || typeof root.querySelectorAll !== 'function') return;
         root.querySelectorAll('[data-text-key]').forEach((el) => {
             const key = el.getAttribute('data-text-key');
-            const text = this.get(key, el.textContent);
+            const text: string = this.get(key, el.textContent ?? '') as string;
             if (text !== undefined) {
                 el.textContent = text;
             }
@@ -643,7 +647,7 @@ const TextResources: {
 
         root.querySelectorAll('[data-placeholder-key]').forEach((el) => {
             const key = el.getAttribute('data-placeholder-key');
-            const text = this.get(key, el.getAttribute('placeholder') || '');
+            const text: string = this.get(key, el.getAttribute('placeholder') || '') as string;
             if (text) {
                 el.setAttribute('placeholder', text);
             }
@@ -651,7 +655,7 @@ const TextResources: {
 
         root.querySelectorAll('[data-aria-label-key]').forEach((el) => {
             const key = el.getAttribute('data-aria-label-key');
-            const text = this.get(key, el.getAttribute('aria-label') || '');
+            const text: string = this.get(key, el.getAttribute('aria-label') || '') as string;
             if (text) {
                 el.setAttribute('aria-label', text);
             }
@@ -659,7 +663,7 @@ const TextResources: {
 
         root.querySelectorAll('[data-title-key]').forEach((el) => {
             const key = el.getAttribute('data-title-key');
-            const text = this.get(key, el.getAttribute('title') || '');
+            const text: string = this.get(key, el.getAttribute('title') || '') as string;
             if (text) {
                 el.setAttribute('title', text);
             }
@@ -669,7 +673,7 @@ const TextResources: {
 
 if (typeof document !== 'undefined') {
     document.addEventListener('DOMContentLoaded', () => {
-        const detected = TextResources.detectBrowserLocale();
+        const detected: string = TextResources.detectBrowserLocale() as string;
         TextResources.setLocale(detected, { silent: true });
         TextResources.apply();
     });
