@@ -16,7 +16,7 @@ describe('MovementManager', () => {
     getPlayer: () => ({ roomIndex: 0, x: 0, y: 0, lastX: 0 }),
     getRoomCoords: () => ({ row: 0, col: 0 }),
     getRoomIndex: () => null,
-    getGame: () => ({ rooms: [] }),
+    getGame: () => ({ sprites: [] }),
     getObjectAt: () => null,
     isVariableOn: () => false,
     hasSkill: vi.fn((_skill: string) => false),
@@ -55,8 +55,14 @@ describe('MovementManager', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    getSpy.mockImplementation((_key: string, fallback = '') => fallback || 'text');
-    formatSpy.mockImplementation((_key: string, _params?: Record<string, unknown>, fallback = '') => fallback || 'text');
+    getSpy.mockImplementation((...args: unknown[]) => {
+      const fallback = args[1] as string | undefined;
+      return fallback || 'text';
+    });
+    formatSpy.mockImplementation((...args: unknown[]) => {
+      const fallback = args[2] as string | undefined;
+      return fallback || 'text';
+    });
   });
 
   it('advances dialog pages when a dialog is active', () => {
@@ -119,7 +125,7 @@ describe('MovementManager', () => {
       getPlayer: () => player,
       getRoomCoords: () => ({ row: 0, col: 0 }),
       getRoomIndex: (_row: number, col: number) => (col === -1 ? 1 : null),
-      getGame: () => ({ rooms: [{}, {}] }),
+      getGame: () => ({ sprites: [] }),
       setPlayerPosition: (x: number, y: number, roomIndex: number | null) => {
         player.x = x;
         player.y = y;

@@ -37,7 +37,7 @@ export function setupShareGlobals(options: SetupOptions = {}) {
     Object.assign(ITEM_TYPES, options.objectTypes);
   }
   if (options.enemyNormalize) {
-    vi.spyOn(EnemyDefinitions, 'normalizeType').mockImplementation(options.enemyNormalize);
+    vi.spyOn(EnemyDefinitions, 'normalizeType').mockImplementation(options.enemyNormalize as never);
   }
   if (typeof options.playerEndTextLimit === 'number') {
     vi.spyOn(StateObjectManager, 'PLAYER_END_TEXT_LIMIT', 'get').mockReturnValue(options.playerEndTextLimit);

@@ -12,7 +12,7 @@ describe('Core managers', () => {
         variables: [],
       },
       normalizeVariableId: () => null,
-    };
+    } as never;
     const manager = new NPCManager(gameState);
     expect(manager.getNPCs()).toEqual([]);
   });

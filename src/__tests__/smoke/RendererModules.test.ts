@@ -26,7 +26,7 @@ describe('Renderer modules', () => {
 
   it('RendererCanvasHelper calculates tile size', () => {
     const canvas = { width: 80 } as HTMLCanvasElement;
-    const ctx = { fillRect: () => {} } as CanvasRenderingContext2D;
+    const ctx = { fillRect: () => {} } as unknown as CanvasRenderingContext2D;
     const helper = new RendererCanvasHelper(canvas, ctx, null);
     expect(helper.getTilePixelSize()).toBe(10);
   });

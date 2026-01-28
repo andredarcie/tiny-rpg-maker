@@ -26,7 +26,7 @@ describe('RendererDialogRenderer', () => {
       strokeRect: vi.fn(),
       fillText: vi.fn((text: string) => lines.push(text)),
       measureText: (text: string) => ({ width: text.length * 6 }),
-    } as CanvasRenderingContext2D;
+    } as unknown as CanvasRenderingContext2D;
 
     renderer.drawDialog(ctx, { width: 96, height: 72 });
 

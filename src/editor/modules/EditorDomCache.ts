@@ -45,6 +45,7 @@ class EditorDomCache {
     projectTestStartLevel: HTMLSelectElement | null;
     projectTestSkillList: HTMLElement | null;
     projectTestGodMode: HTMLInputElement | null;
+    jsonArea?: HTMLTextAreaElement | null;
 
     constructor(root: Document | HTMLElement | null = typeof document !== 'undefined' ? document : null) {
         this.root = root || (null as unknown as Document); // fallback for strict mode if needed, though properties can be null
@@ -93,6 +94,7 @@ class EditorDomCache {
             this.projectTestStartLevel = null;
             this.projectTestSkillList = null;
             this.projectTestGodMode = null;
+            this.jsonArea = null;
             return;
         }
 
@@ -140,6 +142,7 @@ class EditorDomCache {
         this.projectTestStartLevel = root.querySelector('#project-test-start-level') as HTMLSelectElement | null;
         this.projectTestSkillList = root.querySelector('#project-test-skill-list') as HTMLElement | null;
         this.projectTestGodMode = root.querySelector('#project-test-god-mode') as HTMLInputElement | null;
+        this.jsonArea = root.querySelector('#json-area') as HTMLTextAreaElement | null;
     }
 }
 

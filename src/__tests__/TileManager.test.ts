@@ -100,7 +100,7 @@ describe('TileManager business rules', () => {
     const manager = new TileManager(gameState);
     const globalWithCrypto = globalThis as GlobalWithCrypto;
     const originalCrypto = globalWithCrypto.crypto;
-    if (originalCrypto?.randomUUID) {
+    if (originalCrypto?.randomUUID !== undefined) {
       const spy = vi.spyOn(originalCrypto, 'randomUUID').mockReturnValue('uuid-123');
       expect(manager.generateTileId()).toBe('uuid-123');
       spy.mockRestore();
@@ -118,8 +118,6 @@ describe('TileManager business rules', () => {
         value: originalCrypto,
         configurable: true
       });
-    } else {
-      delete globalWithCrypto.crypto;
     }
   });
 

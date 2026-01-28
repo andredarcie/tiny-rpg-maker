@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { itemCatalog } from '../../runtime/domain/services/ItemCatalog';
 import { InteractionManager } from '../../runtime/services/engine/InteractionManager';
 import { TextResources } from '../../runtime/adapters/TextResources';
+import type { ItemType } from '../../runtime/domain/constants/itemTypes';
 
 describe('InteractionManager', () => {
   const getDefinitionSpy = vi.spyOn(itemCatalog, 'getItemDefinition');
@@ -36,25 +37,39 @@ describe('InteractionManager', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    getDefinitionSpy.mockImplementation((type: string) => ({
-      type,
-      id: `${type}-id`,
-      name: `Name:${type}`,
-      nameKey: `objects.${type}`,
-      behavior: { order: 0, tags: [] },
-      sprite: [],
-    }));
+    getDefinitionSpy.mockImplementation((...args: unknown[]) => {
+      const type = args[0] as ItemType;
+      const behavior: { order: number; tags: string[]; swordDurability?: number } = { order: 0, tags: [] };
+      return {
+        type,
+        id: `${type}-id`,
+        name: `Name:${type}`,
+        nameKey: `objects.${type}`,
+        behavior,
+        sprite: [],
+        getTags: () => behavior.tags ?? [],
+        hasTag: (tag: string) => (behavior.tags ?? []).includes(tag),
+        getOrder: (fallbackOrder: number) => behavior.order ?? fallbackOrder,
+        getSwordDurability: () => behavior.swordDurability ?? null,
+      } as never;
+    });
     getDurabilitySpy.mockImplementation(() => 2);
-    getSpy.mockImplementation((_key: string, fallback = '') => fallback || 'fallback');
-    formatSpy.mockImplementation((_key: string, _params?: Record<string, unknown>, fallback = '') => fallback || 'formatted');
+    getSpy.mockImplementation((...args: unknown[]) => {
+      const fallback = args[1] as string | undefined;
+      return fallback || 'fallback';
+    });
+    formatSpy.mockImplementation((...args: unknown[]) => {
+      const fallback = args[2] as string | undefined;
+      return fallback || 'formatted';
+    });
   });
 
   it('collects keys and triggers pickup overlay', () => {
     const gameState = baseGameState();
     const manager = new InteractionManager(gameState, dialogManager);
-    const key = { type: 'key', collected: false, roomIndex: 0, x: 0, y: 0 };
+    const key: { type: string; collected: boolean; roomIndex: number; x: number; y: number } = { type: 'key', collected: false, roomIndex: 0, x: 0, y: 0 };
 
-    const handled = manager.handleCollectibleObject(key);
+    const handled = manager.handleCollectibleObject(key as never);
     expect(handled).toBe(true);
     expect(key.collected).toBe(true);
     expect(gameState.showPickupOverlay).toHaveBeenCalled();
@@ -67,9 +82,9 @@ describe('InteractionManager', () => {
   it('toggles switches and shows dialog', () => {
     const gameState = baseGameState();
     const manager = new InteractionManager(gameState, dialogManager);
-    const object = { type: 'switch', on: false, variableId: 'var-1', roomIndex: 0, x: 0, y: 0 };
+    const object: { type: string; on: boolean; variableId: string; roomIndex: number; x: number; y: number } = { type: 'switch', on: false, variableId: 'var-1', roomIndex: 0, x: 0, y: 0 };
 
-    const handled = manager.handleSwitch(object);
+    const handled = manager.handleSwitch(object as never);
 
     expect(handled).toBe(true);
     expect(object.on).toBe(true);

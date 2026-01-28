@@ -34,7 +34,7 @@ class TileDefinitions {
     ) {
         const layoutList = Array.isArray(layouts) ? layouts.filter(Boolean) : [layouts];
         const frames = (layoutList.length ? layoutList : [this.createEmptyLayout()])
-            .map((layout) => this.toPixels(layout));
+            .map((layout) => this.toPixels(layout as (number | null)[][]));
         const data: TileDefinitionData = {
             id,
             name,

@@ -36,7 +36,7 @@ describe('RendererEffectsManager', () => {
         if (id === 'screen-flash') return screenElement;
         return null;
       }),
-    } as Document;
+    } as unknown as Document;
 
     const renderer = {
       canvas: {} as HTMLCanvasElement,
@@ -69,7 +69,7 @@ describe('RendererEffectsManager', () => {
   it('clamps flash edge tile indexes', () => {
     globalThis.document = {
       getElementById: vi.fn(() => null),
-    } as Document;
+    } as unknown as Document;
 
     const renderer = {
       canvas: {} as HTMLCanvasElement,

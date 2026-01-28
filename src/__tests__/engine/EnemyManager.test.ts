@@ -56,10 +56,25 @@ describe('EnemyManager', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    getSpy.mockImplementation((key: string, fallback = '') => (key === 'combat.cooldown' ? 'Safe' : fallback || 'text'));
-    formatSpy.mockImplementation((_key: string, _params?: Record<string, unknown>, fallback = '') => fallback || 'text');
+    getSpy.mockImplementation((...args: unknown[]) => {
+      const key = args[0] as string;
+      const fallback = args[1] as string | undefined;
+      return key === 'combat.cooldown' ? 'Safe' : fallback || 'text';
+    });
+    formatSpy.mockImplementation((...args: unknown[]) => {
+      const fallback = args[2] as string | undefined;
+      return fallback || 'text';
+    });
     normalizeSpy.mockImplementation((type: string | null | undefined) => type ?? 'test-enemy');
-    getDefinitionSpy.mockImplementation(() => ({ ...baseEnemyDefinition }));
+    getDefinitionSpy.mockImplementation(() => {
+      const data = { ...baseEnemyDefinition };
+      return {
+        ...data,
+        matchesType: (type: string) => data.type === type,
+        getExperienceReward: () => data.experience,
+        getMissChance: () => data.missChance,
+      };
+    });
     getExperienceSpy.mockImplementation(() => 2);
     getMissChanceSpy.mockImplementation(() => null);
   });
@@ -93,11 +108,11 @@ describe('EnemyManager', () => {
     const manager = new EnemyManager(baseGameState(), renderer, tileManager);
     const globalWithCrypto = globalThis as GlobalWithCrypto;
     const originalCrypto = globalWithCrypto.crypto;
-    const spy = originalCrypto?.randomUUID
+    const spy = originalCrypto?.randomUUID !== undefined
       ? vi.spyOn(originalCrypto, 'randomUUID').mockReturnValue('enemy-uuid')
       : null;
 
-    if (spy) {
+    if (spy !== null) {
       expect(manager.generateEnemyId()).toBe('enemy-uuid');
       spy.mockRestore();
       return;
@@ -114,14 +129,22 @@ describe('EnemyManager', () => {
   });
 
   it('triggers defeat variables and shows message', () => {
-    getDefinitionSpy.mockImplementation(() => ({
-      ...baseEnemyDefinition,
-      activateVariableOnDefeat: { variableId: 'var-1', message: 'Unlocked' },
-    }));
+    getDefinitionSpy.mockImplementation(() => {
+      const data = {
+        ...baseEnemyDefinition,
+        activateVariableOnDefeat: { variableId: 'var-1', message: 'Unlocked' },
+      };
+      return {
+        ...data,
+        matchesType: (type: string) => data.type === type,
+        getExperienceReward: () => data.experience,
+        getMissChance: () => data.missChance,
+      };
+    });
     const gameState = baseGameState();
     const manager = new EnemyManager(gameState, renderer, tileManager);
 
-    const result = manager.tryTriggerDefeatVariable({ type: 'rat', roomIndex: 0, x: 0, y: 0 });
+    const result = manager.tryTriggerDefeatVariable({ id: 'enemy-1', type: 'rat', roomIndex: 0, x: 0, y: 0, lastX: 0 });
 
     expect(result).toBe(true);
     expect(gameState.setVariableValue).toHaveBeenCalledWith('var-1', true, true);
@@ -131,7 +154,7 @@ describe('EnemyManager', () => {
   it('shows a cooldown message when damage is blocked by room change safety', () => {
     const gameState = {
       ...baseGameState(),
-      getEnemies: vi.fn(() => [{ id: 'enemy-1', type: 'rat', roomIndex: 0, x: 0, y: 0 }]),
+      getEnemies: vi.fn(() => [{ id: 'enemy-1', type: 'rat', roomIndex: 0, x: 0, y: 0, lastX: 0 }]),
       isPlayerOnDamageCooldown: vi.fn(() => true),
     };
     const manager = new EnemyManager(gameState, renderer, tileManager);
@@ -163,7 +186,7 @@ describe('EnemyManager', () => {
       getEnemies: vi.fn(() => enemies),
       addEnemy: vi.fn(() => 'enemy-1'),
       removeEnemy: vi.fn(),
-      getGame: vi.fn(() => ({ rooms: [{}, {}] })),
+      getGame: vi.fn(() => ({ sprites: [] })),
       getPlayer: vi.fn(() => player),
       isPlayerOnDamageCooldown: vi.fn(
         () => Number.isFinite(player.lastRoomChangeTime) && Date.now() - (player.lastRoomChangeTime ?? 0) < 1000,
@@ -205,9 +228,9 @@ describe('EnemyManager', () => {
     const interactionManager = { handlePlayerInteractions: vi.fn() };
     const movementTileManager = { getTileMap: vi.fn(() => ({ ground: [], overlay: [] })), getTile: vi.fn(() => null) };
 
-    const enemyManager = new EnemyManager(gameState, renderer, tileManager);
+    const enemyManager = new EnemyManager(gameState as never, renderer, tileManager);
     const movementManager = new MovementManager({
-      gameState,
+      gameState: gameState as never,
       tileManager: movementTileManager,
       renderer: movementRenderer,
       dialogManager,

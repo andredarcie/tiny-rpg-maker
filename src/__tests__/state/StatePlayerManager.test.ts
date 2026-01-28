@@ -14,7 +14,25 @@ const createWorldManager = () => ({
 
 describe('StatePlayerManager', () => {
   it('clamps keys and respects god mode', () => {
-    const state = {
+    const state: {
+      player: {
+        x: number;
+        y: number;
+        lastX: number;
+        roomIndex: number;
+        level: number;
+        maxLives: number;
+        currentLives: number;
+        lives: number;
+        keys: number;
+        experience: number;
+        damageShield: number;
+        damageShieldMax: number;
+        swordType: null;
+        lastDamageReduction: number;
+        godMode: boolean;
+      };
+    } = {
       player: {
         x: 1,
         y: 1,
@@ -33,7 +51,7 @@ describe('StatePlayerManager', () => {
         godMode: false,
       },
     };
-    const manager = new StatePlayerManager(state, createWorldManager());
+    const manager = new StatePlayerManager(state as never, createWorldManager() as never);
 
     expect(manager.addKeys(20)).toBe(manager.getMaxKeys());
     expect(manager.consumeKey()).toBe(true);

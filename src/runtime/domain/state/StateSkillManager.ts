@@ -235,7 +235,7 @@ class StateSkillManager {
             const choices = this.pickChoices(2, levelForChoice);
             if (choices.length) {
                 overlay.active = true;
-                overlay.choices = choices;
+                overlay.choices = choices.map((choice) => ({ id: choice.id, nameKey: choice.nameKey }));
                 overlay.cursor = 0;
                 runtime.pendingSelections = runtime.pendingLevelQueue.length;
                 return overlay;
@@ -266,7 +266,7 @@ class StateSkillManager {
         const choices = queue
             .slice(0, choiceCount)
             .map((id: string) => SkillDefinitions.getById(id))
-            .filter((skill): skill is { id: string; nameKey?: string } => skill !== null);
+            .filter((skill): skill is NonNullable<ReturnType<typeof SkillDefinitions.getById>> => skill !== null);
         return choices;
     }
 

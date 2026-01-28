@@ -120,13 +120,13 @@ describe('Renderer', () => {
       restore: vi.fn(),
       fillText: vi.fn(),
       strokeRect: vi.fn(),
-    } as CanvasRenderingContext2D;
+    } as unknown as CanvasRenderingContext2D;
 
     const canvas = {
       width: 64,
       height: 64,
       getContext: () => ctx,
-    } as HTMLCanvasElement;
+    } as unknown as HTMLCanvasElement;
 
     const tileManager = {
       getAnimationFrameCount: vi.fn(() => 2),
@@ -149,14 +149,14 @@ describe('Renderer', () => {
       constructor(type: string) {
         this.type = type;
       }
-    } as typeof Event;
+    } as unknown as typeof Event;
     globalThis.CustomEvent = class CustomEvent extends globalThis.Event {
       detail: Record<string, unknown>;
       constructor(type: string, params?: { detail?: Record<string, unknown> }) {
         super(type);
         this.detail = params?.detail ?? {};
       }
-    } as typeof CustomEvent;
+    } as unknown as typeof CustomEvent;
 
     const startLoopSpy = vi.spyOn(Renderer.prototype, 'startTileAnimationLoop').mockImplementation(() => {});
 

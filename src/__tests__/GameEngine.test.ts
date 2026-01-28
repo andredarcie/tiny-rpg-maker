@@ -33,7 +33,7 @@ let GameEngineCtor: GameEngineCtor
 
 beforeAll(async () => {
   const mod = await import('../runtime/services/GameEngine')
-  GameEngineCtor = mod.GameEngine as GameEngineCtor
+  GameEngineCtor = mod.GameEngine as unknown as GameEngineCtor
 })
 
 const createEngine = () => {
@@ -234,7 +234,7 @@ describe('GameEngine business rules (legacy)', () => {
     engine.handlePlayerDefeat()
 
     expect(engine.enemyManager.stop.mock.calls.length).toBeGreaterThan(0)
-    expect(engine.gameState.setGameOverCalls).toEqual([{ value: true, reason: 'defeat' }])
+    expect((engine.gameState as StubGameState).setGameOverCalls).toEqual([{ value: true, reason: 'defeat' }])
     expect(engine.awaitingRestart).toBe(true)
     expect(engine.renderer.draw.mock.calls.length).toBeGreaterThan(drawsBefore)
   })
@@ -249,7 +249,7 @@ describe('GameEngine business rules (legacy)', () => {
     engine.gameState.gameOver = false
     engine.handleGameCompletion()
     expect(engine.enemyManager.stop.mock.calls.length).toBeGreaterThan(0)
-    expect(engine.gameState.setGameOverCalls).toEqual([{ value: true, reason: 'victory' }])
+    expect((engine.gameState as StubGameState).setGameOverCalls).toEqual([{ value: true, reason: 'victory' }])
     expect(engine.awaitingRestart).toBe(true)
   })
 

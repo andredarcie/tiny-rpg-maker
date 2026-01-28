@@ -142,7 +142,7 @@ class EditorObjectService {
             if (normalized) return normalized;
         }
         const fallbackTypes = new Set(itemCatalog.getPlaceableTypes());
-        return fallbackTypes.has(type) ? (type as Parameters<typeof this.manager.gameEngine.gameState.objectManager.generateObjectId>[0]) : null;
+        return fallbackTypes.has(type as never) ? (type as never as Parameters<typeof this.manager.gameEngine.gameState.objectManager.generateObjectId>[0]) : null;
     }
 }
 

@@ -28,7 +28,7 @@ describe('ShareMatrixCodec', () => {
 
   it('encodes and decodes overlay matrices with nulls', () => {
     const size = ShareConstants.MATRIX_SIZE;
-    const matrix = Array.from({ length: size }, () => Array.from({ length: size }, () => null));
+    const matrix: (number | null)[][] = Array.from({ length: size }, () => Array.from({ length: size }, () => null));
     matrix[0][0] = 7;
 
     const { text } = ShareMatrixCodec.encodeOverlay(matrix);

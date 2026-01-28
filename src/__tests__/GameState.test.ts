@@ -6,7 +6,7 @@ describe('GameState', () => {
     const originalDocument = globalThis.document;
     globalThis.document = {
       addEventListener: vi.fn(),
-    } as Document;
+    } as unknown as Document;
 
     try {
       const state = new GameState();
@@ -14,7 +14,7 @@ describe('GameState', () => {
 
       expect(game.title).toBe('My Tiny RPG Game');
       expect(game.rooms.length).toBe(9);
-      expect(state.getPlayer().x).toBe(1);
+      expect(state.getPlayer()?.x).toBe(1);
 
       state.getState().player.roomIndex = 999;
       const currentRoom = state.getCurrentRoom();

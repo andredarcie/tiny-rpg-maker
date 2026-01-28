@@ -30,8 +30,8 @@ describe('StateObjectManager', () => {
 
     const manager = new StateObjectManager(game, worldManager, variableManager);
 
-    expect(game.objects[0].type).toBe(ITEM_TYPES.PLAYER_START);
-    expect(game.objects[0].roomIndex).toBe(1);
+    expect((game.objects[0] as { type: string }).type).toBe(ITEM_TYPES.PLAYER_START);
+    expect((game.objects[0] as { roomIndex: number }).roomIndex).toBe(1);
 
     manager.setObjectPosition(ITEM_TYPES.PLAYER_END, 0, 1, 1);
     const longText = 'a'.repeat(StateObjectManager.PLAYER_END_TEXT_LIMIT + 5);
