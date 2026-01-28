@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { createRuntimeStateMock } from './mocks';
 import { StatePlayerManager } from '../../runtime/domain/state/StatePlayerManager';
-import type { RuntimeState } from '../../types/gameState';
 
 const createWorldManager = () => ({
   clampRoomIndex: (value: number) => {
@@ -13,51 +13,11 @@ const createWorldManager = () => ({
   },
 });
 
-const createState = (): RuntimeState => ({
-  player: {
-    x: 1,
-    y: 1,
-    lastX: 1,
-    roomIndex: 0,
-    level: 1,
-    maxLives: 3,
-    currentLives: 3,
-    lives: 3,
-    keys: 0,
-    experience: 0,
-    damageShield: 0,
-    damageShieldMax: 0,
-    swordType: null,
-    lastDamageReduction: 0,
-    godMode: false,
-  },
-  dialog: { active: false, text: '', page: 1, maxPages: 1, meta: null },
-  enemies: [],
-  variables: [],
-  gameOver: false,
-  gameOverReason: null,
-  pickupOverlay: {
-    active: false,
-    name: '',
-    spriteGroup: null,
-    spriteType: null,
-    effect: null,
-  },
-  levelUpOverlay: { active: false, choices: [], cursor: 0 },
-  levelUpCelebration: {
-    active: false,
-    level: null,
-    startTime: 0,
-    timeoutId: null,
-    durationMs: 3000,
-  },
-  skillRuntime: null,
-});
 
 describe('StatePlayerManager - Critical Path Tests', () => {
   describe('Multi-level progression', () => {
     it('handles multiple level-ups from single large XP gain', () => {
-      const state = createState();
+      const state = createRuntimeStateMock();
       const manager = new StatePlayerManager(state, createWorldManager());
 
       // Give enough XP to level up multiple times (base 6, growth 1.35)
@@ -72,7 +32,7 @@ describe('StatePlayerManager - Critical Path Tests', () => {
     });
 
     it('stops leveling at max level and resets experience', () => {
-      const state = createState();
+      const state = createRuntimeStateMock();
       state.player.level = 9; // One below max (10)
       state.player.maxLives = 11;
       state.player.currentLives = 11;
@@ -87,7 +47,7 @@ describe('StatePlayerManager - Critical Path Tests', () => {
     });
 
     it('fully heals player on each level up', () => {
-      const state = createState();
+      const state = createRuntimeStateMock();
       state.player.currentLives = 1; // Low health
       const manager = new StatePlayerManager(state, createWorldManager());
 
@@ -100,7 +60,7 @@ describe('StatePlayerManager - Critical Path Tests', () => {
 
   describe('XP boost skill', () => {
     it('applies XP boost when skill is active', () => {
-      const state = createState();
+      const state = createRuntimeStateMock();
       const skillManager = {
         hasSkill: (skillId: string) => skillId === 'xp-boost',
         getXpBoost: () => 0.5, // 50% boost
@@ -115,7 +75,7 @@ describe('StatePlayerManager - Critical Path Tests', () => {
     });
 
     it('handles zero XP gain gracefully', () => {
-      const state = createState();
+      const state = createRuntimeStateMock();
       const manager = new StatePlayerManager(state, createWorldManager());
 
       const result = manager.addExperience(0);
@@ -128,7 +88,7 @@ describe('StatePlayerManager - Critical Path Tests', () => {
 
   describe('Damage calculation with shields', () => {
     it('reduces damage using shield before affecting health', () => {
-      const state = createState();
+      const state = createRuntimeStateMock();
       const manager = new StatePlayerManager(state, createWorldManager());
 
       manager.addDamageShield(5, 'iron');
@@ -142,7 +102,7 @@ describe('StatePlayerManager - Critical Path Tests', () => {
     });
 
     it('uses remaining shield then takes health damage', () => {
-      const state = createState();
+      const state = createRuntimeStateMock();
       const manager = new StatePlayerManager(state, createWorldManager());
 
       manager.addDamageShield(2, 'bronze');
@@ -158,7 +118,7 @@ describe('StatePlayerManager - Critical Path Tests', () => {
     });
 
     it('preserves sword type while shield is active', () => {
-      const state = createState();
+      const state = createRuntimeStateMock();
       const manager = new StatePlayerManager(state, createWorldManager());
 
       manager.addDamageShield(5, 'legendary');
@@ -169,7 +129,7 @@ describe('StatePlayerManager - Critical Path Tests', () => {
     });
 
     it('clears sword type when shield depletes', () => {
-      const state = createState();
+      const state = createRuntimeStateMock();
       const manager = new StatePlayerManager(state, createWorldManager());
 
       manager.addDamageShield(2, 'wood');
@@ -182,7 +142,7 @@ describe('StatePlayerManager - Critical Path Tests', () => {
 
   describe('Iron-body skill damage reduction', () => {
     it('reduces incoming damage by 1 when iron-body is active', () => {
-      const state = createState();
+      const state = createRuntimeStateMock();
       const skillManager = {
         hasSkill: (skillId: string) => skillId === 'iron-body',
       };
@@ -195,7 +155,7 @@ describe('StatePlayerManager - Critical Path Tests', () => {
     });
 
     it('stacks with shield protection', () => {
-      const state = createState();
+      const state = createRuntimeStateMock();
       const skillManager = {
         hasSkill: (skillId: string) => skillId === 'iron-body',
       };
@@ -211,7 +171,7 @@ describe('StatePlayerManager - Critical Path Tests', () => {
     });
 
     it('can reduce damage to zero', () => {
-      const state = createState();
+      const state = createRuntimeStateMock();
       const skillManager = {
         hasSkill: (skillId: string) => skillId === 'iron-body',
       };
@@ -226,7 +186,7 @@ describe('StatePlayerManager - Critical Path Tests', () => {
 
   describe('God mode', () => {
     it('prevents all damage and tracks reduction', () => {
-      const state = createState();
+      const state = createRuntimeStateMock();
       const manager = new StatePlayerManager(state, createWorldManager());
 
       manager.setGodMode(true);
@@ -239,7 +199,7 @@ describe('StatePlayerManager - Critical Path Tests', () => {
     });
 
     it('fully heals player when god mode is enabled', () => {
-      const state = createState();
+      const state = createRuntimeStateMock();
       const manager = new StatePlayerManager(state, createWorldManager());
 
       state.player.currentLives = 1;
@@ -251,7 +211,7 @@ describe('StatePlayerManager - Critical Path Tests', () => {
 
   describe('Revive attempt', () => {
     it('calls skill manager attemptRevive when lives reach zero', () => {
-      const state = createState();
+      const state = createRuntimeStateMock();
       let reviveCalled = false;
       const skillManager = {
         attemptRevive: (player: typeof state.player) => {
@@ -271,7 +231,7 @@ describe('StatePlayerManager - Critical Path Tests', () => {
 
   describe('Max lives calculation', () => {
     it('calculates max lives from level', () => {
-      const state = createState();
+      const state = createRuntimeStateMock();
       const manager = new StatePlayerManager(state, createWorldManager());
 
       // Base: 3, Level 1: +0, Level 5: +4
@@ -280,7 +240,7 @@ describe('StatePlayerManager - Critical Path Tests', () => {
     });
 
     it('includes bonus max lives from skills', () => {
-      const state = createState();
+      const state = createRuntimeStateMock();
       const skillManager = {
         getBonusMaxLives: () => 2,
       };
@@ -293,7 +253,7 @@ describe('StatePlayerManager - Critical Path Tests', () => {
 
   describe('Room change damage cooldown', () => {
     it('detects when player is on damage cooldown', () => {
-      const state = createState();
+      const state = createRuntimeStateMock();
       const manager = new StatePlayerManager(state, createWorldManager());
 
       state.player.lastRoomChangeTime = Date.now();
@@ -302,7 +262,7 @@ describe('StatePlayerManager - Critical Path Tests', () => {
     });
 
     it('detects when cooldown has expired', () => {
-      const state = createState();
+      const state = createRuntimeStateMock();
       const manager = new StatePlayerManager(state, createWorldManager());
 
       state.player.lastRoomChangeTime = Date.now() - 1000;
@@ -313,7 +273,7 @@ describe('StatePlayerManager - Critical Path Tests', () => {
 
   describe('Player stats normalization', () => {
     it('clamps current lives to max lives', () => {
-      const state = createState();
+      const state = createRuntimeStateMock();
       const manager = new StatePlayerManager(state, createWorldManager());
 
       state.player.currentLives = 999;
@@ -323,7 +283,7 @@ describe('StatePlayerManager - Critical Path Tests', () => {
     });
 
     it('clamps experience below level requirement', () => {
-      const state = createState();
+      const state = createRuntimeStateMock();
       const manager = new StatePlayerManager(state, createWorldManager());
 
       state.player.experience = 999;
@@ -334,7 +294,7 @@ describe('StatePlayerManager - Critical Path Tests', () => {
     });
 
     it('resets experience at max level', () => {
-      const state = createState();
+      const state = createRuntimeStateMock();
       const manager = new StatePlayerManager(state, createWorldManager());
 
       state.player.level = 10;

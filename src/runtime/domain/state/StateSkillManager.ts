@@ -235,7 +235,12 @@ class StateSkillManager {
             const choices = this.pickChoices(2, levelForChoice);
             if (choices.length) {
                 overlay.active = true;
-                overlay.choices = choices.map((choice) => ({ id: choice.id, nameKey: choice.nameKey }));
+                overlay.choices = choices.map((choice) => ({
+                    id: choice.id,
+                    nameKey: choice.nameKey,
+                    descriptionKey: choice.descriptionKey,
+                    icon: choice.icon
+                }));
                 overlay.cursor = 0;
                 runtime.pendingSelections = runtime.pendingLevelQueue.length;
                 return overlay;

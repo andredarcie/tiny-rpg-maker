@@ -106,6 +106,8 @@ export type PickupOverlayOptions = {
 export type LevelUpChoice = {
     id: string;
     nameKey?: string;
+    descriptionKey?: string;
+    icon?: string;
 };
 
 export type LevelUpOverlayState = {
