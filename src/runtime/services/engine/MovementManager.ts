@@ -174,11 +174,11 @@ class MovementManager {
     const direction = this.getDirectionFromDelta(dx, dy);
     const roomIndex = player.roomIndex;
     const previousPosition = {
-      x: player?.x ?? 0,
-      y: player?.y ?? 0,
+      x: player.x,
+      y: player.y,
       roomIndex,
-      lastX: player?.lastX ?? player?.x ?? 0,
-      facingLeft: (player?.x ?? 0) < (player?.lastX ?? player?.x ?? 0),
+      lastX: player.lastX ?? player.x,
+      facingLeft: player.x < (player.lastX ?? player.x),
     };
     const currentCoords = this.gameState.getRoomCoords(roomIndex);
     const limit = this.gameState.game.roomSize - 1;
@@ -290,7 +290,7 @@ class MovementManager {
     const overlayId = tileMap?.overlay?.[targetY]?.[targetX] ?? null;
     const groundId = tileMap?.ground?.[targetY]?.[targetX] ?? null;
     const candidateId = overlayId ?? groundId;
-    if (candidateId !== null && candidateId !== undefined) {
+    if (candidateId !== null) {
       const tile = this.tileManager.getTile(candidateId);
       if (tile?.collision && !this.canTraverseCollisionTile(tile)) {
         if (enteringNewRoom) {
@@ -318,7 +318,7 @@ class MovementManager {
 
     // Prevent passing through enemies: resolve collision/combat without moving.
     if (!enteringNewRoom) {
-      const enemyHit = this.enemyManager?.collideAt?.(targetRoomIndex, targetX, targetY) || false;
+      const enemyHit = this.enemyManager.collideAt(targetRoomIndex, targetX, targetY) || false;
       if (enemyHit) {
         this.renderer.draw();
         return;
@@ -334,7 +334,7 @@ class MovementManager {
       if (updatedPlayer) {
         if (dx !== 0) {
           updatedPlayer.lastX = updatedPlayer.x - Math.sign(dx);
-        } else if (previousPosition.lastX !== undefined) {
+        } else {
           updatedPlayer.lastX = previousPosition.lastX;
         }
         updatedPlayer.lastRoomChangeTime = Date.now();
@@ -417,7 +417,7 @@ class MovementManager {
   }
 
   findNpcAt(roomIndex: number, x: number, y: number): NpcState | null {
-    const sprites = (this.gameState?.getGame()?.sprites || []) as NpcState[];
+    const sprites = (this.gameState.getGame().sprites || []) as NpcState[];
     return (
       sprites.find((npc) => npc.placed && npc.roomIndex === roomIndex && npc.x === x && npc.y === y) ||
       null

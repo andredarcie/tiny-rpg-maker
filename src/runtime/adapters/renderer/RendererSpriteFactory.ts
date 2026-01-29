@@ -161,8 +161,8 @@ class RendererSpriteFactory {
         );
     }
 
-    turnSpriteHorizontally(sprite: SpriteOrNull): Sprite | undefined {
-        if (!sprite) return undefined;
+    turnSpriteHorizontally(sprite: SpriteOrNull): SpriteOrNull {
+        if (!sprite) return null;
         return sprite.map(line => [...line].reverse());
     }
 

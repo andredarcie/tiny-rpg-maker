@@ -427,7 +427,7 @@ class StateObjectManager {
     checkOpenedMagicDoor(variableId: string | null | undefined, value: unknown) {
         const OT = this.types;
         for (const object of this.getObjects()) {
-            if (value && object.type == OT.DOOR_VARIABLE && object.variableId == variableId) {
+            if (value && object.type === OT.DOOR_VARIABLE && object.variableId === variableId) {
                 return true;
             }
         }

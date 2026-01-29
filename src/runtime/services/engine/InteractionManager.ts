@@ -247,14 +247,14 @@ class InteractionManager {
   getObjectDisplayName(type: ItemType): string {
     const definition = itemCatalog.getItemDefinition(type);
     if (!definition) {
-      return type || '';
+      return type;
     }
     if (definition.nameKey) {
-      const localized = TextResources.get(definition.nameKey, definition.name || type || '') as string;
-      if (localized) return localized;
+      const localized = TextResources.get(definition.nameKey, definition.name || type) as string;
+      return localized;
     }
     if (definition.name) return definition.name;
-    return type || '';
+    return type;
   }
 
   getInteractionText(key: string, fallback = ''): string {
@@ -311,7 +311,7 @@ class InteractionManager {
   }
 
   getNpcDialogText(npc: NpcState): string {
-    const rawConditionId = npc?.conditionVariableId || null;
+    const rawConditionId = npc.conditionVariableId || null;
     const isBardCondition = rawConditionId === 'skill:bard';
     const conditionId = isBardCondition ? null : this.gameState.normalizeVariableId?.(rawConditionId) ?? null;
     const hasConditionText = typeof npc.conditionText === 'string' && npc.conditionText.trim().length > 0;
@@ -328,15 +328,11 @@ class InteractionManager {
       return npc.text;
     }
 
-    if (useConditionText) {
-      return npc.conditionText ?? '';
-    }
-
     return npc.text || 'Hello!';
   }
 
   getNpcDialogMeta(npc: NpcState): Record<string, unknown> | undefined {
-    const rawConditionId = npc?.conditionVariableId || null;
+    const rawConditionId = npc.conditionVariableId || null;
     const isBardCondition = rawConditionId === 'skill:bard';
     const conditionId = isBardCondition ? null : this.gameState.normalizeVariableId?.(rawConditionId) ?? null;
     const rewardId = this.gameState.normalizeVariableId?.(npc.rewardVariableId ?? null) ?? null;

@@ -25,7 +25,7 @@ class EditorShareService {
         return key || '';
     }
 
-    async buildShareUrl() {
+    buildShareUrl() {
         if (!ShareUtils?.buildShareUrl) {
             alert(this.t('alerts.share.unavailable'));
             return null;

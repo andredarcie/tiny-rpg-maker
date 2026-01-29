@@ -28,23 +28,23 @@ class RendererConstants {
 
     static get NPC_DEFINITIONS() {
         if (!this._npcDefinitions || !this._npcDefinitions.length) {
-            this._npcDefinitions = NPCDefinitions.definitions || [];
+            this._npcDefinitions = NPCDefinitions.definitions;
         }
-        return this._npcDefinitions || [];
+        return this._npcDefinitions;
     }
 
     static get OBJECT_DEFINITIONS() {
         if (!this._objectDefinitions || !this._objectDefinitions.length) {
-            this._objectDefinitions = ItemDefinitions.definitions || [];
+            this._objectDefinitions = ItemDefinitions.definitions;
         }
-        return this._objectDefinitions || [];
+        return this._objectDefinitions;
     }
 
     static get ENEMY_DEFINITIONS() {
         if (!this._enemyDefinitions || !this._enemyDefinitions.length) {
-            this._enemyDefinitions = EnemyDefinitions.definitions || [];
+            this._enemyDefinitions = EnemyDefinitions.definitions;
         }
-        return this._enemyDefinitions || [];
+        return this._enemyDefinitions;
     }
 
     static get DEFAULT_PALETTE() {

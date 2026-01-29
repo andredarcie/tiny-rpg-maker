@@ -52,7 +52,7 @@ class EditorEventBinder extends EditorManagerModule {
             this.renderService.updateNpcForm();
         });
 
-        btnGenerateUrl?.addEventListener('click', () => shareService.generateShareableUrl());
+        btnGenerateUrl?.addEventListener('click', () => void shareService.generateShareableUrl());
         btnUndo?.addEventListener('click', () => manager.undo());
         btnRedo?.addEventListener('click', () => manager.redo());
         projectVariablesToggle?.addEventListener('click', () => manager.toggleVariablePanel());

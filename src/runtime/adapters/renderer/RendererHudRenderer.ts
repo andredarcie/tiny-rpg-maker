@@ -23,7 +23,7 @@ class RendererHudRenderer {
         this.viewportOffsetY = 0;
         this.canvasHelper = entityRenderer.canvasHelper;
         this.healthIconDefinitions = {};
-        this.objectSprites = this.entityRenderer?.spriteFactory?.getObjectSprites?.() || {};
+        this.objectSprites = this.entityRenderer.spriteFactory?.getObjectSprites?.() || {};
         this.setupHealthIcons();
     }
 
@@ -32,7 +32,7 @@ class RendererHudRenderer {
         const width = area.width ?? ctx.canvas?.width ?? 128;
         const height = area.height ?? 16;
         const padding = area.padding ?? this.padding;
-        const accent = this.paletteManager?.getColor?.(7) || '#FFF1E8';
+        const accent = this.paletteManager.getColor(7);
 
         ctx.save();
         ctx.fillStyle = this.backgroundColor;
@@ -58,8 +58,8 @@ class RendererHudRenderer {
         const rightReserved = miniMapSize + this.gap + labelWidth + labelGap;
         const availableWidth = Math.max(0, width - padding - rightReserved);
 
-        const heartBaseSize = this.canvasHelper.getTilePixelSize?.() ?? 16;
-        const maxLives = this.gameState.getMaxLives?.() ?? 0;
+        const heartBaseSize = this.canvasHelper.getTilePixelSize() ?? 16;
+        const maxLives = this.gameState.getMaxLives() ?? 0;
         const heartSize = Math.max(6, Math.min(height - padding * 2, heartBaseSize / 2));
         const heartStride = heartSize + 2;
         const minPerRow = maxLives > 0 ? Math.max(1, Math.ceil(maxLives / 2)) : 1;
@@ -113,7 +113,7 @@ class RendererHudRenderer {
             return;
         }
 
-        const baseSize = this.canvasHelper.getTilePixelSize?.() ?? 16;
+        const baseSize = this.canvasHelper.getTilePixelSize() ?? 16;
         const availableHeight = Math.max(0, height - padding * 2);
         const maxIconSize = Math.max(6, Math.min(availableHeight, baseSize / 2));
         const fittedIconSize = Math.min(
@@ -142,7 +142,7 @@ class RendererHudRenderer {
 
         const swordSprite = this.getSwordHudSprite(swordType);
         if (swordShield > 0 && swordSprite) {
-            const tileSize = this.canvasHelper.getTilePixelSize?.() ?? 16;
+            const tileSize = this.canvasHelper.getTilePixelSize() ?? 16;
             const swordSize = tileSize;
             const swordX = width - padding - swordSize;
             const swordY = padding + Math.max(0, Math.round((height - padding * 2 - swordSize) / 2));
@@ -177,7 +177,7 @@ class RendererHudRenderer {
             ? Math.max(1, Math.floor(options.heartsPerRow as number))
             : 5;
 
-        const tilePixelSize = this.canvasHelper.getTilePixelSize?.() ?? 16;
+        const tilePixelSize = this.canvasHelper.getTilePixelSize() ?? 16;
         let iconSize = Number.isFinite(options.heartSize) && (options.heartSize as number) > 0
             ? (options.heartSize as number)
             : tilePixelSize / 2;
@@ -220,10 +220,10 @@ class RendererHudRenderer {
         ctx.strokeStyle = 'rgba(255,255,255,0.12)';
         ctx.strokeRect(-2, -2, mapSize + 4, mapSize + 4);
 
-        const game = this.gameState.getGame?.() || {};
+        const game = this.gameState.getGame() || {};
         const worldRows = Math.max(1, game.world?.rows || 1);
         const worldCols = Math.max(1, game.world?.cols || 1);
-        const playerRoom = this.gameState.getPlayer?.()?.roomIndex ?? 0;
+        const playerRoom = this.gameState.getPlayer()?.roomIndex ?? 0;
         const playerRow = Math.floor(playerRoom / worldCols);
         const playerCol = playerRoom % worldCols;
         const rowChunk = Math.max(1, Math.ceil(worldRows / rows));
@@ -246,7 +246,7 @@ class RendererHudRenderer {
     }
 
     drawXpBar(ctx: CanvasRenderingContext2D, x: number, y: number) {
-        const xpNeeded = this.gameState.getExperienceToNext?.() ?? 0;
+        const xpNeeded = this.gameState.getExperienceToNext() ?? 0;
         if (!Number.isFinite(xpNeeded) || xpNeeded <= 0) {
             return;
         }
@@ -259,8 +259,8 @@ class RendererHudRenderer {
         ctx.lineTo(x+totalBarSize, y);
         ctx.stroke();
 
-        const currentXp = this.gameState.getExperience?.() ?? 0;
-        if (currentXp == 0) {return;}
+        const currentXp = this.gameState.getExperience() ?? 0;
+        if (currentXp === 0) {return;}
         const barSize = (currentXp * totalBarSize / xpNeeded);
 
         ctx.strokeStyle = this.paletteManager.getColor(13);

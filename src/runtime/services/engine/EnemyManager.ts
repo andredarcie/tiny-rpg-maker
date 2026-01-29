@@ -162,10 +162,10 @@ class EnemyManager {
     const addedId = this.gameState.addEnemy({
       id,
       type,
-      roomIndex: enemy.roomIndex ?? 0,
-      x: enemy.x ?? 0,
-      y: enemy.y ?? 0,
-      lastX: enemy.lastX ?? enemy.x ?? 0,
+      roomIndex: enemy.roomIndex,
+      x: enemy.x,
+      y: enemy.y,
+      lastX: enemy.lastX ?? enemy.x,
       defeatVariableId: enemy.defeatVariableId ?? null,
     });
     if (!addedId) {
@@ -181,8 +181,8 @@ class EnemyManager {
   }
 
   generateEnemyId(): string {
-    const cryptoObj = typeof crypto !== 'undefined' ? crypto : globalThis.crypto ?? null;
-    if (cryptoObj?.randomUUID) {
+    const cryptoObj = typeof crypto !== 'undefined' ? crypto : globalThis.crypto;
+    if (cryptoObj && cryptoObj.randomUUID) {
       return cryptoObj.randomUUID();
     }
     return `enemy-${Math.random().toString(36).slice(2, 10)}`;
@@ -211,15 +211,13 @@ class EnemyManager {
 
     const game = this.gameState.getGame();
     const player = this.gameState.getPlayer();
-    if (player) {
-      this.evaluateVision(player);
-    }
+    this.evaluateVision(player);
     let moved = false;
 
     for (let i = 0; i < enemies.length; i++) {
       const enemy = enemies[i];
       const result =
-        player && enemy?.playerInVision
+        enemy.playerInVision
           ? this.tryChaseEnemy(enemy, i, game, player, enemies)
           : this.tryMoveEnemy(enemies, i, game);
       if (result === EnemyMovementResult.Moved) {
@@ -336,7 +334,7 @@ class EnemyManager {
 
     const dir = this.pickRandomDirection();
     const target = this.getTargetPosition(enemy, dir);
-    const roomIndex = enemy.roomIndex ?? 0;
+    const roomIndex = enemy.roomIndex;
 
     if (!this.canEnterTile(roomIndex, target.x, target.y, game, enemies, index)) {
       return EnemyMovementResult.None;
@@ -374,7 +372,7 @@ class EnemyManager {
     const directions = this.getChaseDirections(enemy, player);
     for (const direction of directions) {
       const target = this.getTargetPosition(enemy, direction);
-      const roomIndex = enemy.roomIndex ?? 0;
+      const roomIndex = enemy.roomIndex;
       if (!this.canEnterTile(roomIndex, target.x, target.y, game, enemies, index)) {
         continue;
       }
@@ -395,7 +393,7 @@ class EnemyManager {
     let moved = false;
     for (let index = 0; index < enemies.length; index += 1) {
       const enemy = enemies[index];
-      if (!enemy || !enemy.playerInVision) continue;
+      if (!enemy.playerInVision) continue;
       const result = this.tryChaseEnemy(enemy, index, game, player, enemies);
       if (result === EnemyMovementResult.Moved) {
         moved = true;

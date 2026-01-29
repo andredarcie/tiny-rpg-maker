@@ -132,7 +132,7 @@ class RendererEffectsManager extends RendererModuleBase {
 
     drawEdgeFlash(ctx: CanvasRenderingContext2D, bounds: { width: number; height: number }) {
         const state = this.edgeFlash;
-        if (!state?.direction) return;
+        if (!state.direction) return;
         const now = Date.now();
         if (!Number.isFinite(state.expiresAt) || state.expiresAt <= now) {
             this.edgeFlash.direction = '';

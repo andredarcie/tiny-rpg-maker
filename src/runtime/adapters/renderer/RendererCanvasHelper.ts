@@ -15,7 +15,7 @@ class RendererCanvasHelper {
     constructor(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, tileManager: TileManagerApi | null) {
         this.canvas = canvas;
         this.ctx = context;
-        this.tileManager = tileManager || null;
+        this.tileManager = tileManager;
     }
 
     getTilePixelSize() {

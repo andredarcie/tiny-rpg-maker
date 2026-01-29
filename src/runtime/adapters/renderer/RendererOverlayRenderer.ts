@@ -81,7 +81,7 @@ class RendererOverlayRenderer extends RendererModuleBase {
         }
 
         const renderer = this.overlayRenderer;
-        if (renderer?.gameEngine?.canDismissIntroScreen) {
+        if (renderer.gameEngine?.canDismissIntroScreen) {
             const blink = ((Date.now() / GameConfig.animation.blinkInterval) % 2) > 1
                 ? GameConfig.animation.blinkMinOpacity
                 : GameConfig.animation.blinkMaxOpacity;
@@ -97,7 +97,7 @@ class RendererOverlayRenderer extends RendererModuleBase {
     drawLevelUpOverlay(ctx: CanvasRenderingContext2D, gameplayCanvas: { width: number; height: number }) {
         if (!ctx || !gameplayCanvas) return;
         const gameState = this.overlayGameState;
-        const overlay = gameState.getLevelUpOverlay?.();
+        const overlay = gameState.getLevelUpOverlay();
         if (!overlay?.active) return;
         this.overlayEntityRenderer.cleanupEnemyLabels();
         const choices = Array.isArray(overlay.choices) ? overlay.choices : [];
@@ -105,7 +105,7 @@ class RendererOverlayRenderer extends RendererModuleBase {
         const height = gameplayCanvas.height;
         const centerX = width / 2;
         const title = getOverlayText('skills.levelUpTitle', 'Level Up!');
-        const pending = Math.max(0, gameState.getPendingLevelUpChoices?.() || 0);
+        const pending = Math.max(0, gameState.getPendingLevelUpChoices() || 0);
         const accent = this.overlayPalette.getColor(7) || '#FFF1E8';
         const accentStrong = this.overlayPalette.getColor(13) || accent;
         const titleFont = Math.max(7, Math.floor(height / 42));
@@ -316,7 +316,7 @@ class RendererOverlayRenderer extends RendererModuleBase {
     drawLevelUpCelebrationOverlay(ctx: CanvasRenderingContext2D, gameplayCanvas: { width: number; height: number }) {
         if (!ctx || !gameplayCanvas) return;
         const gameState = this.overlayGameState;
-        const overlay = gameState.getLevelUpCelebration?.();
+        const overlay = gameState.getLevelUpCelebration();
         if (!overlay?.active) {
             this.stopLevelUpAnimationLoop();
             return;
@@ -360,7 +360,7 @@ class RendererOverlayRenderer extends RendererModuleBase {
     drawPickupOverlay(ctx: CanvasRenderingContext2D, gameplayCanvas: { width: number; height: number }) {
         if (!ctx || !gameplayCanvas) return;
         const gameState = this.overlayGameState;
-        const overlay = gameState.getPickupOverlay?.();
+        const overlay = gameState.getPickupOverlay();
         if (!overlay?.active) {
             this.stopPickupAnimationLoop();
             return;
@@ -470,13 +470,13 @@ class RendererOverlayRenderer extends RendererModuleBase {
     ensureLevelUpAnimationLoop() {
         if (this.levelUpAnimationHandle) return;
         const step = () => {
-            if (!this.overlayGameState.isLevelUpCelebrationActive?.()) {
+            if (!this.overlayGameState.isLevelUpCelebrationActive()) {
                 this.stopLevelUpAnimationLoop();
-                this.overlayRenderer?.draw?.();
+                this.overlayRenderer.draw();
                 return;
             }
             this.levelUpAnimationHandle = this.schedulePickupFrame(step);
-            this.overlayRenderer?.draw?.();
+            this.overlayRenderer.draw();
         };
         this.levelUpAnimationHandle = this.schedulePickupFrame(step);
     }
@@ -490,12 +490,12 @@ class RendererOverlayRenderer extends RendererModuleBase {
     ensurePickupAnimationLoop() {
         if (this.pickupAnimationHandle) return;
         const step = () => {
-            if (!this.overlayGameState.isPickupOverlayActive?.()) {
+            if (!this.overlayGameState.isPickupOverlayActive()) {
                 this.stopPickupAnimationLoop();
                 return;
             }
             this.pickupAnimationHandle = this.schedulePickupFrame(step);
-            this.overlayRenderer?.draw?.();
+            this.overlayRenderer.draw();
         };
         this.pickupAnimationHandle = this.schedulePickupFrame(step);
     }
@@ -570,7 +570,7 @@ class RendererOverlayRenderer extends RendererModuleBase {
         const reason = gameState.getGameOverReason();
         const isVictory = reason === 'victory';
         const endingText = isVictory
-            ? (gameState.getActiveEndingText?.() || '')
+            ? (gameState.getActiveEndingText() || '')
             : '';
         const hasEndingText = isVictory && endingText.trim().length > 0;
 
@@ -658,7 +658,7 @@ class RendererOverlayRenderer extends RendererModuleBase {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         const retryY = Math.round(this.canvas.height / 1.5) + 0.5;
-        const reviveLabel = gameState.hasNecromancerReviveReady?.()
+        const reviveLabel = gameState.hasNecromancerReviveReady()
             ? getOverlayText('skills.necromancer.revivePrompt', '')
             : getOverlayText(isVictory ? 'gameOver.retryVictory' : 'gameOver.retryDefeat', '');
         ctx.fillText(reviveLabel, centerX, retryY);

@@ -15,7 +15,7 @@ class RendererPalette {
     }
 
     getPicoPalette(): string[] {
-        return (PICO8_COLORS || RendererConstants.DEFAULT_PALETTE) as string[];
+        return PICO8_COLORS as string[];
     }
 
     getColor(index: number): string {

@@ -144,7 +144,7 @@ class RendererEntityRenderer {
 
     drawTileIconOnPlayer(ctx: CanvasRenderingContext2D, tileId: string) {
         const objectSprites = this.spriteFactory.getObjectSprites();
-        let tileSprite = objectSprites?.[tileId];
+        const tileSprite = objectSprites?.[tileId];
         if (!tileSprite) return;
 
         const player = this.gameState.getPlayer();

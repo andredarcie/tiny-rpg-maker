@@ -278,7 +278,7 @@ describe('GameState - Critical Path Tests', () => {
   });
 
   describe('Level-up celebration', () => {
-    it('automatically hides celebration after timeout', async () => {
+    it('automatically hides celebration after timeout', () => {
       vi.useFakeTimers();
 
       const state = new GameState();

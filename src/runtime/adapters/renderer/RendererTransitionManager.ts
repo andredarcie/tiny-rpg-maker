@@ -67,7 +67,7 @@ class RendererTransitionManager extends RendererModuleBase {
     }
 
     isActive() {
-        return Boolean(this.transition?.active);
+        return Boolean(this.transition.active);
     }
 
     start(options: TransitionOptions = {}) {
@@ -83,8 +83,8 @@ class RendererTransitionManager extends RendererModuleBase {
             : GameConfig.transitions.roomDuration;
         const now = performance.now();
 
-        if (this.transition?.rafId) {
-            globalThis.cancelAnimationFrame?.(this.transition.rafId);
+        if (this.transition.rafId) {
+            globalThis.cancelAnimationFrame(this.transition.rafId);
         }
 
         this.removePlayerFromFrame(fromFrame, options.playerPath?.from);
@@ -126,7 +126,7 @@ class RendererTransitionManager extends RendererModuleBase {
     }
 
     getProgress() {
-        if (!this.transition?.active) {
+        if (!this.transition.active) {
             return 1;
         }
         const now = performance.now();
@@ -136,7 +136,7 @@ class RendererTransitionManager extends RendererModuleBase {
 
     drawFrame(ctx: CanvasRenderingContext2D, gameplayCanvas: { width: number; height: number }) {
         const transition = this.transition;
-        if (!transition?.active) return;
+        if (!transition.active) return;
         const width = gameplayCanvas.width;
         const height = gameplayCanvas.height;
         const progress = this.getProgress();
@@ -212,7 +212,7 @@ class RendererTransitionManager extends RendererModuleBase {
 
     drawTransitionPlayer(ctx: CanvasRenderingContext2D, gameplayCanvas: { width: number; height: number }, progress: number) {
         const transition = this.transition;
-        const path = transition?.playerPath;
+        const path = transition.playerPath;
         if (!path?.from || !path?.to) return;
         const tileSize = Math.max(1, Math.floor(gameplayCanvas.width / 8));
         const step = tileSize / 8;
@@ -259,9 +259,9 @@ class RendererTransitionManager extends RendererModuleBase {
     }
 
     finish() {
-        if (!this.transition?.active) return;
+        if (!this.transition.active) return;
         if (this.transition.rafId) {
-            globalThis.cancelAnimationFrame?.(this.transition.rafId);
+            globalThis.cancelAnimationFrame(this.transition.rafId);
         }
         const callback = this.transition.onComplete;
         this.transition = { active: false };
