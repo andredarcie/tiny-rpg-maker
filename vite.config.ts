@@ -3,6 +3,9 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
   base: './', // Paths relativos para compatibilidade com itch.io e subdiretórios
+  build: {
+    outDir: 'docs'
+  },
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
