@@ -273,52 +273,6 @@
     <input type="file" id="file-input" accept=".json" style="display: none;">
 
     <!-- Carregar módulos na ordem correta -->
-    <script src="js/core/TextResources.js?v=20250208"></script>
-    <script src="js/core/SkillDefinitions.js?v=20250208"></script>
-    <script src="js/core/state/StateWorldManager.js?v=20250208"></script>
-    <script src="js/core/state/StateSkillManager.js?v=20250208"></script>
-    <script src="js/core/state/StatePlayerManager.js?v=20250208"></script>
-    <script src="js/core/state/StateDialogManager.js?v=20250208"></script>
-    <script src="js/core/state/StateVariableManager.js?v=20250208"></script>
-    <script src="js/core/state/StateEnemyManager.js?v=20250208"></script>
-    <script src="js/core/state/StateObjectManager.js?v=20250208"></script>
-    <script src="js/core/state/StateItemManager.js?v=20250208"></script>
-    <script src="js/core/state/GameStateLifecycle.js?v=20250208"></script>
-    <script src="js/core/state/GameStateScreenManager.js?v=20250208"></script>
-    <script src="js/core/state/GameStateWorldFacade.js?v=20250208"></script>
-    <script src="js/core/state/GameStatePlayerFacade.js?v=20250208"></script>
-    <script src="js/core/state/GameStateDataFacade.js?v=20250208"></script>
-    <script src="js/core/state/StateDataManager.js?v=20250208"></script>
-    <script src="js/core/GameState.js?v=20250208"></script>
-    <script src="js/core/sprites/PlayerSprites.js?v=20250208"></script>
-    <script src="js/core/sprites/NpcSprites.js?v=20250208"></script>
-    <script src="js/core/sprites/EnemySprites.js?v=20250208"></script>
-    <script src="js/core/sprites/ObjectSprites.js?v=20250208"></script>
-    <script src="js/core/sprites/SpriteMatrixRegistry.js?v=20250208"></script>
-    <script src="js/core/renderer/RendererConstants.js?v=20250208"></script>
-    <script src="js/core/renderer/RendererPalette.js?v=20250208"></script>
-    <script src="js/core/renderer/RendererSpriteFactory.js?v=20250208"></script>
-    <script src="js/core/renderer/RendererCanvasHelper.js?v=20250208"></script>
-    <script src="js/core/renderer/RendererTileRenderer.js?v=20250208"></script>
-    <script src="js/core/renderer/RendererEntityRenderer.js?v=20250208"></script>
-    <script src="js/core/renderer/RendererDialogRenderer.js?v=20250208"></script>
-    <script src="js/core/renderer/RendererHudRenderer.js?v=20250208"></script>
-    <script src="js/core/renderer/RendererMinimapRenderer.js?v=20250208"></script>
-    <script src="js/core/renderer/RendererModuleBase.js?v=20250208"></script>
-    <script src="js/core/renderer/RendererEffectsManager.js?v=20250208"></script>
-    <script src="js/core/renderer/RendererTransitionManager.js?v=20250208"></script>
-    <script src="js/core/renderer/RendererOverlayRenderer.js?v=20250208"></script>
-    <script src="js/core/share/ShareConstants.js?v=20250208"></script>
-    <script src="js/core/share/ShareMath.js?v=20250208"></script>
-    <script src="js/core/share/ShareBase64.js?v=20250208"></script>
-    <script src="js/core/share/ShareTextCodec.js?v=20250208"></script>
-    <script src="js/core/share/ShareVariableCodec.js?v=20250208"></script>
-    <script src="js/core/share/ShareMatrixCodec.js?v=20250208"></script>
-    <script src="js/core/share/SharePositionCodec.js?v=20250208"></script>
-    <script src="js/core/share/ShareDataNormalizer.js?v=20250208"></script>
-    <script src="js/core/share/ShareEncoder.js?v=20250208"></script>
-    <script src="js/core/share/ShareDecoder.js?v=20250208"></script>
-    <script src="js/core/share/ShareUrlHelper.js?v=20250208"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
@@ -357,52 +311,6 @@
             console.warn('[TinyRPG] Firebase analytics unavailable.', error);
         }
     </script>
-    <script src="js/core/FirebaseShareTracker.js?v=20250301"></script>
-    <script src="js/core/TileDefinitions.js?v=20250208"></script>
-    <script src="js/core/NPCDefinitions.js?v=20250208"></script>
-    <script src="js/core/EnemyDefinitions.js?v=20250208"></script>
-    <script src="js/core/ObjectDefinitions.js?v=20250208"></script>
-    <script src="js/editor/modules/EditorConstants.js?v=20250208"></script>
-    <script src="js/editor/modules/EditorDomCache.js?v=20250208"></script>
-    <script src="js/editor/modules/EditorState.js?v=20250208"></script>
-    <script src="js/editor/modules/EditorHistoryManager.js?v=20250208"></script>
-    <script src="js/editor/modules/EditorShareService.js?v=20250301"></script>
-    <script src="js/editor/manager/EditorManagerModule.js?v=20250208"></script>
-    <script src="js/editor/manager/EditorEventBinder.js?v=20250208"></script>
-    <script src="js/editor/manager/EditorUIController.js?v=20250208"></script>
-    <script src="js/editor/manager/EditorInteractionController.js?v=20250208"></script>
-    <script src="js/editor/modules/renderers/EditorRendererBase.js?v=20250208"></script>
-    <script src="js/editor/modules/renderers/EditorCanvasRenderer.js?v=20250208"></script>
-    <script src="js/editor/modules/renderers/EditorTilePanelRenderer.js?v=20250208"></script>
-    <script src="js/editor/modules/renderers/EditorNpcRenderer.js?v=20250208"></script>
-    <script src="js/editor/modules/renderers/EditorEnemyRenderer.js?v=20250208"></script>
-    <script src="js/editor/modules/renderers/EditorObjectRenderer.js?v=20250208"></script>
-    <script src="js/editor/modules/renderers/EditorWorldRenderer.js?v=20250208"></script>
-    <script src="js/editor/modules/EditorRenderService.js?v=20250208"></script>
-    <script src="js/editor/modules/EditorTileService.js?v=20250208"></script>
-    <script src="js/editor/modules/EditorNpcService.js?v=20250208"></script>
-    <script src="js/editor/modules/EditorEnemyService.js?v=20250208"></script>
-    <script src="js/editor/modules/EditorObjectService.js?v=20250208"></script>
-    <script src="js/editor/modules/EditorVariableService.js?v=20250208"></script>
-    <script src="js/editor/modules/EditorWorldService.js?v=20250208"></script>
-    <script src="js/editor/EditorManager.js?v=20250208"></script>
-    <script src="js/core/ShareUtils.js?v=20250208"></script>
-    <script src="js/core/TileManager.js?v=20250208"></script>
-    <script src="js/core/NPCManager.js?v=20250208"></script>
-    <script src="js/core/InputManager.js?v=20250208"></script>
-    <script src="js/core/Renderer.js?v=20250208"></script>
-    <script src="js/core/engine/DialogManager.js?v=20250208"></script>
-    <script src="js/core/engine/InteractionManager.js?v=20250208"></script>
-    <script src="js/core/engine/EnemyManager.js?v=20250208"></script>
-    <script src="js/core/engine/MovementManager.js?v=20250208"></script>
-    <script src="js/core/GameEngine.js?v=20250208"></script>
-    <script src="js/main.js?v=20250208"></script>
-    <script src="js/editor/modules/EditorExportService.js?v=20250208"></script>
+    <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
-
-
-
-
-
-
